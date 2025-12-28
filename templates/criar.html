@@ -1,0 +1,11 @@
+<h1>Cadastrar Câmara</h1>
+
+<form method="POST">
+  {% csrf_token %}
+
+  <input name="nome" placeholder="Nome" required><br>
+  <input name="localizacao" placeholder="Localização" required><br>
+  <input name="url_stream" placeholder="RTSP / IP / URL" required><br>
+
+  <button type="submit">Salvar</button>
+</form>
