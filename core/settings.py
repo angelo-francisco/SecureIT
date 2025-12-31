@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.panel",
     "apps.cameras",
+    "apps.people",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [

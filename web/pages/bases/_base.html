@@ -27,7 +27,11 @@
                         "background-dark": "#101922",
                         "surface-dark": "#1c2630",
                         "surface-light": "#ffffff",
-                        "border-dark": "#3b4754"
+                        "border-dark": "#3b4754",
+                        "success": "#16a34a",
+                        "error": "#dc2626",
+                        "warning": "#facc15",
+                        "info": "#0ea5e9"
                     },
                     fontFamily: {
                         "display": ["Poppins", "sans-serif"],
@@ -55,6 +59,22 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #137fec;
         }
+
+        @keyframes slide-in {
+            0% {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.3s ease forwards;
+        }
     </style>
     <title>{% block title %}{% endblock %} | SecureIT</title>
 </head>
@@ -68,7 +88,32 @@
             class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay">
         </div>
     </div>
+    <div class="fixed top-6 right-6 z-[100] flex flex-col gap-3">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="messages-div max-w-sm w-full rounded-lg px-4 py-3 shadow-lg text-white font-medium flex items-center justify-between transition-transform transform animate-slide-in
+            {% if message.tags == 'success' %} bg-success {% elif message.tags == 'error' %} bg-error {% elif message.tags == 'warning' %} bg-warning {% else %} bg-info {% endif %}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
     {% block body %}{% endblock %}
+    <script>
+        let messages = document.querySelectorAll('.messages-div')
+
+        if (messages) {
+            setTimeout(() => {
+                messages.forEach(element => {
+                    element.remove()
+                });
+            }, 3000);
+        }
+    </script>
 </body>
 
 </html>

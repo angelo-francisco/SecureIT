@@ -1,15 +1,12 @@
 from django.urls import path
-from .views import (
-    home_page,
-    lista_cameras,
-    criar_camera,
-    eliminar_camera,
-    ver_camera
-)
+
+from .views import cameras, delete_camera, new_camera, view_camera
+
+app_name = "cameras"
 
 urlpatterns = [
-    path("", home_page, name="home_page"),
-    path("nova/", criar_camera, name="criar_camera"),
-    path("eliminar/<int:id>/", eliminar_camera, name="eliminar_camera"),
-    path("ver/<int:id>/", ver_camera, name="ver_camera"),
+    path("", cameras, name="home"),
+    path("new/", new_camera, name="new"),
+    path("<int:id>/", view_camera, name="view"),
+    path("<int:id>/del/", delete_camera, name="delete"),
 ]

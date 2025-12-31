@@ -1,35 +1,31 @@
 <header
     class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#353e47] bg-transparent/40 px-4 lg:px-10 py-3 shadow-sm">
     {% include 'components/full-logo.html' %}
-    <nav class="hidden md:flex items-center gap-9">
+    <nav class="flex items-center gap-5 md:gap-9">
         <a class="flex items-center gap-1 text-slate-600 dark:text-[#9dabb9] hover:text-primary dark:hover:text-white text-sm font-medium leading-normal transition-colors"
-            href="#">
+            href="{% url 'panel:home' %}">
             <span class="material-symbols-outlined">
                 admin_panel_settings
             </span>
-            Painel
+            <span class="hidden sm:flex">
+                Painel
+            </span>
         </a>
         <a class="flex items-center gap-1 text-slate-600 dark:text-[#9dabb9] hover:text-primary dark:hover:text-white text-sm font-medium leading-normal transition-colors"
-            href="#">
+            href="{% url 'cameras:home' %}">
             <span class="material-symbols-outlined">
                 videocam
             </span>
-            Dispositivos
+            <span class="hidden sm:flex">
+                Câmaras
+            </span>
         </a>
         <a class="flex items-center gap-1 text-slate-600 dark:text-[#9dabb9] hover:text-primary dark:hover:text-white text-sm font-medium leading-normal transition-colors"
-            href="#">
-            <span class="material-symbols-outlined">
-                settings
+            href="{% url 'notifications:home' %}">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="hidden sm:flex">
+                Notificações
             </span>
-            Configurações
         </a>
     </nav>
-    <div class="flex items-center gap-4">
-        <div class="sm:flex gap-2">
-            <button
-                class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 hover:bg-slate-100 dark:hover:bg-[#283039] text-slate-600 dark:text-white transition-colors">
-                <span class="material-symbols-outlined">notifications</span>
-            </button>
-        </div>
-    </div>
 </header>
