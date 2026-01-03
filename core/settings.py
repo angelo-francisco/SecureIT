@@ -84,3 +84,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR.joinpath("web", "static")
+
+X_FRAME_OPTIONS = "SAMEORIGIN"

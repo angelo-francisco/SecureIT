@@ -41,7 +41,7 @@ class Camera(object):
             if not grabbed:
                 break
             self.frame = frame
-            sleep(1) # tmp: 1 fps
+            sleep(1/30) # tmp: 30 fps
 
 
 def gen_video(camera: Camera):

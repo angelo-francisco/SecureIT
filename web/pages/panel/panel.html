@@ -4,4 +4,29 @@
 
 {% block content %}
 
+<div class="cameras grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+</div>
+
+<script>
+    const camerasHTML = document.querySelector('.cameras')
+    window.onload = async () => {
+        const res = await fetch('/cameras/get-cameras');
+        const data = await res.json();
+
+        data.forEach(camera => {
+            let latestIndex = camera.path.length - 1
+            camerasHTML.innerHTML += `
+                <div class="camera">
+                    <iframe
+                        src="/cameras/get-camera-video?index=1"
+                        width="500"
+                        height="400"
+                        frameborder="0"
+                    ></iframe>
+                </div>
+            `
+        });
+    }
+</script>
 {% endblock %}

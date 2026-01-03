@@ -97,7 +97,7 @@
   async function fetchLocalCameras() {
     localDevicesSelect.innerHTML = `<option disabled selected>Carregando...</option>`;
     try {
-      const res = await fetch('/cameras/new/?getCameras=1');
+      const res = await fetch('/cameras/get-cameras');
       const data = await res.json();
       localDevicesSelect.innerHTML = `<option disabled selected>Selecione uma das câmaras</option>`;
       data.forEach(cam => {

@@ -1,6 +1,13 @@
 from django.urls import path
 
-from .views import cameras, delete_camera, get_camera_video, new_camera, view_camera
+from .views import (
+    cameras,
+    delete_camera,
+    get_camera_video,
+    new_camera,
+    view_camera,
+    get_cameras,
+)
 
 app_name = "cameras"
 
@@ -9,5 +16,6 @@ urlpatterns = [
     path("new/", new_camera, name="new"),
     path("<int:id>/", view_camera, name="view"),
     path("<int:id>/del/", delete_camera, name="delete"),
+    path("get-cameras/", get_cameras, name="get-cameras"),
     path("get-camera-video/", get_camera_video, name="get-camera-video"),
 ]
