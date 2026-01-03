@@ -1,9 +1,11 @@
 from cv2_enumerate_cameras import enumerate_cameras
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Camera, LocalCamera, WifiCamera
+from .services import Camera as CameraController
+from .services import gen_video
 
 
 def cameras(request):
@@ -74,7 +76,7 @@ def new_camera(request):
                         break
                 if not camera_info:
                     camera.delete()
-                    messages.error(request, 'Dados da câmara indisponíveis.')
+                    messages.error(request, "Dados da câmara indisponíveis.")
                     return render(request, "cameras/new.html")
                 LocalCamera.objects.create(camera=camera, info=camera_info)
             messages.success(request, "Câmara registada.")
@@ -98,3 +100,14 @@ def view_camera(request, id):
     """
     camera = get_object_or_404(Camera, id=id)
     return render(request, "cameras/view.html", {"camera": camera})
+
+
+def get_camera_video(request):
+    index: str = request.GET.get("index", "")
+    try:
+        camera = CameraController(index)
+        return StreamingHttpResponse(
+            gen_video(camera), content_type="multipart/x-mixed-replace;boundary=frame"
+        )
+    except Exception as error:
+        return JsonResponse({"error": str(error)}, status=500)
