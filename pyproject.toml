@@ -7,13 +7,14 @@ requires-python = ">=3.12"
 dependencies = [
     "cv2-enumerate-cameras>=1.3.1",
     "django>=6.0",
+    "gevent>=25.9.1",
     "gunicorn>=23.0.0",
     "opencv-python>=4.12.0.88",
     "watchdog>=6.0.0",
 ]
 
 [tool.taskipy.tasks]
-run = "gunicorn core.wsgi:application"
+run = "gunicorn core.wsgi:application --reload -k gevent"
 hrun = "watchmedo auto-restart --patterns='*.py;*.html;*.css' --ignore-directories --recursive --verbose -- gunicorn core.wsgi:application"
 mg = "python manage.py migrate"
 mkmg = "python manage.py makemigrations"
