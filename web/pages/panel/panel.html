@@ -4,29 +4,21 @@
 
 {% block content %}
 
+{% for camera in cameras %}
 <div class="cameras grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-
+    <div class="camera">
+        <iframe src="{{ camera.get_video_url }}" width="500" height="400" frameborder="0"></iframe>
+    </div>
 </div>
-
-<script>
-    const camerasHTML = document.querySelector('.cameras')
-    window.onload = async () => {
-        const res = await fetch('/cameras/get-cameras');
-        const data = await res.json();
-
-        data.forEach(camera => {
-            let latestIndex = camera.path.length - 1
-            camerasHTML.innerHTML += `
-                <div class="camera">
-                    <iframe
-                        src="/cameras/get-camera-video?index=1"
-                        width="500"
-                        height="400"
-                        frameborder="0"
-                    ></iframe>
-                </div>
-            `
-        });
-    }
-</script>
+{% empty %}
+<div class="w-full h-[80vh] flex justify-center items-center flex-col text-center gap-1">
+    <div
+        class="flex items-center justify-center w-24 h-24 rounded-full bg-surface-dark border-2 border-dashed border-gray-700 text-text-secondary">
+        <span class="material-symbols-outlined text-[48px] opacity-50">mimo_disconnect</span>
+    </div>
+    <div class="flex flex-col gap-2 max-w-md">
+        <h3 class="text-white text-xl font-bold">Sem câmaras sendo monitoradas</h3>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

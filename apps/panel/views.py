@@ -1,5 +1,7 @@
 from django.shortcuts import render
+from apps.cameras.models import Camera
 
 
 def panel(request):
-    return render(request, "panel/panel.html")
+    cameras = Camera.objects.all()
+    return render(request, "panel/panel.html", {"cameras": cameras})
