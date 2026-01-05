@@ -21,7 +21,6 @@ def new_camera(request):
     Cadastra uma nova câmara
     """
     if request.method == "POST":
-        name = request.POST.get("name", "").strip()
         location = request.POST.get("location", "").strip()
         connection_type = request.POST.get("connection_type", "").strip().upper()
         stream_url = request.POST.get("stream_url", "").strip()
@@ -29,7 +28,7 @@ def new_camera(request):
         password = request.POST.get("password", "").strip()
         local_camera = request.POST.get("local_camera", "").strip()
 
-        if not name or not location or not connection_type:
+        if not location or not connection_type:
             messages.error(request, "Preencha todos os campos, por favor.")
         elif connection_type not in ["L", "W"]:
             messages.error(request, "Só aceitamos câmaras locais ou Wi-1Fi")
@@ -41,7 +40,7 @@ def new_camera(request):
             messages.error(request, "Informe a url de vídeo da câmara Wi-Fi")
         else:
             camera = Camera.objects.create(
-                name=name, location=location, connection_type=connection_type
+                location=location, connection_type=connection_type
             )
 
             if connection_type == "W":

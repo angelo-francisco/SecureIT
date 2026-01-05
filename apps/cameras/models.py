@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class Camera(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True)
     location = models.CharField(max_length=150, null=True, blank=True)
     status = models.BooleanField(default=True, null=True, blank=True)
     connection_type = models.CharField(
@@ -25,6 +24,10 @@ class Camera(models.Model):
             return reverse("cameras:get-camera-video", query={"index": path[-1]})
         except (ObjectDoesNotExist, KeyError):
             return None
+    
+    @property
+    def get_name(self):
+        return f'CAM-{self.pk}'
 
 
 class LocalCamera(models.Model):

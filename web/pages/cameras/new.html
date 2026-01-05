@@ -12,24 +12,14 @@
         Selecione o tipo de conexão da câmera e configure o acesso
       </p>
     </header>
-
-    <div class="flex-1 overflow-y-auto px-6 pb-10">
-      <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] p-4 border border-[#283039] shadow-xl">
-        <div class="flex flex-col gap-3 md:flex-row mb-4">
-          <div>
-            <label class="text-sm text-white font-medium">Nome</label>
-            <input name="name" placeholder="Nome da câmara" required value="{{request.POST.name}}"
-              class="mt-1 h-10 w-full rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white" />
-          </div>
-          <div>
-            <label class="text-sm text-white font-medium">Localização</label>
-            <input name="location" placeholder="Localização da câmara" required value="{{request.POST.location}}"
-              class="mt-1 h-10 w-full rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white" />
-          </div>
+    <div class="flex-1 overflow-y-auto">
+      <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
+        <div class="mb-4 flex flex-col justify-start gap-1">
+          <label class="text-base text-white font-medium">Localização</label>
+          {% include 'components/input.html' with placeholder="Localização da câmara" type="text" icon="pin_drop" name="location" value=request.POST.location required=True %}
         </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-white mb-1">Tipo de Conexão *</label>
+        <div class="mb-4 flex flex-col justify-start gap-1">
+          <label class="block text-base font-medium text-white mb-1">Tipo de Conexão</label>
           <select id="connection-type-select" name="connection_type"
             class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
             <option value="L" selected>Local / USB</option>
@@ -38,20 +28,18 @@
         </div>
         <div class="space-y-4">
           <div id="wifi-fields" class="space-y-2">
-            <div>
-              <label class="text-sm text-white font-medium">URL da Câmera *</label>
-              <input value="{{request.POST.stream_url}}" name="stream_url" placeholder="Ex: rtsp://192.168.1.10:554/stream"
-                class="mt-1 h-10 w-full rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white" />
+            <div class="mb-4 flex flex-col gap-1">
+              <label class="text-base text-white font-medium">URL da Câmera</label>
+              {% include 'components/input.html' with placeholder="Exemplo: http://192.168.100.181:5555/stream" type="url" icon="link" name="stream_url" value=request.POST.stream_url %}
             </div>
-            <div>
-              <label class="text-sm text-white font-medium">Username</label>
-              <input name="username" placeholder="Usuário da câmera" value="{{request.POST.username}}"
-                class="mt-1 h-10 w-full rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white" />
-            </div>
-            <div>
-              <label class="text-sm text-white font-medium">Password</label>
-              <input type="password" name="password" placeholder="Senha da câmera" value="{{request.POST.password}}"
-                class="mt-1 h-10 w-full rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white" />
+            <label class="text-base text-white font-medium">Autenticação (Se aplicável)</label>
+            <div class="flex gap-2">
+              <div>
+                {% include 'components/input.html' with placeholder="Nome de usuário" type="text" icon="person" name="username" value=request.POST.username %}
+              </div>
+              <div>
+                {% include 'components/input.html' with placeholder="Palavra-passe" type="password" icon="lock" name="password" %}
+              </div>
             </div>
           </div>
 
@@ -69,9 +57,8 @@
 
         <div class="flex justify-end gap-3 mt-6">
           <button type="submit" onclick="this.disabled = true; this.form.submit()"
-            class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white font-bold text-sm">
-            Pronto
-            <span class="material-symbols-outlined text-base">arrow_forward</span>
+            class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white font-bold text-base">
+            Adicionar
           </button>
         </div>
 

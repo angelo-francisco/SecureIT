@@ -50,66 +50,47 @@
   </header>
   <div class="flex-1 overflow-y-auto px-6 lg:px-10 pb-10">
     <div class="flex flex-col gap-3">
-      {% for camera in cameras %}
-      <div
-        class="group bg-surface-dark rounded-lg p-4 border border-gray-800 hover:border-gray-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-start sm:items-center gap-4">
-          <div
-            class="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-emerald-500/10 text-emerald-500">
-            <span class="material-symbols-outlined filled text-[20px]">
-              {% if camera.status %}
-              videocam
-              {% else %}
-              videocam_off
-              {% endif %}
-            </span>
-          </div>
-          <div class="flex flex-col">
-            <h3 class="text-white text-base font-bold">{{camera.name}}</h3>
-            <div class="flex items-center gap-2 mt-0.5">
-              <span class="flex items-center gap-1.5">
-                {% if camera.status %}
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs font-bold text-emerald-500 uppercase tracking-wide">Online</span>
-                {% else %}
-                <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                <span class="text-xs font-bold text-red-500 uppercase tracking-wide">Offline</span>
-                {% endif %}
+      {% if cameras %}
+      <table class="w-full table-auto">
+        <thead>
+          <tr class="bg-surface-dark">
+            <th class="p-4 text-left border border-gray-500">Nome</th>
+            <th class="p-4 text-left border border-gray-500">Localização</th>
+            <th class="p-4 text-left border border-gray-500">Estado</th>
+            <th class="p-4 text-left border border-gray-500">Data de Configuração</th>
+            <th class="p-4 text-left border border-gray-500">Última actualização</th>
+            <th class="p-4 text-left border border-gray-500 flex items-center justify-center">Acções</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for camera in cameras %}
+          <tr>
+            <td class="p-4 border border-gray-500">{{ camera.get_name }}</td>
+            <td class="p-4 border border-gray-500">{{ camera.location }}</td>
+            <td class="p-4 border border-gray-500">
+              <span class="px-2 py-1 rounded-full font-bold {% if camera.status %} bg-green-500 {% else %} bg-red-500 {% endif %}">
+                {% if camera.status %} Online {% else %} Offline {% endif %}
               </span>
-              <span class="text-gray-700 text-[10px]">•</span>
-              <p class="text-text-secondary text-xs">ID: CAM-{{camera.id}}</p>
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 ml-14 sm:ml-0">
-          <div class="flex items-center gap-2 text-text-secondary min-w-[140px]">
-            <span class="material-symbols-outlined text-[18px]">
-              {% if camera.connection_type == 'L' %}
-              usb
-              {% else %}
-              wifi
-              {% endif %}
-            </span>
-            <span class="text-sm font-medium">{{camera.get_connection_type_display}}</span>
-          </div>
-          <div class="flex gap-2">
-            <button
-              class="p-2 rounded bg-surface-hover text-text-secondary hover:text-white hover:bg-primary transition-colors"
-              title="Editar">
-              <span class="material-symbols-outlined text-[18px]">edit</span>
-            </button>
-            <a
-              href="{% url 'cameras:delete' id=camera.id %}"
-              class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 hover:bg-red-500/10 transition-colors"
-              title="Remover">
-              <span class="material-symbols-outlined text-[18px]">delete</span>
-          </a>
-          </div>
-        </div>
-      </div>
-      {% empty %}
+            </td>
+            <td class="p-4 border border-gray-500">{{ camera.created_at|date:"d/m/y H:m" }} às {{ camera.created_at|date:"H:i" }}</td>
+            <td class="p-4 border border-gray-500">{{ camera.updated_at|date:"d/m/y" }} às {{ camera.updated_at|date:"H:i" }}</td>
+            <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
+              <button class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
+                title="Editar">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </button>
+              <a href="{% url 'cameras:delete' id=camera.id %}"
+                class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
+                title="Remover">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
       <div class="w-full flex justify-center items-center flex-col text-center gap-1 mt-3">
-
         <div
           class="flex items-center justify-center w-24 h-24 rounded-full bg-surface-dark border-2 border-dashed border-gray-700 text-text-secondary">
           <span class="material-symbols-outlined text-[48px] opacity-50">videocam_off</span>
@@ -122,7 +103,7 @@
           </p>
         </div>
       </div>
-      {% endfor %}
+      {% endif %}
     </div>
   </div>
 </main>

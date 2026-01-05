@@ -87,9 +87,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
-
-STATIC_ROOT = BASE_DIR.joinpath("web", "static")
-
-# Permite rodar iframes que são do mesmo host no site
-
-X_FRAME_OPTIONS = "SAMEORIGIN"
+STATICFILES_DIRS = [
+    BASE_DIR.joinpath("web", "static"),
+]
+STATIC_ROOT = BASE_DIR.joinpath("web", "staticfiles")
