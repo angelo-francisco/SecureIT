@@ -9,6 +9,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -49,7 +51,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "core.wsgi.application"
+# Alterados de wsgi para asgi
+# Assim servimos websockets
+
+ASGI_APPLICATION = "core.asgi.application"
 
 DATABASES = {
     "default": {
@@ -84,5 +89,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR.joinpath("web", "static")
+
+# Permite rodar iframes que são do mesmo host no site
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
