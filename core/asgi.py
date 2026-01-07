@@ -6,7 +6,7 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 from django.urls import path
 
-from apps.panel.consumers import PainelConsumer
+from apps.cameras.consumers import CameraConsumer
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 
@@ -19,7 +19,7 @@ application = ProtocolTypeRouter(
             AuthMiddlewareStack(
                 URLRouter(
                     [
-                        path("/panel-consumer", PainelConsumer.as_asgi()),
+                        path("ws/camera-video/<int:index>", CameraConsumer.as_asgi()),
                     ]
                 )
             )

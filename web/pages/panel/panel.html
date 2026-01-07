@@ -7,18 +7,24 @@
     {% include "components/loader.html" with w=50 %}
 </div>
 
-<main class="px-20 py-5 hidden w-full min-h-[calc(100vh-76px)] grid grid-cols-2 justify-center gap-2" id="container">
-    <div class="">
+<main id="container" class="
+    hidden
+    w-full
+    min-h-[calc(100vh-76px)]
+    grid
+    grid-cols-1 md:grid-cols-2
+    gap-3 md:gap-10
+    px-4
+    sm:px-6
+    lg:px-20
+    py-5
+  ">
+    <div>
         <h1 class="flex items-center gap-2 text-2xl font-semibold text-right mb-4">
             <span class="material-symbols-outlined">videocam</span>
             Câmaras ao vivo
         </h1>
-        <div class="cameras flex flex-col gap-3">
-            <div class="camera border w-[600px] h-[300px]">
-            </div>
-            <div class="camera border w-[600px] h-[300px]">
-            </div>
-        </div>
+        <div class="flex gap-4" id="cameras"></div>
     </div>
     <div>
         <h1 class="flex items-center gap-2 text-2xl font-semibold mb-4">
@@ -26,7 +32,7 @@
             Notificações
         </h1>
 
-        <ul id="notifications" class="mt-4 space-y-2">
+        <ul id="notifications" class="space-y-2">
             <li class="flex items-center justify-between bg-black/40 p-4 rounded-xl hover:shadow-lg hover:bg-black/50">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-red-500 text-2xl">emergency_home</span>
@@ -42,15 +48,48 @@
                     </a>
                 </div>
             </li>
-        
+
         </ul>
     </div>
 </main>
 <script>
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
+    const camerasHTML = document.getElementById("cameras")
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function getIndexFromPath(path) {
+        return parseInt(path.replace("/dev/video", ""))
+    }
+
+    function connectCameraWs(index) {
+        if (!index) return
+
+        const ws = new WebSocket(`ws:localhost:8000/ws/camera-video/${index}`)
+
+        ws.binaryType = "arraybuffer"
+
+        ws.onmessage = (event) => {
+            const blob = new Blob([event.data], { type: "image/jpeg" });
+            const url = URL.createObjectURL(blob);
+            document.getElementById(`cam-${index}`).src = url
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const response = await fetch("/cameras/get-cameras")
+        const cameras = await response.json()
+
+        cameras.forEach(camera => {
+            let index = getIndexFromPath(camera.path)
+            camerasHTML.innerHTML += `
+            <div class="camera border rounded-xl w-full aspect-video bg-black/30">
+                <img src="" class="w-full h-full rounded-xl object-cover" id="cam-${index}">
+            </div>
+            `
+            connectCameraWs(index)
+        });
+
         loader.classList.add('hidden')
         mainHTML.classList.remove('hidden')
     })

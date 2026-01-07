@@ -1,10 +1,8 @@
 from django.contrib import messages
-from django.http import JsonResponse, StreamingHttpResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Camera, LocalCamera, WifiCamera
-from .services import Camera as CameraController
-from .services import gen_video
 from .utils import get_cameras as func_get_cameras
 
 
