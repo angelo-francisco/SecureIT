@@ -89,14 +89,3 @@ def get_cameras(request):
     request.session["cameras"] = cameras
     request.session["registered_cameras"] = list(registered)
     return JsonResponse(cameras, safe=False)
-
-
-def get_camera_video(request):
-    index: str = request.GET.get("index", "")
-    try:
-        camera = CameraController(index)
-        return StreamingHttpResponse(
-            gen_video(camera), content_type="multipart/x-mixed-replace;boundary=frame"
-        )
-    except Exception as error:
-        return JsonResponse({"error": str(error)}, status=500)
