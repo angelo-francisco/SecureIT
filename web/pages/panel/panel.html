@@ -3,18 +3,56 @@
 {% block title %}Painel de Controle{% endblock %}
 
 {% block content %}
-
-<div class="cameras grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    <div class="camera">
-    </div>
+<div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
+    {% include "components/loader.html" with w=50 %}
 </div>
-<!-- <div class="w-full h-[80vh] flex justify-center items-center flex-col text-center gap-1">
-    <div
-        class="flex items-center justify-center w-24 h-24 rounded-full bg-surface-dark border-2 border-dashed border-gray-700 text-text-secondary">
-        <span class="material-symbols-outlined text-[48px] opacity-50">mimo_disconnect</span>
+
+<main class="px-20 py-5 hidden w-full min-h-[calc(100vh-76px)] grid grid-cols-2 justify-center gap-2" id="container">
+    <div class="">
+        <h1 class="flex items-center gap-2 text-2xl font-semibold text-right mb-4">
+            <span class="material-symbols-outlined">videocam</span>
+            Câmaras ao vivo
+        </h1>
+        <div class="cameras flex flex-col gap-3">
+            <div class="camera border w-[600px] h-[300px]">
+            </div>
+            <div class="camera border w-[600px] h-[300px]">
+            </div>
+        </div>
     </div>
-    <div class="flex flex-col gap-2 max-w-md">
-        <h3 class="text-white text-xl font-bold">Sem câmaras sendo monitoradas</h3>
+    <div>
+        <h1 class="flex items-center gap-2 text-2xl font-semibold mb-4">
+            <span class="material-symbols-outlined">notifications</span>
+            Notificações
+        </h1>
+
+        <ul id="notifications" class="mt-4 space-y-2">
+            <li class="flex items-center justify-between bg-black/40 p-4 rounded-xl hover:shadow-lg hover:bg-black/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-red-500 text-2xl">emergency_home</span>
+                    <span class="text-lg">
+                        Indivíduo não registado detectado
+                    </span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="" class="hover:text-blue-500 transition-colors cursor-pointer">
+                        <span class="material-symbols-outlined">
+                            visibility
+                        </span>
+                    </a>
+                </div>
+            </li>
+        
+        </ul>
     </div>
-</div> -->
+</main>
+<script>
+    const mainHTML = document.getElementById("container")
+    const loader = document.getElementById("loader")
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loader.classList.add('hidden')
+        mainHTML.classList.remove('hidden')
+    })
+</script>
 {% endblock %}
