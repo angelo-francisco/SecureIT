@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from cv2 import VideoCapture, imencode
 
-FPS = 15
+FPS = 16
 
 
 class Camera:
