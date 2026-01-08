@@ -3,18 +3,95 @@
 {% block title %}Painel de Controle{% endblock %}
 
 {% block content %}
-
-<div class="cameras grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    <div class="camera">
-    </div>aaa
+<div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
+    {% include "components/loader.html" with w=50 %}
 </div>
-<!-- <div class="w-full h-[80vh] flex justify-center items-center flex-col text-center gap-1">
-    <div
-        class="flex items-center justify-center w-24 h-24 rounded-full bg-surface-dark border-2 border-dashed border-gray-700 text-text-secondary">
-        <span class="material-symbols-outlined text-[48px] opacity-50">mimo_disconnect</span>
+
+<main id="container" class="
+    hidden
+    w-full
+    min-h-[calc(100vh-76px)]
+    grid
+    grid-cols-1 md:grid-cols-2
+    gap-3 md:gap-10
+    px-4
+    sm:px-6
+    lg:px-20
+    py-5
+  ">
+    <div>
+        <h1 class="flex items-center gap-2 text-2xl font-semibold text-right mb-4">
+            <span class="material-symbols-outlined">videocam</span>
+            Câmaras ao vivo
+        </h1>
+        <div class="flex gap-4" id="cameras"></div>
     </div>
-    <div class="flex flex-col gap-2 max-w-md">
-        <h3 class="text-white text-xl font-bold">Sem câmaras sendo monitoradas</h3>
+    <div>
+        <h1 class="flex items-center gap-2 text-2xl font-semibold mb-4">
+            <span class="material-symbols-outlined">notifications</span>
+            Notificações
+        </h1>
+
+        <ul id="notifications" class="space-y-2">
+            <li class="flex items-center justify-between bg-black/40 p-4 rounded-xl hover:shadow-lg hover:bg-black/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-red-500 text-2xl">emergency_home</span>
+                    <span class="text-lg">
+                        Indivíduo não registado detectado
+                    </span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="" class="hover:text-blue-500 transition-colors cursor-pointer">
+                        <span class="material-symbols-outlined">
+                            visibility
+                        </span>
+                    </a>
+                </div>
+            </li>
+
+        </ul>
     </div>
-</div> -->
+</main>
+<script>
+    const mainHTML = document.getElementById("container")
+    const loader = document.getElementById("loader")
+    const camerasHTML = document.getElementById("cameras")
+
+    function getIndexFromPath(path) {
+        return parseInt(path.replace("/dev/video", ""))
+    }
+
+    function connectCameraWs(index) {
+        if (!index) return
+
+        const ws = new WebSocket(`ws:localhost:8000/ws/camera-video/${index}`)
+
+        ws.binaryType = "arraybuffer"
+
+        ws.onmessage = (event) => {
+            const blob = new Blob([event.data], { type: "image/jpeg" });
+            const url = URL.createObjectURL(blob);
+            document.getElementById(`cam-${index}`).src = url
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const response = await fetch("/cameras/get-cameras")
+        const cameras = await response.json()
+
+        cameras.forEach(camera => {
+            let index = getIndexFromPath(camera.path)
+            camerasHTML.innerHTML += `
+            <div class="camera border rounded-xl w-full aspect-video bg-black/30">
+                <img src="" class="w-full h-full rounded-xl object-cover" id="cam-${index}">
+            </div>
+            `
+            connectCameraWs(index)
+        });
+
+        loader.classList.add('hidden')
+        mainHTML.classList.remove('hidden')
+    })
+</script>
 {% endblock %}
