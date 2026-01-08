@@ -24,6 +24,9 @@ INSTALLED_APPS = [
     "apps.notifications",
 ]
 
+AUTH_USER_MODEL = 'users.User'
+
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -40,7 +43,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "web" / "pages"],
-        "APP_DIRS": False,
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
@@ -91,3 +94,9 @@ STATICFILES_DIRS = [
     BASE_DIR.joinpath("web", "static"),
 ]
 STATIC_ROOT = BASE_DIR.joinpath("web", "staticfiles")
+
+#configurações de login/logout (adicionadas)
+
+LOGIN_URL = "/users/login/"
+LOGIN_REDIRECT_URL = "/cameras/"
+LOGOUT_REDIRECT_URL = "/users/login/"

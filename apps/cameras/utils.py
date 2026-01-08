@@ -1,21 +1,20 @@
-from cv2_enumerate_cameras import enumerate_cameras
+import cv2
 
 
-def get_cameras() -> tuple[list[dict[str, str | int]], set[str]]:
+def get_cameras():
     """
-    Mapeia todas as câmaras disponíveis no computador
+    Lista câmeras disponíveis de forma compatível
+    com Windows, Linux e macOS usando OpenCV puro.
     """
-    cams = []
-    registered = set()
-    for cam in enumerate_cameras():
-        if cam.path not in registered:
-            cams.append(
-                {
-                    "name": cam.name,
-                    "path": cam.path,
-                    "backend": cam.backend,
-                    "index": cam.index,
-                }
-            )
-            registered.add(cam.path)
-    return cams, registered
+    cameras = []
+
+    for index in range(5):  # tenta de 0 a 4
+        cap = cv2.VideoCapture(index)
+        if cap.isOpened():
+            cameras.append({
+                "id": index,
+                "name": f"Câmera {index}"
+            })
+            cap.release()
+
+    return cameras
