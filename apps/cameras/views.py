@@ -83,7 +83,5 @@ def view_camera(request, id):
 
 
 def get_cameras(request):
-    cameras, registered = func_get_cameras()
-    request.session["cameras"] = cameras
-    request.session["registered_cameras"] = list(registered)
+    cameras = func_get_cameras()
     return JsonResponse(cameras, safe=False)

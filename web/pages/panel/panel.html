@@ -57,17 +57,17 @@
     const loader = document.getElementById("loader")
     const camerasHTML = document.getElementById("cameras")
 
-    function getIndexFromPath(path) {
-        return parseInt(path.replace("/dev/video", ""))
+    function getIndexFromPath(id) {
+        if (typeof id === "number") return id
+        return parseInt(id.replace("/dev/video", ""))
     }
-
+    
     function connectCameraWs(index) {
-        if (!index) return
-
+        if (typeof index !== "number" && !index ) return
+        
         const ws = new WebSocket(`ws:localhost:8000/ws/camera-video/${index}`)
-
         ws.binaryType = "arraybuffer"
-
+        
         ws.onmessage = (event) => {
             const blob = new Blob([event.data], { type: "image/jpeg" });
             const url = URL.createObjectURL(blob);
@@ -75,13 +75,20 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
     }
-
+    
     document.addEventListener('DOMContentLoaded', async () => {
         const response = await fetch("/cameras/get-cameras")
         const cameras = await response.json()
-
+        
         cameras.forEach(camera => {
-            let index = getIndexFromPath(camera.path)
+            let id;
+            if (camera.path) {
+                id = camera.path
+            } else {
+                id = camera.id
+            } 
+            
+            let index = getIndexFromPath(id)
             camerasHTML.innerHTML += `
             <div class="camera border rounded-xl w-full aspect-video bg-black/30">
                 <img src="" class="w-full h-full rounded-xl object-cover" id="cam-${index}">
