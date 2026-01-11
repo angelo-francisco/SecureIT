@@ -1,9 +1,9 @@
 from django.urls import path
 
 from .views import (
-    people
+    home
 )
 
 app_name = "people"
 
-urlpatterns = [path("people/", people, name="home")]
+urlpatterns = [path("", home, name="home")]
