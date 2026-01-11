@@ -7,9 +7,9 @@
   <header class="w-full px-6 py-4 lg:px-10 lg:py-6 flex flex-col gap-4 shrink-0 z-10">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div class="flex flex-col gap-2">
-        <h2 class="text-white text-3xl md:text-4xl font-bold tracking-tight">Gerir Câmaras</h2>
+        <h2 class="text-white text-3xl md:text-4xl font-bold tracking-tight">Câmaras</h2>
         <p class="text-text-secondary text-base font-normal max-w-xl">
-          Visualize todas câmaras registradas na plataforma.
+          Visualize todas câmaras registadas na plataforma
         </p>
       </div>
       <a href="{% url 'cameras:new' %}"
@@ -92,14 +92,13 @@
       {% else %}
       <div class="w-full flex justify-center items-center flex-col text-center gap-1 mt-3">
         <div
-          class="flex items-center justify-center w-24 h-24 rounded-full bg-surface-dark border-2 border-dashed border-gray-700 text-text-secondary">
-          <span class="material-symbols-outlined text-[48px] opacity-50">videocam_off</span>
+          class="flex items-center justify-center ">
+          <span class="material-symbols-outlined text-[48px] opacity-80">videocam_off</span>
         </div>
         <div class="flex flex-col gap-2 max-w-md">
           <h3 class="text-white text-xl font-bold">Nenhuma câmara registrada</h3>
           <p class="text-text-secondary text-sm leading-relaxed">
-            Não foram adicionadas câmaras. Adicione sua primeira câmera para começar a monitorar o
-            ambiente.
+            Adicione alguma câmera para começar a monitorar
           </p>
         </div>
       </div>
