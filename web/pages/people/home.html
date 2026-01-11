@@ -1,0 +1,110 @@
+{% extends 'bases/panel.html' %}
+
+{% block title %}Pessoas{% endblock %}
+
+{% block content %}
+<main class="flex-1 h-full flex flex-col relative overflow-hidden ">
+  <header class="w-full px-6 py-4 lg:px-10 lg:py-6 flex flex-col gap-4 shrink-0 z-10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div class="flex flex-col gap-2">
+        <h2 class="text-white text-3xl md:text-4xl font-bold tracking-tight">Gerir Pessoas</h2>
+        <p class="text-text-secondary text-base font-normal max-w-xl">
+          Visualize todas câmaras registradas na plataforma.
+        </p>
+      </div>
+      <a href="{% url 'cameras:new' %}"
+        class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20">
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        <span>Adicionar Nova Câmera</span>
+      </a>
+    </div>
+    <div
+      class="flex flex-col lg:flex-row gap-4 mt-4 items-start lg:items-center justify-between border-b border-gray-600 pb-6">
+      <div class="relative w-full lg:w-96">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-secondary">
+          <span class="material-symbols-outlined">search</span>
+        </div>
+        <input
+          class="block w-full p-2.5 pl-10 text-sm text-white bg-surface-dark border-none rounded-lg focus:ring-2 focus:ring-primary placeholder-text-secondary"
+          placeholder="Buscar por nome, IP ou localização..." type="text" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button
+          class="flex items-center justify-center px-4 h-8 rounded-full bg-primary text-white text-xs font-medium transition-colors border border-primary">
+          Todas
+        </button>
+        <button
+          class="flex items-center justify-center px-4 h-8 rounded-full bg-surface-dark hover:bg-surface-hover text-text-secondary hover:text-white text-xs font-medium transition-colors border border-transparent">
+          Online
+        </button>
+        <button
+          class="flex items-center justify-center px-4 h-8 rounded-full bg-surface-dark hover:bg-surface-hover text-text-secondary hover:text-white text-xs font-medium transition-colors border border-transparent">
+          Offline
+        </button>
+        <button
+          class="flex items-center justify-center px-4 h-8 rounded-full bg-surface-dark hover:bg-surface-hover text-text-secondary hover:text-white text-xs font-medium transition-colors border border-transparent">
+          Wi-Fi
+        </button>
+      </div>
+    </div>
+  </header>
+  <div class="flex-1 overflow-y-auto px-6 lg:px-10 pb-10">
+    <div class="flex flex-col gap-3">
+      {% if cameras %}
+      <table class="w-full table-auto">
+        <thead>
+          <tr class="bg-surface-dark">
+            <th class="p-4 text-left border border-gray-500">Nome</th>
+            <th class="p-4 text-left border border-gray-500">Localização</th>
+            <th class="p-4 text-left border border-gray-500">Estado</th>
+            <th class="p-4 text-left border border-gray-500">Data de Configuração</th>
+            <th class="p-4 text-left border border-gray-500">Última actualização</th>
+            <th class="p-4 text-left border border-gray-500 flex items-center justify-center">Acções</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for camera in cameras %}
+          <tr>
+            <td class="p-4 border border-gray-500">{{ camera.get_name }}</td>
+            <td class="p-4 border border-gray-500">{{ camera.location }}</td>
+            <td class="p-4 border border-gray-500">
+              <span class="px-2 py-1 rounded-full font-bold {% if camera.status %} bg-green-500 {% else %} bg-red-500 {% endif %}">
+                {% if camera.status %} Online {% else %} Offline {% endif %}
+              </span>
+            </td>
+            <td class="p-4 border border-gray-500">{{ camera.created_at|date:"d/m/y H:m" }} às {{ camera.created_at|date:"H:i" }}</td>
+            <td class="p-4 border border-gray-500">{{ camera.updated_at|date:"d/m/y" }} às {{ camera.updated_at|date:"H:i" }}</td>
+            <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
+              <button class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
+                title="Editar">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </button>
+              <a href="{% url 'cameras:delete' id=camera.id %}"
+                class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
+                title="Remover">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="w-full flex justify-center items-center flex-col text-center gap-1 mt-3">
+        <div
+          class="flex items-center justify-center w-24 h-24 rounded-full bg-surface-dark border-2 border-dashed border-gray-700 text-text-secondary">
+          <span class="material-symbols-outlined text-[48px] opacity-50">videocam_off</span>
+        </div>
+        <div class="flex flex-col gap-2 max-w-md">
+          <h3 class="text-white text-xl font-bold">Nenhuma câmara registrada</h3>
+          <p class="text-text-secondary text-sm leading-relaxed">
+            Não foram adicionadas câmaras. Adicione sua primeira câmera para começar a monitorar o
+            ambiente.
+          </p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}
