@@ -1,16 +1,22 @@
-import cv2
+from cv2_enumerate_cameras import enumerate_cameras
 
 
-def get_cameras():
-    cameras = []
-
-    for index in range(5):
-        cap = cv2.VideoCapture(index)
-        if cap.isOpened():
-            cameras.append({
-                "id": index,
-                "name": f"Câmera {index}"
-            })
-            cap.release()
-
-    return cameras
+def get_cameras() -> tuple[list[dict[str, str | int]], set[str]]:
+    """
+    Mapeia todas as câmaras disponíveis no computador
+    """
+    cams = []
+    registered = set()
+    for idx, cam in enumerate(enumerate_cameras()):
+        if cam.path not in registered:
+            cams.append(
+                {
+                    "id": idx,
+                    "name": cam.name,
+                    "path": cam.path,
+                    "backend": cam.backend,
+                    "index": cam.index,
+                }
+            )
+            registered.add(cam.path)
+    return cams
