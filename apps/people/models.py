@@ -1,8 +1,10 @@
 from django.db import models
 
+
 # Isto terá de ser criado manualmente, o ORM do django não tem suporte para embeddings
 # Por Ângelo
 class Person(models.Model): ...
+
 
 class Visitor(models.Model): ...
 
