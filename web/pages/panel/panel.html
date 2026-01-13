@@ -1,73 +1,71 @@
-{% extends 'bases/panel.html' %}
+{% extends 'bases/panel_no_nav.html' %}
 
 {% block title %}Painel de Controle{% endblock %}
+
+{% block subhead %}
+<style>
+    #container[data-count="1"] {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+    }
+
+    #container[data-count="2"] {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: 1fr;
+    }
+
+    #container[data-count="3"],
+    #container[data-count="4"] {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+    }
+
+    #container[data-count="5"],
+    #container[data-count="6"] {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+    }
+
+    #container[data-count="7"],
+    #container[data-count="8"],
+    #container[data-count="9"] {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
     {% include "components/loader.html" with w=50 %}
 </div>
 
+{% include "components/floating_navbar.html" %}
 <main id="container" class="
     hidden
     w-full
-    min-h-[calc(100vh-76px)]
+    h-[100vh]
+    bg-black
     grid
-    grid-cols-1 md:grid-cols-2
-    gap-3 md:gap-10
-    px-4
-    sm:px-6
-    lg:px-20
-    py-5
+    gap-1
   ">
-    <div>
-        <h1 class="flex items-center gap-2 text-2xl font-semibold text-right mb-4">
-            <span class="material-symbols-outlined">videocam</span>
-            Câmaras ao vivo
-        </h1>
-        <div class="flex gap-4" id="cameras"></div>
-    </div>
-    <div>
-        <h1 class="flex items-center gap-2 text-2xl font-semibold mb-4">
-            <span class="material-symbols-outlined">notifications</span>
-            Notificações
-        </h1>
-
-        <ul id="notifications" class="space-y-2">
-            <li class="flex items-center justify-between bg-black/40 p-4 rounded-xl hover:shadow-lg hover:bg-black/50">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-red-500 text-2xl">emergency_home</span>
-                    <span class="text-lg">
-                        Indivíduo não registado detectado
-                    </span>
-                </div>
-                <div class="flex gap-2">
-                    <a href="" class="hover:text-blue-500 transition-colors cursor-pointer">
-                        <span class="material-symbols-outlined">
-                            visibility
-                        </span>
-                    </a>
-                </div>
-            </li>
-
-        </ul>
-    </div>
 </main>
+
 <script>
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
-    const camerasHTML = document.getElementById("cameras")
 
     function getIndexFromPath(id) {
         if (typeof id === "number") return id
         return parseInt(id.replace("/dev/video", ""))
     }
-    
+
     function connectCameraWs(index) {
-        if (typeof index !== "number" && !index ) return
-        
+        if (typeof index !== "number" && !index) return
+
         const ws = new WebSocket(`ws:localhost:8000/ws/camera-video/${index}`)
         ws.binaryType = "arraybuffer"
-        
+
         ws.onmessage = (event) => {
             const blob = new Blob([event.data], { type: "image/jpeg" });
             const url = URL.createObjectURL(blob);
@@ -75,24 +73,27 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
     }
-    
+
     document.addEventListener('DOMContentLoaded', async () => {
         const response = await fetch("/cameras/get-cameras")
         const cameras = await response.json()
-        
+        mainHTML.dataset.count = cameras.length
         cameras.forEach(camera => {
             let id;
             if (camera.path) {
                 id = camera.path
             } else {
                 id = camera.id
-            } 
-            
+            }
+
             let index = getIndexFromPath(id)
-            camerasHTML.innerHTML += `
-            <div class="camera border rounded-xl w-full aspect-video bg-black/30">
-                <img src="" class="w-full h-full rounded-xl object-cover" id="cam-${index}">
-            </div>
+            mainHTML.innerHTML += `
+                <div class="relative bg-black w-full h-full overflow-hidden">
+                    <img src="" id="cam-${index}" class="absolute inset-0 w-full h-full object-contain bg-black"/>
+                    <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
+                    CAM-${index}
+                    </span>
+                </div>
             `
             connectCameraWs(index)
         });
