@@ -1,12 +1,22 @@
 from django.db import models
 
+FIELDS = [
+    ("AL", "Auxiliar de Limpeza"),
+    ("G", "Guarda"),
+    ("J", "Jardineiro(a)"),
+    ("E", "Eletricista"),
+    ("EA", "Entregador(a) de Água"),
+    ("O", "Outro"),
+]
+
+TYPES = [
+    ("R", "Residente"),
+    ("V", "Visitante"),
+    ("W", "Trabalhador"),
+]
+
 
 class Person(models.Model):
-    TYPES = [
-        ("R", "Residente"),
-        ("V", "Visitante"),
-        ("W", "Trabalhador"),
-    ]
     first_name = models.CharField(max_length=80)
     last_name = models.CharField(max_length=80)
     type = models.CharField(max_length=1, choices=TYPES)
@@ -18,7 +28,7 @@ class Person(models.Model):
 
 class Home(models.Model):
     number = models.PositiveIntegerField()
-    street = models.CharField(max_length=10)
+    street = models.CharField(max_length=30)
 
 
 class Visitor(models.Model):
@@ -36,18 +46,10 @@ class Resident(models.Model):
 
 
 class Worker(models.Model):
-    FIELDS = [
-        ("AL", "Auxiliar de Limpeza"),
-        ("G", "Guarda"),
-        ("J", "Jardineiro(a)"),
-        ("E", "Eletricista"),
-        ("EA", "Entregador(a) de Água"),
-        ("O", "Outro"),
-    ]
     person = models.OneToOneField(
         "Person", on_delete=models.DO_NOTHING, related_name="worker"
     )
-    field = models.CharField(max_length=3, choices=FIELDS)
+    field = models.CharField(max_length=6)
 
 
 class Worker_Home(models.Model):
