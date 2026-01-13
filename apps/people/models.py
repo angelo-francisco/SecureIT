@@ -33,7 +33,7 @@ class Worker(models.Model):
     person = models.OneToOneField(
         "Person", on_delete=models.DO_NOTHING, related_name="worker"
     )
-    work_for = models.ManyToManyField(Person)
+    work_for = models.ManyToManyField(Person, related_name="bosses")
     field = models.CharField(
         max_length=3,
         choices=[
