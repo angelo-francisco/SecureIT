@@ -4,16 +4,19 @@ from pathlib import Path
 import sqlite_vec
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DB_DIR = BASE_DIR / "db.sqlite3"
+DATABASE_DIR = BASE_DIR / "db.sqlite3"
 
 
-def main():
-    db = sqlite3.connect(DB_DIR)
-
+def get_conn():
+    db = sqlite3.connect(DATABASE_DIR)
     db.enable_load_extension(True)
     sqlite_vec.load(db)
     db.enable_load_extension(False)
+    return db
 
+
+def main():
+    db = get_conn()
     db.execute(
         """
         CREATE VIRTUAL TABLE IF NOT EXISTS PersonEmbedding 
