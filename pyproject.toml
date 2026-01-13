@@ -15,6 +15,6 @@ dependencies = [
 
 [tool.taskipy.tasks]
 run = "python manage.py runserver"
-mg = "python manage.py migrate"
+mg = "python apps/people/db.py && python manage.py migrate"
 mkmg = "python manage.py makemigrations"
 app = "python manage.py startapp"
