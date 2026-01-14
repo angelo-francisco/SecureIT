@@ -2,13 +2,14 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
-from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import redirect, render
+
+from .utils import pin_not_required, without_login
 
 User = get_user_model()
 
 
-@login_not_required
+@without_login
 def signup(request):
     if request.method == "POST":
         email = request.POST.get("email", "")
@@ -20,7 +21,7 @@ def signup(request):
             first_name = full_name[0]
             last_name = full_name[-1]
         except IndexError:
-            messages.error(request, 'Informe o seu nome completo')
+            messages.error(request, "Informe o seu nome completo")
             return render(request, "users/signup.html")
 
         if not email or not password or not pin or not first_name or not last_name:
@@ -28,7 +29,9 @@ def signup(request):
         elif len(pin) != 4:
             messages.error(request, "O PIN deve conter 4 dígitos")
         elif len(password) < 12:
-            messages.error(request, "Palavra-passe deve conter pelo menos 12 caracteres")
+            messages.error(
+                request, "Palavra-passe deve conter pelo menos 12 caracteres"
+            )
         else:
             user = User(email=email, first_name=first_name, last_name=last_name)
             user.set_password(password)
@@ -40,7 +43,7 @@ def signup(request):
     return render(request, "users/signup.html")
 
 
-@login_not_required
+@without_login
 def login(request):
     if request.method == "POST":
         email = request.POST.get("email", "")
@@ -49,17 +52,37 @@ def login(request):
         if not email or not password:
             messages.error(request, "Endereço ou Palavra-passe não informados")
         else:
-            user = authenticate(request, email, password)
+            user = authenticate(request, username=None, password=password, email=email)
             if user is not None:
                 django_login(request, user)
+                messages.success(request, "Sessão iniciada com sucesso")
                 return redirect("users:pin")
+        messages.error(request, "Endereço ou palavra-passe incorrectos")
         return render(request, "users/login.html")
     return render(request, "users/login.html")
 
 
-@login_not_required
+@pin_not_required
 def pin(request):
+    if request.method == "POST":
+        raw_pin = request.POST.get("pin", "")
+
+        if not raw_pin or len(raw_pin) != 4:
+            messages.error(request, "Informe o PIN completo")
+        else:
+            user = request.user
+            if user.check_pin(raw_pin):
+                response = redirect("panel:home")
+                response.set_cookie("pin_verified", True)
+                return response
+            messages.error(request, "PIN incorrecto")
     return render(request, "users/pin.html")
+
+
+def lock(request):
+    response = redirect("users:pin")
+    response.delete_cookie("pin_verified")
+    return response
 
 
 def logout(request):
