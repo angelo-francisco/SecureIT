@@ -33,8 +33,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.users.utils.pin_middleware"
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -97,6 +99,8 @@ STATIC_ROOT = BASE_DIR.joinpath("web", "staticfiles")
 
 #configurações de login/logout (adicionadas)
 
-LOGIN_URL = "/users/login/"
-LOGIN_REDIRECT_URL = "/cameras/"
-LOGOUT_REDIRECT_URL = "/users/login/"
+LOGIN_URL = "users:login"
+LOGOUT_REDIRECT_URL = "users:logout"
+
+# Extendendo o tempo do cookie para evitar logout automático
+SESSION_COOKIE_AGE = 365 * 24 * 60 * 60 # 1 ano
