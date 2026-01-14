@@ -14,21 +14,23 @@
 
     <div class="w-full h-px bg-border-dark"></div>
 
-    <a href="{% url 'cameras:home'%}"
-    class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/20 rounded-lg">
+    <a href="{% url 'cameras:home' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/20 rounded-lg">
         videocam
     </a>
 
-    <a href="{% url 'people:home'%}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
+    <a href="{% url 'people:home' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
         people
     </a>
 
-    <a href="{% url 'notifications:home'%}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
+    <a href="{% url 'notifications:home' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
         notifications
-
     </a>
 
-    <a href="#" class="material-symbols-outlined p-1 px-2 text-error">
-        logout
+    <a href="{% url 'users:lock' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
+        lock
+    </a>
+
+    <a href="{% url 'notifications:home' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
+        settings
     </a>
 </div>
