@@ -10,7 +10,8 @@
         </label>
         <a href="#" class="text-sm text-blue-300 underline">Esqueceu-se?</a>
     </div>
-    <form class="grid grid-cols-[repeat(1,1fr)_auto] gap-2 sm:gap-4 items-center">
+    <form class="grid grid-cols-[repeat(1,1fr)_auto] gap-2 sm:gap-4 items-center" method="post" action="{% url 'users:pin' %}">
+        {% csrf_token %}
         {% include 'components/pin.html' %}
         <button type="submit"
             class="h-12 w-12 bg-primary rounded-lg flex items-center justify-center text-white hover:bg-blue-600 active:scale-[0.98] transition-all shadow-[0_0_10px_rgba(19,127,236,0.2)]">
