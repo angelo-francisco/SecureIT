@@ -41,11 +41,13 @@ class VisitorHost(models.Model):
 
 
 class Resident(models.Model):
+    bi = models.CharField(max_length=14, unique=True)
     person = models.ForeignKey("Person", on_delete=models.DO_NOTHING)
     home = models.ForeignKey("Home", on_delete=models.CASCADE)
 
 
 class Worker(models.Model):
+    bi = models.CharField(max_length=14, unique=True)
     person = models.OneToOneField(
         "Person", on_delete=models.DO_NOTHING, related_name="worker"
     )
