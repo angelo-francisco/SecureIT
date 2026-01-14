@@ -47,7 +47,6 @@
     h-[100vh]
     bg-black
     grid
-    gap-1
   ">
 </main>
 
@@ -79,8 +78,9 @@
         const cameras = await response.json()
         mainHTML.dataset.count = cameras.length
         cameras.forEach(camera => {
+            let platform = "{{platform}}"
             let id;
-            if (camera.path) {
+            if (platform === "Linux") {
                 id = camera.path
             } else {
                 id = camera.id
