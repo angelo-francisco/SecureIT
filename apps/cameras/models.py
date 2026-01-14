@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class Camera(models.Model):
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="cameras")
     location = models.CharField(max_length=150, null=True, blank=True)
     status = models.BooleanField(default=True, null=True, blank=True)
     connection_type = models.CharField(
