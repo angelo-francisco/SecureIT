@@ -30,7 +30,7 @@ def signup(request):
         elif len(password) < 12:
             messages.error(request, "Palavra-passe deve conter pelo menos 12 caracteres")
         else:
-            user = User(email=email, first_name=first_name, last_name=last_name, is_staff=True)
+            user = User(email=email, first_name=first_name, last_name=last_name)
             user.set_password(password)
             user.set_pin(pin)
 
