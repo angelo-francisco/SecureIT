@@ -45,6 +45,9 @@
                 {% endfor %}
               </datalist>
             </div>
+            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do BI</label>
+              {% include 'components/input.html' with placeholder="Número do BI" type="text" name="bi" value=request.POST.bi required=True %}
+            </div>
           </div>
           <div id="visitor-fields" class="hidden space-y-2">
             <div class="mb-4 flex flex-col gap-1">
@@ -58,6 +61,9 @@
             </div>
           </div>
           <div id="worker-fields" class="hidden space-y-2">
+            <div class="mb-4 flex flex-col gap-1">
+              {% include 'components/input.html' with placeholder="Número do BI" type="text" name="bi" value=request.POST.bi required=True %}
+            </div>
             <div class="mb-4 flex flex-col gap-1">
               <label class="ml-1 text-sm text-white font-medium">Área de Trabalho</label>
               <select name="selected_field" id="selected-field" required
