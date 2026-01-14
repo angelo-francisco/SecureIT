@@ -37,7 +37,7 @@ class Visitor(models.Model):
 
 class VisitorHost(models.Model):
     visitor = models.ForeignKey("Visitor", on_delete=models.DO_NOTHING)
-    host = models.ForeignKey("Person", on_delete=models.DO_NOTHING)
+    host = models.ForeignKey("Resident", on_delete=models.DO_NOTHING)
 
 
 class Resident(models.Model):
