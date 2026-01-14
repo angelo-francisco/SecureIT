@@ -14,7 +14,7 @@ def signup(request):
         email = request.POST.get("email", "")
         password = request.POST.get("password", "")
         pin = request.POST.get("pin", "")
-        full_name = request.POST.get("first_name", "").split(" ")
+        full_name = request.POST.get("full_name", "").split(" ")
 
         try:
             first_name = full_name[0]
@@ -24,7 +24,6 @@ def signup(request):
             return render(request, "users/signup.html")
 
         if not email or not password or not pin or not first_name or not last_name:
-            print(email, password, pin, full_name, first_name, last_name)
             messages.error(request, "Preencha todos os campos")
         elif len(pin) != 4:
             messages.error(request, "O PIN deve conter 4 dígitos")
