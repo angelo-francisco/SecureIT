@@ -8,7 +8,7 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     pin = models.CharField(max_length=4)
-
+    
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
