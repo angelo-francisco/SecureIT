@@ -86,5 +86,7 @@ def lock(request):
 
 
 def logout(request):
+    response = redirect("users:login")
+    response.delete_cookie("pin_verified")
     django_logout(request)
-    return redirect("users:login")
+    return response
