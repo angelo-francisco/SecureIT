@@ -6,9 +6,9 @@ from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect, render
 from PIL import Image
-
+from django.core.exceptions import ValidationError
 from .models import FIELDS, Home, Person, Resident, ResidentHome, Visitor, VisitorHost
-
+from .db import insert_person_embedding
 
 def base64_to_image_file(base64_str, filename="image.jpg"):
     if not base64_str:
@@ -28,6 +28,30 @@ def base64_to_image_file(base64_str, filename="image.jpg"):
 
 def home(request):
     return render(request, "people/home.html")
+
+
+def validate_and_format_data_resident(homes: list[str], bi: str) -> tuple:
+    homes = None
+    try:
+        homes = [int(id) for id in homes]
+    except TypeError:
+        raise ValidationError("Informe correctamente os nºs. das casas")
+
+    if not bi or len(bi) != 14:
+        raise ValidationError("Preencha correctamente o BI")
+    elif not Home.objects.filter(id__in=homes).exists():
+        raise ValidationError("Nº. de casa inválido")
+    return homes, bi
+
+
+def create_person(first_name, last_name, person_type, photo):
+    person = Person(
+        first_name=first_name,
+        last_name=last_name,
+        type=person_type,
+    ).save()
+    person.photo.save(f"{uuid4}.jpeg", photo)
+    return person
 
 
 def new_person(request):
@@ -50,39 +74,22 @@ def new_person(request):
             messages.error(request, "Selecione o tipo de pessoa certo")
 
         elif person_type == "R":
-            homes = None
             try:
-                homes = [int(id) for id in request.POST.getlist("homes", [])]
-            except TypeError:
-                messages.error(request, "Informe correctamente os nºs. das casas")
-                return response
-            bi = request.POST.get("bi", "")
-
-            if not bi or len(bi) != 14:
-                messages.error(request, "Preencha correctamente o BI")
-            elif not Home.objects.filter(id__in=homes).exists():
-                messages.error(request, "Nº. de casa inválido")
-
-            person = Person(
-                first_name=first_name,
-                last_name=last_name,
-                type=person_type,
-            ).save()
-            person.photo.save(f"{uuid4}.jpeg", photo)
-
-            resident = Resident(
-                person_id=person.id,
-                bi=bi   
-            ).save()
-
-            resident_homes = [
-                ResidentHome(
-                    resident_id=resident.id,
-                    home_id=home
+                homes, bi = validate_and_format_data_resident(
+                    request.POST.getlist("homes", []), request.POST.get("bi", "")
                 )
-                for home in homes
-            ]
-            ResidentHome.objects.bulk_create(*resident_homes)
-            
+
+                person = create_person(first_name, last_name, person_type, photo)
+                resident = Resident(person_id=person.id, bi=bi)
+                resident.save()
+
+                resident_homes = [
+                    ResidentHome(resident_id=resident.id, home_id=home)
+                    for home in homes
+                ]
+                ResidentHome.objects.bulk_create(*resident_homes)
+            except Exception as e:
+                messages.error(request, e.message)
+
         # return redirect("people:home")
     return response
