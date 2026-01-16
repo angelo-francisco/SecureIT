@@ -15,6 +15,21 @@ def get_conn():
     return db
 
 
+def insert_person_embedding(person, embedding):
+    db = get_conn()
+    db.execute(
+        f"""
+        CREATE VIRTUAL TABLE IF NOT EXISTS PersonEmbedding 
+        USING vec0(
+            person INTEGER,
+            embedding FLOAT[512]
+        )
+        INSERT INTO PersonEmbedding (person, embedding) VALUES ({person}, {embedding})
+        """
+    )
+    db.close()
+
+
 def main():
     db = get_conn()
     db.execute(
