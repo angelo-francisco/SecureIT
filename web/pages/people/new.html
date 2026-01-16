@@ -3,7 +3,7 @@
 {% block title %}Adicionar Pessoa{% endblock %}
 
 {% block content %}
-<form method="post" class="h-full mb-5" action="{% url 'cameras:new' %}">
+<form method="post" class="h-full mb-5" action="{% url 'people:new' %}">
   {% csrf_token %}
   <main class="flex-1 h-full flex flex-col relative overflow-hidden">
     <header class="w-full px-6 py-4 text-center">
@@ -12,16 +12,16 @@
         Registar residente, visitante ou trabalhadores
       </p>
     </header>
-    <div class="flex-1 overflow-y-auto">  
+    <div class="flex-1 overflow-y-auto">
       <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
         <div class="mb-4 flex justify-between gap-2">
           <div>
             <label class="ml-1 text-base text-white font-medium">Primeiro nome</label>
-            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="location" value=request.POST.location required=True %}
+            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="first_name" value=request.POST.first_name required=True %}
           </div>
           <div>
             <label class="ml-1 text-base text-white font-medium">Sobrenome</label>
-            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="location" value=request.POST.location required=True %}
+            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="last_name" value=request.POST.last_name required=True %}
           </div>
         </div>
         <div class="mb-4 flex flex-col justify-start gap-1">
@@ -38,15 +38,17 @@
           <div id="resident-fields" class="hidden space-y-2">
             <div class="mb-4 flex flex-col gap-1">
               <label class="ml-1 text-base text-white font-medium">Nº. da Casa</label>
-              {% include 'components/input.html' with placeholder="Ex.: I100, I145, I200" list="homesList" required=True type="text" icon="home" name="home" value=request.POST.home %}
-              <datalist id="homesList">
+              {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+              <select name="homes" id="home" multiple required
+                class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                 {% for home in homes %}
-                <option value="I{{home.number}}" title="{{home.street}}">
+                <option value="{{home.id}}" data-number="{{ home.number }}">{{ home.number }}</option>
                 {% endfor %}
-              </datalist>
+              </select>
             </div>
-            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do BI</label>
-              {% include 'components/input.html' with placeholder="Número do BI" type="text" name="bi" value=request.POST.bi required=True %}
+            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do
+                BI</label>
+              {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="bi" value=request.POST.bi required=True %}
             </div>
           </div>
           <div id="visitor-fields" class="hidden space-y-2">
@@ -55,14 +57,16 @@
               {% include 'components/input.html' with placeholder="Nome do anfitrião" list="hostsList" required=True type="text" icon="person" name="host" value=request.POST.host %}
               <datalist id="hostsList">
                 {% for host in hosts %}
-                <option value="{{host.person.first_name}}{{host.person.last_name}}" title="{{host.home.street}}, {{host.home.number}}">
-                {% endfor %}
+                <option value="{{host.person.first_name}}{{host.person.last_name}}"
+                  title="{{host.home.street}}, {{host.home.number}}">
+                  {% endfor %}
               </datalist>
             </div>
           </div>
           <div id="worker-fields" class="hidden space-y-2">
-            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do BI</label>
-              {% include 'components/input.html' with placeholder="Número do BI" type="text" name="bi" value=request.POST.bi required=True %}
+            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do
+                BI</label>
+              {% include 'components/input.html' with placeholder="Número do BI" type="text" name="bi" icon="id_card" value=request.POST.bi required=True %}
             </div>
             <div class="mb-4 flex flex-col gap-1">
               <label class="ml-1 text-sm text-white font-medium">Área de Trabalho</label>
@@ -76,29 +80,29 @@
             </div>
             <div class="mb-4 flex flex-col gap-1">
               <label class="ml-1 text-sm text-white font-medium">Casas em que Trabalha</label>
-              <select name="work-homes" id="work-homes" multiple required
-                class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+              {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+              <select name="homes" id="home" multiple required
+                class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                 {% for home in homes %}
-                <option value="{{home.id}}">I{{ home.number }}</option>
+                <option value="{{home.id}}" data-number="{{ home.number }}">{{ home.number }}</option>
                 {% endfor %}
               </select>
             </div>
           </div>
         </div>
-        <div 
-          id="photoCapture"
+        <div id="photoCapture"
           class="hidden space-y-4 w-full flex justify-center items-center border-t border-gray-600 gap-3 pt-3 mt-3">
           <canvas id="canvas" class="hidden"></canvas>
           <video autoplay playsinline class="aspect-video"></video>
           <input type="hidden" name="photo" id="photo" required>
           <div class="flex flex-col gap-4">
             <button id="takePhoto" title="Capturar">
-              <span class="material-symbols-outlined" >
+              <span class="material-symbols-outlined">
                 camera
               </span>
             </button>
             <button title="Desfazer" id="replayVideo">
-              <span class="material-symbols-outlined" >
+              <span class="material-symbols-outlined">
                 replay
               </span>
             </button>
@@ -120,6 +124,19 @@
 </form>
 
 <script>
+  const homeSearchInputs = document.querySelectorAll('.home-search')
+
+  homeSearchInputs.forEach(input => {
+    const select = input.parentElement.nextElementSibling
+    const originalOptions = Array.from(select.options)
+
+    input.addEventListener('input', (e) => {
+      const search = e.target.value.trim()
+      select.innerHTML = ""
+      const filteredOptions = originalOptions.filter(option => option.text.includes(search))
+      filteredOptions.forEach(option => select.append(option))
+    })
+  })  
   const personTypeSelect = document.getElementById("person_type");
   const residentFields = document.getElementById("resident-fields");
   const visitorFields = document.getElementById("visitor-fields");
@@ -130,7 +147,7 @@
   const startVideo = document.getElementById("startVideo")
   const photoCapture = document.getElementById("photoCapture")
   const canvas = document.getElementById("canvas")
-  const photo = document.getElementById("photo")  
+  const photo = document.getElementById("photo")
   const video = document.querySelector("video");
 
   let stream;
@@ -141,7 +158,7 @@
     visitorFields.classList.toggle("hidden", value !== "V");
     workerFields.classList.toggle("hidden", value !== "W");
   }
- 
+
   personTypeSelect.addEventListener("change", toggleFields);
   toggleFields();
 
