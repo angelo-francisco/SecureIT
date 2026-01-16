@@ -30,6 +30,10 @@ class Home(models.Model):
     number = models.PositiveIntegerField()
     street = models.CharField(max_length=30)
 
+    @classmethod
+    def get_home(self, home_id: int):
+        return Home.objects.filter(id=home_id).first()
+
 
 class Visitor(models.Model):
     person = models.OneToOneField("Person", on_delete=models.DO_NOTHING)
@@ -43,6 +47,10 @@ class VisitorHost(models.Model):
 class Resident(models.Model):
     bi = models.CharField(max_length=14, unique=True)
     person = models.ForeignKey("Person", on_delete=models.DO_NOTHING)
+
+
+class ResidentHome(models.Model):
+    resident = models.ForeignKey("Resident", on_delete=models.DO_NOTHING)
     home = models.ForeignKey("Home", on_delete=models.CASCADE)
 
 
@@ -54,6 +62,6 @@ class Worker(models.Model):
     field = models.CharField(max_length=6)
 
 
-class Worker_Home(models.Model):
+class WorkerHome(models.Model):
     worker = models.ForeignKey("Worker", on_delete=models.DO_NOTHING)
     home = models.ForeignKey("Home", on_delete=models.CASCADE)
