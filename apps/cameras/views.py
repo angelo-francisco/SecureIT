@@ -38,7 +38,7 @@ def new_camera(request):
             messages.error(request, "Informe a url de vídeo da câmara Wi-Fi")
         else:
             camera = Camera.objects.create(
-                location=location, connection_type=connection_type
+                user=request.user, location=location, connection_type=connection_type
             )
 
             if connection_type == "W":
