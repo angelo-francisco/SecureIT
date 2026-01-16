@@ -10,7 +10,7 @@ def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    cameras = Camera.objects.all()
+    cameras = Camera.objects.filter(user=request.user)
     return render(request, "cameras/home.html", {"cameras": cameras})
 
 
@@ -68,8 +68,11 @@ def delete_camera(request, id):
     """
     Elimina uma câmara pelo ID
     """
-    camera = get_object_or_404(Camera, id=id)
-    camera.delete()
+    camera: Camera = get_object_or_404(Camera, id=id)
+    if camera.user == request.user:
+        camera.delete()
+    else:
+        messages.error(request, "Esta câmara não é sua")
     return redirect("cameras:home")
 
 
@@ -79,7 +82,11 @@ def view_camera(request, id):
     (stream entra aqui depois)
     """
     camera = get_object_or_404(Camera, id=id)
-    return render(request, "cameras/view.html", {"camera": camera})
+    if camera.user == request.user:
+        return render(request, "cameras/view.html", {"camera": camera})
+    else:
+        messages.error(request, "Esta câmara não é sua")
+        return redirect("cameras:home")
 
 
 def get_cameras(request):
