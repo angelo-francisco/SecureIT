@@ -59,7 +59,7 @@ class Worker(models.Model):
     person = models.OneToOneField(
         "Person", on_delete=models.DO_NOTHING, related_name="worker"
     )
-    field = models.CharField(max_length=6)
+    fields = models.CharField(max_length=15)
 
 
 class WorkerHome(models.Model):
