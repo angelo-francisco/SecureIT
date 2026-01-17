@@ -42,6 +42,7 @@ class Visitor(models.Model):
 class VisitorHost(models.Model):
     visitor = models.ForeignKey("Visitor", on_delete=models.DO_NOTHING)
     host = models.ForeignKey("Resident", on_delete=models.DO_NOTHING)
+    visited_at = models.DateTimeField(auto_now_add=True)
 
 
 class Resident(models.Model):
