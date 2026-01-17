@@ -83,7 +83,7 @@ def create_person(first_name, last_name, person_type, photo):
         type=person_type,
     )
     person.photo.save(f"{uuid4()}.jpeg", photo[0])
-    insert_person_embedding(person.id, photo[1])
+    # insert_person_embedding(person.id, photo[1])
     return person
 
 

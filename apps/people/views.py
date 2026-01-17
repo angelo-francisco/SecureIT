@@ -51,10 +51,10 @@ def new_person(request):
         messages.success(request, "Pessoa cadastrada com sucesso")
         return redirect("people:home")
     except Exception as error:
-        messages.error(
-            request,
+        msg = (
             error.message
-            if getattr(error, "messages", False)
-            else "Erro ao cadastrar, verifique os campos, por favor.",
+            if getattr(error, "message", False)
+            else "Erro ao cadastrar, verifique os campos, por favor."
         )
+        messages.error(request, msg)
         return render(request, "people/new.html", context)
