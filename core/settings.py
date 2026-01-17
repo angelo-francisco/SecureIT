@@ -97,6 +97,9 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR.joinpath("web", "staticfiles")
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR.joinpath('media')
+
 #configurações de login/logout (adicionadas)
 
 LOGIN_URL = "users:login"
