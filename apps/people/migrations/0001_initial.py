@@ -5,80 +5,205 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Home',
+            name="Home",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.PositiveIntegerField()),
-                ('street', models.CharField(max_length=30)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("number", models.PositiveIntegerField()),
+                ("street", models.CharField(max_length=30)),
             ],
         ),
         migrations.CreateModel(
-            name='Person',
+            name="Person",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=80)),
-                ('last_name', models.CharField(max_length=80)),
-                ('type', models.CharField(choices=[('R', 'Residente'), ('V', 'Visitante'), ('W', 'Trabalhador')], max_length=1)),
-                ('photo', models.ImageField(upload_to='people_photos/')),
-                ('added_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('banned', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("first_name", models.CharField(max_length=80)),
+                ("last_name", models.CharField(max_length=80)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("R", "Residente"),
+                            ("V", "Visitante"),
+                            ("W", "Trabalhador"),
+                        ],
+                        max_length=1,
+                    ),
+                ),
+                ("photo", models.ImageField(upload_to="people_photos/")),
+                ("added_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("banned", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='Resident',
+            name="Resident",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('bi', models.CharField(max_length=14, unique=True)),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='people.person')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("bi", models.CharField(max_length=14, unique=True)),
+                (
+                    "person",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="people.person",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ResidentHome',
+            name="ResidentHome",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('home', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.home')),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='people.resident')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "home",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="people.home"
+                    ),
+                ),
+                (
+                    "person",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="people.resident",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Visitor',
+            name="Visitor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('person', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, to='people.person')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "person",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="people.person",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='VisitorHost',
+            name="VisitorHost",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('host', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='people.resident')),
-                ('visitor', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='people.visitor')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "host",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="people.resident",
+                    ),
+                ),
+                (
+                    "visitor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="people.visitor",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Worker',
+            name="Worker",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('bi', models.CharField(max_length=14, unique=True)),
-                ('field', models.CharField(max_length=6)),
-                ('person', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, related_name='worker', to='people.person')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("bi", models.CharField(max_length=14, unique=True)),
+                ("field", models.CharField(max_length=6)),
+                (
+                    "person",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="worker",
+                        to="people.person",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='WorkerHome',
+            name="WorkerHome",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('home', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.home')),
-                ('worker', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='people.worker')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "home",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="people.home"
+                    ),
+                ),
+                (
+                    "worker",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="people.worker",
+                    ),
+                ),
             ],
         ),
     ]

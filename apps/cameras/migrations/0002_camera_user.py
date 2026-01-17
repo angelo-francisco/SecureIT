@@ -6,17 +6,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0001_initial'),
+        ("cameras", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='camera',
-            name='user',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='cameras', to=settings.AUTH_USER_MODEL),
+            model_name="camera",
+            name="user",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="cameras",
+                to=settings.AUTH_USER_MODEL,
+            ),
             preserve_default=False,
         ),
     ]

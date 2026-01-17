@@ -5,40 +5,80 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Camera',
+            name="Camera",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('location', models.CharField(blank=True, max_length=150, null=True)),
-                ('status', models.BooleanField(blank=True, default=True, null=True)),
-                ('connection_type', models.CharField(blank=True, choices=[('L', 'Local'), ('W', 'Wi-Fi')], max_length=1, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("location", models.CharField(blank=True, max_length=150, null=True)),
+                ("status", models.BooleanField(blank=True, default=True, null=True)),
+                (
+                    "connection_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[("L", "Local"), ("W", "Wi-Fi")],
+                        max_length=1,
+                        null=True,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='LocalCamera',
+            name="LocalCamera",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('info', models.JSONField(blank=True, default=dict, null=True)),
-                ('camera', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cameras.camera')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("info", models.JSONField(blank=True, default=dict, null=True)),
+                (
+                    "camera",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="cameras.camera"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='WifiCamera',
+            name="WifiCamera",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('stream_url', models.URLField(blank=True, max_length=255, null=True)),
-                ('username', models.CharField(blank=True, max_length=100, null=True)),
-                ('password', models.CharField(blank=True, max_length=100, null=True)),
-                ('camera', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cameras.camera')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("stream_url", models.URLField(blank=True, max_length=255, null=True)),
+                ("username", models.CharField(blank=True, max_length=100, null=True)),
+                ("password", models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "camera",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="cameras.camera"
+                    ),
+                ),
             ],
         ),
     ]

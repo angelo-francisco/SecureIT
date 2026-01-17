@@ -24,11 +24,13 @@ def pin_middleware(get_response):
 
 def pin_not_required(view_func):
     view_func.pin_required = False
+
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if request.COOKIES.get("pin_verified", False):
             return redirect("panel:home")
         return view_func(request, *args, **kwargs)
+
     return wrapper
 
 

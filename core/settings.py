@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     "apps.notifications",
 ]
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
 
 MIDDLEWARE = [
@@ -36,7 +36,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.users.utils.pin_middleware"
+    "apps.users.utils.pin_middleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -97,13 +97,13 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR.joinpath("web", "staticfiles")
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR.joinpath('media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR.joinpath("media")
 
-#configurações de login/logout (adicionadas)
+# configurações de login/logout (adicionadas)
 
 LOGIN_URL = "users:login"
 LOGOUT_REDIRECT_URL = "users:logout"
 
 # Extendendo o tempo do cookie para evitar logout automático
-SESSION_COOKIE_AGE = 365 * 24 * 60 * 60 # 1 ano
+SESSION_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 ano
