@@ -69,10 +69,10 @@
               {% include 'components/input.html' with placeholder="Número do BI" type="text" name="bi" icon="id_card" value=request.POST.bi required=True %}
             </div>
             <div class="mb-4 flex flex-col gap-1">
-              <label class="ml-1 text-sm text-white font-medium">Área de Trabalho</label>
-              <select name="selected_field" id="selected-field" required
+              <label class="ml-1 text-sm text-white font-medium">Áreas de Trabalho</label>
+              <select name="fields" id="selected-field" multiple required
                 class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                <option disabled selected>Selecione uma área</option>
+                <option disabled selected>Selecione as área de trabalho</option>
                 {% for field in fields %}
                 <option value="{{field.0}}">{{ field.1 }}</option>
                 {% endfor %}
