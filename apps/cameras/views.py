@@ -10,7 +10,7 @@ def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    cameras = Camera.objects.filter(user=request.user)
+    cameras = Camera.objects.all()
     return render(request, "cameras/home.html", {"cameras": cameras})
 
 

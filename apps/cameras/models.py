@@ -1,12 +1,9 @@
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
 
 class Camera(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cameras")
     location = models.CharField(max_length=150, null=True, blank=True)
     status = models.BooleanField(default=True, null=True, blank=True)
     connection_type = models.CharField(
@@ -22,15 +19,15 @@ class Camera(models.Model):
     def get_video_url(self):
         try:
             if self.connection_type == "W":
-                return  WifiCamera.get_stream_url(self.pk)
-            path = LocalCamera.get_camera_path(self.pk) 
+                return WifiCamera.get_stream_url(self.pk)
+            path = LocalCamera.get_camera_path(self.pk)
             return reverse("cameras:get-camera-video", query={"index": path[-1]})
         except (ObjectDoesNotExist, KeyError):
             return None
-    
+
     @property
     def get_name(self):
-        return f'CAM-{self.pk}'
+        return f"CAM-{self.pk}"
 
 
 class LocalCamera(models.Model):

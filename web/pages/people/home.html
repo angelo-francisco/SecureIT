@@ -35,9 +35,9 @@
         <thead>
           <tr class="bg-surface-dark">
             <th class="p-4 text-left border border-gray-500">Nome</th>
-            <th class="p-4 text-left border border-gray-500">Localização</th>
-            <th class="p-4 text-left border border-gray-500">Estado</th>
-            <th class="p-4 text-left border border-gray-500">Data de Configuração</th>
+            <th class="p-4 text-left border border-gray-500">Tipo de pessoa</th>
+            <th class="p-4 text-left border border-gray-500">Banido</th>
+            <th class="p-4 text-left border border-gray-500">Data de adição</th>
             <th class="p-4 text-left border border-gray-500">Última actualização</th>
             <th class="p-4 text-left border border-gray-500 flex items-center justify-center">Acções</th>
           </tr>
@@ -46,24 +46,22 @@
           {% for person in people %}
           <!-- Substituir pelo dados correspondentes -->
           <tr>
-            <td class="p-4 border border-gray-500">{{ camera.get_name }}</td>
-            <td class="p-4 border border-gray-500">{{ camera.location }}</td>
+            <td class="p-4 border border-gray-500"><a href="#" class="hover:underline text-blue-500">{{ person.first_name }} {{ person.last_name }}</a></td>
+            <td class="p-4 border border-gray-500">{{ person.get_type_display }}</td>
             <td class="p-4 border border-gray-500">
               <span
                 class="px-2 py-1 rounded-full font-bold {% if camera.status %} bg-green-500 {% else %} bg-red-500 {% endif %}">
-                {% if camera.status %} Online {% else %} Offline {% endif %}
+                {% if person.banned %} Sim {% else %} Não {% endif %}
               </span>
             </td>
-            <td class="p-4 border border-gray-500">{{ camera.created_at|date:"d/m/y H:m" }} às {{
-              camera.created_at|date:"H:i" }}</td>
-            <td class="p-4 border border-gray-500">{{ camera.updated_at|date:"d/m/y" }} às {{
-              camera.updated_at|date:"H:i" }}</td>
+            <td class="p-4 border border-gray-500">{{ person.added_at|date:"d/m/y H:m" }} às {{ camera.added_at|date:"H:i" }}</td>
+            <td class="p-4 border border-gray-500">{{ person.updated_at|date:"d/m/y" }} às {{ person.updated_at|date:"H:i" }}</td>
             <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
               <button class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
                 title="Editar">
                 <span class="material-symbols-outlined text-[18px]">edit</span>
               </button>
-              <a href="{% url 'cameras:delete' id=camera.id %}"
+              <a href=""
                 class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
                 title="Remover">
                 <span class="material-symbols-outlined text-[18px]">delete</span>

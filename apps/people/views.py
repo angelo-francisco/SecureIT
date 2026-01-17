@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
-from .models import FIELDS, Home, ResidentHome
+from .models import FIELDS, Home, ResidentHome, Person
 from .utils import (
     treat_photo,
     create_person,
@@ -12,7 +12,8 @@ from .utils import (
 
 
 def home(request):
-    return render(request, "people/home.html")
+    context = {"people": Person.objects.all()}
+    return render(request, "people/home.html", context)
 
 
 def new_person(request):
