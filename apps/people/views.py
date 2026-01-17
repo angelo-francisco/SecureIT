@@ -48,12 +48,13 @@ def new_person(request):
                 )
             case "V":
                 create_visitor(person.id, request.POST.get("host", ""))
-        messages.success("Pessoa cadastrada com sucesso")
+        messages.success(request, "Pessoa cadastrada com sucesso")
         return redirect("people:home")
     except Exception as error:
         messages.error(
+            request,
             error.message
             if getattr(error, "messages", False)
-            else "Erro ao cadastrar, verifique os campos, por favor."
+            else "Erro ao cadastrar, verifique os campos, por favor.",
         )
         return render(request, "people/new.html", context)
