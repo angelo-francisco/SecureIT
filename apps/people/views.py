@@ -36,18 +36,18 @@ def new_person(request):
             case "R":
                 create_resident(
                     person.id,
-                    request.POST.getlist("homes", []),
-                    request.POST.get("bi", ""),
+                    request.POST.getlist("resident-homes", []),
+                    request.POST.get("resident-bi", ""),
                 )
             case "W":
                 create_worker(
                     person.id,
-                    request.POST.get("bi", ""),
-                    request.POST.getlist("homes", []),
-                    request.POST.getlist("fields", []),
+                    request.POST.get("worker-bi", ""),
+                    request.POST.getlist("worker-homes", []),
+                    request.POST.getlist("worker-fields", []),
                 )
             case "V":
-                create_visitor(person.id, request.POST.get("host", ""))
+                create_visitor(person.id, request.POST.get("visitor-host", ""))
         messages.success(request, "Pessoa cadastrada com sucesso")
         return redirect("people:home")
     except Exception as error:
