@@ -3,12 +3,24 @@ from io import BytesIO
 from uuid import uuid4
 
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect, render
 from PIL import Image
-from django.core.exceptions import ValidationError
-from .models import FIELDS, Home, Person, Resident, ResidentHome, Visitor, VisitorHost
+
 from .db import insert_person_embedding
+from .models import (
+    FIELDS,
+    Home,
+    Person,
+    Resident,
+    ResidentHome,
+    Visitor,
+    VisitorHost,
+    Worker,
+    WorkerHome,
+)
+
 
 def base64_to_image_file(base64_str, filename="image.jpg"):
     if not base64_str:
@@ -26,11 +38,7 @@ def base64_to_image_file(base64_str, filename="image.jpg"):
     return ContentFile(buffer.getvalue(), name=filename)
 
 
-def home(request):
-    return render(request, "people/home.html")
-
-
-def validate_and_format_data_resident(homes: list[str], bi: str) -> tuple:
+def get_validated_resident(homes: list[str], bi: str) -> tuple:
     homes = None
     try:
         homes = [int(id) for id in homes]
@@ -42,6 +50,51 @@ def validate_and_format_data_resident(homes: list[str], bi: str) -> tuple:
     elif not Home.objects.filter(id__in=homes).exists():
         raise ValidationError("Nº. de casa inválido")
     return homes, bi
+
+
+def get_validated_visitor(host_id: str | int):
+    if isinstance(host_id, str) and not host_id.isdigit():
+        raise ValidationError("Anfitrião inválido")
+    else:
+        host_id = int(host_id)
+
+    host = Resident.objects.filter(id=host_id).only("id").first()
+
+    if not host:
+        raise ValidationError("Anfitrião não encontrado")
+    return host
+
+
+def get_validated_worker(homes: list[str], bi: str, fields: list[str]) -> tuple:
+    homes = None
+    try:
+        homes = [int(id) for id in homes]
+    except TypeError:
+        raise ValidationError("Informe correctamente os nºs. das casas")
+
+    if not bi or len(bi) != 14:
+        raise ValidationError("Preencha correctamente o BI")
+    elif not Home.objects.filter(id__in=homes).exists():
+        raise ValidationError("Nº. de casa inválido")
+    original_fields = [
+        "AL",
+        "G",
+        "J",
+        "E",
+        "EA",
+        "O",
+    ]
+    if not fields:
+        raise ValidationError("Áreas de trabalho não informadas")
+
+    for field in fields:
+        if field not in original_fields:
+            raise ValidationError("Área de trabalho inválida")
+    return homes, bi, ",".join(fields)
+
+
+def home(request):
+    return render(request, "people/home.html")
 
 
 def create_person(first_name, last_name, person_type, photo):
@@ -75,7 +128,7 @@ def new_person(request):
 
         elif person_type == "R":
             try:
-                homes, bi = validate_and_format_data_resident(
+                homes, bi = get_validated_resident(
                     request.POST.getlist("homes", []), request.POST.get("bi", "")
                 )
 
@@ -87,9 +140,38 @@ def new_person(request):
                     ResidentHome(resident_id=resident.id, home_id=home)
                     for home in homes
                 ]
-                ResidentHome.objects.bulk_create(*resident_homes)
+                ResidentHome.objects.bulk_create(resident_homes)
             except Exception as e:
                 messages.error(request, e.message)
+        elif person_type == "V":
+            try:
+                host = get_validated_visitor(request.POST.get("host", ""))
 
-        # return redirect("people:home")
+                person = create_person(first_name, last_name, person_type, photo)
+                visitor = Visitor(person_id=person.id)
+                visitor.save()
+
+                VisitorHost(visitor_id=visitor.id, host_id=host.id)
+            except Exception as e:
+                messages.error(request, e.message)
+        elif person_type == "W":
+            try:
+                homes, bi, fields = get_validated_worker(
+                    request.POST.getlist("homes", []),
+                    request.POST.get("bi", ""),
+                    request.POST.getlist("fields", []),
+                )
+
+                person = create_person(first_name, last_name, person_type, photo)
+                worker = Worker(person_id=person.id, bi=bi, fields=fields)
+                worker.save()
+
+                worker_homes = [
+                    WorkerHome(worker_id=worker.id, home_id=home) for home in homes
+                ]
+                WorkerHome.objects.bulk_create(worker_homes)
+            except Exception as e:
+                messages.error(request, e.message)
+        messages.success("Pessoa cadastrada com sucesso")
+        return redirect("people:home")
     return response
