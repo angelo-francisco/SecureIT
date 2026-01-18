@@ -55,7 +55,6 @@ TEMPLATES = [
         },
     },
 ]
-
 # Alterados de wsgi para asgi
 # Assim servimos websockets
 
