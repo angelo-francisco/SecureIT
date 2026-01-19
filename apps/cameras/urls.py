@@ -3,9 +3,9 @@ from django.urls import path
 from .views import (
     cameras,
     delete_camera,
+    get_cameras,
     new_camera,
     view_camera,
-    get_cameras,
 )
 
 app_name = "cameras"
