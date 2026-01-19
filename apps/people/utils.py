@@ -18,7 +18,6 @@ from .models import (
     WorkerHome,
 )
 
-
 VALID_FIELDS = {"AL", "G", "J", "E", "EA", "O"}
 
 
