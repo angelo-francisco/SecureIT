@@ -1,13 +1,13 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
-from .models import FIELDS, Home, ResidentHome, Person
+from .models import FIELDS, Home, Person, ResidentHome
 from .utils import (
-    treat_photo,
     create_person,
     create_resident,
     create_visitor,
     create_worker,
+    treat_photo,
 )
 
 
