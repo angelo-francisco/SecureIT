@@ -4,11 +4,11 @@ from .models import (
     Home,
     Person,
     Resident,
+    ResidentHome,
     Visitor,
     VisitorHost,
     Worker,
     WorkerHome,
-    ResidentHome,
 )
 
 admin.site.register(
