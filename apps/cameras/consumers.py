@@ -1,4 +1,5 @@
-from asyncio import create_task, sleep as async_sleep, CancelledError
+from asyncio import CancelledError, create_task
+from asyncio import sleep as async_sleep
 from threading import Thread
 from time import sleep
 
