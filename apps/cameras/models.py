@@ -1,6 +1,6 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class Camera(models.Model):
