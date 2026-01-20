@@ -19,4 +19,4 @@ def get_cameras() -> tuple[list[dict[str, str | int]], set[str]]:
                 }
             )
             registered.add(cam.path)
-    return cams
+    return cams, registered
