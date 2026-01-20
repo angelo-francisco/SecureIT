@@ -10,7 +10,7 @@ def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    cameras = Camera.objects.all()
+    cameras = Camera.objects.filter(user=request.user).all()
     return render(request, "cameras/home.html", {"cameras": cameras})
 
 
@@ -19,6 +19,7 @@ def new_camera(request):
     Cadastra uma nova câmara
     """
     if request.method == "POST":
+        registered_cameras = func_get_cameras()[1]
         location = request.POST.get("location", "").strip()
         connection_type = request.POST.get("connection_type", "").strip().upper()
         stream_url = request.POST.get("stream_url", "").strip()
@@ -32,7 +33,7 @@ def new_camera(request):
             messages.error(request, "Só aceitamos câmaras locais ou Wi-1Fi")
         elif connection_type == "L" and not local_camera:
             messages.error(request, "Câmara local não informada")
-        elif local_camera not in request.session.get("registered_cameras"):
+        elif local_camera not in registered_cameras:
             messages.error(request, "Câmara não encontrada")
         elif connection_type == "W" and not stream_url:
             messages.error(request, "Informe a url de vídeo da câmara Wi-Fi")
@@ -50,7 +51,7 @@ def new_camera(request):
                 )
             else:
                 camera_info = None
-                for cam in request.session.get("cameras"):
+                for cam in registered_cameras:
                     if cam["path"] == local_camera:
                         camera_info = cam
                         break
@@ -90,5 +91,5 @@ def view_camera(request, id):
 
 
 def get_cameras(request):
-    cameras = func_get_cameras()
+    cameras = func_get_cameras()[0]
     return JsonResponse(cameras, safe=False)
