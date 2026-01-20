@@ -2,8 +2,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
 
+from django.contrib.auth import get_user_model
+
 
 class Camera(models.Model):
+    user = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name="cameras"
+    )
     location = models.CharField(max_length=150, null=True, blank=True)
     status = models.BooleanField(default=True, null=True, blank=True)
     connection_type = models.CharField(
