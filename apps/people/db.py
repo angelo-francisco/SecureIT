@@ -18,10 +18,12 @@ def get_conn():
 def insert_person_embedding(person, embedding):
     db = get_conn()
     db.execute(
-        f"""
-        INSERT INTO PersonEmbedding (person, embedding) VALUES ({person}, {embedding})
         """
+        INSERT INTO PersonEmbedding (person, embedding) VALUES (?, ?)
+        """,
+        (person, embedding)
     )
+    db.commit()
     db.close()
 
 
@@ -36,6 +38,7 @@ def main():
         )
         """
     )
+    db.commit()
     db.close()
     print("TABELA VIRTUAL CONFERIDA")
 

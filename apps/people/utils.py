@@ -2,11 +2,13 @@ import base64
 from io import BytesIO
 from uuid import uuid4
 
+import numpy as np
+import torch
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image
 
-from .db import insert_person_embedding
 from .models import (
     Home,
     Person,
@@ -20,6 +22,29 @@ from .models import (
 
 VALID_FIELDS = {"AL", "G", "J", "E", "EA", "O"}
 
+mtcnn = MTCNN(
+    image_size=160,
+    margin=0,
+    select_largest=True,
+    post_process=True,
+    device="cuda" if torch.cuda.is_available() else "cpu",
+)
+
+resnet = InceptionResnetV1(pretrained="vggface2").eval().to(mtcnn.device)
+
+
+def generate_face_embedding(image_path: str) -> np.ndarray | None:
+    img = Image.open(image_path).convert("RGB")
+    face = mtcnn(img)
+
+    if face is None:
+        return None
+
+    with torch.no_grad():
+        embedding = resnet(face.unsqueeze(0))
+
+    return embedding.cpu().numpy().astype(np.float32).flatten().tobytes()
+
 
 def treat_photo(base64_str, filename="image.jpg"):
     if not base64_str:
@@ -30,11 +55,10 @@ def treat_photo(base64_str, filename="image.jpg"):
 
     image_data = base64.b64decode(base64_str)
     image = Image.open(BytesIO(image_data))
-    embedding = None
     buffer = BytesIO()
     image.save(buffer, format=image.format or "JPEG")
 
-    return ContentFile(buffer.getvalue(), name=filename), embedding
+    return ContentFile(buffer.getvalue(), name=filename)
 
 
 def validate_bi(bi):
@@ -70,7 +94,7 @@ def create_person(first_name, last_name, person_type, photo):
     if not first_name or not last_name or not person_type:
         raise ValidationError("Preencha todos os campos")
 
-    if not photo[0]:
+    if not photo:
         raise ValidationError("Faça a captura de rosto")
 
     if person_type not in ["W", "V", "R"]:
@@ -81,8 +105,7 @@ def create_person(first_name, last_name, person_type, photo):
         last_name=last_name,
         type=person_type,
     )
-    person.photo.save(f"{uuid4()}.jpeg", photo[0])
-    # insert_person_embedding(person.id, photo[1])
+    person.photo.save(f"{uuid4()}.jpeg", photo)
     return person
 
 

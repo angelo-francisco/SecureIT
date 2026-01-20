@@ -36,33 +36,33 @@ class Home(models.Model):
 
 
 class Visitor(models.Model):
-    person = models.OneToOneField("Person", on_delete=models.DO_NOTHING)
+    person = models.OneToOneField("Person", on_delete=models.CASCADE)
 
 
 class VisitorHost(models.Model):
-    visitor = models.ForeignKey("Visitor", on_delete=models.DO_NOTHING)
-    host = models.ForeignKey("Resident", on_delete=models.DO_NOTHING)
+    visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE)
+    host = models.ForeignKey("Resident", on_delete=models.CASCADE)
     visited_at = models.DateTimeField(auto_now_add=True)
 
 
 class Resident(models.Model):
     bi = models.CharField(max_length=14, unique=True)
-    person = models.ForeignKey("Person", on_delete=models.DO_NOTHING)
+    person = models.ForeignKey("Person", on_delete=models.CASCADE)
 
 
 class ResidentHome(models.Model):
-    resident = models.ForeignKey("Resident", on_delete=models.DO_NOTHING)
+    resident = models.ForeignKey("Resident", on_delete=models.CASCADE)
     home = models.ForeignKey("Home", on_delete=models.CASCADE)
 
 
 class Worker(models.Model):
     bi = models.CharField(max_length=14, unique=True)
     person = models.OneToOneField(
-        "Person", on_delete=models.DO_NOTHING, related_name="worker"
+        "Person", on_delete=models.CASCADE, related_name="worker"
     )
     fields = models.CharField(max_length=15)
 
 
 class WorkerHome(models.Model):
-    worker = models.ForeignKey("Worker", on_delete=models.DO_NOTHING)
+    worker = models.ForeignKey("Worker", on_delete=models.CASCADE)
     home = models.ForeignKey("Home", on_delete=models.CASCADE)
