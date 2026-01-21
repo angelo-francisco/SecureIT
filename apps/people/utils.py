@@ -27,16 +27,22 @@ mtcnn = MTCNN(
     margin=0,
     select_largest=True,
     post_process=True,
-    device="cuda" if torch.cuda.is_available() else "cpu",
+    device="cpu",
 )
 
 resnet = InceptionResnetV1(pretrained="vggface2").eval().to(mtcnn.device)
 
 
-def generate_face_embedding(image_path: str) -> np.ndarray | None:
-    img = Image.open(image_path).convert("RGB")
-    face = mtcnn(img)
+def generate_face_embedding(base64_str=None, image=None):
+    if base64_str:
+        image_data = base64.b64decode(base64_str)
+        image = Image.open(BytesIO(image_data)).convert("RGB")
+    elif image:
+        image = image.convert("RGB")
+    else:
+        raise ValueError("É necessário fornecer base64 ou uma imagem PIL")
 
+    face = mtcnn(image)
     if face is None:
         return None
 
@@ -58,7 +64,7 @@ def treat_photo(base64_str, filename="image.jpg"):
     buffer = BytesIO()
     image.save(buffer, format=image.format or "JPEG")
 
-    return ContentFile(buffer.getvalue(), name=filename)
+    return ContentFile(buffer.getvalue(), name=filename), image
 
 
 def validate_bi(bi):

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -30,11 +29,14 @@ def new_person(request):
         return render(request, "people/new.html", context)
     person = None
     try:
+        photo_base64 = request.POST.get("photo", "").strip()
+        content_file, image = treat_photo(photo_base64)
+
         person = create_person(
             first_name=request.POST.get("first_name", "").strip(),
             last_name=request.POST.get("last_name", "").strip(),
             person_type=request.POST.get("person_type", "").strip(),
-            photo=treat_photo(request.POST.get("photo", "").strip()),
+            photo=content_file,
         )
 
         match person.type:
@@ -54,8 +56,7 @@ def new_person(request):
             case "V":
                 create_visitor(person.id, request.POST.get("visitor-host", ""))
 
-        full_image_url = settings.MEDIA_ROOT.resolve() / person.photo.name
-        embedding = generate_face_embedding(full_image_url)
+        embedding = generate_face_embedding(image=image)
         insert_person_embedding(person.id, embedding)
 
         messages.success(request, "Pessoa cadastrada com sucesso")
