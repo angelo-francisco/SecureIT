@@ -14,14 +14,15 @@ from .utils import (
 
 
 def home(request):
-    context = {"people": Person.objects.all()}
-    return render(request, "people/home.html", context)
+    people = Person.objects.all()
+
+    return render(request, "people/home.html", {"people": people})
 
 
 def new_person(request):
     context = {
         "homes": Home.objects.all(),
-        "hosts": ResidentHome.objects.select_related("resident", "home"),
+        "hosts": ResidentHome.objects.select_related("resident__person", "home").all(),
         "fields": FIELDS,
     }
 

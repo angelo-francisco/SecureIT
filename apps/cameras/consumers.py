@@ -3,18 +3,23 @@ from asyncio import sleep as async_sleep
 from threading import Thread
 from time import sleep
 
+import cv2
+import imutils
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from cv2 import VideoCapture, imencode
 
-FPS = 16
+FPS = 30
+
+hog = cv2.HOGDescriptor()
+hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
 
 class Camera:
     def __init__(self, index: int):
+        self.frame_count = 0
         self.running = True
 
-        self.video = VideoCapture(index)
+        self.video = cv2.VideoCapture(index)
         if not self.video.isOpened():
             raise RuntimeError("Erro ao abrir câmara")
 
@@ -29,8 +34,19 @@ class Camera:
             self.video.release()
 
     def get_frame(self):
-        image = self.frame
-        _, jpeg = imencode(".jpg", image)
+        frame = self.frame
+        self.frame_count += 1
+
+        if self.frame_count % 1 == 0:
+            image = imutils.resize(frame, width=min(400, frame.shape[1]))
+            (regions, _) = hog.detectMultiScale(
+                image, winStride=(4, 4), padding=(4, 4), scale=1.05
+            )
+
+        for x, y, w, h in regions:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 1)
+
+        _, jpeg = cv2.imencode(".jpg", image)
         return jpeg.tobytes()
 
     def update(self):
@@ -49,7 +65,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         try:
-            self.camera = await sync_to_async(Camera)(self.index)
+            self.camera: Camera = await sync_to_async(Camera)(self.index)
         except Exception as error:
             print(error)
             await self.close()

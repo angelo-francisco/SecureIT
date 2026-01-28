@@ -52,15 +52,25 @@
             </div>
           </div>
           <div id="visitor-fields" class="hidden space-y-2">
-            <div class="mb-4 flex flex-col gap-1">
-              <label class=" ml-1 text-base text-white font-medium">Anfitrião</label>
-              {% include 'components/input.html' with placeholder="Nome do anfitrião" list="hostsList" required=True type="text" icon="person" name="visitor-host" value=request.POST.host %}
-              <datalist id="hostsList">
+            <div class="mb-4 flex flex-col justify-start gap-1">
+              <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de visitante</label>
+              <select id="visitor_type" name="visitor_type" required
+                class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                <option value="" selected disabled>Selecione um tipo de visitante</option>
+                <option value="R">Procurando emprego</option>
+                <option value="V">Entregador</option>
+                <option value="W">Trabalhador(a)</option>
+              </select>
+            </div>
+            <div class="mb-4 flex flex-col gap-1">  
+              <label class=" ml-1 text-base text-white font-medium">Anfitrião/Destinatário(s)</label>
+              {% include 'components/input.html' with class="home-search" placeholder="Nome do anfitrião/destinatário" type="text" icon="person" name="visitor-host" %}
+              <select name="visitor-hosts" id="visitor-hosts" multiple required
+                class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                 {% for host in hosts %}
-                <option value="{{host.person.first_name}}{{host.person.last_name}}"
-                  title="{{host.home.street}}, {{host.home.number}}">
-                  {% endfor %}
-              </datalist>
+                <option value="{{host.resident.id}}">{{ host.resident.person.first_name }} {{ host.resident.person.last_name }} - I{{ host.home.number }}</option>
+                {% endfor %}
+              </select>
             </div>
           </div>
           <div id="worker-fields" class="hidden space-y-2">
@@ -131,9 +141,13 @@
     const originalOptions = Array.from(select.options)
 
     input.addEventListener('input', (e) => {
+      console.log(e)
       const search = e.target.value.trim()
       select.innerHTML = ""
-      const filteredOptions = originalOptions.filter(option => option.text.includes(search))
+      const filteredOptions = originalOptions.filter(option => {
+        const text = String(option.text).toLowerCase()
+        return text.includes(search.toLowerCase())
+      })
       filteredOptions.forEach(option => select.append(option))
     })
   })  
