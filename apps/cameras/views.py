@@ -41,7 +41,7 @@ def new_camera(request):
             case "L":
                 create_local_camera(
                     camera_id=camera.id,
-                    local_camera=request.POST.get("local_camera", "").strip(),
+                    camera_path=request.POST.get("local_camera", "").strip(),
                     cameras_list=cameras,
                 )
             case "W":
@@ -55,6 +55,7 @@ def new_camera(request):
         messages.success(request, "Câmara registada.")
         return redirect("cameras:home")
     except Exception as error:
+        print(error)
         if camera:
             camera.delete()
         msg = (
