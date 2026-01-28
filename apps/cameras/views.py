@@ -5,20 +5,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import Camera, LocalCamera, WifiCamera
 from .utils import create_camera, create_local_camera, create_wifi_camera
 from .utils import get_cameras as func_get_cameras
-from itertools import chain
+
 
 def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    local_cameras = LocalCamera.objects.select_related("camera").filter(
-        camera__user=request.user
-    )
-    wifi_cameras = WifiCamera.objects.select_related("camera").filter(
-        camera__user=request.user
-    )
-
-    cameras = list(chain(local_cameras, wifi_cameras))
+    cameras = Camera.objects.filter(user=request.user)
     return render(request, "cameras/home.html", {"cameras": cameras})
 
 
@@ -55,7 +48,6 @@ def new_camera(request):
         messages.success(request, "Câmara registada.")
         return redirect("cameras:home")
     except Exception as error:
-        print(error)
         if camera:
             camera.delete()
         msg = (

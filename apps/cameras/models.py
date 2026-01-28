@@ -1,3 +1,5 @@
+from platform import system
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
@@ -18,7 +20,7 @@ class Camera(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.location}"
+        return self.get_name
 
     @property
     def get_video_url(self):
@@ -34,9 +36,17 @@ class Camera(models.Model):
     def get_name(self):
         return f"CAM-{self.pk}"
 
+    @property
+    def get_connection_url_or_id(self):
+        if self.connection_type == "W":
+            return self.wificamera.stream_url
+        if system() == "Linux":
+            return self.localcamera.path.split("video")[-1]
+        return self.localcamera.get_id
+
 
 class LocalCamera(models.Model):
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
+    camera = models.OneToOneField(Camera, on_delete=models.CASCADE)
     info = models.JSONField(default=dict, null=True, blank=True)
 
     @staticmethod
@@ -51,9 +61,13 @@ class LocalCamera(models.Model):
     def path(self):
         return self.info["path"]
 
+    @property
+    def get_id(self):
+        return self.info["id"]
+
 
 class WifiCamera(models.Model):
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
+    camera = models.OneToOneField(Camera, on_delete=models.CASCADE)
     stream_url = models.URLField(max_length=255, null=True, blank=True)
     username = models.CharField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=100, null=True, blank=True)

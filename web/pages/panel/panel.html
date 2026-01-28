@@ -49,7 +49,8 @@
     grid
   ">
     {% for camera in cameras %}
-    <div class="camera relative bg-black w-full h-full overflow-hidden" data-id="{{camera}}" data-path="" data-stream-url="">
+    <div class="camera relative bg-black w-full h-full overflow-hidden"
+        data-connection-url-or-id="{{ camera.get_connection_url_or_id }}">
         <img src="" id="cam-{{forloop.counter}}" class="absolute inset-0 w-full h-full object-contain bg-black" />
         <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
             CAM-{{forloop.counter}}
@@ -71,9 +72,9 @@
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
 
-    function getIndexFromPath(id) {
+    function convertToInt(id) {
         if (typeof id === "number") return id
-        return parseInt(id.replace("/dev/video", ""))
+        return parseInt(id)
     }
 
     function connectCameraWs(index) {
@@ -94,15 +95,10 @@
         const cameras = document.querySelectorAll('.camera')
         mainHTML.dataset.count = cameras.length
         cameras.forEach(camera => {
-            let id = camera.dataset.id
-            if (!id) return
-            let platform = "{{platform}}"
-            if (platform === "Linux") {
-                id = camera.path
-            } else {
-                id = camera.id
-            }
-            connectCameraWs(index)
+            let connectionUrlOrId = camera.dataset.connectionUrlOrId
+            if (!connectionUrlOrId) return
+
+            connectCameraWs(convertToInt(connectionUrlOrId))
         });
 
         loader.classList.add('hidden')
