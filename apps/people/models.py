@@ -30,12 +30,22 @@ class Home(models.Model):
     number = models.PositiveIntegerField()
     street = models.CharField(max_length=30)
 
-    @classmethod
-    def get_home(self, home_id: int):
+    @staticmethod
+    def get_home(home_id: int):
         return Home.objects.filter(id=home_id).first()
 
 
 class Visitor(models.Model):
+    type = models.CharField(
+        max_length=3,
+        choices=[
+            ("VR", "Visitanto residente"),
+            ("EMP", "Procurando emprego"),
+            ("ENT", "Entregador"),
+            ("PS", "Prestador de serviço"),
+            ("O", "Outro"),
+        ],
+    )
     person = models.OneToOneField("Person", on_delete=models.CASCADE)
 
 

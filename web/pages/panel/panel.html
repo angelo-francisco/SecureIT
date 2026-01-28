@@ -48,6 +48,23 @@
     bg-black
     grid
   ">
+    {% for camera in cameras %}
+    <div class="camera relative bg-black w-full h-full overflow-hidden" data-id="{{camera}}" data-path="" data-stream-url="">
+        <img src="" id="cam-{{forloop.counter}}" class="absolute inset-0 w-full h-full object-contain bg-black" />
+        <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
+            CAM-{{forloop.counter}}
+        </span>
+    </div>
+    {% empty %}
+    <div class="fixed inset-0 flex flex-col items-center justify-center">
+        <div class="flex items-center justify-center ">
+            <span class="material-symbols-outlined text-[48px] opacity-80">videocam_off</span>
+        </div>
+        <span class="text-xl">
+            Sem câmeras registadas
+        </span>
+    </div>
+    {% endfor %}
 </main>
 
 <script>
@@ -74,27 +91,17 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-        const response = await fetch("/cameras/get-cameras")
-        const cameras = []
+        const cameras = document.querySelectorAll('.camera')
         mainHTML.dataset.count = cameras.length
         cameras.forEach(camera => {
+            let id = camera.dataset.id
+            if (!id) return
             let platform = "{{platform}}"
-            let id;
             if (platform === "Linux") {
                 id = camera.path
             } else {
                 id = camera.id
             }
-
-            let index = getIndexFromPath(id)
-            mainHTML.innerHTML += `
-                <div class="relative bg-black w-full h-full overflow-hidden">
-                    <img src="" id="cam-${index}" class="absolute inset-0 w-full h-full object-contain bg-black"/>
-                    <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
-                    CAM-${index}
-                    </span>
-                </div>
-            `
             connectCameraWs(index)
         });
 

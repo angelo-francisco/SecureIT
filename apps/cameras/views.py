@@ -3,14 +3,22 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Camera, LocalCamera, WifiCamera
+from .utils import create_camera, create_local_camera, create_wifi_camera
 from .utils import get_cameras as func_get_cameras
-
+from itertools import chain
 
 def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    cameras = Camera.objects.filter(user=request.user).all()
+    local_cameras = LocalCamera.objects.select_related("camera").filter(
+        camera__user=request.user
+    )
+    wifi_cameras = WifiCamera.objects.select_related("camera").filter(
+        camera__user=request.user
+    )
+
+    cameras = list(chain(local_cameras, wifi_cameras))
     return render(request, "cameras/home.html", {"cameras": cameras})
 
 
@@ -18,51 +26,44 @@ def new_camera(request):
     """
     Cadastra uma nova câmara
     """
-    if request.method == "POST":
-        registered_cameras = func_get_cameras()[1]
-        location = request.POST.get("location", "").strip()
-        connection_type = request.POST.get("connection_type", "").strip().upper()
-        stream_url = request.POST.get("stream_url", "").strip()
-        username = request.POST.get("username", "").strip()
-        password = request.POST.get("password", "").strip()
-        local_camera = request.POST.get("local_camera", "").strip()
+    cameras, _ = func_get_cameras()
+    context = {"cameras": cameras}
+    if request.method != "POST":
+        return render(request, "cameras/new.html", context)
+    try:
+        camera = create_camera(
+            user=request.user,
+            location=request.POST.get("location", "").strip(),
+            connection_type=request.POST.get("connection_type", "").strip().upper(),
+        )
 
-        if not location or not connection_type:
-            messages.error(request, "Preencha todos os campos, por favor.")
-        elif connection_type not in ["L", "W"]:
-            messages.error(request, "Só aceitamos câmaras locais ou Wi-1Fi")
-        elif connection_type == "L" and not local_camera:
-            messages.error(request, "Câmara local não informada")
-        elif local_camera not in registered_cameras:
-            messages.error(request, "Câmara não encontrada")
-        elif connection_type == "W" and not stream_url:
-            messages.error(request, "Informe a url de vídeo da câmara Wi-Fi")
-        else:
-            camera = Camera.objects.create(
-                user=request.user, location=location, connection_type=connection_type
-            )
-
-            if connection_type == "W":
-                WifiCamera.objects.create(
-                    camera=camera,
-                    stream_url=stream_url,
-                    username=username,
-                    password=password,
+        match camera.connection_type:
+            case "L":
+                create_local_camera(
+                    camera_id=camera.id,
+                    local_camera=request.POST.get("local_camera", "").strip(),
+                    cameras_list=cameras,
                 )
-            else:
-                camera_info = None
-                for cam in registered_cameras:
-                    if cam["path"] == local_camera:
-                        camera_info = cam
-                        break
-                if not camera_info:
-                    camera.delete()
-                    messages.error(request, "Dados da câmara indisponíveis.")
-                    return render(request, "cameras/new.html")
-                LocalCamera.objects.create(camera=camera, info=camera_info)
-            messages.success(request, "Câmara registada.")
-            return redirect("cameras:home")
-    return render(request, "cameras/new.html")
+            case "W":
+                create_wifi_camera(
+                    camera_id=camera.id,
+                    stream_url=request.POST.get("stream_url", "").strip(),
+                    username=request.POST.get("username", "").strip(),
+                    password=request.POST.get("password", "").strip(),
+                )
+
+        messages.success(request, "Câmara registada.")
+        return redirect("cameras:home")
+    except Exception as error:
+        if camera:
+            camera.delete()
+        msg = (
+            error.message
+            if getattr(error, "message", False)
+            else "Erro ao registar câmara."
+        )
+        messages.error(request, msg)
+        return render(request, "cameras/new.html", context)
 
 
 def delete_camera(request, id):
