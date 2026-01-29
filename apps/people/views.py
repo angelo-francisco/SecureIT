@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 
 from .db import insert_person_embedding
 from .models import FIELDS, Home, Person, ResidentHome
@@ -73,3 +73,10 @@ def new_person(request):
         print(error)
         messages.error(request, msg)
         return render(request, "people/new.html", context)
+
+
+def get_person(request, person_id):
+    person = get_object_or_404(Person, id=id)
+    context = {"person": person}
+
+    return render(request, "people/details.html", context)
