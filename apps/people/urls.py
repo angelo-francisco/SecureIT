@@ -7,5 +7,5 @@ app_name = "people"
 urlpatterns = [
     path("", home, name="home"),
     path("new/", new_person, name="new"),
-    path("<int:id>/", get_person, name="details")
+    path("<int:person_id>/", get_person, name="details"),
 ]
