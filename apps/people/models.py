@@ -61,7 +61,7 @@ class VisitorHost(models.Model):
 
 class Resident(models.Model):
     bi = models.CharField(max_length=14, unique=True)
-    person = models.ForeignKey("Person", on_delete=models.CASCADE)
+    person = models.OneToOneField("Person", on_delete=models.CASCADE)
 
 
 class ResidentHome(models.Model):
