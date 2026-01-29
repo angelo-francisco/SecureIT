@@ -76,7 +76,7 @@ def new_person(request):
 
 
 def get_person(request, person_id):
-    person = get_object_or_404(Person, id=id)
+    person = get_object_or_404(Person, id=person_id)
     context = {"person": person}
 
     return render(request, "people/details.html", context)
