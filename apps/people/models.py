@@ -25,6 +25,10 @@ class Person(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     banned = models.BooleanField(default=False)
 
+    @property
+    def full_name(self):
+        return self.first_name + " " + self.last_name
+
 
 class Home(models.Model):
     number = models.PositiveIntegerField()
