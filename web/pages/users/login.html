@@ -13,13 +13,11 @@
     <form action="{% url 'users:login' %}" class="flex flex-col gap-5" method="post">
         {% csrf_token %}
         <label class="flex flex-col w-full">
-            <p class="text-white text-base font-medium leading-normal pb-2">Endereço eletrónico</p>
-            {% include 'components/input.html' with placeholder="Informe o seu endereço eletrónico" type="email" icon="email" name="email" %}
+            {% include 'components/input.html' with placeholder="Endereço eletrónico" type="email" icon="email" name="email" %}
         </label>
         <div class="flex flex-col sm:flex-row gap-4">
             <label class="flex flex-col w-full flex-1">
-                <p class="text-white text-base font-medium leading-normal pb-2">Palavra-passe</p>
-                {% include 'components/input.html' with placeholder="Informe a sua palavra-passe" type="password" icon="lock" name="password" %}
+                {% include 'components/input.html' with placeholder="Palavra-passe" type="password" icon="lock" name="password" %}
             </label>
         </div>
         <button

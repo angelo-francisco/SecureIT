@@ -1,0 +1,77 @@
+{% extends 'bases/panel.html' %}
+
+{% block title %}Visualizar Pessoa{% endblock %}
+
+{% block content %}
+<main class="flex-1 h-full flex flex-col relative overflow-hidden pt-10">
+    <!-- <a href="{% url 'people:new' %}"
+        class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20">
+        <span class="material-symbols-outlined text-[20px]">edit</span>
+        <span class="hidden md:block">Editar Pessoa</span>
+    </a> -->
+    <div class="flex-1 overflow-y-auto px-6 lg:px-10 pb-10">
+        <div class="grid grid-cols-2">
+            <div class="flex flex-col items-center justify-center">
+                <div class="mb-4">
+                    {% if person.photo %}
+                    <img src="{{ person.photo.url }}" alt="Foto de {{ person.full_name }}"
+                        class="w-28 h-28 md:w-80 md:h-80 rounded-lg object-cover " />
+                    {% else %}
+                    <div class="w-28 h-28 md:w-40 md:h-40 rounded-lg bg-gray-700 flex items-center justify-center">
+                        <span class="text-gray-400 text-sm">Sem foto</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-xl md:text-4xl font-semibold">{{ person.full_name }}</h1>
+                    <span class="text-gray-400">Adicionado(a) em {{ person.added_at|date:"d/m/y" }}</span>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3">
+                <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
+                    <h1 class="text-xl md:text-2xl pb-2 mb-3 border-b border-gray-600">Informações Gerais</h1>
+                    <div class="flex justify-between mb-2 mt-2">
+                        <span class="text-gray-300 text-base">Estado</span>
+                        <span
+                            class="font-semibold {% if person.banned %}text-red-500{% else %}text-green-500{% endif %}">
+                            {% if person.banned %}Banido{% else %}Activo{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between mb-2 mt-2">
+                        <span class="text-gray-300 text-base">Tipo de pessoa</span>
+                        <span class="text-white">{{ person.get_type_display }}</span>
+                    </div>
+                    <div class="flex justify-between mb-2 mt-2">
+                        <span class="text-gray-300 text-base">Última actualização</span>
+                        <span class="text-white">{{ person.updated_at|date:"d/m/y" }}</span>
+                    </div>
+                </div>
+
+                {% if person.resident %}
+                <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
+                    <h1 class="text-xl md:text-2xl pb-2 mb-3 border-b border-gray-600">Informações do Residente</h1>
+                    <div class="flex justify-between mb-2 mt-2">
+                        <span class="text-gray-300 text-base">Bilhete de Identidade</span>
+                        <span class="text-white">
+                            {{ person.resident.bi }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between mb-2 mt-2">
+                        <span class="text-gray-300 text-base">Casa(s)</span>
+                        <div>
+                            {% for rh in person.resident.residenthome_set.all %}
+                            <span class="text-white underline cursor-pointer" title="{{ rh.home.street }}">
+                                I{{ rh.home.number }}
+                            </span>
+                            {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
