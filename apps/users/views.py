@@ -18,10 +18,12 @@ def signup(request):
         full_name = request.POST.get("full_name", "").split(" ")
 
         try:
+            if len(full_name) < 2:
+                raise ValueError
             first_name = full_name[0]
             last_name = full_name[-1]
-        except IndexError:
-            messages.error(request, "Informe o seu nome completo")
+        except ValueError:
+            messages.error(request, "Informe pelo menos o seu primeiro e último nome")
             return render(request, "users/signup.html")
 
         if not email or not password or not pin or not first_name or not last_name:
@@ -32,6 +34,8 @@ def signup(request):
             messages.error(
                 request, "Palavra-passe deve conter pelo menos 12 caracteres"
             )
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, "Este e-mail já foi cadastrado.")
         else:
             user = User(email=email, first_name=first_name, last_name=last_name)
             user.set_password(password)

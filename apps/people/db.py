@@ -21,9 +21,30 @@ def insert_person_embedding(person, embedding):
         """
         INSERT INTO PersonEmbedding (person, embedding) VALUES (?, ?)
         """,
-        (person, embedding)
+        (person, embedding),
     )
     db.commit()
+    db.close()
+
+
+def search_person_by_embedding(embedding):
+    db = get_conn()
+    db.execute(
+        """
+        SELECT 
+            id,
+            person,
+            distance 
+        FROM 
+            PersonEmbedding
+        WHERE
+            embedding MATCH ?
+        ORDER_BY
+            distance
+        LIMIT 5;
+        """,
+        (embedding),
+    )
     db.close()
 
 

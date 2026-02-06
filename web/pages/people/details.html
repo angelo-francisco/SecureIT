@@ -3,75 +3,197 @@
 {% block title %}Visualizar Pessoa{% endblock %}
 
 {% block content %}
-<main class="flex-1 h-full flex flex-col relative overflow-hidden pt-10">
-    <!-- <a href="{% url 'people:new' %}"
-        class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20">
-        <span class="material-symbols-outlined text-[20px]">edit</span>
-        <span class="hidden md:block">Editar Pessoa</span>
-    </a> -->
-    <div class="flex-1 overflow-y-auto px-6 lg:px-10 pb-10">
-        <div class="grid grid-cols-2">
-            <div class="flex flex-col items-center justify-center">
-                <div class="mb-4">
-                    {% if person.photo %}
-                    <img src="{{ person.photo.url }}" alt="Foto de {{ person.full_name }}"
-                        class="w-28 h-28 md:w-80 md:h-80 rounded-lg object-cover " />
-                    {% else %}
-                    <div class="w-28 h-28 md:w-40 md:h-40 rounded-lg bg-gray-700 flex items-center justify-center">
-                        <span class="text-gray-400 text-sm">Sem foto</span>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="flex flex-col">
-                    <h1 class="text-xl md:text-4xl font-semibold">{{ person.full_name }}</h1>
-                    <span class="text-gray-400">Adicionado(a) em {{ person.added_at|date:"d/m/y" }}</span>
-                </div>
-            </div>
-            <div class="flex flex-col gap-3">
-                <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
-                    <h1 class="text-xl md:text-2xl pb-2 mb-3 border-b border-gray-600">Informações Gerais</h1>
-                    <div class="flex justify-between mb-2 mt-2">
-                        <span class="text-gray-300 text-base">Estado</span>
-                        <span
-                            class="font-semibold {% if person.banned %}text-red-500{% else %}text-green-500{% endif %}">
-                            {% if person.banned %}Banido{% else %}Activo{% endif %}
-                        </span>
-                    </div>
-                    <div class="flex justify-between mb-2 mt-2">
-                        <span class="text-gray-300 text-base">Tipo de pessoa</span>
-                        <span class="text-white">{{ person.get_type_display }}</span>
-                    </div>
-                    <div class="flex justify-between mb-2 mt-2">
-                        <span class="text-gray-300 text-base">Última actualização</span>
-                        <span class="text-white">{{ person.updated_at|date:"d/m/y" }}</span>
-                    </div>
-                </div>
+<div class="{% if not request.GET.search_query %}hidden{% endif %} fixed inset-0 z-[1000] 
+            flex items-center justify-center bg-black/70 backdrop-blur-sm" id="visitisHistoryModal">
 
-                {% if person.resident %}
-                <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
-                    <h1 class="text-xl md:text-2xl pb-2 mb-3 border-b border-gray-600">Informações do Residente</h1>
-                    <div class="flex justify-between mb-2 mt-2">
-                        <span class="text-gray-300 text-base">Bilhete de Identidade</span>
-                        <span class="text-white">
-                            {{ person.resident.bi }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between mb-2 mt-2">
-                        <span class="text-gray-300 text-base">Casa(s)</span>
-                        <div>
-                            {% for rh in person.resident.residenthome_set.all %}
-                            <span class="text-white underline cursor-pointer" title="{{ rh.home.street }}">
-                                I{{ rh.home.number }}
-                            </span>
-                            {% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </div>
+    <form method="get"
+        class="relative w-full max-w-3xl bg-[#1c2127] rounded-2xl p-6 space-y-5 shadow-2xl border border-white/10">
+
+        <h1 class="text-3xl font-bold text-center border-b border-white/10 pb-3">
+            Histórico de visitas
+        </h1>
+
+        <div class="flex gap-4 items-center justify-center">
+            {% include 'components/input.html' with placeholder="Pesquisar residente" icon="search" type="text" name="search_query" value=request.GET.search_query %}
+
+            <button type="submit"
+                class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                <span class="material-symbols-outlined">search</span>
+                Pesquisar
+            </button>
+
+            <button type="button" id="closeVisitsHistoryModal"
+                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                <span class="material-symbols-outlined">close</span>
+                Fechar
+            </button>
+        </div>
+
+        <div class="divide-y divide-white/10">
+            {% for visitor_host in visitor_hosts %}
+            <div class="flex justify-between items-center py-3">
+                <a href="{% url 'people:details' visitor_host.host.id %}"
+                    class="text-blue-400 hover:underline font-medium">
+                    {{ visitor_host.host.person.full_name }}
+                </a>
+                <span class="text-gray-400 text-sm">
+                    {{ visitor_host.visited_at|date:"d/m/Y" }} às {{ visitor_host.visited_at|date:"H:i" }}
+                </span>
+            </div>
+            {% empty %}
+            <p class="text-center text-gray-400 py-6">Nenhuma visita encontrada.</p>
+            {% endfor %}
+        </div>
+    </form>
+</div>
+
+<main class="min-h-screen bg-[#12161d] pt-12 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
+        <div class="w-full lg:w-1/3 bg-gradient-to-b from-[#1f2937] to-[#111827] rounded-3xl p-6 shadow-xl border border-white/10 flex flex-col items-center text-center">
+            {% if person.photo %}
+            <img src="{{ person.photo.url }}" alt="Foto de {{ person.full_name }}"
+                class="w-30 h-30 md:w-60 md:h-60 rounded-full border border-[#1d2431] shadow-2xl" />
+            {% else %}
+            <div class="w-28 h-28 md:w-40 md:h-40 rounded-lg bg-gray-700 flex items-center justify-center">
+                <span class="text-gray-400 text-sm">Sem foto</span>
+            </div>
+            {% endif %}
+
+            <h1 class="text-2xl md:text-4xl mt-4 font-semibold">{{ person.full_name }}</h1>
+            
+            <span class="text-gray-400">Adicionado(a) em {{ person.added_at|date:"d/m/y" }}</span>
+            
+            <span class="mt-4 px-4 py-1 rounded-full text-sm font-semibold
+                {% if person.banned %}
+                    bg-red-500/20 text-red-400
+                {% else %}
+                    bg-green-500/20 text-green-400
+                {% endif %}">
+                {% if person.banned %}Banido{% else %}Activo{% endif %}
+            </span>
+        </div>
+        <div class="flex-1 flex flex-col justify-around gap-6">
+            <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
+                <div class="w-full flex items-center pb-2 mb-3 justify-between border-b border-gray-600">
+                    <h1 class="text-xl md:text-2xl">Informações Gerais</h1>
+                    <div class="flex gap-3">
+                        <button type="button" class="flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                            <span class="hidden md:block">Editar dados</span>
+                        </button>
                     </div>
                 </div>
-                {% endif %}
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Tipo de pessoa</span>
+                    <span class="text-white">{{ person.get_type_display }}</span>
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Última actualização</span>
+                    <span class="text-white">{{ person.updated_at|date:"d/m/y" }}</span>
+                </div>
             </div>
+
+            {% if person.resident %}
+            <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
+                <h1 class="text-xl md:text-2xl pb-2 mb-3 border-b border-gray-600">Informações do Residente</h1>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Bilhete de Identidade</span>
+                    <span class="text-white">
+                        {{ person.resident.bi }}
+                    </span>
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Casa(s)</span>
+                    <div>
+                        {% for rh in person.resident.residenthome_set.all %}
+                        <span class="text-white underline cursor-pointer" title="{{ rh.home.street }}">
+                            I{{ rh.home.number }}
+                        </span>
+                        {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if person.visitor %}
+            <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
+                <div class="w-full flex items-center pb-2 mb-3 justify-between border-b border-gray-600">
+                    <h1 class="text-xl md:text-2xl">Informações do Visitante</h1>
+                    <div class="flex gap-3">
+                        <button type="button" id="openVisitsHistoryModal"
+                            class="flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">history</span>
+                            <span class="hidden md:block">Histórico de visitas</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Tipo de visitante</span>
+                    <span class="text-white">
+                        {{ person.visitor.get_type_display }}
+                    </span>
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Número de visitas</span>
+                    <span class="text-white">
+                        {{ person.visitor.visitorhost_set.count }}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if person.worker %}
+            <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
+                <div class="w-full flex items-center pb-2 mb-3 justify-between border-b border-gray-600">
+                    <h1 class="text-xl md:text-2xl">Informações do(a) Trabalhor(a)</h1>
+                    <!-- <div class="flex gap-3">
+                        <button type="button" id="openVisitsHistoryModal" class="flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">history</span>
+                            <span class="hidden md:block">Histórico de visitas</span>
+                        </button>
+                    </div> -->
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Bilhete de Identidade</span>
+                    <span class="text-white">
+                        {{ person.worker.bi }}
+                    </span>
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Áreas de trabalho</span>
+                    <span class="text-white">
+                        {{ person.worker.get_formatted_fields }}
+                    </span>
+                </div>
+                <div class="flex justify-between mb-2 mt-2">
+                    <span class="text-gray-300 text-base">Casa(s) em que trabalha</span>
+                    <div>
+                        {% for wh in person.worker.workerhome_set.all %}
+                        <span class="text-white underline cursor-pointer" title="{{ wh.home.street }}">
+                            I{{ wh.home.number }}
+                        </span>
+                        {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </main>
 
+<script>
+    const modal = document.getElementById('visitisHistoryModal')
+
+    document.getElementById('openVisitsHistoryModal')
+        .addEventListener('click', (e) => {
+            modal.classList.toggle('hidden')
+        })
+
+    document.getElementById('closeVisitsHistoryModal')
+        .addEventListener('click', (e) => {
+            modal.classList.toggle('hidden')
+        })
+</script>
 {% endblock %}

@@ -1,33 +1,20 @@
 from django.db import models
 
-FIELDS = [
-    ("AL", "Auxiliar de Limpeza"),
-    ("G", "Guarda"),
-    ("J", "Jardineiro(a)"),
-    ("E", "Eletricista"),
-    ("EA", "Entregador(a) de Água"),
-    ("O", "Outro"),
-]
-
-TYPES = [
-    ("R", "Residente"),
-    ("V", "Visitante"),
-    ("W", "Trabalhador"),
-]
+from .choices import VISITOR_TYPES, FIELD_TYPES_DICT, PERSON_TYPES
 
 
 class Person(models.Model):
     first_name = models.CharField(max_length=80)
     last_name = models.CharField(max_length=80)
-    type = models.CharField(max_length=1, choices=TYPES)
+    type = models.CharField(max_length=1, choices=PERSON_TYPES)
     photo = models.ImageField(upload_to="people_photos/")
     added_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    banned = models.BooleanField(default=False)
+    banned = models.BooleanField(default=False)  # type: ignore
 
     @property
     def full_name(self):
-        return self.first_name + " " + self.last_name
+        return str(self.first_name) + " " + str(self.last_name)
 
 
 class Home(models.Model):
@@ -36,20 +23,11 @@ class Home(models.Model):
 
     @staticmethod
     def get_home(home_id: int):
-        return Home.objects.filter(id=home_id).first()
+        return Home.objects.filter(id=home_id).first()  # type: ignore
 
 
 class Visitor(models.Model):
-    type = models.CharField(
-        max_length=3,
-        choices=[
-            ("VR", "Visitanto residente"),
-            ("EMP", "Procurando emprego"),
-            ("ENT", "Entregador"),
-            ("PS", "Prestador de serviço"),
-            ("O", "Outro"),
-        ],
-    )
+    type = models.CharField(max_length=3, choices=VISITOR_TYPES)
     person = models.OneToOneField("Person", on_delete=models.CASCADE)
 
 
@@ -74,7 +52,11 @@ class Worker(models.Model):
     person = models.OneToOneField(
         "Person", on_delete=models.CASCADE, related_name="worker"
     )
-    fields = models.CharField(max_length=15)
+    fields = models.CharField(max_length=30)
+
+    @property
+    def get_formatted_fields(self):
+        return ", ".join([FIELD_TYPES_DICT[f] for f in self.fields.split(",")])  # type: ignore
 
 
 class WorkerHome(models.Model):

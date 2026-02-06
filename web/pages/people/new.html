@@ -3,6 +3,7 @@
 {% block title %}Adicionar Pessoa{% endblock %}
 
 {% block content %}
+{% include 'components/photo_capture.html' with input="photo" start_button="startVideo" %}
 <form method="post" class="h-full mb-5" action="{% url 'people:new' %}">
   {% csrf_token %}
   <main class="flex-1 h-full flex flex-col relative overflow-hidden">
@@ -16,16 +17,16 @@
       <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
         <div class="mb-4 flex justify-between gap-2">
           <div>
-            <label class="ml-1 text-base text-white font-medium">Primeiro nome</label>
+            <label class="ml-1 text-base text-white font-medium">Primeiro nome * </label>
             {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="first_name" value=request.POST.first_name required=True %}
           </div>
           <div>
-            <label class="ml-1 text-base text-white font-medium">Sobrenome</label>
+            <label class="ml-1 text-base text-white font-medium">Sobrenome *</label>
             {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="last_name" value=request.POST.last_name required=True %}
           </div>
         </div>
         <div class="mb-4 flex flex-col justify-start gap-1">
-          <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de Pessoa</label>
+          <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de Pessoa *</label>
           <select id="person_type" name="person_type" required
             class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
             <option value="" selected disabled>Selecione um tipo de pessoa</option>
@@ -54,18 +55,18 @@
           <div id="visitor-fields" class="hidden space-y-2">
             <div class="mb-4 flex flex-col justify-start gap-1">
               <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de visitante</label>
-              <select id="visitor_type" name="visitor_type" required
+              <select id="visitor_type" name="visitor-type" required
                 class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                 <option value="" selected disabled>Selecione um tipo de visitante</option>
-                <option value="R">Procurando emprego</option>
-                <option value="V">Entregador</option>
-                <option value="W">Trabalhador(a)</option>
+                {% for visitor_type in visitor_types %}
+                <option value="{{ visitor_type.0 }}">{{ visitor_type.1 }}</option>
+                {% endfor %}
               </select>
             </div>
             <div class="mb-4 flex flex-col gap-1">  
-              <label class=" ml-1 text-base text-white font-medium">Anfitrião/Destinatário(s)</label>
+              <label class=" ml-1 text-base text-white font-medium">Anfitrião/Destinatário(a)</label>
               {% include 'components/input.html' with class="home-search" placeholder="Nome do anfitrião/destinatário" type="text" icon="person" name="visitor-host" %}
-              <select name="visitor-hosts" id="visitor-hosts" multiple required
+              <select name="visitor-host" id="visitor-hosts" multiple required
                 class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                 {% for host in hosts %}
                 <option value="{{host.resident.id}}">{{ host.resident.person.first_name }} {{ host.resident.person.last_name }} - I{{ host.home.number }}</option>
@@ -73,15 +74,15 @@
               </select>
             </div>
           </div>
-          <div id="worker-fields" class="hidden space-y-2">
+          <div id="worker-fields" class="hidden space-y-4">
             <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do
-                BI</label>
+                BI *</label>
               {% include 'components/input.html' with placeholder="Número do BI" type="text" name="worker-bi" icon="id_card" value=request.POST.bi required=True %}
             </div>
             <div class="mb-4 flex flex-col gap-1">
-              <label class="ml-1 text-sm text-white font-medium">Áreas de Trabalho</label>
+              <label class="ml-1 text-base text-white font-medium">Áreas de Trabalho *</label>
               <select name="worker-fields" id="selected-field" multiple required
-                class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                 <option disabled selected>Selecione as área de trabalho</option>
                 {% for field in fields %}
                 <option value="{{field.0}}">{{ field.1 }}</option>
@@ -89,7 +90,7 @@
               </select>
             </div>
             <div class="mb-4 flex flex-col gap-1">
-              <label class="ml-1 text-sm text-white font-medium">Casas em que Trabalha</label>
+              <label class="ml-1 text-base text-white font-medium">Casas em que Trabalha</label>
               {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
               <select name="worker-homes" id="home" multiple required
                 class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
@@ -100,24 +101,7 @@
             </div>
           </div>
         </div>
-        <div id="photoCapture"
-          class="hidden space-y-4 w-full flex justify-center items-center border-t border-gray-600 gap-3 pt-3 mt-3">
-          <canvas id="canvas" class="hidden"></canvas>
-          <video autoplay playsinline class="aspect-video"></video>
-          <input type="hidden" name="photo" id="photo" required>
-          <div class="flex flex-col gap-4">
-            <button id="takePhoto" title="Capturar">
-              <span class="material-symbols-outlined">
-                camera
-              </span>
-            </button>
-            <button title="Desfazer" id="replayVideo">
-              <span class="material-symbols-outlined">
-                replay
-              </span>
-            </button>
-          </div>
-        </div>
+        <input type="hidden" name="photo" id="photo" required>    
         <div class="flex justify-end gap-3 mt-6">
           <button id="startVideo"
             class="flex items-center gap-2 h-10 px-4 rounded-lg bg-gray-900 text-white font-bold text-base">
@@ -151,20 +135,21 @@
       filteredOptions.forEach(option => select.append(option))
     })
   })  
-  const personTypeSelect = document.getElementById("person_type");
   const residentFields = document.getElementById("resident-fields");
+  const personTypeSelect = document.getElementById("person_type");
   const visitorFields = document.getElementById("visitor-fields");
   const workerFields = document.getElementById("worker-fields");
-  const localDevicesSelect = document.getElementById("local-devices");
-  const takePhotoBtn = document.getElementById("takePhoto")
-  const replayVideo = document.getElementById("replayVideo")
-  const startVideo = document.getElementById("startVideo")
-  const photoCapture = document.getElementById("photoCapture")
-  const canvas = document.getElementById("canvas")
-  const photo = document.getElementById("photo")
-  const video = document.querySelector("video");
 
-  let stream;
+  // const modal = document.getElementById("photoCaptureModel")
+  // const photoCapture = document.getElementById("photoCapture")
+  // const replayVideo = document.getElementById("replayVideo")
+  // const takePhotoBtn = document.getElementById("takePhoto")
+  // const startVideo = document.getElementById("startVideo")
+  // const canvas = document.getElementById("canvas")
+  // const photo = document.getElementById("photo")
+  // const video = document.querySelector("video");
+
+  // let stream;
 
   function toggleFields() {
     const value = personTypeSelect.value;
@@ -176,38 +161,39 @@
   personTypeSelect.addEventListener("change", toggleFields);
   toggleFields();
 
-  startVideo.addEventListener('click', (e) => {
-    e.preventDefault()
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(mediaStream => {
-        stream = mediaStream
-        video.srcObject = mediaStream
-        video.play()
-        startVideo.classList.add('hidden')
-        photoCapture.classList.toggle('hidden')
-      }).catch(rejected => {
-        window.history.back()
-      })
-  })
+  // startVideo.addEventListener('click', async (e) => {
+  //   e.preventDefault()
 
-  takePhotoBtn.addEventListener('click', (e) => {
-    e.preventDefault()
-    const ctx = canvas.getContext("2d");
+  //   try {
+  //     stream = navigator.mediaDevices.getUserMedia({ video: true })
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+  //     video.srcObject = stream
+  //     await video.play()
+  //     modal.classList.toggle('hidden')
+  //   } catch(error) {
+  //     modal.classList.toggle('hidden')
+  //     await video.pause()
+  //   }
+  // })
 
-    ctx.drawImage(video, 0, 0);
-    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+  // takePhotoBtn.addEventListener('click', (e) => {
+  //   e.preventDefault()
+  //   const ctx = canvas.getContext("2d");
 
-    photo.value = dataURL;
-    video.pause()
-  })
+  //   canvas.width = video.videoWidth;
+  //   canvas.height = video.videoHeight;
 
-  replayVideo.addEventListener('click', (e) => {
-    e.preventDefault()
-    video.play()
-  })
+  //   ctx.drawImage(video, 0, 0);
+  //   const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+
+  //   photo.value = dataURL;
+  //   video.pause()
+  // })
+
+  // replayVideo.addEventListener('click', (e) => {
+  //   e.preventDefault()
+  //   video.play()
+  // })
 
 </script>
 {% endblock %}

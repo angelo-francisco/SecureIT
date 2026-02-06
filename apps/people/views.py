@@ -1,8 +1,14 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render, get_object_or_404
+from django.core.paginator import Paginator
+from django.core.validators import ValidationError
+from django.db.models import Value
+from django.db.models.functions import Concat
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
+from .choices import FIELD_TYPES, VISITOR_TYPES
 from .db import insert_person_embedding
-from .models import FIELDS, Home, Person, ResidentHome
+from .models import Home, Person, ResidentHome, VisitorHost
 from .utils import (
     create_person,
     create_resident,
@@ -14,16 +20,39 @@ from .utils import (
 
 
 def home(request):
-    people = Person.objects.all()
+    all_people = Person.objects.all()  # type: ignore
+    paginator = Paginator(all_people, 10)
 
-    return render(request, "people/home.html", {"people": people})
+    page_number = request.GET.get("page", "")
+    people = paginator.get_page(page_number)
+    context = {"people": people}
+
+    if request.method == "POST":
+        try:
+            photo_b64 = request.POST.get("photo", "")
+            print(photo_b64)
+            if not photo_b64:
+                raise ValidationError("Nenhuma foto foi enviada")
+
+            photo_embedding = generate_face_embedding(photo_b64)
+            print(photo_embedding)
+        except Exception as error:
+            print(error)
+            msg = (
+                error.message  # type: ignore
+                if getattr(error, "message", False)
+                else "Erro ao pesquisar, tente mais tarde."
+            )
+            messages.error(request, msg)
+    return render(request, "people/home.html", context)
 
 
 def new_person(request):
     context = {
-        "homes": Home.objects.all(),
-        "hosts": ResidentHome.objects.select_related("resident__person", "home").all(),
-        "fields": FIELDS,
+        "homes": Home.objects.all(),  # type: ignore
+        "hosts": ResidentHome.objects.select_related("resident__person", "home").all(),  # type: ignore
+        "fields": FIELD_TYPES,
+        "visitor_types": VISITOR_TYPES,
     }
 
     if request.method != "POST":
@@ -40,37 +69,40 @@ def new_person(request):
             photo=content_file,
         )
 
-        match person.type:
+        match str(person.type):
             case "R":
                 create_resident(
-                    person.id,
+                    person.pk,
                     request.POST.getlist("resident-homes", []),
                     request.POST.get("resident-bi", ""),
                 )
             case "W":
                 create_worker(
-                    person.id,
+                    person.pk,
                     request.POST.get("worker-bi", ""),
                     request.POST.getlist("worker-homes", []),
                     request.POST.getlist("worker-fields", []),
                 )
             case "V":
-                create_visitor(person.id, request.POST.get("visitor-host", ""))
+                create_visitor(
+                    person.pk,
+                    request.POST.get("visitor-host", ""),
+                    request.POST.get("visitor-type", ""),
+                )
 
         embedding = generate_face_embedding(image=image)
-        insert_person_embedding(person.id, embedding)
+        insert_person_embedding(person.pk, embedding)
 
         messages.success(request, "Pessoa cadastrada com sucesso")
-        return redirect("people:home")
+        return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
         if person:
             person.delete()
         msg = (
-            error.message
+            error.message  # type: ignore
             if getattr(error, "message", False)
             else "Erro ao cadastrar, verifique os campos, por favor."
         )
-        print(error)
         messages.error(request, msg)
         return render(request, "people/new.html", context)
 
@@ -78,5 +110,23 @@ def new_person(request):
 def get_person(request, person_id):
     person = get_object_or_404(Person, id=person_id)
     context = {"person": person}
-    print(dir(person))
+
+    if person.type == "V":
+        visitor_hosts = VisitorHost.objects.filter(visitor_id=person.visitor.id)  # type: ignore
+        search_query = request.GET.get("search_query", "").strip()
+
+        if search_query:
+            visitor_hosts = visitor_hosts.annotate(
+                full_name=Concat(
+                    "host__person__first_name",
+                    Value(" "),
+                    "host__person__last_name",
+                )
+            ).filter(  # type: ignore
+                full_name__icontains=search_query
+            )
+        paginator = Paginator(visitor_hosts, 10)
+        page = request.GET.get("page", "")
+        context["visitor_hosts"] = paginator.get_page(page)
+
     return render(request, "people/details.html", context)
