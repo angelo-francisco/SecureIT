@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -11,8 +12,17 @@ def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    cameras = Camera.objects.filter(user=request.user)
-    return render(request, "cameras/home.html", {"cameras": cameras})
+    context =  {}
+    cameras = Camera.objects.filter(user=request.user) # type: ignore
+    search_query = request.GET.get("search_query", "").strip()
+    page_number = request.GET.get("page", "")
+
+    if search_query:
+        cameras = cameras.filter(location__icontains=search_query)
+
+    paginator = Paginator(cameras, 10)
+    context["cameras"] = paginator.get_page(page_number)
+    return render(request, "cameras/home.html", context)
 
 
 def new_camera(request):
@@ -21,6 +31,7 @@ def new_camera(request):
     """
     cameras, _ = func_get_cameras()
     context = {"cameras": cameras}
+    camera = None
     if request.method != "POST":
         return render(request, "cameras/new.html", context)
     try:
@@ -51,7 +62,7 @@ def new_camera(request):
         if camera:
             camera.delete()
         msg = (
-            error.message
+            error.message # type: ignore
             if getattr(error, "message", False)
             else "Erro ao registar câmara."
         )
@@ -74,7 +85,6 @@ def delete_camera(request, id):
 def view_camera(request, id):
     """
     Mostra os detalhes de uma câmara
-    (stream entra aqui depois)
     """
     camera = get_object_or_404(Camera, id=id)
     if camera.user == request.user:
