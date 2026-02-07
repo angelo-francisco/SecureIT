@@ -15,7 +15,7 @@ PERSON_TYPES = [
 ]
 
 VISITOR_TYPES = [
-    ("VR", "Visitanto residente"),
+    ("VR", "Visitando residente"),
     ("PE", "Procurando emprego"),
     ("PS", "Prestador de serviço"),
     ("E", "Entregador"),
