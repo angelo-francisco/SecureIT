@@ -27,25 +27,22 @@ def insert_person_embedding(person, embedding):
     db.close()
 
 
-def search_person_by_embedding(embedding):
+def search_person_by_embedding(embedding, k=10):
     db = get_conn()
-    db.execute(
+    cursor = db.cursor()
+    cursor.execute(
         """
-        SELECT 
-            id,
-            person,
-            distance 
-        FROM 
-            PersonEmbedding
-        WHERE
-            embedding MATCH ?
-        ORDER_BY
-            distance
-        LIMIT 5;
+        SELECT PP.id, PP.first_name, PP.last_name, PP.type, PP.banned, PE.distance
+        FROM PersonEmbedding AS PE
+        INNER JOIN people_person AS PP ON PE.person = PP.id
+        WHERE PE.embedding MATCH ? AND k = ?
+        ORDER BY PE.distance;
         """,
-        (embedding),
+        (embedding, k),
     )
+    rows = cursor.fetchall()
     db.close()
+    return rows
 
 
 def main():
