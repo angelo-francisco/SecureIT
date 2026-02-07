@@ -15,6 +15,10 @@
     <div class="flex-1 overflow-y-auto">
       <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
         <div class="mb-4 flex flex-col justify-start gap-1">
+          <label class="text-base text-white font-medium">Nome da câmara</label>
+          {% include 'components/input.html' with placeholder="Nome da câmara" type="text" name="name" value=request.POST.name required=True %}
+        </div>
+        <div class="mb-4 flex flex-col justify-start gap-1">
           <label class="text-base text-white font-medium">Localização</label>
           {% include 'components/input.html' with placeholder="Localização da câmara" type="text" icon="pin_drop" name="location" value=request.POST.location required=True %}
         </div>
@@ -56,6 +60,10 @@
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
+          <button type="submit" onclick="window.history.back()"
+            class="flex items-center gap-2 h-10 px-4 rounded-lg bg-gray-600 text-white font-bold text-base">
+            Cancelar
+          </button>
           <button type="submit" onclick="this.disabled = true; this.form.submit()"
             class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white font-bold text-base">
             Adicionar
