@@ -40,10 +40,11 @@
       <table class="w-full table-auto">
         <thead>
           <tr class="bg-surface-dark">
+            <th class="p-4 text-left border border-gray-500">ID</th>
             <th class="p-4 text-left border border-gray-500">Nome</th>
             <th class="p-4 text-left border border-gray-500">Localização</th>
             <th class="p-4 text-left border border-gray-500">Estado</th>
-            <th class="p-4 text-left border border-gray-500">Data de Configuração</th>
+            <th class="p-4 text-left border border-gray-500">Data de Adição</th>
             <th class="p-4 text-left border border-gray-500">Última actualização</th>
             <th class="p-4 text-left border border-gray-500 flex items-center justify-center">Acções</th>
           </tr>
@@ -52,8 +53,11 @@
           {% for camera in cameras %}
           <tr>
             <td class="p-4 border border-gray-500">
+              {{ camera.get_name }}
+            </td>
+            <td class="p-4 border border-gray-500">
               <a href="{% url 'cameras:view' camera.id %}" class="text-blue-500 hover:underline">
-                {{ camera.get_name }}
+                {{ camera.name }}
               </a>
             </td>
             <td class="p-4 border border-gray-500">{{ camera.location }}</td>
@@ -68,10 +72,10 @@
             <td class="p-4 border border-gray-500">
               {{ camera.updated_at|date:"d/m/y" }} às {{ camera.updated_at|date:"H:i" }}</td>
             <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
-              <button class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
+              <a href="{% url 'cameras:edit' id=camera.id %}" class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
                 title="Editar">
                 <span class="material-symbols-outlined text-[18px]">edit</span>
-              </button>
+            </a>
               <a href="{% url 'cameras:delete' id=camera.id %}"
                 class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
                 title="Remover">
