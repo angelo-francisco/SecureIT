@@ -1,4 +1,142 @@
-<h1>{{ camera.nome }}</h1>
-<p>{{ camera.localizacao }}</p>
+{% extends 'bases/panel.html' %}
 
-<img src="{% url 'ver_camera' camera.id %}" alt="">
+{% block title %}Visualizar Câmara{% endblock %}
+
+{% block content %}
+<div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
+    {% include "components/loader.html" with w=50 %}
+</div>
+<main class="hidden min-h-screen bg-[#0e1117] pt-5 px-4 grid grid-cols-1 lg:grid-cols-4 gap-6" id="container">
+    <div class="lg:col-span-3">
+        <div id="camera" data-connection-url-or-id="{{ camera.get_connection_url_or_id }}"
+            class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl">
+            <img src="" id="cam-{{ camera.id }}" class="w-full h-full object-contain" />
+            <div class="animate-pulse absolute top-3 left-3 bg-black/60 backdrop-blur px-3 py-1 rounded-full text-sm">
+                LIVE
+            </div>
+        </div>
+    </div>
+    <div class="bg-[#1C2127] rounded-2xl p-5 space-y-4 shadow-lg">
+        <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+            <h2 class="text-xl font-semibold">
+                {{ camera.name }}
+            </h2>
+            <div class="flex gap-3">
+                <button
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-600/20 hover:bg-gray-600/30 transition">
+                    <span class="material-symbols-outlined">edit</span>
+                    <span class="hidden md:block">
+                        Editar
+                    </span>
+                </button>
+
+                <button
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition">
+                    <span class="material-symbols-outlined">delete</span>
+                    <span class="hidden md:block">
+                        Eliminar
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Estado</span>
+            <span class="px-3 py-1 text-sm rounded-full font-semibold
+                    {% if camera.status %}
+                        bg-green-500/20 text-green-400
+                    {% else %}
+                        bg-red-500/20 text-red-400
+                    {% endif %}
+                    ">
+                {% if camera.status %}Activo{% else %}Inactivo{% endif %}
+            </span>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Tipo de Conexão</span>
+            <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">
+                    {% if camera.type == "W" %}wifi{% else %}usb{% endif %}
+                </span>
+                {{ camera.get_connection_type_display }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Localização</span>
+            <span class="flex items-center gap-2 truncate">
+                {{ camera.location }}
+            </span>
+        </div>
+        {% if camera.wificamera %}
+        {% if camera.wificamera.username %}
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Nome de utilizador</span>
+            <span class="flex items-center gap-2">{{ camera.wificamera.username }}</span>
+        </div>
+        {% endif %}
+        {% if camera.wificamera.password %}
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Palavra-passe</span>
+            <span class="flex items-center gap-2">******</span>
+        </div>
+        {% endif %}
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">URL de conexão</span>
+            <span class="flex items-center gap-2">{{ camera.wificamera.stream_url }}</span>
+        </div>
+        {% endif %}
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Última actualização</span>
+            <span class="flex items-center gap-2">
+                {{ camera.updated_at|date:"d/m/y" }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="uppercase text-sm text-gray-400">Data de criação</span>
+            <span class="flex items-center gap-2">
+                {{ camera.created_at|date:"d/m/y" }}
+            </span>
+        </div>
+    </div>
+</main>
+
+
+<script>
+    const mainHTML = document.getElementById("container")
+    const loader = document.getElementById("loader")
+    const cameraDiv = document.querySelector('#camera')
+    const imageELement = cameraDiv.querySelector('img')
+
+    function convertToInt(id) {
+        if (typeof id === "number") return id
+        return parseInt(id)
+    }
+
+    function connectCameraWs(index) {
+        if (typeof index !== "number" && !index) return
+
+        const ws = new WebSocket(`ws:localhost:8000/ws/camera-video/${index}`)
+        ws.binaryType = "arraybuffer"
+
+        ws.onmessage = (event) => {
+            const blob = new Blob([event.data], { type: "image/jpeg" });
+            const url = URL.createObjectURL(blob);
+
+            imageELement.src = url
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        let connectionUrlOrId = cameraDiv.dataset.connectionUrlOrId
+        if (!connectionUrlOrId) return
+
+        const index = convertToInt(connectionUrlOrId)
+        connectCameraWs(index)
+
+        loader.classList.toggle('hidden')
+        mainHTML.classList.toggle('hidden')
+    })
+</script>
+{% endblock %}
