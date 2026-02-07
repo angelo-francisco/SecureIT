@@ -11,8 +11,9 @@ class Camera(models.Model):
     user = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name="cameras"
     )
+    name = models.CharField(max_length=80, null=True, blank=True)
     location = models.CharField(max_length=150, null=True, blank=True)
-    status = models.BooleanField(default=True, null=True, blank=True)
+    status = models.BooleanField(default=True, null=True, blank=True)  # type: ignore
     connection_type = models.CharField(
         max_length=1, choices=[("L", "Local"), ("W", "Wi-Fi")], null=True, blank=True
     )
@@ -39,10 +40,10 @@ class Camera(models.Model):
     @property
     def get_connection_url_or_id(self):
         if self.connection_type == "W":
-            return self.wificamera.stream_url
+            return self.wificamera.stream_url  # type: ignore
         if system() == "Linux":
-            return self.localcamera.path.split("video")[-1]
-        return self.localcamera.get_id
+            return self.localcamera.path.split("video")[-1]  # type: ignore
+        return self.localcamera.get_id  # type: ignore
 
 
 class LocalCamera(models.Model):
@@ -54,16 +55,16 @@ class LocalCamera(models.Model):
         """
         Dispara um exeção se não houver path
         """
-        cam = LocalCamera.objects.get(camera_id=camera_id)
+        cam = LocalCamera.objects.get(camera_id=camera_id)  # type: ignore
         return cam.path
 
     @property
     def path(self):
-        return self.info["path"]
+        return self.info["path"]  # type: ignore
 
     @property
     def get_id(self):
-        return self.info["id"]
+        return self.info["id"]  # type: ignore
 
 
 class WifiCamera(models.Model):
@@ -74,5 +75,5 @@ class WifiCamera(models.Model):
 
     @staticmethod
     def get_stream_url(camera_id):
-        cam = WifiCamera.objects.get(camera_id=camera_id)
+        cam = WifiCamera.objects.get(camera_id=camera_id) # type: ignore
         return cam.stream_url
