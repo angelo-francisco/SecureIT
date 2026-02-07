@@ -1,10 +1,17 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from .models import Camera, LocalCamera, WifiCamera
-from .utils import create_camera, create_local_camera, create_wifi_camera
+from .utils import (
+    create_camera,
+    create_local_camera,
+    create_wifi_camera,
+    valid_connection_type,
+)
 from .utils import get_cameras as func_get_cameras
 
 
@@ -12,8 +19,8 @@ def cameras(request):
     """
     Lista todas as câmaras cadastradas
     """
-    context =  {}
-    cameras = Camera.objects.filter(user=request.user) # type: ignore
+    context = {}
+    cameras = Camera.objects.filter(user=request.user)  # type: ignore
     search_query = request.GET.get("search_query", "").strip()
     page_number = request.GET.get("page", "")
 
@@ -37,6 +44,7 @@ def new_camera(request):
     try:
         camera = create_camera(
             user=request.user,
+            name=request.POST.get("name", "").strip(),
             location=request.POST.get("location", "").strip(),
             connection_type=request.POST.get("connection_type", "").strip().upper(),
         )
@@ -62,7 +70,7 @@ def new_camera(request):
         if camera:
             camera.delete()
         msg = (
-            error.message # type: ignore
+            error.message  # type: ignore
             if getattr(error, "message", False)
             else "Erro ao registar câmara."
         )
@@ -92,6 +100,85 @@ def view_camera(request, id):
     else:
         messages.error(request, "Esta câmara não é sua")
         return redirect("cameras:home")
+
+
+def edit_camera(request, id):
+    camera = get_object_or_404(Camera, id=id)
+    if not (camera.user == request.user):
+        messages.error(request, "Esta câmara não é sua")
+        return redirect("cameras:home")
+
+    if request.method == "POST":
+        try:
+            name = request.POST.get("name", "").strip()
+            location = request.POST.get("location", "").strip()
+            connection_type = valid_connection_type(
+                request.POST.get("connection_type", "").strip().upper()
+            )
+
+            if not name or not location:
+                raise ValidationError("Informe o nome e a localização")
+
+            camera.name = name
+            camera.location = location
+
+            if camera.connection_type != connection_type:
+                if camera.connection_type == "L":
+                    camera.localcamera.delete()
+                else:
+                    camera.wificamera.delete()
+
+                camera.connection_type = connection_type
+
+            camera.save()
+
+            match camera.connection_type:
+                case "L":
+                    cameras_list, _ = func_get_cameras()
+                    camera_path = request.POST.get("local_camera", "").strip()
+
+                    if not camera_path:
+                        raise ValidationError("Informe a câmara local, por favor.")
+
+                    camera_info = None
+                    for cam in cameras_list:
+                        if cam["path"] == camera_path:
+                            camera_info = cam
+                            break
+
+                    if not camera_info:
+                        raise ValidationError("Dados da câmara indisponíveis.")
+
+                    LocalCamera.objects.update_or_create(  # type: ignore
+                        camera=camera, defaults={"info": camera_info}
+                    )
+                case "W":
+                    stream_url = request.POST.get("stream_url", "").strip()
+                    if not stream_url:
+                        raise ValidationError("URL de transmissão não informada")
+
+                    username = request.POST.get("username", "").strip()
+                    password = request.POST.get("password", "").strip()
+
+                    defaults = {"stream_url": stream_url}
+
+                    if username and password:
+                        defaults["username"] = username
+                        defaults["password"] = password
+
+                    WifiCamera.objects.update_or_create(  # type: ignore
+                        camera=camera, defaults=defaults, create_defaults=defaults
+                    )
+            messages.success(request, "Dados editados com sucesso.")
+            return redirect(reverse("cameras:view", args=[camera.id]))
+        except Exception as error:
+            msg = (
+                error.message  # type: ignore
+                if getattr(error, "message", False)
+                else "Erro ao registar câmara."
+            )
+            messages.error(request, msg)
+    return render(request, "cameras/edit.html", {"camera": camera})
 
 
 def get_cameras(request):
