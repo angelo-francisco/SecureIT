@@ -2,13 +2,13 @@ import base64
 from io import BytesIO
 from uuid import uuid4
 
-from PIL.ImageFile import ImageFile
 import numpy as np
 import torch
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image
+from PIL.ImageFile import ImageFile
 
 from .models import (
     Home,
@@ -20,7 +20,6 @@ from .models import (
     Worker,
     WorkerHome,
 )
-
 
 mtcnn = MTCNN(
     image_size=160,
@@ -36,11 +35,17 @@ VALID_FIELDS = {"G", "M", "MA", "AL", "J", "E", "O"}
 VALID_VISITORS = {"VR", "PE", "PS", "E", "O"}
 
 
+def base64_to_bytes(photo_b64: str) -> bytes:
+    data = ""
+    if "," in photo_b64:
+        data = photo_b64.split(",")[1]
+    return base64.b64decode(data)
+
+
 def generate_face_embedding(base64_str=None, image=None):
     if base64_str:
-        image_data = base64.b64decode(base64_str)
-        images_bytes = BytesIO(image_data)
-        image = Image.open(images_bytes).convert("RGB")
+        image_data = base64_to_bytes(base64_str)
+        image = Image.open(BytesIO(image_data)).convert("RGB")
     elif image:
         image = image.convert("RGB")
     else:
@@ -59,10 +64,7 @@ def generate_face_embedding(base64_str=None, image=None):
 def treat_photo(
     base64_photo: str, filename="image.jpg"
 ) -> tuple[ContentFile, ImageFile]:
-    if "," in base64_photo:
-        base64_photo = base64_photo.split(",")[1]
-
-    image_data = base64.b64decode(base64_photo)
+    image_data = base64_to_bytes(base64_photo)
     image = Image.open(BytesIO(image_data))
     buffer = BytesIO()
     image.save(buffer, format=image.format or "JPEG")
