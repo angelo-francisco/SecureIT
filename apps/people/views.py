@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from .choices import FIELD_TYPES, VISITOR_TYPES
-from .db import insert_person_embedding
+from .db import insert_person_embedding, search_person_by_embedding
 from .models import Home, Person, ResidentHome, VisitorHost
 from .utils import (
     create_person,
@@ -20,30 +20,39 @@ from .utils import (
 
 
 def home(request):
-    all_people = Person.objects.all()  # type: ignore
-    paginator = Paginator(all_people, 10)
-
+    context = {}
+    people_queryset = Person.objects.all()  # type: ignore
+    search_query = request.GET.get("search_query", "").strip()
     page_number = request.GET.get("page", "")
-    people = paginator.get_page(page_number)
-    context = {"people": people}
+
+    if search_query:
+        people_queryset = people_queryset.annotate(
+            new_full_name=Concat(
+                "first_name", Value(" "), "last_name",
+            )
+        ).filter(  # type: ignore
+            new_full_name__icontains=search_query
+        )
+    paginator = Paginator(people_queryset, 10)
+    context["people"] = paginator.get_page(page_number)
 
     if request.method == "POST":
         try:
             photo_b64 = request.POST.get("photo", "")
-            print(photo_b64)
             if not photo_b64:
                 raise ValidationError("Nenhuma foto foi enviada")
 
             photo_embedding = generate_face_embedding(photo_b64)
-            print(photo_embedding)
+            persons = search_person_by_embedding(photo_embedding)
+            context["search_results"] = persons
         except Exception as error:
-            print(error)
             msg = (
                 error.message  # type: ignore
                 if getattr(error, "message", False)
                 else "Erro ao pesquisar, tente mais tarde."
             )
             messages.error(request, msg)
+
     return render(request, "people/home.html", context)
 
 
