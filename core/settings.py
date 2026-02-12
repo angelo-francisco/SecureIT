@@ -22,6 +22,9 @@ INSTALLED_APPS = [
     "apps.cameras",
     "apps.people",
     "apps.notifications",
+    "tailwind",
+    "tailwind_config",
+    "django_browser_reload",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -37,6 +40,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.users.utils.pin_middleware",
+    "django_browser_reload.middleware.BrowserReloadMiddleware"
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -51,7 +55,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ],
+          ],
         },
     },
 ]
@@ -100,9 +104,11 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR.joinpath("media")
 
 # configurações de login/logout (adicionadas)
-
 LOGIN_URL = "users:login"
 LOGOUT_REDIRECT_URL = "users:logout"
 
 # Extendendo o tempo do cookie para evitar logout automático
 SESSION_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 ano
+
+TAILWIND_APP_NAME = "tailwind_config"
+NPM_BIN_PATH = "/usr/bin/npm"
