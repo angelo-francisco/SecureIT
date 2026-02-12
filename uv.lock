@@ -551,6 +551,15 @@ wheels = [
 ]
 
 [[package]]
+name = "lucide"
+version = "1.1.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/18/466c33b2ebbb63f74496abad1038452bc46b6050decdb2110681c2de5a16/lucide-1.1.3.tar.gz", hash = "sha256:a931b627bc30a529c7f4e57d7b4c2d7379a86a75a4156eb4ced411aa66c1202f", size = 385756, upload-time = "2024-11-08T11:40:58.874Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a6/77/8ac5fda43469c96630dd81817df7362c72cff671f93950a780ad3b13e7e9/lucide-1.1.3-py3-none-any.whl", hash = "sha256:37c9cd5ac3914577b933896dcc4160631aa63a078b7b0a1cf19e984a93e78234", size = 383488, upload-time = "2024-11-08T11:40:56.445Z" },
+]
+
+[[package]]
 name = "markdown-it-py"
 version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1241,6 +1250,7 @@ dependencies = [
     { name = "django-tailwind", extra = ["cookiecutter", "honcho", "reload"] },
     { name = "facenet-pytorch" },
     { name = "imutils" },
+    { name = "lucide" },
     { name = "numpy" },
     { name = "opencv-python" },
     { name = "pillow" },
@@ -1259,6 +1269,7 @@ requires-dist = [
     { name = "django-tailwind", extras = ["cookiecutter", "honcho", "reload"], specifier = ">=4.4.2" },
     { name = "facenet-pytorch", specifier = ">=2.5.3" },
     { name = "imutils", specifier = ">=0.5.4" },
+    { name = "lucide", specifier = ">=1.1.3" },
     { name = "numpy", specifier = ">=2.2.6" },
     { name = "opencv-python", specifier = ">=4.12.0.88" },
     { name = "pillow", specifier = ">=12.1.0" },

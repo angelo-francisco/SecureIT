@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     "tailwind",
     "tailwind_config",
     "django_browser_reload",
-    "django_google_fonts"
+    "django_google_fonts",
+    "lucide",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -41,7 +42,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.users.utils.pin_middleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware"
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -56,7 +57,10 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-          ],
+            ],
+            "builtins": [
+                "lucide.templatetags.lucide",
+            ],
         },
     },
 ]
