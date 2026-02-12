@@ -51,14 +51,15 @@ def main():
         """
         CREATE VIRTUAL TABLE IF NOT EXISTS PersonEmbedding 
         USING vec0(
-            person INTEGER,
+            id_person_embedding INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            person INTEGER NOT NULL
+                REFERENCES people_person (id) DEFERRABLE INITIALLY DEFERRED,
             embedding FLOAT[512]
         )
         """
     )
     db.commit()
     db.close()
-    print("TABELA VIRTUAL CONFERIDA")
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ class Camera(models.Model):
     user = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name="cameras"
     )
-    name = models.CharField(max_length=80, null=True, blank=True)
+    name = models.CharField(max_length=30, null=True, blank=True)
     location = models.CharField(max_length=150, null=True, blank=True)
     status = models.BooleanField(default=True, null=True, blank=True)  # type: ignore
     connection_type = models.CharField(
@@ -70,8 +70,8 @@ class LocalCamera(models.Model):
 class WifiCamera(models.Model):
     camera = models.OneToOneField(Camera, on_delete=models.CASCADE)
     stream_url = models.URLField(max_length=255, null=True, blank=True)
-    username = models.CharField(max_length=100, null=True, blank=True)
-    password = models.CharField(max_length=100, null=True, blank=True)
+    username = models.CharField(max_length=30, null=True, blank=True)
+    password = models.CharField(max_length=80, null=True, blank=True)
 
     @staticmethod
     def get_stream_url(camera_id):

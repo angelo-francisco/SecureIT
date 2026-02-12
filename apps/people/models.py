@@ -4,8 +4,8 @@ from .choices import VISITOR_TYPES, FIELD_TYPES_DICT, PERSON_TYPES
 
 
 class Person(models.Model):
-    first_name = models.CharField(max_length=80)
-    last_name = models.CharField(max_length=80)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
     type = models.CharField(max_length=1, choices=PERSON_TYPES)
     photo = models.ImageField(upload_to="people_photos/")
     added_at = models.DateTimeField(auto_now_add=True)

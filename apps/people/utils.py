@@ -91,7 +91,6 @@ def validate_homes(homes):
 
 
 def validate_fields(fields):
-    print(fields)
     vfl = VALID_FIELDS
 
     if not fields:
