@@ -23,8 +23,13 @@ INSTALLED_APPS = [
     "apps.people",
     "apps.notifications",
     "tailwind",
+<<<<<<< HEAD
     "tailwind_config",
     "django_browser_reload",
+=======
+    "django_browser_reload",
+    "theme"
+>>>>>>> 4dae35bfd4c307c3faca3ab5286d811665591929
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -40,7 +45,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.users.utils.pin_middleware",
+<<<<<<< HEAD
     "django_browser_reload.middleware.BrowserReloadMiddleware"
+=======
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
+>>>>>>> 4dae35bfd4c307c3faca3ab5286d811665591929
 ]
 
 ROOT_URLCONF = "core.urls"
