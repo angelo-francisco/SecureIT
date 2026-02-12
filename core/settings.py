@@ -110,5 +110,6 @@ LOGOUT_REDIRECT_URL = "users:logout"
 # Extendendo o tempo do cookie para evitar logout automático
 SESSION_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 ano
 
+# Django-Tailwind Config.
 TAILWIND_APP_NAME = "tailwind_config"
 NPM_BIN_PATH = "/usr/bin/npm"

@@ -27,7 +27,7 @@ def insert_person_embedding(person, embedding):
     db.close()
 
 
-def search_person_by_embedding(embedding, k=10):
+def search_person_by_embedding(embedding, k=1):
     db = get_conn()
     cursor = db.cursor()
     cursor.execute(
