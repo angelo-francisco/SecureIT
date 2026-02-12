@@ -4,6 +4,7 @@ from django.core.validators import ValidationError
 from django.db.models import Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db import close_old_connections
 from django.urls import reverse
 
 from .choices import FIELD_TYPES, VISITOR_TYPES
@@ -18,6 +19,8 @@ from .utils import (
     treat_photo,
 )
 
+class SearchError(ValidationError):
+    pass
 
 def home(request):
     context = {}
@@ -43,13 +46,15 @@ def home(request):
                 raise ValidationError("Nenhuma foto foi enviada")
 
             photo_embedding = generate_face_embedding(photo_b64)
-            persons = search_person_by_embedding(photo_embedding)
-            context["search_results"] = persons
+            people = search_person_by_embedding(photo_embedding)
+            if people:
+                return redirect(reverse("people:details", args=[people[0][0]]))
+            raise SearchError("Pessoa não registada")
         except Exception as error:
             msg = (
                 error.message  # type: ignore
                 if getattr(error, "message", False)
-                else "Erro ao pesquisar, tente mais tarde."
+                else "Pessoa não registada"
             )
             messages.error(request, msg)
 
@@ -99,12 +104,15 @@ def new_person(request):
                     request.POST.get("visitor-type", ""),
                 )
 
+        # Fechando conexões antigas para impedir lock do banco de dados
+        close_old_connections()
         embedding = generate_face_embedding(image=image)
         insert_person_embedding(person.pk, embedding)
 
         messages.success(request, "Pessoa cadastrada com sucesso")
         return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
+        print(error)
         if person:
             person.delete()
         msg = (
