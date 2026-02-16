@@ -147,3 +147,8 @@ def get_person(request, person_id):
         context["visitor_hosts"] = paginator.get_page(page)
 
     return render(request, "people/details.html", context)
+
+def delete_person(request, person_id: int):
+    person = get_object_or_404(Person, id=person_id)
+    person.delete()
+    return redirect("people:home")
