@@ -58,6 +58,14 @@ class Worker(models.Model):
     def get_formatted_fields(self):
         return ", ".join([FIELD_TYPES_DICT[f] for f in self.fields.split(",")])  # type: ignore
 
+    @property
+    def list_fields(self):
+        return self.fields.split(",")  # type: ignore
+
+    @property   
+    def work_homes(self):
+        return list(self.workerhome_set.values_list("home_id", flat=True))  # type: ignore
+
 
 class WorkerHome(models.Model):
     worker = models.ForeignKey("Worker", on_delete=models.CASCADE)

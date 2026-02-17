@@ -4,6 +4,7 @@
 
 {% block content %}
 {% include 'components/photo_capture.html' with input="photo" start_button="openImageCaptureModel" search="searchByFaceForm" %}
+
 {% if search_results %}
 <div class="fixed inset-0 flex justify-center items-center backdrop-blur-sm z-[1000]" id="search-results-modal">
   <div
@@ -18,7 +19,15 @@
         <a href="{% url 'people:details' sr.0 %}" class="text-lg text-blue-400 hover:underline font-medium">
           {{ forloop.counter }}. {{ sr.1 }} {{ sr.2 }}
         </a>
-        <span class="text-gray-300">{% if sr.3 == "V" %}Visitante{% elif sr.3 == "R" %}Residente{% else %}Trabalhador{% endif %}</span>
+        <span class="text-gray-300">
+          {% if sr.3 == "V" %}
+          Visitante
+          {% elif sr.3 == "R" %}
+          Residente
+          {% else %}
+          Trabalhador
+          {%endif %}
+        </span>
       </div>
       {% empty %}
       <p class="text-lg text-center text-gray-400 py-6">Nenhuma visita encontrada.</p>
@@ -41,7 +50,7 @@
             </div>
             <input
               class="border border-gray/90 block w-full p-2.5 pl-10 text-sm text-white bg-surface-dark rounded-lg focus:ring-1 focus:ring-primary placeholder-text-secondary"
-              placeholder="Buscar por nome..." type="text" name="search_query"/>
+              placeholder="Buscar por nome..." type="text" name="search_query" />
           </form>
         </div>
         <a href="{% url 'people:home' %}"
@@ -79,20 +88,16 @@
             <th class="p-4 text-left border border-gray-500">Estado</th>
             <th class="p-4 text-left border border-gray-500">Data de adição</th>
             <th class="p-4 text-left border border-gray-500">Última actualização</th>
-            {% if request.user.is_superuser %}
             <th class="p-4 text-left border border-gray-500 flex items-center justify-center">Acções</th>
-            {% endif %}
           </tr>
         </thead>
         <tbody>
           {% for person in people %}
           <tr>
-            <td class="p-4 border border-gray-500">
-              <a href="{% url 'people:details' person.id %}" class="hover:underline text-blue-500">
-                {{ person.first_name }} {{ person.last_name }}
-              </a>
+            <td class="p-4 border border-gray-500 text-lg">
+              {{ person.full_name }}
             </td>
-            <td class="p-4 border border-gray-500">{{ person.get_type_display }}</td>
+            <td class="p-4 border border-gray-500 text-lg">{{ person.get_type_display }}</td>
             <td class="p-4 border border-gray-500">
               <span
                 class="px-2 py-1 rounded-full font-bold {% if not person.banned %} bg-green-500 {% else %} bg-red-500 {% endif %}">
@@ -100,21 +105,29 @@
               </span>
             </td>
             <td class="p-4 border border-gray-500">
-              {{ person.added_at|date:"d/m/y" }} às {{ person.added_at|date:"H:i" }}</td>
+              {{ person.added_at|date:"d/m/y" }} às {{ person.added_at|date:"H:i" }}
+            </td>
             <td class="p-4 border border-gray-500">
-              {{ person.updated_at|date:"d/m/y" }} às {{ person.updated_at|date:"H:i" }}</td>
-            {% if request.user.is_superuser %}
+              {{ person.updated_at|date:"d/m/y" }} às {{ person.updated_at|date:"H:i" }}
+            </td>
             <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
-              <button class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
+              <a href="{% url 'people:details' person.id %}"
+                class="p-2 rounded bg-surface-hover text-text-secondary hover:text-gray-500 transition-colors"
+                title="Detalhes">
+                {% lucide "info" width=18 height=18 %}
+              </a>
+              {% if person.type == "V" or request.user.is_superuser %}
+              <a href="{% url 'people:edit' person.id %}" class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
                 title="Editar">
                 {% lucide "pen" width=18 height=18 %}
-              </button>
-              <a href="{% url 'people:delete' person.id %}" class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
+              </a>
+              <a href="{% url 'people:delete' person.id %}"
+                class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
                 title="Remover">
                 {% lucide "trash" width=18 height=18 %}
               </a>
+              {% endif %}
             </td>
-            {% endif %}
           </tr>
           {% endfor %}
         </tbody>

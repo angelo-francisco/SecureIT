@@ -72,15 +72,15 @@ def treat_photo(
     return ContentFile(buffer.getvalue(), name=filename), image
 
 
-def validate_bi(bi):
+def validate_bi(bi: str):
     if not bi or len(bi) != 14:
         raise ValidationError("Preencha correctamente o BI")
     return bi.upper()
 
 
-def validate_homes(homes):
+def validate_homes(_homes: list[str]) -> list[int]:
     try:
-        homes = [int(h) for h in homes]
+        homes = [int(h) for h in _homes]
     except:  # NOQA
         raise ValidationError("Informe correctamente os nºs. das casas")
 
@@ -90,7 +90,7 @@ def validate_homes(homes):
     return homes
 
 
-def validate_fields(fields):
+def validate_fields(fields: list[str]) -> str:
     vfl = VALID_FIELDS
 
     if not fields:
@@ -121,7 +121,38 @@ def validate_host(host_id: str):
     return host
 
 
-def create_person(first_name, last_name, person_type, photo) -> Person:
+def update_instace(instance, data: dict):
+    update_fields = []
+
+    for key, value in data.items():
+        if getattr(instance, key) != value:
+            setattr(instance, key, value)
+            update_fields.append(key)
+
+    if update_fields:
+        instance.save(update_fields=update_fields)
+
+
+def update_m2m(model, k1_name, k1_value, k2: str, new: set):
+    current = set(
+        model.objects.filter(**{k1_name: k1_value}).values_list(k2, flat=True)  # type: ignore
+    )
+
+    to_add = new - current
+    to_remove = current - new
+
+    if to_add:
+        model.objects.bulk_create(  # type: ignore
+            [model(**{k1_name: k1_value, f"{k2}_id": obj_id}) for obj_id in to_add]
+        )
+
+    if to_remove:
+        model.objects.filter(  # type: ignore
+            **{k1_name: k1_value, f"{k2}_id__in": to_remove}
+        ).delete()
+
+
+def create_person(first_name: str, last_name: str, person_type: str, photo) -> Person:
     if not first_name or not last_name or not person_type:
         raise ValidationError("Preencha todos os campos")
 
@@ -140,9 +171,22 @@ def create_person(first_name, last_name, person_type, photo) -> Person:
     return person
 
 
-def create_resident(person_id, homes, bi):
-    homes = validate_homes(homes)
+def edit_person(person: Person, first_name: str, last_name: str, photo):
+    if not first_name or not last_name:
+        raise ValidationError("Preencha todos os campos")
+
+    update_instace(person, {"first_name": first_name, "last_name": last_name})
+
+    if photo:
+        person.photo.save(f"{uuid4()}.jpeg", photo)  # type: ignore
+
+
+def create_resident(person_id: int, _homes: list[str], bi: str) -> Resident:
+    homes = validate_homes(_homes)
     bi = validate_bi(bi)
+
+    if not homes:
+        raise ValidationError("Informe pelo menos uma residência")
 
     resident = Resident.objects.create(person_id=person_id, bi=bi)  # type: ignore
     ResidentHome.objects.bulk_create(  # type: ignore
@@ -151,20 +195,47 @@ def create_resident(person_id, homes, bi):
     return resident
 
 
-def create_worker(person_id, bi, homes, fields) -> Worker:
-    homes = validate_homes(homes)
+def edit_resident(resident: Resident, _homes: list[str], bi: str):
+    homes = validate_homes(_homes)
+    bi = validate_bi(bi)
+
+    if not homes:
+        raise ValidationError("Informe pelo menos uma residência")
+
+    update_instace(resident, {"bi": bi})
+    update_m2m(ResidentHome, "resident", resident, "home", set(homes))
+
+
+def create_worker(
+    person_id: int, bi: str, _homes: list[str], _fields: list[str]
+) -> Worker:
+    homes = validate_homes(_homes)
 
     if not homes:
         raise ValidationError("Informe o seu local de trabalho")
 
     bi = validate_bi(bi)
-    fields = validate_fields(fields)
+    fields = validate_fields(_fields)
 
     worker = Worker.objects.create(person_id=person_id, bi=bi, fields=fields)  # type: ignore
+
     WorkerHome.objects.bulk_create(  # type: ignore
         [WorkerHome(worker_id=worker.id, home_id=home) for home in homes]
     )
     return worker
+
+
+def edit_worker(worker: Worker, bi: str, _homes: list[str], _fields: list[str]):
+    homes = validate_homes(_homes)
+
+    if not homes:
+        raise ValidationError("Informe o seu local de trabalho")
+
+    bi = validate_bi(bi)
+    fields = validate_fields(_fields)
+
+    update_instace(worker, {"bi": bi, "fields": fields})
+    update_m2m(WorkerHome, "worker", worker, "home", set(homes))
 
 
 def create_visitor(person_id: int, host_id: str, visitor_type: str) -> Visitor:
@@ -174,3 +245,8 @@ def create_visitor(person_id: int, host_id: str, visitor_type: str) -> Visitor:
     visitor = Visitor.objects.create(person_id=person_id, type=visitor_type)  # type: ignore
     VisitorHost.objects.create(visitor_id=visitor.id, host_id=host.id)  # type: ignore
     return visitor
+
+
+def edit_visitor(visitor: Visitor, visitor_type: str):
+    visitor_type = validate_visitor_type(visitor_type)
+    update_instace(visitor, {"type": visitor_type})

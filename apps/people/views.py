@@ -9,18 +9,24 @@ from django.urls import reverse
 
 from .choices import FIELD_TYPES, VISITOR_TYPES
 from .db import insert_person_embedding, search_person_by_embedding
-from .models import Home, Person, ResidentHome, VisitorHost
+from .models import Home, Person, Resident, ResidentHome, VisitorHost
 from .utils import (
     create_person,
     create_resident,
     create_visitor,
     create_worker,
+    edit_resident,
+    edit_visitor,
+    edit_worker,
     generate_face_embedding,
     treat_photo,
+    edit_person as util_edit_person,
 )
+
 
 class SearchError(ValidationError):
     pass
+
 
 def home(request):
     context = {}
@@ -31,7 +37,9 @@ def home(request):
     if search_query:
         people_queryset = people_queryset.annotate(
             new_full_name=Concat(
-                "first_name", Value(" "), "last_name",
+                "first_name",
+                Value(" "),
+                "last_name",
             )
         ).filter(  # type: ignore
             new_full_name__icontains=search_query
@@ -148,7 +156,76 @@ def get_person(request, person_id):
 
     return render(request, "people/details.html", context)
 
+
 def delete_person(request, person_id: int):
     person = get_object_or_404(Person, id=person_id)
     person.delete()
     return redirect("people:home")
+
+
+def edit_person(request, person_id: int):
+    person = get_object_or_404(Person, id=person_id)
+    context = {"person": person}
+
+    if person.type == "R":
+        context["homes"] = Home.objects.all() # type: ignore
+        context["resident_homes"] = person.resident.residenthome_set.values_list(
+            "home_id", flat=True
+        )
+    elif person.type == "V":
+        context["visitor_types"] = VISITOR_TYPES
+    else:
+        context["fields"] = FIELD_TYPES
+        context["homes"] = Home.objects.all() # type: ignore
+
+    if request.method != "POST":
+        return render(request, "people/edit.html", context)
+    try:
+        content_file, image = [None] * 2
+        photo_base64 = request.POST.get("photo", "").strip()
+
+        if photo_base64:
+            content_file, image = treat_photo(photo_base64)
+
+        util_edit_person(
+            person=person,
+            first_name=request.POST.get("first_name", "").strip(),
+            last_name=request.POST.get("last_name", "").strip(),
+            photo=content_file,
+        )
+
+        match str(person.type):
+            case "R":
+                edit_resident(
+                    person.resident,
+                    request.POST.getlist("resident-homes", []),
+                    request.POST.get("resident-bi", ""),
+                )
+            case "W":
+                edit_worker(
+                    person.worker,
+                    request.POST.get("worker-bi", ""),
+                    request.POST.getlist("worker-homes", []),
+                    request.POST.getlist("worker-fields", []),
+                )
+            case "V":
+                edit_visitor(
+                    person.visitor,
+                    request.POST.get("visitor-type", ""),
+                )
+
+        if content_file and image:
+            close_old_connections()
+            embedding = generate_face_embedding(image=image)
+            insert_person_embedding(person.pk, embedding)
+
+        messages.success(request, "Pessoa editada com sucesso")
+        return redirect(reverse("people:details", args=[person.pk]))
+    except Exception as error:
+        msg = (
+            error.message  # type: ignore
+            if getattr(error, "message", False)
+            else "Erro ao editar, verifique os campos, por favor."
+        )
+        messages.error(request, msg)
+        return render(request, "people/edit.html", context)
