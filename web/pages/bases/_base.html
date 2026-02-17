@@ -61,9 +61,11 @@
              opacity-20 brightness-100 contrast-150 mix-blend-overlay">
         </div>
     </div>
-
+    {% if not request.pin_verified %}
+    {% include 'components/pin_modal.html' %}
+    {% endif %}
     {% if messages %}
-    <div class="fixed top-6 right-6 z-[100] flex flex-col gap-3">
+    <div class="fixed top-6 right-6 z-[1001] flex flex-col gap-3">
         {% for message in messages %}
         <div
             class="messages-div max-w-sm w-full rounded-lg px-4 py-3 shadow-lg

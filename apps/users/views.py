@@ -2,10 +2,11 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-
+from django.views.decorators.csrf import csrf_exempt
 from .utils import pin_not_required, without_login
-
+import json
 User = get_user_model()
 
 
@@ -67,24 +68,26 @@ def login(request):
 
 
 @pin_not_required
+@csrf_exempt
 def pin(request):
     if request.method == "POST":
-        raw_pin = request.POST.get("pin", "")
+        data = json.loads(request.body)
+        raw_pin = data.get("pin", "")
 
         if not raw_pin or len(raw_pin) != 4:
-            messages.error(request, "Informe o PIN completo")
+            return JsonResponse({"error": "PIN incompleto"}, status=400)
         else:
             user = request.user
             if user.check_pin(raw_pin):
-                response = redirect("panel:home")
-                response.set_cookie("pin_verified", True)
+                response = JsonResponse({"success": True})
+                response.set_cookie("pin_verified", True)  # type: ignore
                 return response
-            messages.error(request, "PIN incorrecto")
-    return render(request, "users/pin.html")
+            return JsonResponse({"error": "PIN incorrecto"}, status=400)
+    return JsonResponse({"error": "Método proibido"}, status=405)
 
 
 def lock(request):
-    response = redirect("users:pin")
+    response = redirect("panel:home")
     response.delete_cookie("pin_verified")
     return response
 

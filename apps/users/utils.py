@@ -7,6 +7,7 @@ from django.urls import resolve
 
 def pin_middleware(get_response):
     def middleware(request):
+        setattr(request, "pin_verified", True)
         resolver = resolve(request.path_info)
         view = resolver.func
 
@@ -15,7 +16,7 @@ def pin_middleware(get_response):
             and not request.COOKIES.get("pin_verified", False)
             and request.user.is_authenticated
         ):
-            return redirect("users:pin")
+            setattr(request, "pin_verified", False)
         response = get_response(request)
         return response
 
@@ -42,8 +43,8 @@ def without_login(view_func):
         if request.user.is_authenticated:
             return redirect(
                 "panel:home"
-                if request.COOKIES.get("pin_verified", False)
-                else "users:pin"
+                #if request.COOKIES.get("pin_verified", False)
+               # else "users:pin"
             )
         return view_func(request, *args, **kwargs)
 
