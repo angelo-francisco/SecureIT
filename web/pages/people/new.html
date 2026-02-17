@@ -30,9 +30,11 @@
           <select id="person_type" name="person_type" required
             class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
             <option value="" selected disabled>Selecione um tipo de pessoa</option>
-            <option value="R">Residente</option>
             <option value="V">Visitante</option>
-            <option value="W">Trabalhador(a)</option>
+            {% if request.user.is_superuser %}
+              <option value="R">Residente</option>
+              <option value="W">Trabalhador(a)</option>
+            {% endif %}
           </select>
         </div>
         <div class="space-y-4">
@@ -103,6 +105,10 @@
         </div>
         <input type="hidden" name="photo" id="photo" required>    
         <div class="flex justify-end gap-3 mt-6">
+          <button onclick="window.history.go(-1)"
+            class="flex items-center gap-2 h-10 px-4 rounded-lg bg-red-500 text-white font-bold text-base">
+            Cancelar
+          </button>
           <button id="startVideo"
             class="flex items-center gap-2 h-10 px-4 rounded-lg bg-gray-900 text-white font-bold text-base">
             Capturar Rosto

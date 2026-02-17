@@ -1,15 +1,15 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.validators import ValidationError
+from django.db import close_old_connections
 from django.db.models import Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db import close_old_connections
 from django.urls import reverse
 
 from .choices import FIELD_TYPES, VISITOR_TYPES
 from .db import insert_person_embedding, search_person_by_embedding
-from .models import Home, Person, Resident, ResidentHome, VisitorHost
+from .models import Home, Person, ResidentHome, VisitorHost
 from .utils import (
     create_person,
     create_resident,
@@ -20,6 +20,8 @@ from .utils import (
     edit_worker,
     generate_face_embedding,
     treat_photo,
+)
+from .utils import (
     edit_person as util_edit_person,
 )
 
@@ -168,7 +170,7 @@ def edit_person(request, person_id: int):
     context = {"person": person}
 
     if person.type == "R":
-        context["homes"] = Home.objects.all() # type: ignore
+        context["homes"] = Home.objects.all()  # type: ignore
         context["resident_homes"] = person.resident.residenthome_set.values_list(
             "home_id", flat=True
         )
@@ -176,7 +178,7 @@ def edit_person(request, person_id: int):
         context["visitor_types"] = VISITOR_TYPES
     else:
         context["fields"] = FIELD_TYPES
-        context["homes"] = Home.objects.all() # type: ignore
+        context["homes"] = Home.objects.all()  # type: ignore
 
     if request.method != "POST":
         return render(request, "people/edit.html", context)
@@ -229,3 +231,6 @@ def edit_person(request, person_id: int):
         )
         messages.error(request, msg)
         return render(request, "people/edit.html", context)
+
+
+def new_visit(request, visitor_id: int): ...

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import home, new_person, get_person, delete_person, edit_person
+from .views import home, new_person, get_person, delete_person, edit_person, new_visit
 
 app_name = "people"
 
@@ -10,4 +10,5 @@ urlpatterns = [
     path("<int:person_id>/", get_person, name="details"),
     path("<int:person_id>/edit", edit_person, name="edit"),
     path("<int:person_id>/del", delete_person, name="delete"),
+    path("<int:visitor_id>/new-visit", new_visit, name="new-visit")
 ]
