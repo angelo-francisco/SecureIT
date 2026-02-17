@@ -1,16 +1,16 @@
 <div class="grid grid-cols-[repeat(4,1fr)_auto] gap-3 sm:gap-4 items-center">
     <input
-        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-2xl font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
-        maxlength="1" placeholder="•" type="text" />
+        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-lg font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
+        maxlength="1" placeholder="•" type="password" />
     <input
-        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-2xl font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
-        maxlength="1" placeholder="•" type="text" />
+        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-lg font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
+        maxlength="1" placeholder="•" type="password" />
     <input
-        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-2xl font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
-        maxlength="1" placeholder="•" type="text" />
+        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-lg font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
+        maxlength="1" placeholder="•" type="password" />
     <input
-        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-2xl font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
-        maxlength="1" placeholder="•" type="text" />
+        class="pin-input h-14 w-full bg-[#11161b] border border-border-dark rounded-lg text-center text-white text-lg font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
+        maxlength="1" placeholder="•" type="password" />
     <input type="hidden" id="finalPinInput" name="pin" />
 </div>
 
@@ -33,7 +33,8 @@
             if (inputType === "deleteContentBackward") {
                 if (idx > 0) {
                     const previousPinField = pinFields[idx - 1]
-                    previousPinField.focus()
+                    // previousPinField.focus()
+                    previousPinField.select()
                 }
             } else {
                 if (idx < 3) {
