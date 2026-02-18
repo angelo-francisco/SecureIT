@@ -1,5 +1,5 @@
 {% extends 'bases/panel_no_nav.html' %}
-
+{% load static %}
 {% block title %}Painel de Controle{% endblock %}
 
 {% block subhead %}
@@ -32,6 +32,44 @@
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: repeat(3, 1fr);
     }
+
+    @keyframes float-up {
+        0% {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        20% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        80% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale(1);
+        }
+    }
+
+    .notification-float {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1000;
+        animation: float-up 5s ease-in-out;
+        background: rgba(19, 127, 236, 0.2);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(19, 127, 236, 0.3);
+        border-radius: 100px;
+        padding: 8px 16px;
+        margin: 10px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
 </style>
 {% endblock %}
 
@@ -39,6 +77,8 @@
 <div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
     {% include "components/loader.html" with w=50 %}
 </div>
+
+<audio id="soundEffect" src="{% static 'sounds/notify.mp3' %}" preload="auto"></audio>
 
 {% include "components/floating_navbar.html" %}
 <main id="container" class="
@@ -71,6 +111,32 @@
 <script>
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
+    const notificationCounter = document.getElementById("notificationCounter")
+    const audio = document.getElementById("soundEffect")
+
+    function showDetectionAnimation(peopleCount) {
+        const notificationBtn = document.getElementById('notificationBtn');
+
+        const floatElement = document.createElement('div');
+        floatElement.className = 'notification-float flex items-center gap-2'
+
+        const message = peopleCount === 1
+            ? 'Detectamos 1 pessoa agora'
+            : `Detectamos ${peopleCount} pessoas agora`;
+
+        floatElement.innerHTML = `{% lucide 'info' %}${message}`;
+
+        document.body.appendChild(floatElement);
+
+        setTimeout(() => {
+            floatElement.remove();
+        }, 5000);
+    }
+
+    function playNotificationSound() {
+        audio.currentTime = 0;
+        audio.play().catch(err => console.log("Falha ao tocar som: " + err))
+    }
 
     function convertToInt(id) {
         if (typeof id === "number") return id
@@ -84,16 +150,29 @@
         ws.binaryType = "arraybuffer"
 
         ws.onmessage = (event) => {
-            const blob = new Blob([event.data], { type: "image/jpeg" });
-            const url = URL.createObjectURL(blob);
-            document.getElementById(`cam-${index}`).src = url
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            if (typeof event.data === "string") {
+                const data = JSON.parse(event.data)
+                if (data.type === "notification") {
+                    notificationCounter.innerText = parseInt(notificationCounter.innerText) + 1;
+                    playNotificationSound()
+                    showDetectionAnimation(data.people)
+                }
+            }
+
+            if (event.data instanceof ArrayBuffer) {
+                const blob = new Blob([event.data], { type: "image/jpeg" });
+                const url = URL.createObjectURL(blob);
+                document.getElementById(`cam-${index}`).src = url
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
         }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
+        await navigator.mediaDevices.getUserMedia({ audio: true })
         const cameras = document.querySelectorAll('.camera')
         mainHTML.dataset.count = cameras.length
+
         cameras.forEach(camera => {
             let connectionUrlOrId = camera.dataset.connectionUrlOrId
             if (!connectionUrlOrId) return

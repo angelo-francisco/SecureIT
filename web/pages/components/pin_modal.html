@@ -1,4 +1,4 @@
-<div class="fixed inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg z-[1000]"
+<div class="hidden fixed inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg z-[1000]"
     id="pimModalElement">
     <div class="max-w-lg text-center px-2 md:px-0">
         <div class="flex flex-col items-center pb-6">
@@ -22,8 +22,14 @@
 </div>
 
 <script>
+    const pinVerified = "{{ request.pin_verified }}" === "True"
+    const pinModal = document.querySelector("#pimModalElement")
     const pinButton = document.querySelector("#submitPin")
     const errorP = document.querySelector("#errorPElement")
+
+    if (!pinVerified) {
+        pinModal.classList.toggle('hidden')
+    }
 
     pinButton.addEventListener('click', async () => {
         const response = await fetch("/users/pin/", {
@@ -36,7 +42,10 @@
         const data = await response.json()
 
         if (response.ok) {
-            document.querySelector("#pimModalElement").classList.toggle('hidden')
+            document.querySelectorAll('input[type="password"]').forEach(input => {
+                input.value = ""
+            })
+            pinModal.classList.toggle('hidden')
         } else {
             errorP.innerText = data.error
         }

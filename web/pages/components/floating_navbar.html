@@ -4,7 +4,7 @@
             bg-surface-dark/60 backdrop-blur-xl backdrop-saturate-150
             border border-gray-700
             rounded-full shadow-xl
-            flex flex-col items-center gap-3
+            flex flex-col items-center gap-2
             p-3 cursor-move select-none">
 
     <div class="relative w-10 h-10 flex items-center justify-center text-white font-bold">
@@ -14,28 +14,49 @@
 
     <div class="w-full h-px bg-border-dark"></div>
 
-    <a href="{% url 'cameras:home' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/20 rounded-lg">
-        videocam
+    <a href="{% url 'cameras:home' %}"
+        class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        {% lucide "video" %}
     </a>
 
-    <a href="{% url 'people:home' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
-        people
+    <a href="{% url 'people:home' %}"
+        class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        {% lucide "users" %}
     </a>
 
-    <a href="{% url 'notifications:home' %}"
-        class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
-        notifications
+    <a href="{% url 'notifications:home' %}" id="notificationBtn"
+        class="relative flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        {% lucide "bell" class="text-white" %}
+    
+        <span id="notificationCounter"
+            class="absolute top-0 right-0 px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+            0
+        </span>
     </a>
 
-    <a href="{% url 'users:lock' %}" class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
-        lock
+    <a id="btnLock" class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        {% lucide "lock" %}
     </a>
-    <a href="/admin"
-        class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
+    <a href="/admin" class="material-symbols-outlined flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
         shield_person
     </a>
     <a href="{% url 'notifications:home' %}"
-        class="material-symbols-outlined p-1 px-2 hover:bg-[#137FEC]/10 rounded-lg">
-        settings
+        class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        {% lucide "settings" %}
     </a>
 </div>
+
+<script>
+    const pinModalFromFloatingNavbar = document.querySelector("#pimModalElement")
+
+    document.querySelector("#btnLock")
+        .addEventListener('click', async () => {
+            const response = await fetch("/users/lock/", {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            pinModalFromFloatingNavbar.classList.toggle('hidden')
+        })
+</script>

@@ -1,3 +1,5 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth import login as django_login
@@ -5,8 +7,11 @@ from django.contrib.auth import logout as django_logout
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
+
+from apps.panel.models import Configuration
+
 from .utils import pin_not_required, without_login
-import json
+
 User = get_user_model()
 
 
@@ -43,6 +48,8 @@ def signup(request):
             user.set_pin(pin)
 
             user.save()
+            Configuration.objects.create(user=user)  # type: ignore
+
             messages.success(request, "Dados registados com sucesso")
             return redirect("users:login")
     return render(request, "users/signup.html")
@@ -87,7 +94,7 @@ def pin(request):
 
 
 def lock(request):
-    response = redirect("panel:home")
+    response = JsonResponse({"success": True})
     response.delete_cookie("pin_verified")
     return response
 
