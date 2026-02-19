@@ -53,7 +53,7 @@ def main():
         USING vec0(
             id_person_embedding INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             person INTEGER NOT NULL
-                REFERENCES people_person (id) DEFERRABLE INITIALLY DEFERRED,
+                REFERENCES people_person (id),
             embedding FLOAT[512]
         )
         """
