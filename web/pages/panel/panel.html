@@ -114,6 +114,8 @@
     const loader = document.getElementById("loader")
     const notificationCounter = document.getElementById("notificationCounter")
     const audio = document.getElementById("soundEffect")
+    
+    notificationCounter.innerHTML = "{{ notifications_count }}"
 
     function showDetectionAnimation(peopleCount) {
         const notificationBtn = document.getElementById('notificationBtn');

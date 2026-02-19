@@ -109,7 +109,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_notifications_count(self, readed=False):
         return Notification.objects.filter(  # type: ignore
-            user=self.scope["user"], readed=readed, deleted=False
+            user=self.scope["user"], deleted=False, readed=readed
         ).count()
 
     async def disconnect(self, close_code):  # type: ignore
