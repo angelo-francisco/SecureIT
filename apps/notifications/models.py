@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from apps.cameras.models import Camera
 
 class Notification(models.Model):
     user = models.ForeignKey(
@@ -17,6 +18,8 @@ class Notification(models.Model):
             ("P", "Perigo"),
         ],
     )
+    deleted = models.BooleanField(default=False)
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True, blank=True)
     readed = models.BooleanField(default=False) # type: ignore
     photo = models.ImageField(upload_to="notifications_frames/")
     created_at = models.DateTimeField(auto_now_add=True)

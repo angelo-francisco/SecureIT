@@ -9,7 +9,7 @@
 <div class="bg-[#0b0f14] fixed w-full h-full z-[-1]"></div>
 <main id="container" class="hidden p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-5 gap-6">
     <div class="xl:col-span-3">
-        <div id="camera" data-connection-url-or-id="{{ camera.get_connection_url_or_id }}"
+        <div id="camera" data-camera-id="{{ camera.id }}" data-connection-url-or-id="{{ camera.get_connection_url_or_id }}"
             class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
             <img id="cam-{{ camera.id }}" class="w-full h-full" />
             <div class="absolute top-4 left-4 px-4 py-1 rounded-full bg-red-600/80 text-sm font-semibold animate-pulse">
@@ -105,9 +105,9 @@
         return parseInt(id)
     }
 
-    function connectCameraWs(index) {
+    function connectCameraWs(cameraId, index) {
         if (!index) return
-        const ws = new WebSocket(`ws:localhost:8000/ws/camera-video/${index}`)
+        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/stream-in/${index}`)
         ws.binaryType = "arraybuffer"
         ws.onmessage = e => {
             const blob = new Blob([e.data], { type: "image/jpeg" })
@@ -119,7 +119,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const index = convertToInt(cameraDiv.dataset.connectionUrlOrId)
-        connectCameraWs(index)
+        const cameraId = cameraDiv.dataset.cameraId
+        connectCameraWs(cameraId, index)
         loader.classList.add("hidden")
         mainHTML.classList.remove("hidden")
     })

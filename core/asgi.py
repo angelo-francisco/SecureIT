@@ -19,7 +19,10 @@ application = ProtocolTypeRouter(
             AuthMiddlewareStack(
                 URLRouter(
                     [
-                        path("ws/camera-video/<int:index>", CameraConsumer.as_asgi()),
+                        path(
+                            "ws/camera/<int:camera_id>/stream-in/<int:index>",
+                            CameraConsumer.as_asgi(),
+                        ),
                     ]
                 )
             )

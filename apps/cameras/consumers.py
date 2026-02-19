@@ -94,13 +94,14 @@ class CameraConsumer(AsyncWebsocketConsumer):
         return Configuration.objects.get(user=self.scope["user"])  # type: ignore
 
     @database_sync_to_async
-    def create_notification(self, title: str, description: str, level: str, photo=None):
+    def create_notification(self, title: str, description: str, level: str, photo=None, camera_id=None):
         return Notification.objects.create(  # type: ignore
             user=self.scope["user"],
             description=description,
             title=title,
             level=level,
             photo=photo,
+            camera_id=camera_id
         )
 
     @database_sync_to_async
@@ -145,6 +146,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
                                 description="Foram avistados alguns possíveis suspeitos em horário de monitoramneto",
                                 level="S",
                                 photo=ContentFile(frame, f"{uuid4()}.jpg"),
+                                camera_id=self.scope["url_route"]["kwargs"]["camera_id"],
                             )
                             await self.send(
                                 text_data=json.dumps(
