@@ -1,17 +1,20 @@
 import datetime
+import json
 from asyncio import CancelledError, create_task
 from asyncio import sleep as async_sleep
 from threading import Thread
 from time import sleep, time
-import json
-from channels.consumer import database_sync_to_async
+from uuid import uuid4
+
 import cv2
 import imutils
 from asgiref.sync import sync_to_async
+from channels.consumer import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.files.base import ContentFile
 
+from apps.notifications.models import Notification
 from apps.panel.models import Configuration
-
 
 ALERT_COOLDOWN = 5
 DETECT_EVERY = 3
@@ -90,6 +93,22 @@ class CameraConsumer(AsyncWebsocketConsumer):
     def get_user_confs(self):
         return Configuration.objects.get(user=self.scope["user"])  # type: ignore
 
+    @database_sync_to_async
+    def create_notification(self, title: str, description: str, level: str, photo=None):
+        return Notification.objects.create(  # type: ignore
+            user=self.scope["user"],
+            description=description,
+            title=title,
+            level=level,
+            photo=photo,
+        )
+
+    @database_sync_to_async
+    def get_notifications_count(self, readed=False):
+        return Notification.objects.filter( # type: ignore
+            user=self.scope["user"], readed=readed
+        ).count()  
+
     async def disconnect(self, close_code):  # type: ignore
         self.running = False
         await sync_to_async(self.camera.stop)()
@@ -121,17 +140,25 @@ class CameraConsumer(AsyncWebsocketConsumer):
                             and self.check_cooldown()
                             and people != self.last_people_count
                         ):
+                            await self.create_notification(
+                                title=f"Detectadas {people} pessoa(s)",
+                                description="Foram avistados alguns possíveis suspeitos em horário de monitoramneto",
+                                level="S",
+                                photo=ContentFile(frame, f"{uuid4()}.jpg"),
+                            )
                             await self.send(
                                 text_data=json.dumps(
                                     {
                                         "type": "notification",
                                         "people": people,
+                                        "notifications_count": await self.get_notifications_count(),
                                     }
                                 )
                             )
                             self.last_alert = time()
                             self.last_people_count = people
-                except RuntimeError:
+                except Exception as error:
+                    print(error)
                     break
 
                 await self.send(bytes_data=frame)

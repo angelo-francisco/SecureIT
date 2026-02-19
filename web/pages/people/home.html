@@ -133,21 +133,17 @@
         </tbody>
       </table>
       <div class="pagination text-center">
-        <span class="step-links">
+        <span class="text-center step-links flex items-center gap-2 justify-center">
           {% if people.has_previous %}
-          <a href="?page=1">&laquo; 1</a>
-          <a href="?page={{ people.previous_page_number }}">Anterior</a>
+            <a href="?page={{ people.previous_page_number }}">{% lucide "chevron-left" %}</a>
           {% endif %}
 
-          {% if people.next_page_number > people.number %}
           <span class="current">
-            Pág. {{ people.number }} / {{ people.paginator.num_pages }}.
+            Pág. {{ people.number }} / {{ people.paginator.num_pages }}
           </span>
-          {% endif %}
 
           {% if people.has_next %}
-          <a href="?page={{ people.next_page_number }}">Próxima</a>
-          <a href="?page={{ people.paginator.num_pages }}">{{ people.paginator.num_pages }} &raquo;</a>
+            <a href="?page={{ people.next_page_number }}">{% lucide "chevron-right" %}</a>
           {% endif %}
         </span>
       </div>

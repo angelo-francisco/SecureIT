@@ -48,6 +48,7 @@
             opacity: 1;
             transform: scale(1);
         }
+
         100% {
             opacity: 0;
             transform: scale(1);
@@ -153,7 +154,7 @@
             if (typeof event.data === "string") {
                 const data = JSON.parse(event.data)
                 if (data.type === "notification") {
-                    notificationCounter.innerText = parseInt(notificationCounter.innerText) + 1;
+                    notificationCounter.innerText = data.notifications_count;
                     playNotificationSound()
                     showDetectionAnimation(data.people)
                 }
@@ -169,19 +170,24 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-        await navigator.mediaDevices.getUserMedia({ audio: true })
-        const cameras = document.querySelectorAll('.camera')
-        mainHTML.dataset.count = cameras.length
+        const media = await navigator.mediaDevices.getUserMedia({ audio: true })
+        if (media) {
 
-        cameras.forEach(camera => {
-            let connectionUrlOrId = camera.dataset.connectionUrlOrId
-            if (!connectionUrlOrId) return
+            const cameras = document.querySelectorAll('.camera')
+            mainHTML.dataset.count = cameras.length
 
-            connectCameraWs(convertToInt(connectionUrlOrId))
-        });
+            cameras.forEach(camera => {
+                let connectionUrlOrId = camera.dataset.connectionUrlOrId
+                if (!connectionUrlOrId) return
 
-        loader.classList.add('hidden')
-        mainHTML.classList.remove('hidden')
+                connectCameraWs(convertToInt(connectionUrlOrId))
+            });
+
+            loader.classList.add('hidden')
+            mainHTML.classList.remove('hidden')
+        } else {
+            console.log("Give permissionss to play audios")
+        }
     })
 </script>
 {% endblock %}

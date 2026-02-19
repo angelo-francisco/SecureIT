@@ -17,6 +17,6 @@ class Notification(models.Model):
             ("P", "Perigo"),
         ],
     )
-    readed = models.BooleanField(default=False)
+    readed = models.BooleanField(default=False) # type: ignore
     photo = models.ImageField(upload_to="notifications_frames/")
     created_at = models.DateTimeField(auto_now_add=True)

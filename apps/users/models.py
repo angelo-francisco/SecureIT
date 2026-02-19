@@ -19,3 +19,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    @property
+    def count_unreaded_notifications(self):
+        return self.notifications.filter(readed=False).count()  # type:ignore
