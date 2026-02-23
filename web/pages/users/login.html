@@ -13,11 +13,11 @@
     <form action="{% url 'users:login' %}" class="flex flex-col gap-5" method="post">
         {% csrf_token %}
         <label class="flex flex-col w-full">
-            {% include 'components/input.html' with placeholder="Endereço eletrónico" type="email" icon="email" name="email" %}
+            {% include 'components/lucide-input.html' with placeholder="Endereço eletrónico" type="email" icon="mail" name="email" %}
         </label>
         <div class="flex flex-col sm:flex-row gap-4">
             <label class="flex flex-col w-full flex-1">
-                {% include 'components/input.html' with placeholder="Palavra-passe" type="password" icon="lock" name="password" %}
+                {% include 'components/lucide-input.html' with placeholder="Palavra-passe" type="password" icon="lock" name="password" %}
             </label>
         </div>
         <button
@@ -25,7 +25,7 @@
             type="submit">
             <span class="truncate flex items-center gap-1">
                 Avançar
-                <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                {% lucide "arrow-right" %}
             </span>
         </button>
         <span class="text-center">Não tem conta? <a href="{% url 'users:signup' %}" class="text-blue-500 hover:underline">Registar-se</a></span>

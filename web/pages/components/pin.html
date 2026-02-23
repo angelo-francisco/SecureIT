@@ -15,35 +15,37 @@
 </div>
 
 <script>
-    const pinFields = document.querySelectorAll('.pin-input')
-    const finalPinInput = document.querySelector('#finalPinInput')
+    document.addEventListener('DOMContentLoaded', () => {
+        const pinFields = document.querySelectorAll('.pin-input')
+        const finalPinInput = document.querySelector('#finalPinInput')
 
-    function updateFinalPinIput() {
-        let newPinValue = ""
-        pinFields.forEach(pinField => {
-            newPinValue += pinField.value
-        })
-        finalPinInput.value = newPinValue
-    }
+        function updateFinalPinIput() {
+            let newPinValue = ""
+            pinFields.forEach(pinField => {
+                newPinValue += pinField.value
+            })
+            finalPinInput.value = newPinValue
+        }
 
-    pinFields.forEach((pinField, idx) => {
-        pinField.addEventListener('input', (e) => {
-            const inputType = e.inputType
+        pinFields.forEach((pinField, idx) => {
+            pinField.addEventListener('input', (e) => {
+                const inputType = e.inputType
 
-            if (inputType === "deleteContentBackward") {
-                if (idx > 0) {
-                    const previousPinField = pinFields[idx - 1]
-                    // previousPinField.focus()
-                    previousPinField.select()
+                if (inputType === "deleteContentBackward") {
+                    if (idx > 0) {
+                        const previousPinField = pinFields[idx - 1]
+                        // previousPinField.focus()
+                        previousPinField.select()
+                    }
+                } else {
+                    if (idx < 3) {
+                        const nextPinField = pinFields[idx + 1]
+                        nextPinField.value = ""
+                        nextPinField.focus()
+                    }
                 }
-            } else {
-                if (idx < 3) {
-                    const nextPinField = pinFields[idx + 1]
-                    nextPinField.value = ""
-                    nextPinField.focus()
-                }
-            }
-            updateFinalPinIput()
+                updateFinalPinIput()
+            })
         })
     })
 </script>

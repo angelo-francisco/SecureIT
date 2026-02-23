@@ -22,32 +22,35 @@
 </div>
 
 <script>
-    const pinVerified = "{{ request.pin_verified }}" === "True"
-    const pinModal = document.querySelector("#pimModalElement")
-    const pinButton = document.querySelector("#submitPin")
-    const errorP = document.querySelector("#errorPElement")
+    document.addEventListener('DOMContentLoaded', () => {
 
-    if (!pinVerified) {
-        pinModal.classList.toggle('hidden')
-    }
+        const pinVerified = "{{ request.pin_verified }}" === "True"
+        const pinModal = document.querySelector("#pimModalElement")
+        const pinButton = document.querySelector("#submitPin")
+        const errorP = document.querySelector("#errorPElement")
 
-    pinButton.addEventListener('click', async () => {
-        const response = await fetch("/users/pin/", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ pin: document.querySelector("#finalPinInput").value }),
-        })
-        const data = await response.json()
-
-        if (response.ok) {
-            document.querySelectorAll('input[type="password"]').forEach(input => {
-                input.value = ""
-            })
+        if (!pinVerified) {
             pinModal.classList.toggle('hidden')
-        } else {
-            errorP.innerText = data.error
         }
+
+        pinButton.addEventListener('click', async () => {
+            const response = await fetch("/users/pin/", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pin: document.querySelector("#finalPinInput").value }),
+            })
+            const data = await response.json()
+
+            if (response.ok) {
+                document.querySelectorAll('input[type="password"]').forEach(input => {
+                    input.value = ""
+                })
+                pinModal.classList.toggle('hidden')
+            } else {
+                errorP.innerText = data.error
+            }
+        })
     })
 </script>

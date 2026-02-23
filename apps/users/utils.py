@@ -8,7 +8,12 @@ from django.urls import resolve
 def pin_middleware(get_response):
     def middleware(request):
         setattr(request, "pin_verified", True)
-        resolver = resolve(request.path_info)
+        path_info = request.path_info
+
+        if path_info.startswith('/users/signup') or path_info.startswith('/users/login'):
+            setattr(request, "need_pin_modal", False)
+
+        resolver = resolve(path_info)
         view = resolver.func
 
         if (
