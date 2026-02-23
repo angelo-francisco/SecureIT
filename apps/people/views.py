@@ -155,7 +155,7 @@ def get_person(request, person_id):
             )
         paginator = Paginator(visits, 10)
         page = request.GET.get("page", "")
-        context["visitor_hosts"] = paginator.get_page(page)
+        context["visits"] = paginator.get_page(page)
 
     return render(request, "people/details.html", context)
 
