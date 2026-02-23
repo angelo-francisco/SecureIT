@@ -1,5 +1,5 @@
 <div class="hidden fixed inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg z-[1000]"
-    id="pimModalElement">
+    id="pinModalElement">
     <div class="max-w-lg text-center px-2 md:px-0">
         <div class="flex flex-col items-center pb-6">
             {% include 'components/full-logo.html' %}
@@ -10,7 +10,7 @@
             {% include 'components/pin.html' %}
             <button id="submitPin"
                 class="h-12 w-12 bg-primary rounded-lg flex items-center justify-center text-white hover:bg-blue-600 active:scale-[0.98] transition-all shadow-[0_0_10px_rgba(19,127,236,0.2)]">
-                <span class="material-symbols-outlined text-[24px]">arrow_forward</span>
+                {% lucide "arrow-right" %}
             </button>
         </div>
         <p class="pb-4 text-lg text-error" id="errorPElement"></p>
@@ -25,7 +25,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         const pinVerified = "{{ request.pin_verified }}" === "True"
-        const pinModal = document.querySelector("#pimModalElement")
+        const pinModal = document.querySelector("#pinModalElement")
         const pinButton = document.querySelector("#submitPin")
         const errorP = document.querySelector("#errorPElement")
 

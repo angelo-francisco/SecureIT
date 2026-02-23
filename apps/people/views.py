@@ -141,18 +141,7 @@ def get_person(request, person_id):
 
     if person.type == "V":
         visits = Visit.objects.filter(visitor_id=person.visitor.id)  # type: ignore
-        search_query = request.GET.get("search_query", "").strip()
 
-        if search_query:
-            visits = visits.annotate(
-                full_name=Concat(
-                    "resident__person__first_name",
-                    Value(" "),
-                    "resident__person__last_name",
-                )
-            ).filter(  # type: ignore
-                full_name__icontains=search_query
-            )
         paginator = Paginator(visits, 10)
         page = request.GET.get("page", "")
         context["visits"] = paginator.get_page(page)

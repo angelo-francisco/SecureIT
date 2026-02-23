@@ -5,7 +5,7 @@
             border border-gray-700
             rounded-full shadow-xl
             flex flex-col items-center gap-2
-            p-3 cursor-move select-none">
+            p-3 select-none">
 
     <div class="relative w-10 h-10 flex items-center justify-center text-white font-bold">
         <div class="absolute inset-0 rounded-full bg-[#137FEC]/70 blur-lg"></div>
@@ -27,27 +27,31 @@
     <a href="{% url 'notifications:home' %}" id="notificationBtn"
         class="relative flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
         {% lucide "bell" class="text-white" %}
-    
+
         <span id="notificationCounter"
             class="absolute top-0 right-0 px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-            
+
         </span>
     </a>
 
-    <a id="btnLock" class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+    <a id="btnLock"
+        class="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
         {% lucide "lock" %}
     </a>
-    <a href="/admin" class="material-symbols-outlined flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
-        shield_person
-    </a>
-    <a href="{% url 'notifications:home' %}"
-        class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+    <button
+        class="settingsButton flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
         {% lucide "settings" %}
+    </button>
+    {% if request.user.is_superuser %}
+    <a href="/admin"
+        class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        {% lucide "shield" %}
     </a>
+    {% endif %}
 </div>
 
 <script>
-    const pinModalFromFloatingNavbar = document.querySelector("#pimModalElement")
+    const pinModalFromFloatingNavbar = document.querySelector("#pinModalElement")
 
     document.querySelector("#btnLock")
         .addEventListener('click', async () => {

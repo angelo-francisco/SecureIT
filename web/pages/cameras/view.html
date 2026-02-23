@@ -22,12 +22,12 @@
             <h2 class="text-2xl font-semibold">{{ camera.name }}</h2>
             <div class="flex gap-2">
                 <a href="{% url 'cameras:edit' camera.id %}" class="p-2 rounded-lg bg-gray-600/20 hover:bg-gray-600/30 transition">
-                    <span class="material-symbols-outlined">edit</span>
+                    {% lucide "pencil" %}
                 </a>
                 <form action="{% url 'cameras:delete' camera.id %}" method="GET">
                     {% csrf_token %}
                     <button class="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition">
-                        <span class="material-symbols-outlined">delete</span>
+                        { lucide "trash"%}
                     </button>
                 </form>
             </div>
@@ -48,9 +48,8 @@
         <div class="flex justify-between items-center">
             <span class="text-sm uppercase text-gray-400">Conexão</span>
             <span class="flex items-center gap-2">
-                <span class="material-symbols-outlined">
-                    {% if camera.type == "W" %}wifi{% else %}usb{% endif %}
-                </span>
+                {% if camera.type == "W" %}{% lucide "wifi" %}{% else %}{% lucide "usb" %}{% endif %}
+               
                 {{ camera.get_connection_type_display }}
             </span>
         </div>

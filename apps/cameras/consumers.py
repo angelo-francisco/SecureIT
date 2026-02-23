@@ -1,5 +1,3 @@
-import datetime
-import json
 from asyncio import CancelledError, create_task
 from asyncio import sleep as async_sleep
 from threading import Thread
@@ -8,10 +6,12 @@ from uuid import uuid4
 
 import cv2
 import imutils
+import orjson as json  # type: ignore
 from asgiref.sync import sync_to_async
 from channels.consumer import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.files.base import ContentFile
+from django.utils import timezone
 
 from apps.notifications.models import Notification
 from apps.panel.models import Configuration
@@ -112,13 +112,13 @@ class CameraConsumer(AsyncWebsocketConsumer):
             user=self.scope["user"], deleted=False, readed=readed
         ).count()
 
-    async def disconnect(self, close_code):  # type: ignore
+    async def disconnect(self, close_code) -> None:  # type: ignore
         self.running = False
         await sync_to_async(self.camera.stop)()
         self.task.cancel()
 
     def is_monitoring_time(self) -> bool:
-        now = datetime.datetime.now().time()
+        now = timezone.now().time()
         start = self.confs.monitoring_start_time
         end = self.confs.monitoring_end_time
 

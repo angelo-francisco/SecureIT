@@ -6,31 +6,23 @@
         <div class="flex gap-2">
             <button id="photo_capture_close_button_element"
                 class="flex items-center justify-center px-3 py-2 bg-red-500 rounded-lg" title="Fechar" type="button">
-                <span class="material-symbols-outlined">
-                    close
-                </span>
+                {% lucide "x" %}
                 Fechar
             </button>
             <button class="flex items-center justify-center px-3 py-2 bg-gray-900 rounded-lg" title="Desfazer"
                 id="replayVideo" type="button">
-                <span class="material-symbols-outlined">
-                    replay
-                </span>
+                {% lucide "rotate-ccw" %}
                 Repetir
             </button>
             <button class="flex items-center justify-center px-3 py-2 bg-blue-500 rounded-lg" id="takePhoto"
                 title="Capturar" type="button">
-                <span class="material-symbols-outlined">
-                    camera
-                </span>
+                {% lucide "camera" %}
                 Capturar
             </button>
             {% if search %}
             <button class="flex items-center justify-center px-3 py-2 bg-gray-600 rounded-lg"
                 id="photo_capture_search_button_element" title="Pesquisar">
-                <span class="material-symbols-outlined">
-                    search
-                </span>
+                {% lucide "search" %}
                 Pesquisar
             </button>
             {% endif %}

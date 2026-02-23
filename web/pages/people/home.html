@@ -11,7 +11,8 @@
     class="max-w-xl p-5 py-10 bg-[#1c2127] rounded-xl space-y-4 w-full flex flex-col justify-center items-center gap-3 pt-3 mt-3">
     <h1
       class="w-full flex items-center justify-center gap-3 text-3xl font-bold text-center border-b border-white/10 pb-3 pt-3">
-      Resultados da Pesquisa <span class="material-symbols-outlined cursor-pointer" onclick="closeModal()">close</span>
+      Resultados da Pesquisa
+       <button class="cursor-pointer" onclick="closeModal()">{% lucide "x" %}</span>
     </h1>
     <div class="w-full divide-y divide-white/10">
       {% for sr in search_results %}
@@ -46,7 +47,7 @@
         <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
           <form class="relative w-full lg:w-96" action="{% url 'people:home' %}" method="GET">
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-secondary">
-              <span class="material-symbols-outlined">search</span>
+              {% lucide "search" %}
             </div>
             <input
               class="border border-gray/90 block w-full p-2.5 pl-10 text-sm text-white bg-surface-dark rounded-lg focus:ring-1 focus:ring-primary placeholder-text-secondary"
@@ -55,7 +56,7 @@
         </div>
         <a href="{% url 'people:home' %}"
           class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-gray-600 hover:bg-gray-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-gray/20">
-          <span class="material-symbols-outlined text-[20px]">cleaning_services</span>
+          {% lucide "eraser" %}
           <span class="hidden md:block">Limpar Pesquisa</span>
         </a>
 
@@ -64,14 +65,14 @@
           <input type="hidden" name="photo" id="photo" value="">
           <button id="openImageCaptureModel"
             class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 border border-gray-500 text-white text-sm font-bold tracking-wide transition-all">
-            <span class="material-symbols-outlined text-[20px]">account_box</span>
+            {% lucide "scan-face" %}
             <span class="hidden md:block">Pesquisar por rosto</span>
           </button>
         </form>
 
         <a href="{% url 'people:new' %}"
           class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20">
-          <span class="material-symbols-outlined text-[20px]">add</span>
+          {% lucide "plus" %}
           <span class="hidden md:block">Adicionar Pessoa</span>
         </a>
       </div>
@@ -150,7 +151,7 @@
       {% else %}
       <div class="w-full flex justify-center items-center flex-col text-center gap-1 mt-3">
         <div class="flex items-center justify-center">
-          <span class="material-symbols-outlined text-[48px] opacity-80">group_off</span>
+          {% lucide "users-x" %}
         </div>
         <div class="flex flex-col gap-2 max-w-md">
           <h3 class="text-white text-xl font-bold">Nenhuma pessoa registada</h3>

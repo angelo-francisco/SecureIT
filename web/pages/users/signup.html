@@ -32,14 +32,14 @@
             <label class="text-white text-base font-medium leading-normal">
                 Código de accesso
             </label>
-            {% include 'components/pin.html' %}
+            {% include 'components/customizable_pin.html' with pin_class="pin-input-signup" final_input_id="final-input-id-signup" pin_input_name="pin-signup" %}
         </div>
         <button
             class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary hover:bg-primary/90 text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-[0_0_15px_rgba(19,127,236,0.3)] hover:shadow-[0_0_20px_rgba(19,127,236,0.5)]"
             type="submit">
             <span class="truncate flex items-center gap-1">
                 Avançar
-                <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                {% lucide "arrow-right" %}
             </span>
         </button>
         <span class="text-center">Já conta? <a href="{% url 'users:login' %}"

@@ -20,7 +20,7 @@ def signup(request):
     if request.method == "POST":
         email = request.POST.get("email", "")
         password = request.POST.get("password", "")
-        pin = request.POST.get("pin", "")
+        pin = request.POST.get("pin-signup", "")
         full_name = request.POST.get("full_name", "").split(" ")
 
         try:

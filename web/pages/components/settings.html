@@ -1,0 +1,83 @@
+<div class="hidden fixed inset-0 flex flex-col px-5 items-center justify-center backdrop-blur-sm z-[1000]"
+    id="settingsModal">
+    <div class="flex flex-col w-full max-w-3xl p-5 px-8 bg-[#1c2127] relative rounded-lg">
+        <div class="border-b border-gray-600 text-left pb-2 mb-2">
+            <div class="flex items-center justify-between">
+                <h1 class="font-semibold text-3xl">Configurações</h1>
+                <div class="flex items-center gap-2">
+                    <button class="rounded-lg px-2 py-1 bg-blue-600 text-white cursor-pointer p-3"
+                        id="settingsButtonSave">
+                        {% lucide "save" %}
+                    </button>
+                    <button class="rounded-lg px-2 py-1 bg-red-500 text-white cursor-pointer p-3"
+                        id="settingsButtonCloseModal">
+                        {% lucide "x" %}
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-500 text-lg">Altere as configurações do sistema</p>
+        </div>
+        <div class="border-b border-gray-300 py-2 flex items-center justify-between">
+            <span class="text-lg font-mediun text-nowrap">
+                Frames por segundo (FPS)
+            </span>
+            <div class="max-w-[150px]">
+                {% include 'components/lucide-input.html' with type="number" name="fps" value=request.user.settings.fps %}
+            </div>
+        </div>
+        <div class="border-b border-gray-300 py-2 flex items-center justify-between">
+            <span class="text-lg font-mediun text-nowrap">
+                Início do monitoramento
+            </span>
+            <div class="max-w-[150px]">
+                {% include 'components/lucide-input.html' with type="time" name="monitoring_start_time" icon="timer" value=request.user.settings.monitoring_start_time %}
+            </div>
+        </div>
+        <div class="py-2 flex items-center justify-between text-nowrap">
+            <span class="text-lg font-mediun">
+                Término do monitoramento
+            </span>
+            <div class="max-w-[150px]">
+                {% include 'components/lucide-input.html' with type="time" name="monitoring_end_time" icon="timer" value=request.user.settings.monitoring_end_time %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const settingsModal = document.querySelector("#settingsModal")
+
+        document.querySelector('#settingsButtonCloseModal').addEventListener('click', (e) => {
+            settingsModal.classList.toggle('hidden')
+        })
+        document.querySelectorAll('.settingsButton').forEach(
+            btn => {
+                btn.addEventListener('click', (e) => {
+                    settingsModal.classList.toggle('hidden')
+                    document.querySelector('#settingsButtonSave')
+                        .addEventListener('click', async (e) => {
+                            const body = {}
+
+                            settingsModal.querySelectorAll('input')
+                                .forEach(input => {
+                                    body[input.name] = input.value
+                                })
+                            const response = await fetch("{% url 'panel:save-settings' %}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(body)
+                            })
+                            const data = await response.json()
+                            settingsModal.querySelectorAll('input')
+                                .forEach(input => {
+                                    input.value = data[input.name]
+                                })
+                        })
+                })
+            }
+        )
+    })
+</script>

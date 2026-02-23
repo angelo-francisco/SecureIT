@@ -11,7 +11,7 @@
         class="flex gap-4 items-start lg:items-center justify-between">
         <form class="relative w-full lg:w-96" action="{% url 'cameras:home' %}" method="GET">
           <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-secondary">
-            <span class="material-symbols-outlined">search</span>
+            {% lucide "search" %}
           </div>
           <input
             class="border border-gray/90 block w-full p-2.5 pl-10 text-sm text-white bg-surface-dark rounded-lg focus:ring-1 focus:ring-primary placeholder-text-secondary"
@@ -19,11 +19,11 @@
         </form>
         <a href="{% url 'cameras:home' %}"
           class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-gray-600 hover:bg-gray-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-gray/20">
-          <span class="material-symbols-outlined text-[20px]">cleaning_services</span>
+          {% lucide "eraser" %}
         </a>
         <a href="{% url 'cameras:new' %}"
           class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20">
-          <span class="material-symbols-outlined text-[20px]">add</span>
+          {% lucide "plus" %}
           <span class="hidden xl:block">Adicionar Nova Câmera</span>
         </a>
       </div>
@@ -69,12 +69,12 @@
             <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
               <a href="{% url 'cameras:edit' id=camera.id %}" class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
                 title="Editar">
-                <span class="material-symbols-outlined text-[18px]">edit</span>
+                {% lucide "pencil" %}
             </a>
               <a href="{% url 'cameras:delete' id=camera.id %}"
                 class="p-2 rounded bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
                 title="Remover">
-                <span class="material-symbols-outlined text-[18px]">delete</span>
+                {% lucide "trash" %}
               </a>
             </td>
           </tr>
@@ -84,7 +84,7 @@
       {% else %}
       <div class="w-full flex justify-center items-center flex-col text-center gap-1 mt-3">
         <div class="flex items-center justify-center ">
-          <span class="material-symbols-outlined text-[48px] opacity-80">videocam_off</span>
+          {% lucide "video-off" %}
         </div>
         <div class="flex flex-col gap-2 max-w-md">
           <h3 class="text-white text-xl font-bold">Sem câmara registadas/encontradas</h3>

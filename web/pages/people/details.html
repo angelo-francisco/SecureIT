@@ -14,33 +14,27 @@
         </h1>
 
         <div class="flex gap-4 items-center justify-center">
-            {% include 'components/input.html' with placeholder="Pesquisar residente" icon="search" type="text" name="search_query" value=request.GET.search_query %}
-
-            <button type="submit"
-                class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                <span class="material-symbols-outlined">search</span>
-                Pesquisar
-            </button>
+            {% include 'components/lucide-input.html' with placeholder="Pesquisar por residente" icon="search" type="text" id="search-input" %}
 
             <button type="button" id="closeVisitsHistoryModal"
                 class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
-                <span class="material-symbols-outlined">close</span>
+                {% lucide "x" %}
                 Fechar
             </button>
         </div>
 
-        <div class="divide-y divide-white/10">
+        <div class="divide-y divide-white/10" id="visits">
             {% for visit in visits %}
-            <div class="flex justify-between items-center py-3">
-                <div>
+            <div class="flex justify-between items-center py-3 visit">
+                <span class="resident-names">
                     {% for d in visit.visitdestiny_set.all %}
-                    <a href="{% url 'people:details' d.resident.id %}"
+                    <a href="{% url 'people:details' d.resident.person.id %}"
                         class="text-blue-400 hover:underline font-medium">
                         {{ d.resident.person.full_name }}
                     </a>
                     {% if not forloop.last %},{% endif %}
                     {% endfor %}
-                </div>
+                </span>
                 <span class="text-gray-400 text-base">
                     {{ visit.visited_at|date:"d/m/Y" }} às {{ visit.visited_at|date:"H:i" }}
                 </span>
@@ -84,7 +78,7 @@
                     <h1 class="text-xl md:text-2xl">Informações Gerais</h1>
                     <div class="flex gap-3">
                         <a href="{% url 'people:edit' person.id %}" class="flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                            {% lucide "pencil" %}
                             <span class="hidden md:block">Editar dados</span>
                         </a>
                     </div>
@@ -129,7 +123,7 @@
                     <div class="flex gap-3">
                         <button type="button" id="openVisitsHistoryModal"
                             class="flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-[20px]">history</span>
+                            {% lucide "history" %}
                             <span class="hidden md:block">Histórico de visitas</span>
                         </button>
                         <a href="{% url 'people:new-visit' person.visitor.id %}"
@@ -159,12 +153,6 @@
             <div class="w-full py-5 px-6 bg-[#1d2431] border border-white/10 rounded-xl">
                 <div class="w-full flex items-center pb-2 mb-3 justify-between border-b border-gray-600">
                     <h1 class="text-xl md:text-2xl">Informações do(a) Trabalhor(a)</h1>
-                    <!-- <div class="flex gap-3">
-                        <button type="button" id="openVisitsHistoryModal" class="flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-[20px]">history</span>
-                            <span class="hidden md:block">Histórico de visitas</span>
-                        </button>
-                    </div> -->
                 </div>
                 <div class="flex justify-between mb-2 mt-2">
                     <span class="text-gray-300 text-base">Bilhete de Identidade</span>
@@ -197,15 +185,34 @@
 
 <script>
     const modal = document.getElementById('visitisHistoryModal')
-
+    
     document.getElementById('openVisitsHistoryModal')
         .addEventListener('click', (e) => {
             modal.classList.toggle('hidden')
         })
-
+        
     document.getElementById('closeVisitsHistoryModal')
         .addEventListener('click', (e) => {
             modal.classList.toggle('hidden')
         })
+        
+    const searchInput = document.getElementById('search-input')
+    const visitsDiv = document.getElementById('visits')
+    const allVisits = document.querySelectorAll('.visit')
+    const originalVisits = Array.from(allVisits)
+
+    searchInput.addEventListener('input', (e) => {
+        const searchValue = searchInput.value.trim()
+        visitsDiv.innerHTML = ""
+        const filteredVisits = originalVisits.filter(div => {
+            const names = div.querySelector('.resident-names')
+            console.log(names)
+            const text = String(names).toLowerCase()
+            return text.includes(searchValue.toLowerCase())
+        })
+        filteredVisits.forEach(visit => visitsDiv.append(visit))
+    })
+
+    // TERMINAR PESQUISA   
 </script>
 {% endblock %}

@@ -61,9 +61,8 @@
              opacity-20 brightness-100 contrast-150 mix-blend-overlay">
         </div>
     </div>
-    {% if request.need_pin_modal %}
     {% include 'components/pin_modal.html' %}
-    {% endif %}
+    {% include 'components/settings.html' %}
     {% if messages %}
     <div class="fixed top-6 right-6 z-[1001] flex flex-col gap-3">
         {% for message in messages %}
@@ -82,7 +81,7 @@
             {% endif %}">
             <span>{{ message }}</span>
             <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                <span class="material-symbols-outlined text-base">close</span>
+                {% lucide "x" %}
             </button>
         </div>
         {% endfor %}
