@@ -3,7 +3,8 @@
 {% block title %}Notificações{% endblock %}
 
 {% block content %}
-
+<div class="hidden fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-10" id="seeImageModal">
+</div>
 <main class="w-full flex-1 h-full flex flex-col items-center overflow-hidden py-6 px-4">
     <header class="max-w-3xl w-full flex flex-col items-center gap-4 border-b border-gray-500">
         <div class="flex flex-col gap-2">
@@ -58,10 +59,16 @@
                     <h1 class="text-xl font-semibold">{{ n.title }}</h1>
                     <p class="text-lg text-gray-300">{{ n.description }}</p>
 
-                    <div class="pt-2 flex flex-row justify-between gap-3">
-                        <button href="" class="text-lg px-2 rounded-lg py-1 text-white bg-blue-500">Detalhes</button>
+                    <div class="pt-2 flex flex-row items-center gap-3">
+                        {% if n.photo %}
+                        <button  
+                            class="see-image-btn cursosr-pointer text-lg px-2 rounded-lg py-1 underline text-blue-300"
+                            data-photo-url="{{ n.photo.url }}"
+                        >Ver Imagem</button>
+                        {% endif %}
                         <a href="{% url 'cameras:view' n.camera.id %}"
-                            class="absolute bottom-0 right-0 px-5 text-lg hover:underline">{{ n.camera.get_name }}</a>
+                            class="px-5 text-lg text-gray-200 underline">{{ n.camera.get_name }}</a>
+                        <span class="px-5 text-lg text-gray-300">{{ n.created_at }}</span>
                     </div>
                 </div>
                 <div class="pt-2 flex flex-row gap-3">
@@ -108,5 +115,22 @@
     function closeModal() {
         document.getElementById('search-results-modal').classList.toggle('hidden')
     }
+    const seeImageModal = document.getElementById('seeImageModal')
+    const seeImageButtons = document.querySelectorAll('.see-image-btn')
+    seeImageButtons.forEach(seeImageButton => {
+        seeImageButton.addEventListener('click', (e) => {
+            const photoUrl = seeImageButton.dataset.photoUrl
+            seeImageModal.innerHTML = `
+            <img class="w-50 h-50 relative aspect-video" src="${photoUrl}" alt="Imagem da Notificação">
+            <button
+                onclick="document.getElementById('seeImageModal').classList.toggle('hidden')"
+                class="absolute top-0 right-0 p-3"
+            >
+            {% lucide "x" %}
+            </button>
+            `
+            seeImageModal.classList.toggle('hidden')
+        })
+    })
 </script>
 {% endblock %}

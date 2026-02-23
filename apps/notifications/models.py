@@ -18,8 +18,8 @@ class Notification(models.Model):
             ("P", "Perigo"),
         ],
     )
-    deleted = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False) # type: ignore
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, null=True, blank=True)
     readed = models.BooleanField(default=False) # type: ignore
-    photo = models.ImageField(upload_to="notifications_frames/")
+    photo = models.ImageField(upload_to="notifications_frames/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
