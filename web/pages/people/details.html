@@ -31,6 +31,7 @@
 
         <div class="divide-y divide-white/10">
             {% for visitor_host in visitor_hosts %}
+            {% comment %}
             <div class="flex justify-between items-center py-3">
                 <a href="{% url 'people:details' visitor_host.host.id %}"
                     class="text-blue-400 hover:underline font-medium">
@@ -40,6 +41,7 @@
                     {{ visitor_host.visited_at|date:"d/m/Y" }} às {{ visitor_host.visited_at|date:"H:i" }}
                 </span>
             </div>
+            {% endcomment %}
             {% empty %}
             <p class="text-center text-gray-400 py-6">Nenhuma visita encontrada.</p>
             {% endfor %}
@@ -144,7 +146,7 @@
                 <div class="flex justify-between mb-2 mt-2">
                     <span class="text-gray-300 text-base">Número de visitas</span>
                     <span class="text-white">
-                        {{ person.visitor.visitorhost_set.count }}
+                        {{ person.visitor.visit_set.count }}
                     </span>
                 </div>
             </div>

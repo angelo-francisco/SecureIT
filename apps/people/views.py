@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from .choices import FIELD_TYPES, VISITOR_TYPES
 from .db import insert_person_embedding, search_person_by_embedding
-from .models import Home, Person, ResidentHome, VisitorHost
+from .models import Home, Person, Resident, ResidentHome, Visit, VisitDestiny, Visitor
 from .utils import (
     create_person,
     create_resident,
@@ -20,6 +20,7 @@ from .utils import (
     edit_worker,
     generate_face_embedding,
     treat_photo,
+    validate_residents,
 )
 from .utils import (
     edit_person as util_edit_person,
@@ -139,20 +140,20 @@ def get_person(request, person_id):
     context = {"person": person}
 
     if person.type == "V":
-        visitor_hosts = VisitorHost.objects.filter(visitor_id=person.visitor.id)  # type: ignore
+        visits = Visit.objects.filter(visitor_id=person.visitor.id)  # type: ignore
         search_query = request.GET.get("search_query", "").strip()
 
         if search_query:
-            visitor_hosts = visitor_hosts.annotate(
+            visits = visits.annotate(
                 full_name=Concat(
-                    "host__person__first_name",
+                    "resident__person__first_name",
                     Value(" "),
-                    "host__person__last_name",
+                    "resident__person__last_name",
                 )
             ).filter(  # type: ignore
                 full_name__icontains=search_query
             )
-        paginator = Paginator(visitor_hosts, 10)
+        paginator = Paginator(visits, 10)
         page = request.GET.get("page", "")
         context["visitor_hosts"] = paginator.get_page(page)
 
@@ -233,4 +234,29 @@ def edit_person(request, person_id: int):
         return render(request, "people/edit.html", context)
 
 
-def new_visit(request, visitor_id: int): ...
+def new_visit(request, visitor_id: int):
+    visitor = get_object_or_404(Visitor, id=visitor_id)
+    residents = Resident.objects.all()  # type: ignore
+
+    if request.method == "POST":
+        try:
+            desc = request.POST.get("desc", "")
+            destinies = request.POST.getlist("destinies", [])
+
+            residents = validate_residents(destinies)
+            visit = Visit.objects.create(visitor=visitor, desc=desc)  # type: ignore
+            VisitDestiny.objects.bulk_create(  # type: ignore
+                [VisitDestiny(visit=visit, resident_id=r) for r in residents]
+            )
+            messages.success(request, "Visita registada")
+            return redirect(reverse("people:details", args=[visitor.person.id]))
+        except Exception as error:
+            msg = (
+                error.message  # type: ignore
+                if getattr(error, "message", False)
+                else "Erro ao adicionar visita, verifique os campos."
+            )
+            messages.error(request, msg)
+    return render(
+        request, "people/new_visit.html", {"visitor": visitor, "residents": residents}
+    )

@@ -16,7 +16,8 @@ from .models import (
     Resident,
     ResidentHome,
     Visitor,
-    VisitorHost,
+    Visit,
+    VisitDestiny,
     Worker,
     WorkerHome,
 )
@@ -88,6 +89,18 @@ def validate_homes(_homes: list[str]) -> list[int]:
         raise ValidationError("As casas selecionadas não existem")
 
     return homes
+
+
+def validate_residents(_residents: list[str]) -> list[int]:
+    try:
+        residents = [int(h) for h in _residents]
+    except:  # NOQA
+        raise ValidationError("Informe correctamente os residentes")
+
+    if residents and not Resident.objects.filter(id__in=residents).exists():  # type: ignore
+        raise ValidationError("Os residentes selecionados não existem")
+
+    return residents
 
 
 def validate_fields(fields: list[str]) -> str:
@@ -243,7 +256,8 @@ def create_visitor(person_id: int, host_id: str, visitor_type: str) -> Visitor:
     visitor_type = validate_visitor_type(visitor_type)
 
     visitor = Visitor.objects.create(person_id=person_id, type=visitor_type)  # type: ignore
-    VisitorHost.objects.create(visitor_id=visitor.id, host_id=host.id)  # type: ignore
+    visit = Visit.objects.create(visitor_id=visitor.id)  # type: ignore
+    VisitDestiny.objects.create(visit_id=visit.id, resident_id=host) # type: ignore
     return visitor
 
 

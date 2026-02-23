@@ -31,10 +31,15 @@ class Visitor(models.Model):
     person = models.OneToOneField("Person", on_delete=models.CASCADE)
 
 
-class VisitorHost(models.Model):
+class Visit(models.Model):  # change in diagram
     visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE)
-    host = models.ForeignKey("Resident", on_delete=models.CASCADE)
+    desc = models.TextField(null=True, blank=True)
     visited_at = models.DateTimeField(auto_now_add=True)
+
+
+class VisitDestiny(models.Model):  # add to diagram
+    visit = models.ForeignKey(Visit, on_delete=models.CASCADE)
+    resident = models.ForeignKey("Resident", on_delete=models.CASCADE)
 
 
 class Resident(models.Model):
@@ -62,7 +67,7 @@ class Worker(models.Model):
     def list_fields(self):
         return self.fields.split(",")  # type: ignore
 
-    @property   
+    @property
     def work_homes(self):
         return list(self.workerhome_set.values_list("home_id", flat=True))  # type: ignore
 

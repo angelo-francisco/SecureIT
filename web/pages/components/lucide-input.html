@@ -9,7 +9,8 @@
                focus:border-primary
                focus:ring-2 focus:ring-primary/50
                transition" placeholder="{{ placeholder }}" type="{{ type }}" name="{{ name }}"
-               {% if required %}required{% endif %} value="{{ value }}" list="{{list}}" />
+               {% if required %}required{% endif %} value="{{ value }}" list="{{list}}" 
+               {% if disabled %}disabled{% endif %}/>
     <div class="pointer-events-none absolute inset-y-0 right-0
                flex items-center px-4 text-[#9dabb9]">
         {% lucide icon %}

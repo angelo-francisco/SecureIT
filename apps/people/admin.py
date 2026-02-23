@@ -6,11 +6,12 @@ from .models import (
     Resident,
     ResidentHome,
     Visitor,
-    VisitorHost,
+    Visit,
+    VisitDestiny,
     Worker,
     WorkerHome,
 )
 
 admin.site.register(
-    [Home, Person, Resident, Visitor, Worker, VisitorHost, WorkerHome, ResidentHome]
+    [Home, Person, Resident, Visitor, Worker, Visit, VisitDestiny, WorkerHome, ResidentHome]
 )
