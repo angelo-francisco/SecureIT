@@ -68,7 +68,7 @@ def login(request):
             if user is not None:
                 django_login(request, user)
                 messages.success(request, "Sessão iniciada com sucesso")
-                return redirect("users:pin")
+                return redirect("panel:home")
         messages.error(request, "Endereço ou palavra-passe incorrectos")
         return render(request, "users/login.html")
     return render(request, "users/login.html")
