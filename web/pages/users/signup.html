@@ -15,7 +15,7 @@
         <div>
             <label class="flex flex-col w-full">
                 <p class="text-white text-base font-medium leading-normal pb-2">Primeiro e último nome</p>
-                {% include 'components/lucide-input.html' with placeholder="Digite o nome do administrador" type="text" icon="user" name="full_name" required=True value=request.POST.full_name %}
+                {% include 'components/lucide-input.html' with placeholder="Digite o seu primeiro e último nome" type="text" icon="user" name="full_name" required=True value=request.POST.full_name %}
             </label>
         </div>
         <label class="flex flex-col w-full">
