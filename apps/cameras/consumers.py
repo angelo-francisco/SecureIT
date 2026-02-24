@@ -32,7 +32,7 @@ class Camera:
 
         if not video_source:
             raise RuntimeError("Origem do vídeo não informada")
-        
+
         if isinstance(video_source, str) and video_source.isdigit():
             video_source = int(video_source)
 
@@ -122,8 +122,12 @@ class CameraConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code) -> None:  # type: ignore
         self.running = False
-        await sync_to_async(self.camera.stop)()
-        self.task.cancel()
+        
+        if hasattr(self, "camera"):
+            await sync_to_async(self.camera.stop)()
+        
+        if hasattr(self, "task"):
+            self.task.cancel()
 
     def is_monitoring_time(self) -> bool:
         now = timezone.now().time()
