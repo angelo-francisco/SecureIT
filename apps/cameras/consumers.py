@@ -6,7 +6,6 @@ from urllib.parse import parse_qs
 from uuid import uuid4
 
 import cv2
-from cv2.gapi import video
 import imutils
 import orjson as json  # type: ignore
 from asgiref.sync import sync_to_async
@@ -17,6 +16,7 @@ from django.utils import timezone
 
 from apps.notifications.models import Notification
 from apps.panel.models import Configuration
+from .models import Camera as CameraModel
 
 ALERT_COOLDOWN = 5
 DETECT_EVERY = 3
@@ -80,15 +80,20 @@ class Camera:
 
 class CameraConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        camera_id = self.scope["url_route"]["kwargs"]["camera_id"]
         query_params = parse_qs(self.scope["query_string"].decode())
-        self.video_source = query_params.get("vs", [None, ])[0]
+        self.video_source = query_params.get("vs", [None])[0]
 
         await self.accept()
 
         try:
+            self.camera_object = await self.get_camera_queryset(camera_id)
             self.camera: Camera = await sync_to_async(Camera)(self.video_source)
+            await self.update_camera_status(True)
         except Exception as error:
             print(error)
+
+            await self.update_camera_status(False)
             await self.close()
             return
 
@@ -122,6 +127,19 @@ class CameraConsumer(AsyncWebsocketConsumer):
         return Notification.objects.filter(  # type: ignore
             user=self.scope["user"], deleted=False, readed=readed
         ).count()
+
+    @database_sync_to_async
+    def get_camera_queryset(self, camera_id: int):
+        return CameraModel.objects.get(id=camera_id)
+
+    @database_sync_to_async
+    def update_camera_status(self, status: bool):
+        if not hasattr(self, "camera_object"):
+            return None
+
+        if status != self.camera_object.status:
+            self.camera_object.status = status
+            self.camera_object.save(update_fields=["status"])
 
     async def disconnect(self, close_code) -> None:  # type: ignore
         self.running = False

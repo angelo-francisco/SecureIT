@@ -90,14 +90,14 @@
     grid
   ">
     {% for camera in cameras %}
-    <div class="camera relative bg-black w-full h-full overflow-hidden"
-        data-video-source="{{ camera.video_source }}"
-        data-camera-id="{{ camera.id }}" 
-        data-connection-type="{{ camera.connection_type }}">
-        <img src="" id="cam-{{ camera.id }}" class="absolute inset-0 w-full h-full object-contain bg-black" />
-        <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
-            {{ camera.get_name }}
-        </span>
+    <div class="camera relative bg-black w-full h-full overflow-hidden" data-video-source="{{ camera.video_source }}"
+        data-camera-id="{{ camera.id }}" data-connection-type="{{ camera.connection_type }}">
+        <div id="img-div-{{ camera.id }}" class=" w-full h-full flex items-center justify-center">
+            <img src="" id="cam-{{ camera.id }}" class="relative w-full h-full object-contain bg-black" />
+            <span class="absolute bottom-1 right-1 text-lg text-green-400 font-mono">
+                {{ camera.get_name }}
+            </span>
+        </div>
     </div>
     {% empty %}
     <div class="fixed inset-0 flex flex-col items-center justify-center">
@@ -115,12 +115,12 @@
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
     const audio = document.getElementById("soundEffect")
-    
+
     function changeNotificationCounters(value) {
         document.querySelectorAll(".notificationCounter")
-        .forEach(nc => {
-            nc.innerHTML = value
-        });
+            .forEach(nc => {
+                nc.innerHTML = value
+            });
     }
 
     changeNotificationCounters("{{ notifications_count }}")
@@ -155,55 +155,69 @@
     }
 
     function connectCameraWs(cameraId, videoSource) {
-        if (!videoSource) return
+        let ws;
+        const imageElement = document.getElementById(`cam-${cameraId}`)
+        const containerDiv = document.getElementById(`img-div-${cameraId}`);
 
-        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/?vs=${videoSource}`)
-        ws.binaryType = "arraybuffer"
+        if (!videoSource || !cameraId) return;
 
-        ws.onmessage = (event) => {
-            if (typeof event.data === "string") {
-                const data = JSON.parse(event.data)
-                if (data.type === "notification") {
-                    changeNotificationCounters(data.notifications_count)
-                    playNotificationSound()
-                    showDetectionAnimation(data.people)
+        const createWs = () => {
+            try {
+                ws = new WebSocket(`ws://localhost:8000/ws/camera/${cameraId}/?vs=${videoSource}`)
+            } catch (err) {
+                console.log(err)
+                return;
+            }
+            ws.binaryType = "arraybuffer"
+
+            ws.onmessage = (event) => {
+                if (typeof event.data === "string") {
+                    const data = JSON.parse(event.data)
+                    if (data.type === "notification") {
+                        changeNotificationCounters(data.notifications_count)
+                        playNotificationSound()
+                        showDetectionAnimation(data.people)
+                    }
+                }
+
+                if (event.data instanceof ArrayBuffer) {
+                    const blob = new Blob([event.data], { type: "image/jpeg" });
+                    const url = URL.createObjectURL(blob);
+                    imageElement.src = url
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
                 }
             }
 
-            if (event.data instanceof ArrayBuffer) {
-                const blob = new Blob([event.data], { type: "image/jpeg" });
-                const url = URL.createObjectURL(blob);
-                document.getElementById(`cam-${cameraId}`).src = url
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }
+
+            ws.onclose = (e) => {
+                console.warn(`WS fechado na câmera ${cameraId}`);
+                containerDiv.innerHTML = `{% lucide "video-off" class="text-white" width="50" height="50" %}`;
+            };
         }
+        createWs()
+
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-        const media = await navigator.mediaDevices.getUserMedia({ audio: true })
-        if (media) {
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+        const cameras = document.querySelectorAll('.camera')
+        mainHTML.dataset.count = cameras.length
 
-            const cameras = document.querySelectorAll('.camera')
-            mainHTML.dataset.count = cameras.length
+        cameras.forEach(camera => {
+            const cameraId = camera.dataset.cameraId
+            let cameraType = camera.dataset.connectionType
+            let videoSource = camera.dataset.videoSource
 
-            cameras.forEach(camera => {
-                const cameraId = camera.dataset.cameraId
-                let cameraType = camera.dataset.cameraConnectionType
-                let videoSource = camera.dataset.videoSource
+            if (cameraType === "L") {
+                videoSource = convertToInt(videoSource)
+            }
+            if (!videoSource || !cameraId) return
 
-                if (cameraType === "L") {
-                    videoSource = convertToInt(videoSource)
-                }
-                if (!videoSource || !cameraId) return
+            connectCameraWs(cameraId, videoSource)
+        });
 
-                connectCameraWs(cameraId, videoSource)
-            });
-
-            loader.classList.add('hidden')
-            mainHTML.classList.remove('hidden')
-        } else {
-            console.log("Give permissionss to play audios")
-        }
+        loader.classList.add('hidden')
+        mainHTML.classList.remove('hidden')
     })
 </script>
 {% endblock %}
