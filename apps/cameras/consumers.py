@@ -6,6 +6,7 @@ from urllib.parse import parse_qs
 from uuid import uuid4
 
 import cv2
+from cv2.gapi import video
 import imutils
 import orjson as json  # type: ignore
 from asgiref.sync import sync_to_async
@@ -36,7 +37,9 @@ class Camera:
         if isinstance(video_source, str) and video_source.isdigit():
             video_source = int(video_source)
 
+        print(video_source)
         self.video = cv2.VideoCapture(video_source)
+
         if not self.video.isOpened():
             raise RuntimeError("Erro ao abrir câmara")
 
@@ -80,12 +83,16 @@ class CameraConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         query_params = parse_qs(self.scope["query_string"].decode())
         self.video_source = query_params.get("vs")
+        
+        if isinstance(self.video_source, list):
+            self.video_source = self.video_source[0]
 
         await self.accept()
 
         try:
             self.camera: Camera = await sync_to_async(Camera)(self.video_source)
-        except Exception:
+        except Exception as error:
+            print(error)
             await self.close()
             return
 
@@ -122,7 +129,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code) -> None:  # type: ignore
         self.running = False
-        
+
         if hasattr(self, "camera"):
             await sync_to_async(self.camera.stop)()
         
