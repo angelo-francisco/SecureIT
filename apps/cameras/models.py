@@ -48,7 +48,7 @@ class Camera(models.Model):
     get_name.fget.short_description = "Nome"  # type:ignore
 
     @property
-    def get_connection_url_or_id(self):
+    def video_source(self):
         if self.connection_type == "W":
             return self.wificamera.stream_url  # type: ignore
         if system() == "Linux":
