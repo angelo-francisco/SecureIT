@@ -59,7 +59,7 @@ def new_camera(request):
             case "W":
                 create_wifi_camera(
                     camera_id=camera.pk,
-                    stream_url=request.POST.get("stream_url", "").strip()
+                    stream_url=request.POST.get("stream_url", "").strip(),
                 )
 
         messages.success(request, "Câmara registada.")
@@ -156,10 +156,8 @@ def edit_camera(request, id):
                     if not stream_url:
                         raise ValidationError("URL de transmissão não informada")
 
-                    defaults = 
-
                     WifiCamera.objects.update_or_create(  # type: ignore
-                        camera=camera, defaults=defaults, create_defaults=defaults
+                        camera=camera, defaults={"stream_url": stream_url}
                     )
             messages.success(request, "Dados editados com sucesso.")
             return redirect(reverse("cameras:view", args=[camera.pk]))
