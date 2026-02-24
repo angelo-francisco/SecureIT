@@ -151,7 +151,7 @@
     function connectCameraWs(cameraId, videoSource) {
         if (!videoSource) return
 
-        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/?stream_in=${videoSource}`)
+        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/?vs=${videoSource}`)
         ws.binaryType = "arraybuffer"
 
         ws.onmessage = (event) => {
