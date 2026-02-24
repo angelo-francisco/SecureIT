@@ -114,10 +114,16 @@
 <script>
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
-    const notificationCounter = document.getElementById("notificationCounter")
     const audio = document.getElementById("soundEffect")
     
-    notificationCounter.innerHTML = "{{ notifications_count }}"
+    function changeNotificationCounters(value) {
+        document.querySelectorAll(".notificationCounter")
+        .forEach(nc => {
+            nc.innerHTML = value
+        });
+    }
+
+    changeNotificationCounters("{{ notifications_count }}")
 
     function showDetectionAnimation(peopleCount) {
         const notificationBtn = document.getElementById('notificationBtn');
@@ -158,7 +164,7 @@
             if (typeof event.data === "string") {
                 const data = JSON.parse(event.data)
                 if (data.type === "notification") {
-                    notificationCounter.innerText = data.notifications_count;
+                    changeNotificationCounters(data.notifications_count)
                     playNotificationSound()
                     showDetectionAnimation(data.people)
                 }
