@@ -91,7 +91,9 @@
   ">
     {% for camera in cameras %}
     <div class="camera relative bg-black w-full h-full overflow-hidden"
-        data-connection-url-or-id="{{ camera.get_connection_url_or_id }}" data-camera-id="{{ camera.id }}">
+        data-video-source="{{ camera.video_source }}"
+        data-camera-id="{{ camera.id }}" 
+        data-connection-type="{{ camera.connection_type }}">
         <img src="" id="cam-{{forloop.counter}}" class="absolute inset-0 w-full h-full object-contain bg-black" />
         <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
             CAM-{{forloop.counter}}
@@ -146,10 +148,10 @@
         return parseInt(id)
     }
 
-    function connectCameraWs(cameraId, index) {
-        if (typeof index !== "number" && !index) return
+    function connectCameraWs(cameraId, videoSource) {
+        if (!videoSource) return
 
-        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/stream-in/${index}`)
+        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/?stream_in=${videoSource}`)
         ws.binaryType = "arraybuffer"
 
         ws.onmessage = (event) => {
@@ -180,10 +182,15 @@
 
             cameras.forEach(camera => {
                 const cameraId = camera.dataset.cameraId
-                const connectionUrlOrId = camera.dataset.connectionUrlOrId
-                if (!connectionUrlOrId || !cameraId) return
+                let cameraType = cameraDiv.dataset.cameraConnectionType
+                let videoSource = cameraDiv.dataset.videoSource
 
-                connectCameraWs(cameraId, convertToInt(connectionUrlOrId))
+                if (cameraType === "L") {
+                    videoSource = convertToInt(videoSource)
+                }
+                if (!videoSource || !cameraId) return
+
+                connectCameraWs(cameraId, videoSource)
             });
 
             loader.classList.add('hidden')
