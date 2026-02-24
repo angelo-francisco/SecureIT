@@ -52,13 +52,13 @@ def new_camera(request):
         match camera.connection_type:
             case "L":
                 create_local_camera(
-                    camera_id=camera.id,
+                    camera_id=camera.pk,
                     camera_path=request.POST.get("local_camera", "").strip(),
                     cameras_list=cameras,
                 )
             case "W":
                 create_wifi_camera(
-                    camera_id=camera.id,
+                    camera_id=camera.pk,
                     stream_url=request.POST.get("stream_url", "").strip(),
                     username=request.POST.get("username", "").strip(),
                     password=request.POST.get("password", "").strip(),
@@ -67,6 +67,7 @@ def new_camera(request):
         messages.success(request, "Câmara registada.")
         return redirect("cameras:home")
     except Exception as error:
+        print(error)
         if camera:
             camera.delete()
         msg = (
@@ -170,7 +171,7 @@ def edit_camera(request, id):
                         camera=camera, defaults=defaults, create_defaults=defaults
                     )
             messages.success(request, "Dados editados com sucesso.")
-            return redirect(reverse("cameras:view", args=[camera.id]))
+            return redirect(reverse("cameras:view", args=[camera.pk]))
         except Exception as error:
             msg = (
                 error.message  # type: ignore
