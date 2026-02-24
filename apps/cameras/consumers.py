@@ -82,10 +82,7 @@ class Camera:
 class CameraConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         query_params = parse_qs(self.scope["query_string"].decode())
-        self.video_source = query_params.get("vs")
-        
-        if isinstance(self.video_source, list):
-            self.video_source = self.video_source[0]
+        self.video_source = query_params.get("vs", [None, ])[0]
 
         await self.accept()
 
@@ -132,7 +129,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
 
         if hasattr(self, "camera"):
             await sync_to_async(self.camera.stop)()
-        
+
         if hasattr(self, "task"):
             self.task.cancel()
 
