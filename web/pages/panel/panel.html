@@ -94,9 +94,9 @@
         data-video-source="{{ camera.video_source }}"
         data-camera-id="{{ camera.id }}" 
         data-connection-type="{{ camera.connection_type }}">
-        <img src="" id="cam-{{forloop.counter}}" class="absolute inset-0 w-full h-full object-contain bg-black" />
+        <img src="" id="cam-{{ camera.id }}" class="absolute inset-0 w-full h-full object-contain bg-black" />
         <span class="absolute bottom-1 right-1 text-xs text-green-400 font-mono">
-            CAM-{{forloop.counter}}
+            {{ camera.get_name }}
         </span>
     </div>
     {% empty %}
@@ -167,7 +167,7 @@
             if (event.data instanceof ArrayBuffer) {
                 const blob = new Blob([event.data], { type: "image/jpeg" });
                 const url = URL.createObjectURL(blob);
-                document.getElementById(`cam-${index}`).src = url
+                document.getElementById(`cam-${cameraId}`).src = url
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
             }
         }
@@ -182,8 +182,8 @@
 
             cameras.forEach(camera => {
                 const cameraId = camera.dataset.cameraId
-                let cameraType = cameraDiv.dataset.cameraConnectionType
-                let videoSource = cameraDiv.dataset.videoSource
+                let cameraType = camera.dataset.cameraConnectionType
+                let videoSource = camera.dataset.videoSource
 
                 if (cameraType === "L") {
                     videoSource = convertToInt(videoSource)
