@@ -17,14 +17,12 @@ def create_camera(user, name, location, connection_type):
     return camera
 
 
-def create_wifi_camera(camera_id, stream_url, username, password):
+def create_wifi_camera(camera_id, stream_url):
     if not stream_url:
         raise ValidationError("Informe a url de video da câmara")
     return WifiCamera.objects.create(  # type: ignore
         camera_id=camera_id,
         stream_url=stream_url,
-        username=username,
-        password=password,
     )
 
 

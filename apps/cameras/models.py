@@ -96,12 +96,6 @@ class WifiCamera(models.Model):
     stream_url = models.URLField(
         max_length=255, null=True, blank=True, verbose_name="URL de Transmissão"
     )
-    username = models.CharField(
-        max_length=30, null=True, blank=True, verbose_name="Nome de utilizador"
-    )
-    password = models.CharField(
-        max_length=80, null=True, blank=True, verbose_name="Palavra-passe"
-    )
 
     @staticmethod
     def get_stream_url(camera_id):

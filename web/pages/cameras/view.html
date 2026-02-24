@@ -66,18 +66,6 @@
         </div>
 
         {% if camera.wificamera %}
-        {% if camera.wificamera.username %}
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Utilizador</span>
-            <span>{{ camera.wificamera.username }}</span>
-        </div>
-        {% endif %}
-        {% if camera.wificamera.password %}
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Palavra-passe</span>
-            <span>*****</span>
-        </div>
-        {% endif %}
         <div class="flex justify-between items-center">
             <span class="text-sm uppercase text-gray-400">Stream</span>
             <span class="truncate max-w-[180px]">{{ camera.wificamera.stream_url }}</span>

@@ -10,7 +10,7 @@ class CameraAdmin(admin.ModelAdmin):
 
 @admin.register(WifiCamera)
 class WifiCameraAdmin(admin.ModelAdmin):
-    list_display = ["stream_url", "username", "password"]
+    list_display = ["stream_url"]
 
 
 admin.site.register(LocalCamera)
