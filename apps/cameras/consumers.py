@@ -2,6 +2,7 @@ from asyncio import CancelledError, create_task
 from asyncio import sleep as async_sleep
 from threading import Thread
 from time import sleep, time
+from urllib.parse import parse_qs
 from uuid import uuid4
 
 import cv2
@@ -26,10 +27,16 @@ hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())  # type: ignore
 
 
 class Camera:
-    def __init__(self, index: int):
+    def __init__(self, video_source):
         self.running = True
 
-        self.video = cv2.VideoCapture(index)
+        if not video_source:
+            raise RuntimeError("Origem do vídeo não informada")
+        
+        if isinstance(video_source, str) and video_source.isdigit():
+            video_source = int(video_source)
+
+        self.video = cv2.VideoCapture(video_source)
         if not self.video.isOpened():
             raise RuntimeError("Erro ao abrir câmara")
 
@@ -71,12 +78,13 @@ class Camera:
 
 class CameraConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.index = self.scope["url_route"]["kwargs"]["index"]
+        query_params = parse_qs(self.scope["query_string"].decode())
+        self.video_source = query_params.get("vs")
 
         await self.accept()
 
         try:
-            self.camera: Camera = await sync_to_async(Camera)(self.index)
+            self.camera: Camera = await sync_to_async(Camera)(self.video_source)
         except Exception:
             await self.close()
             return
