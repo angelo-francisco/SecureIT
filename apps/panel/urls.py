@@ -8,5 +8,5 @@ app_name = "panel"
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="panel:home")),
     path("panel/", panel, name="home"),
-    path("settings/save/", save_settings, name="save-settings"),
+    path("save-settings/", save_settings, name="save-settings"),  # type: ignore
 ]

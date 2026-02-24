@@ -5,6 +5,7 @@
             <div class="flex items-center justify-between">
                 <h1 class="font-semibold text-3xl">Configurações</h1>
                 <div class="flex items-center gap-2">
+                    <p id="settngsErrorP" class="text-error text-lg"></p>
                     <button class="rounded-lg px-2 py-1 bg-blue-600 text-white cursor-pointer p-3"
                         id="settingsButtonSave">
                         {% lucide "save" %}
@@ -47,10 +48,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const settingsModal = document.querySelector("#settingsModal")
+        const settingsPElement = document.querySelector('#settngsErrorP')
 
         document.querySelector('#settingsButtonCloseModal').addEventListener('click', (e) => {
             settingsModal.classList.toggle('hidden')
         })
+
         document.querySelectorAll('.settingsButton').forEach(
             btn => {
                 btn.addEventListener('click', (e) => {
@@ -71,10 +74,17 @@
                                 body: JSON.stringify(body)
                             })
                             const data = await response.json()
+
+                            if (!response.ok) {
+                                settingsPElement.innerHTML = `(${data.error})`
+                                setTimeout(() => {
+                                    settingsPElement.innerHTML = ""
+                                }, 5000)
+                            }
                             settingsModal.querySelectorAll('input')
-                                .forEach(input => {
-                                    input.value = data[input.name]
-                                })
+                            .forEach(input => {
+                                input.value = data[input.name]
+                            })
                         })
                 })
             }

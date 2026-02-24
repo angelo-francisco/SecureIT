@@ -2,4 +2,14 @@ from django.contrib import admin
 
 from .models import Notification
 
-admin.site.register(Notification)
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = [
+        "user",
+        "title",
+        "description",
+        "level",
+        "readed",
+        "camera",
+        "created_at",
+    ]
