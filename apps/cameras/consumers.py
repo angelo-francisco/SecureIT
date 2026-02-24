@@ -37,7 +37,6 @@ class Camera:
         if isinstance(video_source, str) and video_source.isdigit():
             video_source = int(video_source)
 
-        print(video_source)
         self.video = cv2.VideoCapture(video_source)
 
         if not self.video.isOpened():
