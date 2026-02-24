@@ -34,15 +34,15 @@
           <div id="wifi-fields" class="space-y-2">
             <div class="mb-4 flex flex-col gap-1">
               <label class="text-base text-white font-medium">URL da Câmera</label>
-              {% include 'components/input.html' with placeholder="Exemplo: http://192.168.100.181:5555/stream" type="url" icon="link" name="stream_url" value=camera.stream_url %}
+              {% include 'components/input.html' with placeholder="Exemplo: http://192.168.100.181:5555/stream" type="url" icon="link" name="stream_url" value=camera.wificamera.stream_url %}
             </div>
-            <label class="text-base text-white font-medium">Autenticação (Se aplicável)</label>
-            <div class="flex gap-2">
+            <label class="hidden text-base text-white font-medium">Autenticação (Se aplicável)</label>
+            <div class="hidden flex gap-2">
               <div>
-                {% include 'components/input.html' with placeholder="Nome de usuário" type="text" icon="person" name="username" value=camera.username %}
+                {% include 'components/input.html' with placeholder="Nome de usuário" type="text" icon="person" name="username" value=camera.wificamera.username %}
               </div>
               <div>
-                {% include 'components/input.html' with placeholder="Palavra-passe" type="password" icon="lock" name="password" %}
+                {% include 'components/input.html' with placeholder="Palavra-passe" type="password" icon="lock" name="password" value=camera.wificamera.password %}
               </div>
             </div>
           </div>
