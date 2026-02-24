@@ -22,7 +22,7 @@ application = ProtocolTypeRouter(
                 URLRouter(
                     [
                         path(
-                            "ws/camera/<int:camera_id>/stream-in/<int:index>",
+                            "ws/camera/<int:camera_id>/",
                             CameraConsumer.as_asgi(),
                         ),
                     ]
