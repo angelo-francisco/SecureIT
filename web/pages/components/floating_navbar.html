@@ -5,22 +5,20 @@
             border border-gray-700
             rounded-full shadow-xl
             flex flex-col items-center gap-2
-            p-3 select-none scale-90 duration-300 ease-in-out">
+            p-3 select-none scale-75 hover:scale-90 duration-300 ease-in-out">
 
     <div class="relative mt-1 w-10 h-10 flex items-center justify-center text-white font-bold cursor-pointer"
         id="floating-navbar-trigger">
         <div class="absolute inset-0 rounded-full bg-[#137FEC]/70 blur-lg"></div>
         <img src="{% static 'imgs/logo.png' %}" alt="Logo" class="relative w-8 h-auto z-10">
-        <span
-            id="floating-navbar-notification-counter"
+        <span id="floating-navbar-notification-counter"
             class="visible notificationCounter absolute top-0 right-0 p-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full z-[999]">
-        
         </span>
     </div>
 
     <div class="overflow-hidden max-h-0 opacity-0 scale-95
             transition-all duration-300 ease-out" id="floating-navbar-menu">
-        <div class="w-full h-px bg-border-dark"></div>
+        <div class="w-full h-px bg-border-dark mb-1"></div>
 
         <a href="{% url 'cameras:home' %}"
             class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
@@ -38,7 +36,7 @@
                 {% lucide "bell" class="text-white" %}
                 <span
                     class="notificationCounter absolute top-0 right-0 px-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-    
+
                 </span>
             </span>
         </a>
@@ -75,8 +73,8 @@
             navbarMenu.classList.toggle('max-h-96')
             navbarMenu.classList.toggle('opacity-100')
             navbarMenu.classList.toggle('scale-100')
-            
-            movableNavbar.classList.toggle('scale-90')
+
+            movableNavbar.classList.toggle('scale-75')
             secondNavbarNotificationCounter.classList.toggle('hidden')
         })
 
