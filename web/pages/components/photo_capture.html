@@ -1,35 +1,46 @@
-<div class="hidden fixed inset-0 flex justify-center items-center backdrop-blur-sm z-[1000]" id="photo_capture_modal">
+<div class="hidden fixed inset-0 flex justify-center items-center backdrop-blur-sm z-[1000]"
+     id="photo_capture_modal">
     <div id="photoCapture"
-        class="max-w-3xl p-5 py-10 rounded-xl space-y-4 w-full flex flex-col justify-center items-center gap-3 pt-3 mt-3">
+         class="max-w-3xl p-5 py-10 rounded-xl space-y-4 w-full flex flex-col justify-center items-center gap-3 pt-3 mt-3">
         <canvas id="photo_capture_canvas_element" class="hidden rounded-lg"></canvas>
-        <video autoplay playsinline class="aspect-video" id="photo_capture_video_element"></video>
+        <video autoplay
+               playsinline
+               class="aspect-video"
+               id="photo_capture_video_element">
+        </video>
         <div class="flex gap-2">
             <button id="photo_capture_close_button_element"
-                class="flex items-center justify-center px-3 py-2 bg-red-500 rounded-lg" title="Fechar" type="button">
+                    class="flex items-center justify-center px-3 py-2 bg-red-500 rounded-lg"
+                    title="Fechar"
+                    type="button">
                 {% lucide "x" %}
                 Fechar
             </button>
-            <button class="flex items-center justify-center px-3 py-2 bg-gray-900 rounded-lg" title="Desfazer"
-                id="replayVideo" type="button">
+            <button class="flex items-center justify-center px-3 py-2 bg-gray-900 rounded-lg"
+                    title="Desfazer"
+                    id="replayVideo"
+                    type="button">
                 {% lucide "rotate-ccw" %}
                 Repetir
             </button>
-            <button class="flex items-center justify-center px-3 py-2 bg-blue-500 rounded-lg" id="takePhoto"
-                title="Capturar" type="button">
+            <button class="flex items-center justify-center px-3 py-2 bg-blue-500 rounded-lg"
+                    id="takePhoto"
+                    title="Capturar"
+                    type="button">
                 {% lucide "camera" %}
                 Capturar
             </button>
             {% if search %}
-            <button class="flex items-center justify-center px-3 py-2 bg-gray-600 rounded-lg"
-                id="photo_capture_search_button_element" title="Pesquisar">
-                {% lucide "search" %}
-                Pesquisar
-            </button>
+                <button class="flex items-center justify-center px-3 py-2 bg-gray-600 rounded-lg"
+                        id="photo_capture_search_button_element"
+                        title="Pesquisar">
+                    {% lucide "search" %}
+                    Pesquisar
+                </button>
             {% endif %}
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', (e) => {
         let stream;

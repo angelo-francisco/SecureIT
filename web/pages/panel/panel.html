@@ -1,9 +1,8 @@
 {% extends 'bases/panel_no_nav.html' %}
 {% load static %}
 {% block title %}Painel de Controle{% endblock %}
-
 {% block subhead %}
-<style>
+    <style>
     #container[data-count="1"] {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr;
@@ -71,49 +70,40 @@
         font-weight: bold;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
-</style>
+    </style>
 {% endblock %}
-
 {% block content %}
-<div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
-    {% include "components/loader.html" with w=50 %}
-</div>
-
-<audio id="soundEffect" src="{% static 'sounds/notify.mp3' %}" preload="auto"></audio>
-
-{% include "components/floating_navbar.html" %}
-<main id="container" class="
-    hidden
-    w-full
-    h-[100vh]
-    bg-black
-    grid
-    grid-rows-2
-    grid-cols-2
-  ">
-    {% for camera in cameras %}
-    <div class="border border-gray-600 camera relative bg-black w-full h-full overflow-hidden" data-video-source="{{ camera.video_source }}"
-        data-camera-id="{{ camera.id }}" data-connection-type="{{ camera.connection_type }}">
-        <div id="img-div-{{ camera.id }}" class=" w-full h-full flex items-center justify-center">
-            <img src="" id="cam-{{ camera.id }}" class="relative w-full h-full object-contain bg-black" />
-            <span class="px-2 absolute bottom-1 right-1 text-lg text-green-400 font-mono">
-                {{ camera.get_name }}
-            </span>
-        </div>
+    <div id="loader"
+         class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
+        {% include "components/loader.html" with w=50 %}
     </div>
-    {% empty %}
-    <div class="fixed inset-0 flex flex-col items-center justify-center">
-        <div class="flex items-center justify-center ">
-            {% lucide "video-off" %}
-        </div>
-        <span class="text-xl">
-            Sem câmeras registadas
-        </span>
-    </div>
-    {% endfor %}
-</main>
-
-<script>
+    <audio id="soundEffect"
+           src="{% static 'sounds/notify.mp3' %}"
+           preload="auto"></audio>
+    {% include "components/floating_navbar.html" %}
+    <main id="container"
+          class=" hidden w-full h-[100vh] bg-black grid grid-rows-2 grid-cols-2 ">
+        {% for camera in cameras %}
+            <div class="border border-gray-600 camera relative bg-black w-full h-full overflow-hidden"
+                 data-video-source="{{ camera.video_source }}"
+                 data-camera-id="{{ camera.id }}"
+                 data-connection-type="{{ camera.connection_type }}">
+                <div id="img-div-{{ camera.id }}"
+                     class=" w-full h-full flex items-center justify-center">
+                    <img src=""
+                         id="cam-{{ camera.id }}"
+                         class="relative w-full h-full object-contain bg-black" />
+                    <span class="px-2 absolute bottom-1 right-1 text-lg text-green-400 font-mono">{{ camera.get_name }}</span>
+                </div>
+            </div>
+        {% empty %}
+            <div class="fixed inset-0 flex flex-col items-center justify-center">
+                <div class="flex items-center justify-center ">{% lucide "video-off" %}</div>
+                <span class="text-xl">Sem câmeras registadas</span>
+            </div>
+        {% endfor %}
+    </main>
+    <script>
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
     const audio = document.getElementById("soundEffect")
@@ -221,5 +211,5 @@
         loader.classList.add('hidden')
         mainHTML.classList.remove('hidden')
     })
-</script>
+    </script>
 {% endblock %}

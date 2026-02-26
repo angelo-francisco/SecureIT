@@ -9,6 +9,7 @@ dependencies = [
     "cv2-enumerate-cameras>=1.3.1",
     "daphne>=4.2.1",
     "django>=6.0",
+    "django-debug-toolbar>=6.2.0",
     "django-google-fonts>=0.0.3",
     "django-stubs>=5.2.9",
     "django-tailwind[cookiecutter,honcho,reload]>=4.4.2",

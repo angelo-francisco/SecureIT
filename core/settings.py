@@ -24,9 +24,9 @@ INSTALLED_APPS = [
     "apps.notifications",
     "tailwind",
     "tailwind_config",
-    "django_browser_reload",
     "django_google_fonts",
     "lucide",
+    "debug_toolbar",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -42,7 +42,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.users.utils.pin_middleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -123,4 +123,8 @@ NPM_BIN_PATH = "/usr/bin/npm"
 GOOGLE_FONTS = [
     "Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900",
     "Noto Sans:ital,wght@0,100..900;1,100..900",
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]

@@ -35,8 +35,8 @@ class Camera(models.Model):
     def get_video_url(self):
         try:
             if self.connection_type == "W":
-                return WifiCamera.get_stream_url(self.pk)
-            path = LocalCamera.get_camera_path(self.pk)
+                return self.wificamera.get_stream_url(self.pk)  # type: ignore
+            path = self.localcamera.get_camera_path(self.pk)  # type: ignore
             return reverse("cameras:get-camera-video", query={"index": path[-1]})
         except (ObjectDoesNotExist, KeyError):
             return None

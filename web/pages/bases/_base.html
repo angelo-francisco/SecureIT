@@ -1,19 +1,20 @@
 {% load static tailwind_tags %}
-
 <!DOCTYPE html>
 <html lang="pt-PT" class="dark">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{% static 'imgs/logo.png' %}" type="image/x-icon">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="{% static 'fonts/notosans:ital,wght@0,100..900;1,100..900.css' %}">
-    <link rel="stylesheet" href="{% static 'fonts/poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900.css' %}">
-    {% tailwind_css %}
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon"
+              href="{% static 'imgs/logo.png' %}"
+              type="image/x-icon">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+              rel="stylesheet" />
+        <link rel="stylesheet"
+              href="{% static 'fonts/notosans:ital,wght@0,100..900;1,100..900.css' %}">
+        <link rel="stylesheet"
+              href="{% static 'fonts/poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900.css' %}">
+        {% tailwind_css %}
+        <style>
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -46,49 +47,33 @@
         .animate-slide-in {
             animation: slide-in 0.3s ease forwards;
         }
-    </style>
-    {% block head %}{% endblock %}
-    <title>{% block title %}{% endblock %} | SecureIT</title>
-</head>
-
-<body
-    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden">
-    <div class="min-h-screen fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px]"></div>
-        <div
-            class="absolute inset-0 bg-[url('http://localhost:8000/static/imgs/noise.svg')]
-             opacity-20 brightness-100 contrast-150 mix-blend-overlay">
+        </style>
+        {% block head %}{% endblock %}
+        <title>
+            {% block title %}{% endblock %}
+        | SecureIT</title>
+    </head>
+    <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden">
+        <div class="min-h-screen fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px]"></div>
+            <div class="absolute inset-0 bg-[url('http://localhost:8000/static/imgs/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay">
+            </div>
         </div>
-    </div>
-    {% include 'components/pin_modal.html' %}
-    {% include 'components/settings.html' %}
-    {% if messages %}
-    <div class="fixed top-6 right-6 z-[1001] flex flex-col gap-3">
-        {% for message in messages %}
-        <div
-            class="messages-div max-w-sm w-full rounded-lg px-4 py-3 shadow-lg
-            text-white font-medium flex items-center justify-between transition-transform
-            transform animate-slide-in
-            {% if message.tags == 'success' %}
-            bg-success
-            {% elif message.tags == 'error' %}
-            bg-error
-            {% elif message.tags == 'warning' %}
-            bg-warning
-            {% else %}
-            bg-info
-            {% endif %}">
-            <span>{{ message }}</span>
-            <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                {% lucide "x" %}
-            </button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% block body %}{% endblock %}
-    <script>
+        {% include 'components/pin_modal.html' %}
+        {% if messages %}
+            <div class="fixed top-6 right-6 z-[1001] flex flex-col gap-3">
+                {% for message in messages %}
+                    <div class="messages-div max-w-sm w-full rounded-lg px-4 py-3 shadow-lg text-white font-medium flex items-center justify-between transition-transform transform animate-slide-in {% if message.tags == 'success' %} bg-success {% elif message.tags == 'error' %} bg-error {% elif message.tags == 'warning' %} bg-warning {% else %} bg-info {% endif %}">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.remove()"
+                                class="ml-2 text-white hover:text-gray-200">{% lucide "x" %}</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block body %}{% endblock %}
+        <script>
         let messages = document.querySelectorAll('.messages-div')
 
         if (messages) {
@@ -98,7 +83,6 @@
                 });
             }, 3000);
         }
-    </script>
-</body>
-
+        </script>
+    </body>
 </html>

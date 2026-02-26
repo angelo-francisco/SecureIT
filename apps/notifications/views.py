@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.paginator import Paginator
 
@@ -7,8 +6,12 @@ from .models import Notification
 
 def notifications(request):
     ctx = {}
-    query = Notification.objects.select_related("camera").filter(  # type: ignore
-        user_id=request.user.pk, deleted=False
+    query = (
+        Notification.objects.select_related("camera")
+        .filter(  # type: ignore
+            user_id=request.user.pk, deleted=False
+        )
+        .order_by("-created_at")
     )
     search_query = request.GET.get("search-query", "A")
 

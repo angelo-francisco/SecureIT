@@ -1,16 +1,19 @@
+from django.contrib import messages
 from django.core.exceptions import ValidationError
-import orjson as json  # type: ignore
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, render
 
 from apps.cameras.models import Camera
 from apps.notifications.models import Notification
+from apps.panel.models import Configuration
+from django.utils.dateparse import parse_time
+
 from apps.people.utils import update_instace
 
 
 def panel(request):
-    cameras = Camera.objects.filter(user=request.user)  # type: ignore
+    cameras = Camera.objects.select_related("localcamera", "wificamera").filter(
+        user=request.user
+    )
     notifications_count = Notification.objects.filter(  # type: ignore
         user=request.user, readed=False, deleted=False
     ).count()
@@ -21,37 +24,42 @@ def panel(request):
     )
 
 
-@csrf_exempt
-def save_settings(request):
+def settings(request):
+    settings = get_object_or_404(Configuration, user=request.user)
     if request.method == "POST":
-        configuration = request.user.settings
-        data = json.loads(request.body)
+        fps = request.POST.get("fps", "")
+        mst = request.POST.get("mst")
+        met = request.POST.get("met")
 
         try:
-            fps = int(data.get("fps"))
-            if fps < 1:
+            if fps and not fps.isdigit():
                 raise ValidationError("FPS inválido")
-            update_instace(configuration, data)
+
+            fps = int(fps)
+            if fps < 1:
+                raise ValidationError("FPS deve ser maior que 1")
+
+            if mst and not settings.is_valid_time(mst):
+                raise ValidationError("Horário de início inválido")
+
+            if met and not settings.is_valid_time(met):
+                raise ValidationError("Horário de término inválido")
+
+            update_instace(
+                settings,
+                {
+                    "fps": fps,
+                    "monitoring_end_time": parse_time(met),
+                    "monitoring_start_time": parse_time(mst),
+                },
+            )
+
+            messages.success(request, "As suas alterações foram salvas")
         except Exception as error:
-            print(error)
             msg = (
                 error.message  # type: ignore
                 if getattr(error, "message", False)
                 else "Erro ao salvar"
             )
-            return JsonResponse(
-                {
-                    "error": msg,
-                    "fps": configuration.fps,
-                    "monitoring_start_time": configuration.monitoring_start_time,
-                    "monitoring_end_time": configuration.monitoring_end_time,
-                },
-                status=400,
-            )
-        return JsonResponse(
-            {
-                "fps": configuration.fps,
-                "monitoring_start_time": configuration.monitoring_start_time,
-                "monitoring_end_time": configuration.monitoring_end_time,
-            }
-        )
+            messages.error(request, msg)
+    return render(request, "panel/settings.html", {"settings": settings})

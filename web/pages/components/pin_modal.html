@@ -1,5 +1,5 @@
 <div class="hidden fixed inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg z-[1000]"
-    id="pinModalElement">
+     id="pinModalElement">
     <div class="max-w-lg text-center px-2 md:px-0">
         <div class="flex flex-col items-center pb-6">
             {% include 'components/full-logo.html' %}
@@ -9,18 +9,18 @@
         <div class="grid grid-cols-[repeat(1,1fr)_auto] gap-2 sm:gap-4 items-center mb-10">
             {% include 'components/pin.html' %}
             <button id="submitPin"
-                class="h-12 w-12 bg-primary rounded-lg flex items-center justify-center text-white hover:bg-blue-600 active:scale-[0.98] transition-all shadow-[0_0_10px_rgba(19,127,236,0.2)]">
+                    class="h-12 w-12 bg-primary rounded-lg flex items-center justify-center text-white hover:bg-blue-600 active:scale-[0.98] transition-all shadow-[0_0_10px_rgba(19,127,236,0.2)]">
                 {% lucide "arrow-right" %}
             </button>
         </div>
         <p class="pb-4 text-lg text-error" id="errorPElement"></p>
         <div class="flex items-center justify-center flex-col gap-4">
             <a href="#" class="text-lg text-blue-300 hover:underline">Esqueceu o PIN?</a>
-            <a href="{% url 'users:logout' %}" class="text-lg text-blue-300 hover:underline">Terminar Sessão</a>
+            <a href="{% url 'users:logout' %}"
+               class="text-lg text-blue-300 hover:underline">Terminar Sessão</a>
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 

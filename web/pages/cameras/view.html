@@ -1,91 +1,76 @@
 {% extends 'bases/panel.html' %}
-
 {% block title %}Visualizar Câmara{% endblock %}
-
 {% block content %}
-<div id="loader" class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
-    {% include "components/loader.html" with w=50 %}
-</div>
-<div class="bg-[#0b0f14] fixed w-full h-full z-[-1]"></div>
-<main id="container" class="hidden p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-5 gap-6">
-    <div class="xl:col-span-3">
-        <div id="camera" data-camera-id="{{ camera.id }}" data-video-source="{{ camera.video_source }}"
-            class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
-            <img id="cam-{{ camera.id }}" class="w-full h-full" />
-            <div class="absolute top-4 left-4 px-4 py-1 rounded-full bg-red-600/80 text-sm font-semibold animate-pulse">
-                LIVE
+    <div id="loader"
+         class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
+        {% include "components/loader.html" with w=50 %}
+    </div>
+    <div class="bg-[#0b0f14] fixed w-full h-full z-[-1]"></div>
+    <main id="container"
+          class="hidden p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-5 gap-6">
+        <div class="xl:col-span-3">
+            <div id="camera"
+                 data-camera-id="{{ camera.id }}"
+                 data-video-source="{{ camera.video_source }}"
+                 class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <img id="cam-{{ camera.id }}" class="w-full h-full" />
+                <div class="absolute top-4 left-4 px-4 py-1 rounded-full bg-red-600/80 text-sm font-semibold animate-pulse">LIVE</div>
             </div>
         </div>
-    </div>
-    <div class="xl:col-span-2 bg-[#161b22] rounded-2xl p-6 shadow-xl flex flex-col gap-4">
-        <div class="flex items-center justify-between border-b border-gray-700 pb-3 gap-5">
-            <h2 class="text-2xl font-semibold truncate max-w-2xl">{{ camera.name }}</h2>
-            <div class="flex gap-2">
-                <a href="{% url 'cameras:edit' camera.id %}" class="p-2 rounded-lg bg-gray-600/20 hover:bg-gray-600/30 transition">
-                    {% lucide "pencil" %}
-                </a>
-                <form action="{% url 'cameras:delete' camera.id %}" method="GET">
-                    {% csrf_token %}
-                    <button class="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition">
-                        {% lucide "trash"%}
-                    </button>
-                </form>
+        <div class="xl:col-span-2 bg-[#161b22] rounded-2xl p-6 shadow-xl flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-3 gap-5">
+                <h2 class="text-2xl font-semibold truncate max-w-2xl">{{ camera.name }}</h2>
+                <div class="flex gap-2">
+                    <a href="{% url 'cameras:edit' camera.id %}"
+                       class="p-2 rounded-lg bg-gray-600/20 hover:bg-gray-600/30 transition">{% lucide "pencil" %}</a>
+                    <form action="{% url 'cameras:delete' camera.id %}" method="GET">
+                        {% csrf_token %}
+                        <button class="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition">{% lucide "trash" %}</button>
+                    </form>
+                </div>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm uppercase text-gray-400">Estado</span>
+                <span class="px-3 py-1 rounded-full text-sm font-semibold {% if camera.status %} bg-green-500/20 text-green-400 {% else %} bg-red-500/20 text-red-400 {% endif %} ">
+                    {% if camera.status %}
+                        Activo
+                    {% else %}
+                        Inactivo
+                    {% endif %}
+                </span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm uppercase text-gray-400">Conexão</span>
+                <span class="flex items-center gap-2">
+                    {% if camera.connection_type == "W" %}
+                        {% lucide "wifi" %}
+                    {% else %}
+                        {% lucide "usb" %}
+                    {% endif %}
+                    {{ camera.get_connection_type_display }}
+                </span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm uppercase text-gray-400">Localização</span>
+                <span class="flex items-center gap-2">{{ camera.location }}</span>
+            </div>
+            {% if camera.wificamera %}
+                <div class="flex justify-between items-center">
+                    <span class="text-sm uppercase text-gray-400">Stream</span>
+                    <span class="truncate max-w-[180px]">{{ camera.wificamera.stream_url }}</span>
+                </div>
+            {% endif %}
+            <div class="flex justify-between items-center">
+                <span class="text-sm uppercase text-gray-400">Actualizado em</span>
+                <span>{{ camera.updated_at|date:"d/m/Y" }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm uppercase text-gray-400">Criado em</span>
+                <span>{{ camera.created_at|date:"d/m/Y" }}</span>
             </div>
         </div>
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Estado</span>
-            <span class="px-3 py-1 rounded-full text-sm font-semibold
-                {% if camera.status %}
-                bg-green-500/20 text-green-400
-                {% else %}
-                bg-red-500/20 text-red-400
-                {% endif %}
-            ">
-                {% if camera.status %}Activo{% else %}Inactivo{% endif %}
-            </span>
-        </div>
-
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Conexão</span>
-            <span class="flex items-center gap-2">
-                {% if camera.connection_type == "W" %}
-                {% lucide "wifi" %}
-                {% else %}
-                {% lucide "usb" %}
-                {% endif %}
-               
-                {{ camera.get_connection_type_display }}
-            </span>
-        </div>
-
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Localização</span>
-            <span class="flex items-center gap-2">
-                {{ camera.location }}
-            </span>
-        </div>
-
-        {% if camera.wificamera %}
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Stream</span>
-            <span class="truncate max-w-[180px]">{{ camera.wificamera.stream_url }}</span>
-        </div>
-        {% endif %}
-
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Actualizado em</span>
-            <span>{{ camera.updated_at|date:"d/m/Y" }}</span>
-        </div>
-
-        <div class="flex justify-between items-center">
-            <span class="text-sm uppercase text-gray-400">Criado em</span>
-            <span>{{ camera.created_at|date:"d/m/Y" }}</span>
-        </div>
-
-    </div>
-</main>
-
-<script>
+    </main>
+    <script>
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
     const cameraDiv = document.getElementById("camera")
@@ -120,5 +105,5 @@
         loader.classList.add("hidden")
         mainHTML.classList.remove("hidden")
     })
-</script>
+    </script>
 {% endblock %}

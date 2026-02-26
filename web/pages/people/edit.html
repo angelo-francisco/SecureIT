@@ -1,113 +1,148 @@
 {% extends 'bases/panel.html' %}
-
 {% block title %}Edit Pessoa{% endblock %}
-
 {% block content %}
-{% include 'components/photo_capture.html' with input="photo" start_button="startVideo" %}
-<form method="post" class="h-full mb-5" action="{% url 'people:edit' person.id %}">
-  {% csrf_token %}
-  <main class="flex-1 h-full flex flex-col relative overflow-hidden">
-    <header class="w-full px-6 py-4 text-center">
-      <h1 class="text-white text-2xl font-black">Editar Pessoa</h1>
-      <p class="text-[#9dabb9] mt-1 text-sm">
-        Alterar dados de residente, visitante ou trabalhadores
-      </p>
-    </header>
-    <div class="flex-1 overflow-y-auto">
-      <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
-        <div class="mb-4 flex justify-between gap-2">
-          <div>
-            <label class="ml-1 text-base text-white font-medium">Primeiro nome * </label>
-            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="first_name" value=person.first_name required=True %}
-          </div>
-          <div>
-            <label class="ml-1 text-base text-white font-medium">Sobrenome *</label>
-            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="last_name" value=person.last_name required=True %}
-          </div>
-        </div>
-        <div class="mb-4 flex flex-col justify-start gap-1">
-          <label class="ml-1 block text-base font-medium text-gray-500 mb-1">Tipo de Pessoa *</label>
-          <select id="person_type" name="person_type" disabled
-            class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-            <option value="R" {% if person.type == "R" %}selected{% endif %}>Residente</option>
-            <option value="V" {% if person.type == "V" %}selected{% endif %}>Visitante</option>
-            <option value="W" {% if person.type == "W" %}selected{% endif %}>Trabalhador(a)</option>
-          </select>
-        </div>
-        <div class="space-y-4">
-          <div id="resident-fields" class="hidden space-y-2">
-            <div class="mb-4 flex flex-col gap-1">
-              <label class="ml-1 text-base text-white font-medium">Nº. da Casa</label>
-              {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
-              <select name="resident-homes" id="home" multiple required
-                class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                {% for home in homes %}
-                <option value="{{home.id}}" data-number="{{ home.number }}" {% if home.id in resident_homes %}selected{% endif %}>{{ home.number }}</option>
-                {% endfor %}
-              </select>
+    {% include 'components/photo_capture.html' with input="photo" start_button="startVideo" %}
+    <form method="post"
+          class="h-full mb-5"
+          action="{% url 'people:edit' person.id %}">
+        {% csrf_token %}
+        <main class="flex-1 h-full flex flex-col relative overflow-hidden">
+            <header class="w-full px-6 py-4 text-center">
+                <h1 class="text-white text-2xl font-black">Editar Pessoa</h1>
+                <p class="text-[#9dabb9] mt-1 text-sm">Alterar dados de residente, visitante ou trabalhadores</p>
+            </header>
+            <div class="flex-1 overflow-y-auto">
+                <div class="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
+                    <div class="mb-4 flex justify-between gap-2">
+                        <div>
+                            <label class="ml-1 text-base text-white font-medium">Primeiro nome *</label>
+                            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="first_name" value=person.first_name required=True %}
+                        </div>
+                        <div>
+                            <label class="ml-1 text-base text-white font-medium">Sobrenome *</label>
+                            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="last_name" value=person.last_name required=True %}
+                        </div>
+                    </div>
+                    <div class="mb-4 flex flex-col justify-start gap-1">
+                        <label class="ml-1 block text-base font-medium text-gray-500 mb-1">Tipo de Pessoa *</label>
+                        <select id="person_type"
+                                name="person_type"
+                                disabled
+                                class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                            <option value="R" {% if person.type == "R" %}selected{% endif %}>Residente</option>
+                            <option value="V" {% if person.type == "V" %}selected{% endif %}>Visitante</option>
+                            <option value="W" {% if person.type == "W" %}selected{% endif %}>Trabalhador(a)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-4">
+                        {% if person.type == "R" %}
+                        <div id="resident-fields" class="space-y-2">
+                            <div class="mb-4 flex flex-col gap-1">
+                                <label class="ml-1 text-base text-white font-medium">Nº. da Casa</label>
+                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+                                <select name="resident-homes"
+                                        id="home"
+                                        multiple
+                                        required
+                                        class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                                    {% for home in homes %}
+                                        <option value="{{ home.id }}"
+                                                data-number="{{ home.number }}"
+                                                {% if home.id in resident_homes %}selected{% endif %}>
+                                            {{ home.number }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-4 flex flex-col gap-1">
+                                <label class=" ml-1 text-base text-white font-medium">
+                                    Nº. do BI
+                                </label>
+                                {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="resident-bi" value=person.resident.bi required=True %}
+                            </div>
+                        </div>
+                        {% elif person.type == "V" %}
+                        <div id="visitor-fields" class="space-y-2">
+                            <div class="mb-4 flex flex-col justify-start gap-1">
+                                <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de visitante</label>
+                                <select id="visitor_type"
+                                        name="visitor-type"
+                                        required
+                                        class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                                    {% for visitor_type in visitor_types %}
+                                        <option value="{{ visitor_type.0 }}"
+                                                {% if person.visitor.type == visitor_type.0 %}selected{% endif %}>
+                                            {{ visitor_type.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div id="worker-fields" class="space-y-4">
+                            <div class="mb-4 flex flex-col gap-1">
+                                <label class=" ml-1 text-base text-white font-medium">
+                                    Nº. do
+                                    BI *
+                                </label>
+                                {% include 'components/input.html' with placeholder="Número do BI" type="text" name="worker-bi" icon="id_card" value=person.worker.bi required=True %}
+                            </div>
+                            <div class="mb-4 flex flex-col gap-1">
+                                <label class="ml-1 text-base text-white font-medium">Áreas de Trabalho *</label>
+                                <select name="worker-fields"
+                                        id="selected-field"
+                                        multiple
+                                        required
+                                        class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                                    {% for field in fields %}
+                                        <option value="{{ field.0 }}"
+                                                {% if field.0 in person.worker.list_fields %}selected{% endif %}>
+                                            {{ field.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-4 flex flex-col gap-1">
+                                <label class="ml-1 text-base text-white font-medium">Casas em que Trabalha</label>
+                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+                                <select name="worker-homes"
+                                        id="home"
+                                        multiple
+                                        required
+                                        class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                                    {% for home in homes %}
+                                        <option value="{{ home.id }}"
+                                                data-number="{{ home.number }}"
+                                                {% if home.id in person.worker.work_homes %}selected{% endif %}>
+                                            {{ home.number }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <input type="hidden" name="photo" id="photo" required>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button onclick="window.history.go(-1)"
+                                class="flex items-center gap-2 h-10 px-4 rounded-lg bg-red-500 text-white font-bold text-base">
+                            Cancelar
+                        </button>
+                        <button id="startVideo"
+                                class="flex items-center gap-2 h-10 px-4 rounded-lg bg-gray-900 text-white font-bold text-base">
+                            Capturar Rosto
+                        </button>
+                        <button type="submit"
+                                onclick="this.disabled = true; this.form.submit()"
+                                class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white font-bold text-base">
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do
-                BI</label>
-              {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="resident-bi" value=person.resident.bi required=True %}
-            </div>
-          </div>
-          <div id="visitor-fields" class="hidden space-y-2">
-            <div class="mb-4 flex flex-col justify-start gap-1">
-              <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de visitante</label>
-              <select id="visitor_type" name="visitor-type" required
-                class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-                {% for visitor_type in visitor_types %}
-                <option value="{{ visitor_type.0 }}" {% if person.visitor.type == visitor_type.0 %}selected{% endif %}>{{ visitor_type.1 }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div id="worker-fields" class="hidden space-y-4">
-            <div class="mb-4 flex flex-col gap-1"><label class=" ml-1 text-base text-white font-medium">Nº. do
-                BI *</label>
-              {% include 'components/input.html' with placeholder="Número do BI" type="text" name="worker-bi" icon="id_card" value=person.worker.bi required=True %}
-            </div>
-            <div class="mb-4 flex flex-col gap-1">
-              <label class="ml-1 text-base text-white font-medium">Áreas de Trabalho *</label>
-              <select name="worker-fields" id="selected-field" multiple required
-                class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                {% for field in fields %}
-                <option value="{{field.0}}" {% if field.0 in person.worker.list_fields %}selected{% endif %}>{{ field.1 }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="mb-4 flex flex-col gap-1">
-              <label class="ml-1 text-base text-white font-medium">Casas em que Trabalha</label>
-              {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
-              <select name="worker-homes" id="home" multiple required
-                class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                {% for home in homes %}
-                <option value="{{home.id}}" data-number="{{ home.number }}" {% if home.id in person.worker.work_homes %}selected{% endif %}>{{ home.number }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-        </div>
-        <input type="hidden" name="photo" id="photo" required>    
-        <div class="flex justify-end gap-3 mt-6">
-          <button onclick="window.history.go(-1)" class="flex items-center gap-2 h-10 px-4 rounded-lg bg-red-500 text-white font-bold text-base">
-            Cancelar
-          </button>
-          <button id="startVideo"
-            class="flex items-center gap-2 h-10 px-4 rounded-lg bg-gray-900 text-white font-bold text-base">
-            Capturar Rosto
-          </button>
-          <button type="submit" onclick="this.disabled = true; this.form.submit()"
-            class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white font-bold text-base">
-            Actualizar
-          </button>
-        </div>
-      </div>
-    </div>
-  </main>
-</form>
-
-<script>
+        </main>
+    </form>
+    <script>
   const homeSearchInputs = document.querySelectorAll('.home-search')
 
   homeSearchInputs.forEach(input => {
@@ -125,65 +160,5 @@
       filteredOptions.forEach(option => select.append(option))
     })
   })  
-  const residentFields = document.getElementById("resident-fields");
-  const personTypeSelect = document.getElementById("person_type");
-  const visitorFields = document.getElementById("visitor-fields");
-  const workerFields = document.getElementById("worker-fields");
-
-  // const modal = document.getElementById("photoCaptureModel")
-  // const photoCapture = document.getElementById("photoCapture")
-  // const replayVideo = document.getElementById("replayVideo")
-  // const takePhotoBtn = document.getElementById("takePhoto")
-  // const startVideo = document.getElementById("startVideo")
-  // const canvas = document.getElementById("canvas")
-  // const photo = document.getElementById("photo")
-  // const video = document.querySelector("video");
-
-  // let stream;
-
-  function toggleFields() {
-    const value = personTypeSelect.value;
-    residentFields.classList.toggle("hidden", value !== "R");
-    visitorFields.classList.toggle("hidden", value !== "V");
-    workerFields.classList.toggle("hidden", value !== "W");
-  }
-
-  personTypeSelect.addEventListener("change", toggleFields);
-  toggleFields();
-
-  // startVideo.addEventListener('click', async (e) => {
-  //   e.preventDefault()
-
-  //   try {
-  //     stream = navigator.mediaDevices.getUserMedia({ video: true })
-
-  //     video.srcObject = stream
-  //     await video.play()
-  //     modal.classList.toggle('hidden')
-  //   } catch(error) {
-  //     modal.classList.toggle('hidden')
-  //     await video.pause()
-  //   }
-  // })
-
-  // takePhotoBtn.addEventListener('click', (e) => {
-  //   e.preventDefault()
-  //   const ctx = canvas.getContext("2d");
-
-  //   canvas.width = video.videoWidth;
-  //   canvas.height = video.videoHeight;
-
-  //   ctx.drawImage(video, 0, 0);
-  //   const dataURL = canvas.toDataURL("image/jpeg", 0.9);
-
-  //   photo.value = dataURL;
-  //   video.pause()
-  // })
-
-  // replayVideo.addEventListener('click', (e) => {
-  //   e.preventDefault()
-  //   video.play()
-  // })
-
-</script>
+    </script>
 {% endblock %}

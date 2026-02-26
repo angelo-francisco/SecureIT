@@ -1,8 +1,8 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.core.validators import ValidationError
+from django.core.exceptions import ValidationError
 from django.db import close_old_connections
-from django.db.models import Value
+from django.db.models import Count, Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -136,15 +136,21 @@ def new_person(request):
 
 
 def get_person(request, person_id):
-    person = get_object_or_404(Person, id=person_id)
+    person = get_object_or_404(
+        Person.objects.select_related("resident", "visitor", "worker")
+        .prefetch_related(
+            "resident__residenthome_set__home", "worker__workerhome_set__home"
+        ),
+        id=person_id,
+    )
     context = {"person": person}
 
     if person.type == "V":
-        visits = Visit.objects.filter(visitor_id=person.visitor.id)  # type: ignore
-
-        paginator = Paginator(visits, 10)
-        page = request.GET.get("page", "")
-        context["visits"] = paginator.get_page(page)
+        context["visits"] = (  # type: ignore
+            Visit.objects.filter(visitor_id=person.visitor.pk)  # type: ignore
+            .prefetch_related("visitdestiny_set__resident__person")
+            .order_by("-visited_at")
+        )
 
     return render(request, "people/details.html", context)
 
@@ -156,12 +162,15 @@ def delete_person(request, person_id: int):
 
 
 def edit_person(request, person_id: int):
-    person = get_object_or_404(Person, id=person_id)
+    person = get_object_or_404(
+        Person.objects.select_related("resident", "visitor", "worker"),
+        id=person_id,
+    )
     context = {"person": person}
 
     if person.type == "R":
         context["homes"] = Home.objects.all()  # type: ignore
-        context["resident_homes"] = person.resident.residenthome_set.values_list(
+        context["resident_homes"] = person.resident.residenthome_set.all().values_list(
             "home_id", flat=True
         )
     elif person.type == "V":
