@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     "tailwind_config",
     "django_google_fonts",
     "lucide",
-    "debug_toolbar",
+    # "debug_toolbar",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -42,7 +42,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.users.utils.pin_middleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
