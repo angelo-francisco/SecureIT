@@ -6,7 +6,6 @@ from urllib.parse import parse_qs
 from uuid import uuid4
 
 import cv2
-import imutils
 import orjson as json  # type: ignore
 from asgiref.sync import sync_to_async
 from channels.consumer import database_sync_to_async
@@ -18,13 +17,12 @@ from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from .models import Camera as CameraModel
 
+from ultralytics import YOLO
+
 ALERT_COOLDOWN = 5
 DETECT_EVERY = 3
 DETECTION_WIDTH = 320
 FPS = 10
-
-hog = cv2.HOGDescriptor()
-hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())  # type: ignore
 
 
 class Camera:
@@ -46,6 +44,10 @@ class Camera:
         self.thread = Thread(target=self.update, daemon=True)
         self.thread.start()
 
+        self.model = YOLO("yolo11n.pt")
+
+        self.model.to("cpu")
+
     def stop(self) -> None:
         self.running = False
 
@@ -57,14 +59,23 @@ class Camera:
         people_count = 0
 
         if detect:
-            small = imutils.resize(frame, width=DETECTION_WIDTH)
-            regions, _ = hog.detectMultiScale(
-                small, winStride=(4, 4), padding=(4, 4), scale=1.05
-            )
-            people_count = len(regions)
+            results = self.model(frame, imgsz=640, conf=0.3)
+            people = [r for r in results[0].boxes if r.cls == 0]
+            people_count = len(people)
 
-            for x, y, w, h in regions:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 1)
+            for person in people:
+                x1, y1, x2, y2 = map(int, person.xyxy[0])
+                conf = person.conf[0]
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                cv2.putText(
+                    frame,
+                    f"{conf:.2f}",
+                    (x1, y1 - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (255, 255, 255),
+                    1,
+                )
 
         _, jpeg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])  # type: ignore
         return jpeg.tobytes(), people_count  # type: ignore
