@@ -16,7 +16,7 @@
                     </div>
                     <div class="mb-4 flex flex-col justify-start gap-1">
                         <label class="text-base text-white font-medium">Localização</label>
-                        {% include 'components/input.html' with placeholder="Localização da câmara" type="text" icon="pin_drop" name="location" value=request.POST.location required=True %}
+                        {% include 'components/lucide-input.html' with placeholder="Localização da câmara" type="text" icon="pin" name="location" value=request.POST.location required=True %}
                     </div>
                     <div class="mb-4 flex flex-col justify-start gap-1">
                         <label class="block text-base font-medium text-white mb-1">Tipo de Conexão</label>

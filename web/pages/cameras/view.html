@@ -7,17 +7,16 @@
     </div>
     <div class="bg-[#0b0f14] fixed w-full h-full z-[-1]"></div>
     <main id="container"
-          class="hidden p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-5 gap-6">
-        <div class="xl:col-span-3">
+          class="hidden p-4 lg:p-8 grid grid-cols-1 gap-6">
+        <div class="max-h-[10vh] flex items-center justify-center p-1">
             <div id="camera"
                  data-camera-id="{{ camera.id }}"
                  data-video-source="{{ camera.video_source }}"
-                 class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
-                <img id="cam-{{ camera.id }}" class="w-full h-full" />
-                <div class="absolute top-4 left-4 px-4 py-1 rounded-full bg-red-600/80 text-sm font-semibold animate-pulse">LIVE</div>
+                 class="relative w-full flex items-center justify-center bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <img id="cam-{{ camera.id }}" class="relative aspect-video" />
             </div>
         </div>
-        <div class="xl:col-span-2 bg-[#161b22] rounded-2xl p-6 shadow-xl flex flex-col gap-4">
+        <div class="bg-[#161b22] rounded-2xl p-6 shadow-xl flex flex-col gap-4">
             <div class="flex items-center justify-between border-b border-gray-700 pb-3 gap-5">
                 <h2 class="text-2xl font-semibold truncate max-w-2xl">{{ camera.name }}</h2>
                 <div class="flex gap-2">
@@ -30,8 +29,8 @@
                 </div>
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm uppercase text-gray-400">Estado</span>
-                <span class="px-3 py-1 rounded-full text-sm font-semibold {% if camera.status %} bg-green-500/20 text-green-400 {% else %} bg-red-500/20 text-red-400 {% endif %} ">
+                <span class="text-sm uppercase text-gray-400 text-base">Estado</span>
+                <span class="px-3 py-1 rounded-full text-base font-semibold {% if camera.status %} bg-green-500/20 text-green-400 {% else %} bg-red-500/20 text-red-400 {% endif %} ">
                     {% if camera.status %}
                         Activo
                     {% else %}
@@ -40,8 +39,8 @@
                 </span>
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm uppercase text-gray-400">Conexão</span>
-                <span class="flex items-center gap-2">
+                <span class="uppercase text-gray-400 text-base">Conexão</span>
+                <span class="flex items-center gap-2 text-base">
                     {% if camera.connection_type == "W" %}
                         {% lucide "wifi" %}
                     {% else %}
@@ -51,22 +50,22 @@
                 </span>
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm uppercase text-gray-400">Localização</span>
-                <span class="flex items-center gap-2">{{ camera.location }}</span>
+                <span class="text-base uppercase text-gray-400">Localização</span>
+                <span class="flex items-center gap-2 text-base">{{ camera.location }}</span>
             </div>
             {% if camera.wificamera %}
                 <div class="flex justify-between items-center">
-                    <span class="text-sm uppercase text-gray-400">Stream</span>
-                    <span class="truncate max-w-[180px]">{{ camera.wificamera.stream_url }}</span>
+                    <span class="text-base uppercase text-gray-400">Stream</span>
+                    <span class="truncate text-base max-w-[180px]">{{ camera.wificamera.stream_url }}</span>
                 </div>
             {% endif %}
             <div class="flex justify-between items-center">
-                <span class="text-sm uppercase text-gray-400">Actualizado em</span>
-                <span>{{ camera.updated_at|date:"d/m/Y" }}</span>
+                <span class="text-base uppercase text-gray-400">Actualizado em</span>
+                <span class="text-base">{{ camera.updated_at|date:"d/m/Y" }}</span>
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm uppercase text-gray-400">Criado em</span>
-                <span>{{ camera.created_at|date:"d/m/Y" }}</span>
+                <span class="text-base uppercase text-gray-400">Criado em</span>
+                <span class="text-base">{{ camera.created_at|date:"d/m/Y" }}</span>
             </div>
         </div>
     </main>

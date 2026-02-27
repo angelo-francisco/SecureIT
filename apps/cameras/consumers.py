@@ -17,7 +17,7 @@ from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from .models import Camera as CameraModel
 
-from ultralytics import YOLO
+from ultralytics import YOLO # type: ignore
 
 ALERT_COOLDOWN = 5
 DETECT_EVERY = 3
@@ -65,17 +65,7 @@ class Camera:
 
             for person in people:
                 x1, y1, x2, y2 = map(int, person.xyxy[0])
-                conf = person.conf[0]
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                cv2.putText(
-                    frame,
-                    f"{conf:.2f}",
-                    (x1, y1 - 5),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (255, 255, 255),
-                    1,
-                )
 
         _, jpeg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])  # type: ignore
         return jpeg.tobytes(), people_count  # type: ignore
