@@ -1,18 +1,22 @@
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render
+from django.utils.dateparse import parse_time
 
 from apps.cameras.models import Camera
 from apps.notifications.models import Notification
 from apps.panel.models import Configuration
-from django.utils.dateparse import parse_time
-
 from apps.people.utils import update_instace
 
 
 def panel(request):
-    cameras = Camera.objects.select_related("localcamera", "wificamera").filter(
-        user=request.user
+    user = request.user
+    cameras = cache.get_or_set(
+        f"user_{user.id}_cameras",
+        lambda: Camera.objects.select_related("localcamera", "wificamera").filter(
+            user=user
+        ),
     )
     notifications_count = Notification.objects.filter(  # type: ignore
         user=request.user, readed=False, deleted=False
