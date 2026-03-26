@@ -97,7 +97,11 @@ def view_camera(request, id):
     """
     Mostra os detalhes de uma câmara
     """
-    camera = get_object_or_404(Camera, id=id, user=request.user)
+    camera = get_object_or_404(
+        Camera.objects.select_related("localcamera", "wificamera"),
+        id=id,
+        user=request.user,
+    )
     if not camera:
         messages.error(request, "Esta câmara não é sua")
         return redirect("cameras:home")
