@@ -10,5 +10,5 @@ def get_binary_location(name: str) -> str:
     return str(locations).split("\n")[0]
 
 
-def invalite_cache(key):
+def invalidate_cache(key):
     return cache.delete(key)

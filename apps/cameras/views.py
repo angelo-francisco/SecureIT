@@ -13,6 +13,7 @@ from .utils import (
     valid_connection_type,
 )
 from .utils import get_cameras as func_get_cameras
+from core.utils import invalidate_cache
 
 
 def cameras(request):
@@ -42,8 +43,9 @@ def new_camera(request):
     if request.method != "POST":
         return render(request, "cameras/new.html", context)
     try:
+        user = request.user
         camera = create_camera(
-            user=request.user,
+            user=user,
             name=request.POST.get("name", "").strip(),
             location=request.POST.get("location", "").strip(),
             connection_type=request.POST.get("connection_type", "").strip().upper(),
@@ -61,7 +63,7 @@ def new_camera(request):
                     camera_id=camera.pk,
                     stream_url=request.POST.get("stream_url", "").strip(),
                 )
-
+        invalidate_cache(f"user_{user.id}_cameras")
         messages.success(request, "Câmara registada.")
         return redirect("cameras:home")
     except Exception as error:
@@ -81,8 +83,10 @@ def delete_camera(request, id):
     """
     Elimina uma câmara pelo ID
     """
+    user = request.user
     camera: Camera = get_object_or_404(Camera, id=id)
-    if camera.user == request.user:
+    if camera.user == user:
+        invalidate_cache(f"user_{user.id}_cameras")
         camera.delete()
     else:
         messages.error(request, "Esta câmara não é sua")
@@ -102,8 +106,9 @@ def view_camera(request, id):
 
 
 def edit_camera(request, id):
+    user = request.user
     camera = get_object_or_404(Camera, id=id)
-    if not (camera.user == request.user):
+    if not (camera.user == user):
         messages.error(request, "Esta câmara não é sua")
         return redirect("cameras:home")
 
@@ -159,6 +164,7 @@ def edit_camera(request, id):
                     WifiCamera.objects.update_or_create(  # type: ignore
                         camera=camera, defaults={"stream_url": stream_url}
                     )
+            invalidate_cache(f"user_{user.id}_cameras")
             messages.success(request, "Dados editados com sucesso.")
             return redirect(reverse("cameras:view", args=[camera.pk]))
         except Exception as error:
@@ -172,7 +178,7 @@ def edit_camera(request, id):
 
 
 def get_cameras(request):
-    cameras = [] 
+    cameras = []
 
     # for camera in func_get_cameras()[0]:
     #     if not LocalCamera.objects.filter(info__path=camera["path"]).exists():
