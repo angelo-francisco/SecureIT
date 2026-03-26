@@ -53,7 +53,7 @@
                 <span class="text-base uppercase text-gray-400">Localização</span>
                 <span class="flex items-center gap-2 text-base">{{ camera.location }}</span>
             </div>
-            {% if camera.wificamera %}
+            {% if camera.connection_type == "W" %}
                 <div class="flex justify-between items-center">
                     <span class="text-base uppercase text-gray-400">Stream</span>
                     <span class="truncate text-base max-w-[180px]">{{ camera.wificamera.stream_url }}</span>
