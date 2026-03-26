@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.db import transaction
 
 from .models import Camera, LocalCamera, WifiCamera
 from .utils import (
@@ -39,37 +40,34 @@ def new_camera(request):
     """
     cameras, _ = func_get_cameras()
     context = {"cameras": cameras}
-    camera = None
     if request.method != "POST":
         return render(request, "cameras/new.html", context)
     try:
         user = request.user
-        camera = create_camera(
-            user=user,
-            name=request.POST.get("name", "").strip(),
-            location=request.POST.get("location", "").strip(),
-            connection_type=request.POST.get("connection_type", "").strip().upper(),
-        )
+        with transaction.atomic():
+            camera = create_camera(
+                user=user,
+                name=request.POST.get("name", "").strip(),
+                location=request.POST.get("location", "").strip(),
+                connection_type=request.POST.get("connection_type", "").strip().upper(),
+            )
 
-        match camera.connection_type:
-            case "L":
-                create_local_camera(
-                    camera_id=camera.pk,
-                    camera_path=request.POST.get("local_camera", "").strip(),
-                    cameras_list=cameras,
-                )
-            case "W":
-                create_wifi_camera(
-                    camera_id=camera.pk,
-                    stream_url=request.POST.get("stream_url", "").strip(),
-                )
+            match camera.connection_type:
+                case "L":
+                    create_local_camera(
+                        camera_id=camera.pk,
+                        camera_path=request.POST.get("local_camera", "").strip(),
+                        cameras_list=cameras,
+                    )
+                case "W":
+                    create_wifi_camera(
+                        camera_id=camera.pk,
+                        stream_url=request.POST.get("stream_url", "").strip(),
+                    )
         invalidate_cache(f"user_{user.id}_cameras")
         messages.success(request, "Câmara registada.")
         return redirect("cameras:home")
     except Exception as error:
-        print(error)
-        if camera:
-            camera.delete()
         msg = (
             error.message  # type: ignore
             if getattr(error, "message", False)

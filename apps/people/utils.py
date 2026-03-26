@@ -63,7 +63,7 @@ def generate_face_embedding(base64_str=None, image=None):
 
 
 def treat_photo(
-    base64_photo: str, filename="image.jpg"
+    base64_photo: str, filename=f"{uuid4()}.jpeg"
 ) -> tuple[ContentFile, ImageFile]:
     image_data = base64_to_bytes(base64_photo)
     image = Image.open(BytesIO(image_data))
@@ -176,11 +176,8 @@ def create_person(first_name: str, last_name: str, person_type: str, photo) -> P
         raise ValidationError("Tipo de pessoa inválido")
 
     person = Person.objects.create(  # type: ignore
-        first_name=first_name,
-        last_name=last_name,
-        type=person_type,
+        first_name=first_name, last_name=last_name, type=person_type, photo=photo
     )
-    person.photo.save(f"{uuid4()}.jpeg", photo)
     return person
 
 

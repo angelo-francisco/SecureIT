@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
-from django.db import close_old_connections
+from django.db import close_old_connections, transaction
 from django.db.models import Count, Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
@@ -82,38 +82,38 @@ def new_person(request):
 
     if request.method != "POST":
         return render(request, "people/new.html", context)
-    person = None
     try:
         photo_base64 = request.POST.get("photo", "").strip()
         content_file, image = treat_photo(photo_base64)
 
-        person = create_person(
-            first_name=request.POST.get("first_name", "").strip(),
-            last_name=request.POST.get("last_name", "").strip(),
-            person_type=request.POST.get("person_type", "").strip(),
-            photo=content_file,
-        )
+        with transaction.atomic():
+            person = create_person(
+                first_name=request.POST.get("first_name", "").strip(),
+                last_name=request.POST.get("last_name", "").strip(),
+                person_type=request.POST.get("person_type", "").strip(),
+                photo=content_file,
+            )
 
-        match str(person.type):
-            case "R":
-                create_resident(
-                    person.pk,
-                    request.POST.getlist("resident-homes", []),
-                    request.POST.get("resident-bi", ""),
-                )
-            case "W":
-                create_worker(
-                    person.pk,
-                    request.POST.get("worker-bi", ""),
-                    request.POST.getlist("worker-homes", []),
-                    request.POST.getlist("worker-fields", []),
-                )
-            case "V":
-                create_visitor(
-                    person.pk,
-                    request.POST.get("visitor-host", ""),
-                    request.POST.get("visitor-type", ""),
-                )
+            match person.type:
+                case "R":
+                    create_resident(
+                        person.pk,
+                        request.POST.getlist("resident-homes", []),
+                        request.POST.get("resident-bi", ""),
+                    )
+                case "W":
+                    create_worker(
+                        person.pk,
+                        request.POST.get("worker-bi", ""),
+                        request.POST.getlist("worker-homes", []),
+                        request.POST.getlist("worker-fields", []),
+                    )
+                case "V":
+                    create_visitor(
+                        person.pk,
+                        request.POST.get("visitor-host", ""),
+                        request.POST.get("visitor-type", ""),
+                    )
 
         # Fechando conexões antigas para impedir lock do banco de dados
         close_old_connections()
@@ -123,9 +123,6 @@ def new_person(request):
         messages.success(request, "Pessoa cadastrada com sucesso")
         return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
-        print(error)
-        if person:
-            person.delete()
         msg = (
             error.message  # type: ignore
             if getattr(error, "message", False)
