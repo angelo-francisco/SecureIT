@@ -7,12 +7,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATABASE_DIR = BASE_DIR / "db.sqlite3"
 
 
+_db_connection = None
+
 def get_conn():
-    db = sqlite3.connect(DATABASE_DIR)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    return db
+    global _db_connection
+    if _db_connection is None:
+        _db_connection = sqlite3.connect(DATABASE_DIR, check_same_thread=False)
+        _db_connection.enable_load_extension(True)
+        sqlite_vec.load(_db_connection)
+        _db_connection.enable_load_extension(False)
+    return _db_connection
+
+# Update search and insert to NOT close the global connection
 
 
 def insert_person_embedding(person, embedding):
@@ -24,7 +30,6 @@ def insert_person_embedding(person, embedding):
         (person, embedding),
     )
     db.commit()
-    db.close()
 
 
 def search_person_by_embedding(embedding, k=1):
@@ -41,7 +46,6 @@ def search_person_by_embedding(embedding, k=1):
         (embedding, k),
     )
     rows = cursor.fetchall()
-    db.close()
     return rows
 
 
@@ -59,7 +63,6 @@ def main():
         """
     )
     db.commit()
-    db.close()
 
 
 if __name__ == "__main__":

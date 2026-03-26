@@ -82,7 +82,7 @@
 
     function connectCameraWs(cameraId, videoSource) {
         if (!videoSource) return
-        const ws = new WebSocket(`ws:localhost:8000/ws/camera/${cameraId}/?vs=${videoSource}`)
+        const ws = new WebSocket(`ws://${window.location.host}/ws/camera/${cameraId}/?vs=${videoSource}`)
         ws.binaryType = "arraybuffer"
         ws.onmessage = e => {
             const blob = new Blob([e.data], { type: "image/jpeg" })

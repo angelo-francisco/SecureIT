@@ -21,7 +21,7 @@ def cameras(request):
     Lista todas as câmaras cadastradas
     """
     context = {}
-    cameras = Camera.objects.filter(user=request.user)  # type: ignore
+    cameras = Camera.objects.select_related("localcamera", "wificamera").filter(user=request.user)  # type: ignore
     search_query = request.GET.get("search_query", "").strip()
     page_number = request.GET.get("page", "")
 

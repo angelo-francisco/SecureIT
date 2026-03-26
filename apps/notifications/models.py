@@ -31,3 +31,7 @@ class Notification(models.Model):
     class Meta:
         verbose_name = "Notificação"
         verbose_name_plural = "Notificações"
+        indexes = [
+            models.Index(fields=["user", "readed", "deleted"]),
+            models.Index(fields=["created_at"]),
+        ]

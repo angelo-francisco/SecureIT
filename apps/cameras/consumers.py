@@ -17,6 +17,7 @@ from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from .models import Camera as CameraModel
 
+from .services import YOLOService
 from ultralytics import YOLO # type: ignore
 
 ALERT_COOLDOWN = 5
@@ -44,9 +45,8 @@ class Camera:
         self.thread = Thread(target=self.update, daemon=True)
         self.thread.start()
 
-        self.model = YOLO("yolo11n.pt")
-
-        self.model.to("cpu")
+        # Model is now managed by YOLOService singleton
+        pass
 
     def stop(self) -> None:
         self.running = False
@@ -59,7 +59,7 @@ class Camera:
         people_count = 0
 
         if detect:
-            results = self.model(frame, imgsz=640, conf=0.3)
+            results = YOLOService.predict(frame, imgsz=320, conf=0.3)
             people = [r for r in results[0].boxes if r.cls == 0]
             people_count = len(people)
 
