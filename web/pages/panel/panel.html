@@ -107,15 +107,15 @@
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
     const audio = document.getElementById("soundEffect")
-
-    function changeNotificationCounters(value) {
-        document.querySelectorAll(".notificationCounter")
-            .forEach(nc => {
-                nc.innerHTML = value
-            });
-    }
-
-    changeNotificationCounters("{{ notifications_count }}")
+    
+    function addNotificationCounters() {
+            document.querySelectorAll(".notificationCounter")
+                .forEach(nc => {
+                    console.log(nc.innerHTML)
+                    console.log(parseInt(nc.innerHTML))
+                    nc.innerHTML = parseInt(nc.innerHTML) + 1;
+                });
+        }
 
     function showDetectionAnimation(peopleCount) {
         const notificationBtn = document.getElementById('notificationBtn');
@@ -146,6 +146,15 @@
         return parseInt(id)
     }
 
+    function handleJson(text) {
+        const data = JSON.parse(text)
+        if (data.type === "notification") {
+            addNotificationCounters()
+            playNotificationSound()
+            showDetectionAnimation(data.people)
+        }
+    }
+
     function connectCameraWs(cameraId, videoSource) {
         let ws;
         const imageElement = document.getElementById(`cam-${cameraId}`)
@@ -161,15 +170,11 @@
                 return;
             }
             ws.binaryType = "arraybuffer"
-
-            ws.onmessage = (event) => {
+            
+            ws.onmessage = (event) => { 
                 if (typeof event.data === "string") {
-                    const data = JSON.parse(event.data)
-                    if (data.type === "notification") {
-                        changeNotificationCounters(data.notifications_count)
-                        playNotificationSound()
-                        showDetectionAnimation(data.people)
-                    }
+                    console.log("NOTIFICACAO")
+                    handleJson(event.data)
                 }
 
                 if (event.data instanceof ArrayBuffer) {
@@ -177,7 +182,7 @@
                     const url = URL.createObjectURL(blob);
                     imageElement.src = url
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
-                }
+                }        
             }
 
 

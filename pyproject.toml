@@ -24,10 +24,12 @@ dependencies = [
     "torch>=2.9.1",
     "torchvision>=0.24.1",
     "ultralytics>=8.4.17",
+    "uvicorn[standard]>=0.42.0",
+    "whitenoise>=6.12.0",
 ]
 
 [tool.taskipy.tasks]
-run = "python manage.py runserver"
+run = "uvicorn core.asgi:application"
 urun = "gunicorn core.asgi:application -k uvicorn_worker.UvicornWorker"
 mg = "python manage.py migrate && python apps/people/db.py"
 mkmg = "python manage.py makemigrations"

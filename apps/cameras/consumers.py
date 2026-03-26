@@ -6,7 +6,7 @@ from urllib.parse import parse_qs
 from uuid import uuid4
 
 import cv2
-import orjson as json  # type: ignore
+import json  # type: ignore
 from asgiref.sync import sync_to_async
 from channels.consumer import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -111,7 +111,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
         return Configuration.objects.get(user=self.scope["user"])  # type: ignore
 
     @database_sync_to_async
-    def create_notification(
+    def create_notification (
         self, title: str, description: str, level: str, photo=None, camera_id=None
     ):
         return Notification.objects.create(  # type: ignore
@@ -152,6 +152,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
             self.task.cancel()
 
     def is_monitoring_time(self) -> bool:
+        return True
         now = timezone.now().time()
         start = self.confs.monitoring_start_time
         end = self.confs.monitoring_end_time
@@ -191,7 +192,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
                                     {
                                         "type": "notification",
                                         "people": people,
-                                        "notifications_count": await self.get_notifications_count(),
+                                        # "notifications_count": await self.get_notifications_count(),
                                     }
                                 )
                             )

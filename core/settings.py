@@ -1,15 +1,16 @@
 from pathlib import Path
 
+from .utils import get_binary_location
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-"
+SECRET_KEY = "x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-"
 
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
-    "daphne",
     "channels",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -26,7 +27,7 @@ INSTALLED_APPS = [
     "tailwind_config",
     "django_google_fonts",
     "lucide",
-    # "debug_toolbar",
+    "whitenoise.runserver_nostatic",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -34,6 +35,7 @@ AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -42,8 +44,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.users.utils.pin_middleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
 
 ROOT_URLCONF = "core.urls"
 
@@ -64,8 +72,6 @@ TEMPLATES = [
         },
     },
 ]
-# Alterados de wsgi para asgi
-# Assim servimos websockets
 
 ASGI_APPLICATION = "core.asgi.application"
 
@@ -108,18 +114,14 @@ STATIC_ROOT = BASE_DIR.joinpath("web", "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR.joinpath("media")
 
-# configurações de login/logout (adicionadas)
 LOGIN_URL = "users:login"
 LOGOUT_REDIRECT_URL = "users:logout"
 
-# Extendendo o tempo do cookie para evitar logout automático
-SESSION_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 ano
+SESSION_COOKIE_AGE = 365 * 24 * 60 * 60  # One year
 
-# Configurações do Tailwind
 TAILWIND_APP_NAME = "tailwind_config"
-NPM_BIN_PATH = "/usr/bin/npm"
+NPM_BIN_PATH = get_binary_location("npm")
 
-# Configurações da biblioteca django-google-fonts
 GOOGLE_FONTS = [
     "Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900",
     "Noto Sans:ital,wght@0,100..900;1,100..900",
@@ -128,3 +130,12 @@ GOOGLE_FONTS = [
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}

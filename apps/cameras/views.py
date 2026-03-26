@@ -174,7 +174,7 @@ def edit_camera(request, id):
 def get_cameras(request):
     cameras = [] 
 
-    for camera in func_get_cameras()[0]:
-        if not LocalCamera.objects.filter(info__path=camera["path"]).exists():
-            cameras.append(camera)
+    # for camera in func_get_cameras()[0]:
+    #     if not LocalCamera.objects.filter(info__path=camera["path"]).exists():
+    #         cameras.append(camera)
     return JsonResponse(cameras, safe=False)
