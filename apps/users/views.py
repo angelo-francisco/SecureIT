@@ -45,10 +45,10 @@ def signup(request):
         else:
             user = User(email=email, first_name=first_name, last_name=last_name)
             user.set_password(password)
-            user.set_pin(pin)
+            user.set_pin(pin) # type: ignore
 
             user.save()
-            Configuration.objects.create(user=user)  # type: ignore
+            Configuration.objects.create(user=user)
 
             messages.success(request, "Dados registados com sucesso")
             return redirect("users:login")
@@ -67,6 +67,7 @@ def login(request):
             user = authenticate(request, username=None, password=password, email=email)
             if user is not None:
                 django_login(request, user)
+
                 messages.success(request, "Sessão iniciada com sucesso")
                 return redirect("panel:home")
         messages.error(request, "Endereço ou palavra-passe incorrectos")

@@ -18,8 +18,6 @@ def get_conn():
         _db_connection.enable_load_extension(False)
     return _db_connection
 
-# Update search and insert to NOT close the global connection
-
 
 def insert_person_embedding(person, embedding):
     db = get_conn()

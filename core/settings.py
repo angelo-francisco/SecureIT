@@ -141,3 +141,5 @@ STORAGES = {
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
+YOLO_PATH = BASE_DIR / "yolo_models"
