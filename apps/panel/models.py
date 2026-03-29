@@ -28,6 +28,9 @@ class Configuration(models.Model):
         validators=[MinValueValidator(3)],
         verbose_name="Número de frames a detectar",
     )
+    allow_draw = models.BooleanField(
+        default=True, verbose_name="Permitir desenho"
+    )
 
     def __str__(self):
         return f"Configurações de {self.user.get_full_name()}"

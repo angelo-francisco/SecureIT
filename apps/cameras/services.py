@@ -27,8 +27,9 @@ class YOLOService:
 
 
 class Camera:
-    def __init__(self, video_source, fps = 15):
+    def __init__(self, video_source, fps = 15, allow_draw = True):
         self.fps = fps
+        self.allow_draw = allow_draw
         self.running = True
 
         if not video_source:
@@ -61,9 +62,10 @@ class Camera:
             people = [r for r in results[0].boxes if r.cls == 0]
             people_count = len(people)
 
-            for person in people:
-                x1, y1, x2, y2 = map(int, person.xyxy[0])
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            if self.allow_draw:
+                for person in people:
+                    x1, y1, x2, y2 = map(int, person.xyxy[0])
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
         _, jpeg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         return jpeg.tobytes(), people_count

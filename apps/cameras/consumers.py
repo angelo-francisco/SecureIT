@@ -29,7 +29,9 @@ class CameraConsumer(AsyncWebsocketConsumer):
 
         try:
             self.camera_object = await self.get_camera_queryset(camera_id)
-            self.camera = await sync_to_async(Camera)(self.video_source, fps=self.fps)
+            self.camera = await sync_to_async(Camera)(
+                self.video_source, fps=self.fps, allow_draw=self.allow_draw
+            )
             await self.update_camera_status(True)
         except Exception as e:
             print(e)
@@ -51,6 +53,7 @@ class CameraConsumer(AsyncWebsocketConsumer):
         self.fps = confs.fps
         self.alert_cooldown = confs.alert_cooldown
         self.detect_every = confs.detect_every
+        self.allow_draw = confs.allow_draw
 
     @database_sync_to_async
     def create_notification(
