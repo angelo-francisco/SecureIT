@@ -152,7 +152,9 @@
         if (data.type === "notification") {
             addNotificationCounters()
             playNotificationSound()
-            showDetectionAnimation(data.people)
+            if(data.people) {
+                showDetectionAnimation(data.people)
+            }
         }
     }
 
@@ -174,7 +176,6 @@
 
             ws.onmessage = (event) => {
                 if (typeof event.data === "string") {
-                    console.log("NOTIFICACAO")
                     handleJson(event.data)
                 }
 
@@ -185,7 +186,6 @@
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                 }
             }
-
 
             ws.onclose = (e) => {
                 console.warn(`WS fechado na câmera ${cameraId}`);

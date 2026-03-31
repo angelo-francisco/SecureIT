@@ -5,6 +5,7 @@ from time import time
 from urllib.parse import parse_qs
 from uuid import uuid4
 
+import cv2
 from asgiref.sync import sync_to_async
 from channels.consumer import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -16,7 +17,7 @@ from apps.panel.models import Configuration
 
 from .models import Camera as CameraModel
 from .models import DetectionLine
-from .services import Camera, RawCamera
+from .services import Camera, RawCamera, YOLOService
 
 
 class RawCameraConsumer(AsyncWebsocketConsumer):
@@ -295,37 +296,33 @@ class AreaDetectionConsumer(AsyncWebsocketConsumer):
     def side(self, px, py, x1, y1, x2, y2):
         return (px - x1) * (y2 - y1) - (py - y1) * (x2 - x1)
 
+    def encode_frame(self, frame):
+        _, jpeg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        return jpeg.tobytes()
+
+    def point_line_distance(self, px, py, x1, y1, x2, y2):
+        numerator = abs((y2 - y1) * px - (x2 - x1) * py + x2 * y1 - y2 * x1)
+        denominator = ((y2 - y1) ** 2 + (x2 - x1) ** 2) ** 0.5
+        return numerator / denominator
+
     async def stream(self):
         try:
             while self.running:
                 self.frame_index += 1
                 detect = self.frame_index % self.detect_every == 0
 
-                frame, _ = await sync_to_async(self.camera.get_frame)(detect)
+                frame = self.camera.frame.copy()
+                h, w = frame.shape[:2]
+
+                x1 = int(self.line.x1 * w)
+                y1 = int(self.line.y1 * h)
+                x2 = int(self.line.x2 * w)
+                y2 = int(self.line.y2 * h)
+
+                cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
                 if detect:
-                    results = await sync_to_async(self.camera.get_frame)(True)
-                    frame_bytes, _ = results
-
-                    import cv2
-                    import numpy as np
-
-                    frame_np = cv2.imdecode(
-                        np.frombuffer(frame_bytes, np.uint8), cv2.IMREAD_COLOR
-                    )
-
-                    h, w = frame_np.shape[:2]
-
-                    x1 = int(self.line.x1 * w)
-                    y1 = int(self.line.y1 * h)
-                    x2 = int(self.line.x2 * w)
-                    y2 = int(self.line.y2 * h)
-
-                    results = await sync_to_async(self.camera.get_frame)(True)
-
-                    from .services import YOLOService
-
-                    preds = YOLOService.predict(frame_np)
+                    preds = YOLOService.predict(frame)
 
                     for i, person in enumerate(preds[0].boxes):
                         if person.cls != 0:
@@ -335,31 +332,33 @@ class AreaDetectionConsumer(AsyncWebsocketConsumer):
                         cx = (px1 + px2) // 2
                         cy = (py1 + py2) // 2
 
-                        current_side = self.side(cx, cy, x1, y1, x2, y2)
+                        distance_to_line = self.point_line_distance(
+                            cx, cy, x1, y1, x2, y2
+                        )
+                        margin = 5  # pixels de tolerância
+                        print(distance_to_line)
+                        if (
+                            distance_to_line < margin
+                            # and self.is_monitoring_time()
+                            # and self.check_cooldown()
+                        ):
+                            create_task(
+                                self.create_notification(
+                                    self.encode_frame(frame),
+                                    self.scope["url_route"]["kwargs"]["camera_id"],
+                                )
+                            )
 
-                        prev = self.prev_positions.get(i)
+                            await self.send(
+                                text_data=json.dumps(
+                                    {"type": "notification", "event": "intrusion"}
+                                )
+                            )
+                            self.last_alert = time()
 
-                        if prev is not None:
-                            if current_side * prev < 0:
-                                if self.is_monitoring_time() and self.check_cooldown():
-                                    create_task(
-                                        self.create_notification(
-                                            frame_bytes,
-                                            self.scope["url_route"]["kwargs"][
-                                                "camera_id"
-                                            ],
-                                        )
-                                    )
+                frame_bytes = self.encode_frame(frame)
 
-                                    await self.send(
-                                        text_data=json.dumps({"type": "intrusion"})
-                                    )
-
-                                    self.last_alert = time()
-
-                        self.prev_positions[i] = current_side
-
-                await self.send(bytes_data=frame)
+                await self.send(bytes_data=frame_bytes)
                 await async_sleep(1 / self.fps)
 
         except CancelledError:
