@@ -1,12 +1,15 @@
+import orjson as json
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.db import transaction
 
-from .models import Camera, LocalCamera, WifiCamera
+from core.utils import invalidate_cache
+
+from .models import Camera, DetectionLine, LocalCamera, WifiCamera
 from .utils import (
     create_camera,
     create_local_camera,
@@ -14,7 +17,6 @@ from .utils import (
     valid_connection_type,
 )
 from .utils import get_cameras as func_get_cameras
-from core.utils import invalidate_cache
 
 
 def cameras(request):
@@ -22,7 +24,9 @@ def cameras(request):
     Lista todas as câmaras cadastradas
     """
     context = {}
-    cameras = Camera.objects.select_related("localcamera", "wificamera").filter(user=request.user)  # type: ignore
+    cameras = Camera.objects.select_related("localcamera", "wificamera").filter(
+        user=request.user
+    )  # type: ignore
     search_query = request.GET.get("search_query", "").strip()
     page_number = request.GET.get("page", "")
 
@@ -129,9 +133,9 @@ def edit_camera(request, id):
 
             if camera.connection_type != connection_type:
                 if camera.connection_type == "L":
-                    camera.localcamera.delete()
+                    camera.localcamera.delete()  # type: ignore
                 else:
-                    camera.wificamera.delete()
+                    camera.wificamera.delete()  # type: ignore
 
                 camera.connection_type = connection_type
 
@@ -182,6 +186,79 @@ def get_cameras(request):
     cameras = []
     user = request.user
     for camera in func_get_cameras()[0]:
-        if not LocalCamera.objects.filter(camera__user_id=user.id, info__path=camera["path"]).exists():
+        if not LocalCamera.objects.filter(
+            camera__user_id=user.id, info__path=camera["path"]
+        ).exists():
             cameras.append(camera)
     return JsonResponse(cameras, safe=False)
+
+
+def new_detection_area(request, id):
+    user = request.user
+    camera = get_object_or_404(Camera, id=id)
+
+    if camera.user != user:
+        messages.error(request, "Esta câmara não é sua")
+        return redirect("cameras:home")
+
+    if request.method == "POST":
+        try:
+            if not request.body:
+                raise ValidationError("Dados não fornecidos")
+
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                raise ValidationError("JSON inválido")
+
+            points = data.get("points")
+
+            if not points or not isinstance(points, list):
+                raise ValidationError("Pontos inválidos")
+
+            if len(points) != 2:
+                raise ValidationError("Deve fornecer exatamente 2 pontos")
+
+            def validate_point(p):
+                if not isinstance(p, dict):
+                    raise ValidationError("Formato de ponto inválido")
+
+                x = p.get("x")
+                y = p.get("y")
+
+                if x is None or y is None:
+                    raise ValidationError("Coordenadas em falta")
+
+                if not isinstance(x, (int, float)) or not isinstance(y, (int, float)):
+                    raise ValidationError("Coordenadas devem ser numéricas")
+
+                if not (0 <= x <= 1) or not (0 <= y <= 1):
+                    raise ValidationError("Coordenadas devem estar entre 0 e 1")
+
+                return float(x), float(y)
+
+            x1, y1 = validate_point(points[0])
+            x2, y2 = validate_point(points[1])
+
+            if x1 == x2 and y1 == y2:
+                raise ValidationError("Os pontos não podem ser iguais")
+
+            DetectionLine.objects.update_or_create(
+                camera=camera,
+                defaults={
+                    "x1": x1,
+                    "y1": y1,
+                    "x2": x2,
+                    "y2": y2,
+                },
+            )
+
+            return JsonResponse({"success": True})
+
+        except ValidationError as error:
+            return JsonResponse({"success": False, "error": error.message}, status=400)
+
+        except Exception:
+            return JsonResponse({"success": False, "error": "Erro interno"}, status=500)
+
+    return render(request, "cameras/new-detection-area.html", {"camera": camera})

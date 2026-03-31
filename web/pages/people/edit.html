@@ -36,90 +36,88 @@
                     </div>
                     <div class="space-y-4">
                         {% if person.type == "R" %}
-                        <div id="resident-fields" class="space-y-2">
-                            <div class="mb-4 flex flex-col gap-1">
-                                <label class="ml-1 text-base text-white font-medium">Nº. da Casa</label>
-                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
-                                <select name="resident-homes"
-                                        id="home"
-                                        multiple
-                                        required
-                                        class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                                    {% for home in homes %}
-                                        <option value="{{ home.id }}"
-                                                data-number="{{ home.number }}"
-                                                {% if home.id in resident_homes %}selected{% endif %}>
-                                            {{ home.number }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
+                            <div id="resident-fields" class="space-y-2">
+                                <div class="mb-4 flex flex-col gap-1">
+                                    <label class="ml-1 text-base text-white font-medium">Nº. da Casa</label>
+                                    {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+                                    <select name="resident-homes"
+                                            id="home"
+                                            multiple
+                                            required
+                                            class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                                        {% for home in homes %}
+                                            <option value="{{ home.id }}"
+                                                    data-number="{{ home.number }}"
+                                                    {% if home.id in resident_homes %}selected{% endif %}>
+                                                {{ home.number }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-4 flex flex-col gap-1">
+                                    <label class=" ml-1 text-base text-white font-medium">Nº. do BI</label>
+                                    {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="resident-bi" value=person.resident.bi required=True %}
+                                </div>
                             </div>
-                            <div class="mb-4 flex flex-col gap-1">
-                                <label class=" ml-1 text-base text-white font-medium">
-                                    Nº. do BI
-                                </label>
-                                {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="resident-bi" value=person.resident.bi required=True %}
-                            </div>
-                        </div>
                         {% elif person.type == "V" %}
-                        <div id="visitor-fields" class="space-y-2">
-                            <div class="mb-4 flex flex-col justify-start gap-1">
-                                <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de visitante</label>
-                                <select id="visitor_type"
-                                        name="visitor-type"
-                                        required
-                                        class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-                                    {% for visitor_type in visitor_types %}
-                                        <option value="{{ visitor_type.0 }}"
-                                                {% if person.visitor.type == visitor_type.0 %}selected{% endif %}>
-                                            {{ visitor_type.1 }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
+                            <div id="visitor-fields" class="space-y-2">
+                                <div class="mb-4 flex flex-col justify-start gap-1">
+                                    <label class="ml-1 block text-base font-medium text-white mb-1">Tipo de visitante</label>
+                                    <select id="visitor_type"
+                                            name="visitor-type"
+                                            required
+                                            class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                                        {% for visitor_type in visitor_types %}
+                                            <option value="{{ visitor_type.0 }}"
+                                                    {% if person.visitor.type == visitor_type.0 %}selected{% endif %}>
+                                                {{ visitor_type.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                        </div>
                         {% else %}
-                        <div id="worker-fields" class="space-y-4">
-                            <div class="mb-4 flex flex-col gap-1">
-                                <label class=" ml-1 text-base text-white font-medium">
-                                    Nº. do
-                                    BI *
-                                </label>
-                                {% include 'components/input.html' with placeholder="Número do BI" type="text" name="worker-bi" icon="id_card" value=person.worker.bi required=True %}
+                            <div id="worker-fields" class="space-y-4">
+                                <div class="mb-4 flex flex-col gap-1">
+                                    <label class=" ml-1 text-base text-white font-medium">
+                                        Nº. do
+                                        BI *
+                                    </label>
+                                    {% include 'components/input.html' with placeholder="Número do BI" type="text" name="worker-bi" icon="id_card" value=person.worker.bi required=True %}
+                                </div>
+                                <div class="mb-4 flex flex-col gap-1">
+                                    <label class="ml-1 text-base text-white font-medium">Áreas de Trabalho *</label>
+                                    <select name="worker-fields"
+                                            id="selected-field"
+                                            multiple
+                                            required
+                                            class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                                        {% for field in fields %}
+                                            <option value="{{ field.0 }}"
+                                                    {% if field.0 in person.worker.list_fields %}selected{% endif %}>
+                                                {{ field.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-4 flex flex-col gap-1">
+                                    <label class="ml-1 text-base text-white font-medium">Casas em que Trabalha</label>
+                                    {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+                                    <select name="worker-homes"
+                                            id="home"
+                                            multiple
+                                            required
+                                            class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
+                                        {% for home in homes %}
+                                            <option value="{{ home.id }}"
+                                                    data-number="{{ home.number }}"
+                                                    {% if home.id in person.worker.work_homes %}selected{% endif %}>
+                                                {{ home.number }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                            <div class="mb-4 flex flex-col gap-1">
-                                <label class="ml-1 text-base text-white font-medium">Áreas de Trabalho *</label>
-                                <select name="worker-fields"
-                                        id="selected-field"
-                                        multiple
-                                        required
-                                        class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                                    {% for field in fields %}
-                                        <option value="{{ field.0 }}"
-                                                {% if field.0 in person.worker.list_fields %}selected{% endif %}>
-                                            {{ field.1 }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="mb-4 flex flex-col gap-1">
-                                <label class="ml-1 text-base text-white font-medium">Casas em que Trabalha</label>
-                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
-                                <select name="worker-homes"
-                                        id="home"
-                                        multiple
-                                        required
-                                        class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
-                                    {% for home in homes %}
-                                        <option value="{{ home.id }}"
-                                                data-number="{{ home.number }}"
-                                                {% if home.id in person.worker.work_homes %}selected{% endif %}>
-                                            {{ home.number }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
                         {% endif %}
                     </div>
                     <input type="hidden" name="photo" id="photo" required>

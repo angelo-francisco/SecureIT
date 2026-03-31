@@ -49,7 +49,10 @@
                 <div class="py-2 flex items-center justify-between text-nowrap">
                     <span class="text-lg font-mediun">Permitir desenho</span>
                     <div class="max-w-[150px]">
-                        <input type="checkbox" name="allow_draw" id="allow_draw" {% if settings.allow_draw %}checked{% endif %} >
+                        <input type="checkbox"
+                               name="allow_draw"
+                               id="allow_draw"
+                               {% if settings.allow_draw %}checked{% endif %}>
                     </div>
                 </div>
             </div>

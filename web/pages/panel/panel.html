@@ -87,7 +87,8 @@
             <div class="border border-gray-600 camera relative bg-black w-full h-full overflow-hidden"
                  data-video-source="{{ camera.video_source }}"
                  data-camera-id="{{ camera.id }}"
-                 data-connection-type="{{ camera.connection_type }}">
+                 data-connection-type="{{ camera.connection_type }}"
+                 data-consumer-name="{% if camera.detectionline %}area-detection{% else %}camera{% endif %}">
                 <div id="img-div-{{ camera.id }}"
                      class=" w-full h-full flex items-center justify-center">
                     <img src=""
@@ -96,7 +97,7 @@
                     <span class="px-2 absolute bottom-1 right-1 text-lg text-green-400 font-mono">{{ camera.get_name }}</span>
                 </div>
             </div>
-        {% empty %} 
+        {% empty %}
             <div class="fixed inset-0 flex flex-col items-center justify-center">
                 <div class="flex items-center justify-center ">{% lucide "video-off" %}</div>
                 <span class="text-xl">Sem câmeras registadas</span>
@@ -107,15 +108,15 @@
     const mainHTML = document.getElementById("container")
     const loader = document.getElementById("loader")
     const audio = document.getElementById("soundEffect")
-    
+
     function addNotificationCounters() {
-            document.querySelectorAll(".notificationCounter")
-                .forEach(nc => {
-                    console.log(nc.innerHTML)
-                    console.log(parseInt(nc.innerHTML))
-                    nc.innerHTML = parseInt(nc.innerHTML) + 1;
-                });
-        }
+        document.querySelectorAll(".notificationCounter")
+            .forEach(nc => {
+                console.log(nc.innerHTML)
+                console.log(parseInt(nc.innerHTML))
+                nc.innerHTML = parseInt(nc.innerHTML) + 1;
+            });
+    }
 
     function showDetectionAnimation(peopleCount) {
         const notificationBtn = document.getElementById('notificationBtn');
@@ -155,7 +156,7 @@
         }
     }
 
-    function connectCameraWs(cameraId, videoSource) {
+    function connectCameraWs(cameraId, videoSource, consumerName) {
         let ws;
         const imageElement = document.getElementById(`cam-${cameraId}`)
         const containerDiv = document.getElementById(`img-div-${cameraId}`);
@@ -164,14 +165,14 @@
 
         const createWs = () => {
             try {
-                ws = new WebSocket(`ws://localhost:8000/ws/camera/${cameraId}/?vs=${videoSource}`)
+                ws = new WebSocket(`ws://localhost:8000/ws/${consumerName}/${cameraId}/?vs=${videoSource}`)
             } catch (err) {
                 console.log(err)
                 return;
             }
             ws.binaryType = "arraybuffer"
-            
-            ws.onmessage = (event) => { 
+
+            ws.onmessage = (event) => {
                 if (typeof event.data === "string") {
                     console.log("NOTIFICACAO")
                     handleJson(event.data)
@@ -182,7 +183,7 @@
                     const url = URL.createObjectURL(blob);
                     imageElement.src = url
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
-                }        
+                }
             }
 
 
@@ -204,13 +205,14 @@
             const cameraId = camera.dataset.cameraId
             let cameraType = camera.dataset.connectionType
             let videoSource = camera.dataset.videoSource
+            const consumerName = camera.dataset.consumerName
 
             if (cameraType === "L") {
                 videoSource = convertToInt(videoSource)
             }
             if (!videoSource || !cameraId) return
 
-            connectCameraWs(cameraId, videoSource)
+            connectCameraWs(cameraId, videoSource, consumerName)
         });
 
         loader.classList.add('hidden')

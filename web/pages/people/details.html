@@ -67,12 +67,11 @@
                     </div>
                     <div class="flex justify-between items-center mb-2 mt-2">
                         <span class="text-gray-300 text-base">Estado</span>
-                        <span
-                            class="px-4 py-1 rounded-full text-base font-semibold {% if person.banned %} bg-red-500/20 text-red-400 {% else %} bg-green-500/20 text-green-400 {% endif %}">
+                        <span class="px-4 py-1 rounded-full text-base font-semibold {% if person.banned %} bg-red-500/20 text-red-400 {% else %} bg-green-500/20 text-green-400 {% endif %}">
                             {% if person.banned %}
-                            Banido
+                                Banido
                             {% else %}
-                            Activo
+                                Activo
                             {% endif %}
                         </span>
                     </div>

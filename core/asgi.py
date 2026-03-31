@@ -12,7 +12,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter  # NOQA
 from channels.security.websocket import AllowedHostsOriginValidator  # NOQA
 from django.urls import path  # NOQA
 
-from apps.cameras.consumers import CameraConsumer  # NOQA
+from apps.cameras.consumers import CameraConsumer, RawCameraConsumer, AreaDetectionConsumer  # NOQA
 
 application = ProtocolTypeRouter(
     {
@@ -24,6 +24,14 @@ application = ProtocolTypeRouter(
                         path(
                             "ws/camera/<int:camera_id>/",
                             CameraConsumer.as_asgi(),
+                        ),
+                        path(
+                            "ws/raw-camera/<int:camera_id>/",
+                            RawCameraConsumer.as_asgi(),
+                        ),
+                        path(
+                            "ws/area-detection/<int:camera_id>/",
+                            AreaDetectionConsumer.as_asgi(),
                         ),
                     ]
                 )

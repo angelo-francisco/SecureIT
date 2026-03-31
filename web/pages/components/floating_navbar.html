@@ -1,49 +1,51 @@
 {% load static %}
 <div id="movableNavbar"
-    class="fixed top-4 left-4 z-[999] bg-surface-dark/60 backdrop-blur-xl backdrop-saturate-150 border border-gray-700 rounded-full shadow-xl flex flex-col items-center gap-2 p-3 select-none duration-300 ease-in-out">
+     class="fixed top-4 left-4 z-[999] bg-surface-dark/60 backdrop-blur-xl backdrop-saturate-150 border border-gray-700 rounded-full shadow-xl flex flex-col items-center gap-2 p-3 select-none duration-300 ease-in-out">
     <div class="relative mt-1 w-10 h-10 flex items-center justify-center text-white font-bold cursor-pointer"
-        id="floating-navbar-trigger">
+         id="floating-navbar-trigger">
         <div class="absolute inset-0 rounded-full bg-[#137FEC]/70 blur-lg"></div>
-        <img src="{% static 'imgs/logo.png' %}" alt="Logo" class="relative w-8 h-auto z-10">
+        <img src="{% static 'imgs/logo.png' %}"
+             alt="Logo"
+             class="relative w-8 h-auto z-10">
         <span id="floating-navbar-notification-counter"
-            class="visible notificationCounter absolute top-0 right-0 p-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full z-[999]">
+              class="visible notificationCounter absolute top-0 right-0 p-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full z-[999]">
             {{ notifications_count }}
         </span>
     </div>
     <div class="overflow-hidden max-h-0 opacity-0 scale-95 transition-all duration-300 ease-out"
-        id="floating-navbar-menu">
+         id="floating-navbar-menu">
         <div class="w-full h-px bg-border-dark mb-1"></div>
         <a href="{% url 'cameras:home' %}"
-            class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+           class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
             {% lucide "video" %}
         </a>
         <a href="{% url 'people:home' %}"
-            class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+           class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
             {% lucide "users" %}
         </a>
-        <a href="{% url 'notifications:home' %}" id="notificationBtn"
-            class="relative flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+        <a href="{% url 'notifications:home' %}"
+           id="notificationBtn"
+           class="relative flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
             <span class="relative">
                 {% lucide "bell" class="text-white" %}
-                <span
-                    class="notificationCounter absolute top-0 right-0 px-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                <span class="notificationCounter absolute top-0 right-0 px-1.5 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
                     {{ notifications_count }}
                 </span>
             </span>
         </a>
         <a id="btnLock"
-            class="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+           class="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
             {% lucide "lock" %}
         </a>
         <a href="{% url 'panel:settings' %}"
-            class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+           class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
             {% lucide "settings" %}
         </a>
         {% if request.user.is_superuser %}
-        <a href="/admin"
-            class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
-            {% lucide "shield" %}
-        </a>
+            <a href="/admin"
+               class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-[#137FEC]/20 transition-all duration-200">
+                {% lucide "shield" %}
+            </a>
         {% endif %}
     </div>
 </div>

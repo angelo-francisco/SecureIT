@@ -1,0 +1,163 @@
+{% extends 'bases/panel.html' %}
+{% block title %}Delimitar Área Restrita{% endblock %}
+{% block content %}
+    <div id="loader"
+         class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
+        {% include "components/loader.html" with w=50 %}
+    </div>
+    <div class="bg-[#0b0f14] fixed w-full h-full z-[-1]"></div>
+    <main id="container" class="hidden p-4 lg:p-8 grid grid-cols-1 gap-6">
+        <div class="flex items-center justify-center p-1">
+            <div id="camera"
+                 data-camera-id="{{ camera.id }}"
+                 data-video-source="{{ camera.video_source }}"
+                 class="relative w-full flex items-center justify-center bg-black rounded-2xl overflow-hidden shadow-2xl max-h-[70vh]">
+                <img id="cam-{{ camera.id }}"
+                     class="w-full h-auto aspect-video object-contain max-h-[70vh]" />
+                <canvas id="draw-canvas"
+                        class="absolute top-0 left-0 w-full h-full cursor-crosshair"></canvas>
+            </div>
+        </div>
+        <div class="bg-[#161b22] rounded-2xl p-6 shadow-xl flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-3 gap-5">
+                <h2 class="text-2xl font-semibold truncate max-w-2xl">{{ camera.name }}</h2>
+                <div class="flex gap-2">
+                    <button id="save-area" class="px-3 py-1 bg-green-500 text-white rounded-lg">Guardar Área</button>
+                    <button id="reset-area" class="px-3 py-1 bg-red-500 text-white rounded-lg">Reset</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const mainHTML = document.getElementById("container")
+        const loader = document.getElementById("loader")
+        const cameraDiv = document.getElementById("camera")
+        const imageELement = cameraDiv.querySelector("img")
+        const canvas = document.getElementById("draw-canvas")
+        const ctx = canvas.getContext("2d")
+
+        let points = []
+
+        function showMessage(message, type = "error") {
+            const el = document.createElement("div")
+            el.className = `fixed top-5 right-5 px-4 py-2 rounded-lg text-white shadow-lg z-50 ${type === "error" ? "bg-red-500" : "bg-green-500"
+                }`
+            el.innerText = message
+            document.body.appendChild(el)
+            setTimeout(() => el.remove(), 3000)
+        }
+
+        function resizeCanvas() {
+            canvas.width = imageELement.clientWidth
+            canvas.height = imageELement.clientHeight
+        }
+
+        function convertToInt(id) {
+            if (typeof id === "number") return id
+            return parseInt(id)
+        }
+
+        function connectCameraWs(cameraId, videoSource) {
+            if (!videoSource) return
+
+            const ws = new WebSocket(`ws://${window.location.host}/ws/raw-camera/${cameraId}/?vs=${videoSource}`)
+            ws.binaryType = "arraybuffer"
+
+            ws.onmessage = e => {
+                const blob = new Blob([e.data], { type: "image/jpeg" })
+                const url = URL.createObjectURL(blob)
+                imageELement.src = url
+                setTimeout(() => URL.revokeObjectURL(url), 500)
+            }
+        }
+
+        canvas.addEventListener("click", (e) => {
+            const rect = canvas.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const y = e.clientY - rect.top
+
+            if (points.length >= 2) return
+
+            points.push({ x, y })
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+            if (points.length === 1) {
+                ctx.beginPath()
+                ctx.arc(x, y, 5, 0, Math.PI * 2)
+                ctx.fillStyle = "red"
+                ctx.fill()
+            }
+
+            if (points.length === 2) {
+                ctx.beginPath()
+                ctx.moveTo(points[0].x, points[0].y)
+                ctx.lineTo(points[1].x, points[1].y)
+                ctx.strokeStyle = "red"
+                ctx.lineWidth = 2
+                ctx.stroke()
+            }
+        })
+
+        document.getElementById("reset-area").onclick = () => {
+            points = []
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+        }
+
+        document.getElementById("save-area").onclick = async () => {
+            if (points.length < 2) {
+                showMessage("Define dois pontos primeiro")
+                return
+            }
+
+            const normalized = points.map(p => ({
+                x: p.x / canvas.width,
+                y: p.y / canvas.height
+            }))
+
+            try {
+                const res = await fetch("{% url 'cameras:new-detection-area' camera.id %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ points: normalized })
+                })
+
+                const data = await res.json()
+
+                if (!res.ok) {
+                    showMessage(data.error || "Erro ao guardar")
+                    return
+                }
+
+                showMessage("Área guardada com sucesso", "success")
+
+                setTimeout(() => {
+                    window.location.href = "{% url 'cameras:view' camera.id %}"
+                }, 1000)
+
+            } catch (err) {
+                showMessage("Erro de conexão")
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let videoSource = cameraDiv.dataset.videoSource
+
+            if ("{{ camera.connection_type }}" === "L") {
+                videoSource = convertToInt(videoSource)
+            }
+
+            const cameraId = cameraDiv.dataset.cameraId
+            connectCameraWs(cameraId, videoSource)
+
+            imageELement.onload = resizeCanvas
+            window.addEventListener("resize", resizeCanvas)
+
+            loader.classList.add("hidden")
+            mainHTML.classList.remove("hidden")
+        })
+    </script>
+{% endblock %}
