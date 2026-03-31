@@ -20,13 +20,13 @@ class Configuration(models.Model):
     )
     alert_cooldown = models.PositiveIntegerField(
         default=5,
-        validators=[MinValueValidator(3)],
-        verbose_name="Tempo de espera (segundos)",
+        validators=[MinValueValidator(0)],
+        verbose_name="Tempo de espera extra (segundos)",
     )
     detect_every = models.PositiveIntegerField(
         default=3,
-        validators=[MinValueValidator(3)],
-        verbose_name="Número de frames a detectar",
+        validators=[MinValueValidator(1)],
+        verbose_name="Número de detecções por frames",
     )
     allow_draw = models.BooleanField(
         default=True, verbose_name="Permitir desenho"

@@ -1,10 +1,9 @@
 {% extends 'bases/_base.html' %}
 {% block head %}
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1"
-            type="module"></script> -->
-    {% block subhead %}{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+{% block subhead %}{% endblock %}
 {% endblock %}
 {% block body %}
-    {% include "components/navbar.html" %}
-    {% block content %}{% endblock %}
+{% include "components/navbar.html" %}
+{% block content %}{% endblock %}
 {% endblock %}

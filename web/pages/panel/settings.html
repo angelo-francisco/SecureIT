@@ -28,10 +28,28 @@
                         {% include 'components/lucide-input.html' with type="text" name="mst" icon="timer" value=settings.monitoring_start_time|time:"H:i:s" %}
                     </div>
                 </div>
-                <div class="py-2 flex items-center justify-between text-nowrap">
+                <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
                     <span class="text-lg font-mediun">Término do monitoramento</span>
                     <div class="max-w-[150px]">
                         {% include 'components/lucide-input.html' with type="text" name="met" icon="timer" value=settings.monitoring_end_time|time:"H:i:s" %}
+                    </div>
+                </div>
+                <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Tempo de espera extra (segundos)</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide-input.html' with type="number" name="alert_cooldown" icon="timer" value=settings.alert_cooldown %}
+                    </div>
+                </div>
+                <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Número de detecções por frames</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide-input.html' with type="number" name="detect_every" icon="timer" value=settings.detect_every %}
+                    </div>
+                </div>
+                <div class="py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Permitir desenho</span>
+                    <div class="max-w-[150px]">
+                        <input type="checkbox" name="allow_draw" id="allow_draw" {% if settings.allow_draw %}checked{% endif %} >
                     </div>
                 </div>
             </div>

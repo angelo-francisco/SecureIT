@@ -34,7 +34,6 @@ class CameraConsumer(AsyncWebsocketConsumer):
             )
             await self.update_camera_status(True)
         except Exception as e:
-            print(e)
             await self.update_camera_status(False)
             await self.close()
             return
@@ -100,7 +99,6 @@ class CameraConsumer(AsyncWebsocketConsumer):
         now = timezone.now().time()
         start = self.mst
         end = self.met
-
         if start <= end:
             return start <= now < end
         return now >= start or now < end
@@ -122,15 +120,17 @@ class CameraConsumer(AsyncWebsocketConsumer):
                             and self.check_cooldown()
                             and people != self.last_people_count
                         ):
-                            create_task(self.create_notification(
-                                title=f"Detectadas {people} pessoa(s)",
-                                description="Foram avistados alguns possíveis suspeitos em horário de monitoramneto",
-                                level="S",
-                                photo=ContentFile(frame, f"{uuid4()}.jpg"),
-                                camera_id=self.scope["url_route"]["kwargs"][
-                                    "camera_id"
-                                ],
-                            ))
+                            create_task(
+                                self.create_notification(
+                                    title=f"Detectadas {people} pessoa(s)",
+                                    description="Foram avistados alguns possíveis suspeitos em horário de monitoramneto",
+                                    level="S",
+                                    photo=ContentFile(frame, f"{uuid4()}.jpg"),
+                                    camera_id=self.scope["url_route"]["kwargs"][
+                                        "camera_id"
+                                    ],
+                                )
+                            )
                             await self.send(
                                 text_data=json.dumps(
                                     {
@@ -142,7 +142,6 @@ class CameraConsumer(AsyncWebsocketConsumer):
                             self.last_alert = time()
                             self.last_people_count = people
                 except Exception as e: # NOQA
-                    print(e)
                     break
 
                 await self.send(bytes_data=frame)

@@ -9,7 +9,8 @@ from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from apps.people.utils import update_instace
 
-
+import logging
+logger = logging.Logger(__name__)
 def panel(request):
     user = request.user
     cameras = cache.get_or_set(
@@ -39,6 +40,9 @@ def settings(request):
         fps = request.POST.get("fps", "")
         mst = request.POST.get("mst")
         met = request.POST.get("met")
+        alert_cooldown = request.POST.get("alert_cooldown")
+        detect_every = request.POST.get("detect_every")
+        allow_draw = request.POST.get("allow_draw")
 
         try:
             if fps and not fps.isdigit():
@@ -47,6 +51,12 @@ def settings(request):
             fps = int(fps)
             if fps < 1:
                 raise ValidationError("FPS deve ser maior que 1")
+
+            if alert_cooldown.isdigit() and int(alert_cooldown) < 0:
+                raise ValidationError("O tempo de espera deve ser um número positivo")
+            
+            if detect_every.isdigit() and int(detect_every) < 1:
+                raise ValidationError("O número de detecções por frames deve ser um número maior que 1")
 
             if mst and not settings.is_valid_time(mst):
                 raise ValidationError("Horário de início inválido")
@@ -60,6 +70,9 @@ def settings(request):
                     "fps": fps,
                     "monitoring_end_time": parse_time(met),
                     "monitoring_start_time": parse_time(mst),
+                    "alert_cooldown": alert_cooldown,
+                    "detect_every": detect_every,
+                    "allow_draw": bool(allow_draw)
                 },
             )
 

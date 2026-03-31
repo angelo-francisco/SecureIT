@@ -6,8 +6,11 @@ from django.core.cache import cache
 
 def get_binary_location(name: str) -> str:
     command = f"where {name}" if HOST_SYSTEM_NAME == "Windows" else f"which {name}"
-    locations = subprocess.run(command.split(" "))
-    return str(locations).split("\n")[0]
+    result = subprocess.run(
+        command.split(" "),
+        capture_output=True,
+    )
+    return result.stdout.decode()
 
 
 def invalidate_cache(key):
