@@ -22,11 +22,11 @@ def panel(request):
     notifications_count = Notification.objects.filter(  # type: ignore
         user=request.user, readed=False, deleted=False
     ).count()
-    if (
-        not user.settings.monitoring_end_time
-        or not user.settings.monitoring_start_time
-    ):
-        messages.info(request, r'Defina os horários de monitoramento nas configurações')
+    # if (
+    #     not user.settings.monitoring_end_time
+    #     or not user.settings.monitoring_start_time
+    # ):
+    #     messages.info(request, r'Defina os horários de monitoramento nas configurações')
     return render(
         request,
         "panel/panel.html",

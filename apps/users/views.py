@@ -1,5 +1,5 @@
 import json
-
+import datetime
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth import login as django_login
@@ -45,10 +45,14 @@ def signup(request):
         else:
             user = User(email=email, first_name=first_name, last_name=last_name)
             user.set_password(password)
-            user.set_pin(pin) # type: ignore
+            user.set_pin(pin)  # type: ignore
 
             user.save()
-            Configuration.objects.create(user=user)
+            Configuration.objects.create(
+                user=user,
+                monitoring_start_time=datetime.time(22, 00, 00),
+                monitoring_end_time=datetime.time(8, 00, 00),
+            )
 
             messages.success(request, "Dados registados com sucesso")
             return redirect("users:login")

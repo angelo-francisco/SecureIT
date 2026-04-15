@@ -31,7 +31,7 @@ dependencies = [
 ]
 
 [tool.taskipy.tasks]
-run = "uvicorn core.asgi:application"
+run = "uvicorn core.asgi:application  "
 urun = "gunicorn core.asgi:application -k uvicorn.workers.UvicornWorker --reload"
 mg = "python manage.py migrate"
 mkmg = "python manage.py makemigrations"
