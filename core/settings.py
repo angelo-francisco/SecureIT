@@ -144,3 +144,7 @@ STORAGES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 YOLO_PATH = BASE_DIR / "yolo_models"
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
