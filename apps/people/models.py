@@ -1,6 +1,13 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
-from .choices import VISITOR_TYPES, FIELD_TYPES_DICT, PERSON_TYPES
+from .choices import FIELD_TYPES_DICT, PERSON_TYPES, VISITOR_TYPES
+
+
+def validate_file_size(file):
+    max_size = 5 * 1024 * 1024
+    if file.size > max_size:
+        raise ValidationError("Arquivo muito grande")
 
 
 class Person(models.Model):
@@ -9,7 +16,9 @@ class Person(models.Model):
     type = models.CharField(
         max_length=1, choices=PERSON_TYPES, verbose_name="Tipo de Pessoa"
     )
-    photo = models.ImageField(upload_to="people_photos/")
+    photo = models.ImageField(
+        upload_to="people_photos/", validators=[validate_file_size]
+    )
     added_at = models.DateTimeField(auto_now_add=True, verbose_name="Data de Adição")
     updated_at = models.DateTimeField(
         auto_now=True, verbose_name="Data de Actualizaçõa"
