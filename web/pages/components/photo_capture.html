@@ -42,69 +42,92 @@
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', (e) => {
-        let stream;
-        const modal = document.getElementById('photo_capture_modal')
-        const photo = document.getElementById("{{ input }}")
-        const video = document.getElementById("photo_capture_video_element");
-        const canvas = document.getElementById("photo_capture_canvas_element")
-        const startVideo = document.getElementById("{{ start_button }}")
-        const searchForm = document.getElementById("{{ search }}")
-        const replayVideo = document.getElementById("replayVideo")
-        const takePhotoBtn = document.getElementById("takePhoto")
-        const searchButton = document.getElementById("photo_capture_search_button_element")
+document.addEventListener('DOMContentLoaded', () => {
+    let stream = null;
 
-        startVideo.addEventListener('click', async (e) => {
-            e.preventDefault()
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: true
-                })
+    const modal = document.getElementById('photo_capture_modal');
+    const video = document.getElementById("photo_capture_video_element");
+    const canvas = document.getElementById("photo_capture_canvas_element");
 
-                video.srcObject = stream
-                await video.play()
+    const photoInput = document.getElementById("{{ input }}");
+    const startBtn = document.getElementById("{{ start_button }}");
+    const closeBtn = document.getElementById("photo_capture_close_button_element");
+    const captureBtn = document.getElementById("takePhoto");
+    const replayBtn = document.getElementById("replayVideo");
+    const searchBtn = document.getElementById("photo_capture_search_button_element");
+    const searchForm = document.getElementById("{{ search }}");
 
-                modal.classList.toggle('hidden')
-            } catch (error) {
-                modal.classList.toggle('hidden')
-                await video.pause()
-            }
-        })
+    const openModal = () => modal.classList.remove('hidden');
+    const closeModal = () => modal.classList.add('hidden');
 
-        takePhotoBtn.addEventListener('click', async (e) => {
-            e.preventDefault()
-            const ctx = canvas.getContext("2d");
+    const stopStream = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        video.srcObject = null;
+    };
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+    const startCamera = async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" }
+            });
 
-            ctx.drawImage(video, 0, 0);
-            const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+            video.srcObject = stream;
 
-            photo.value = dataURL;
-            await video.pause()
-        })
+            await video.play();
+            openModal();
+        } catch (err) {
+            console.error(err);
+            alert("Não foi possível acessar a câmera. Verifique as permissões.");
+        }
+    };
 
-        replayVideo.addEventListener('click', async (e) => {
-            e.preventDefault()
-            await video.play()
-        })
+    const capturePhoto = () => {
+        if (!video.videoWidth) {
+            alert("A câmera ainda não está pronta.");
+            return;
+        }
 
-        document.getElementById("photo_capture_close_button_element")
-            .addEventListener('click', async (e) => {
-                modal.classList.toggle('hidden')
-                await video.pause()
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                    stream = null;
-                }
-                video.srcObject = null;
-            })
+        const ctx = canvas.getContext("2d");
 
-        searchButton.addEventListener('click', (e) => {
-            if (searchForm) {
-                searchForm.submit()
-            }
-        })
-    })
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        ctx.drawImage(video, 0, 0);
+
+        const dataURL = canvas.toDataURL("image/jpeg", 0.85);
+        photoInput.value = dataURL;
+
+        video.pause();
+    };
+
+    startBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        startCamera();
+    });
+
+    captureBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        capturePhoto();
+    });
+
+    replayBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        video.play();
+    });
+
+    closeBtn?.addEventListener('click', () => {
+        closeModal();
+        video.pause();
+        stopStream();
+    });
+
+    searchBtn?.addEventListener('click', () => {
+        if (searchForm) searchForm.submit();
+    });
+
+    window.addEventListener("beforeunload", stopStream);
+});
 </script>
