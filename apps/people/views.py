@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.db import close_old_connections, transaction
-from django.db.models import Count, Value
+from django.db.models import Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -25,6 +25,7 @@ from .utils import (
 from .utils import (
     edit_person as util_edit_person,
 )
+from core.utils import get_error_message as gem
 
 
 class SearchError(ValidationError):
@@ -62,13 +63,7 @@ def home(request):
                 return redirect(reverse("people:details", args=[people[0][0]]))
             raise SearchError("Pessoa não registada")
         except Exception as error:
-            msg = (
-                error.message  # type: ignore
-                if getattr(error, "message", False)
-                else "Pessoa não registada"
-            )
-            messages.error(request, msg)
-
+            messages.error(request, gem(error))
     return render(request, "people/home.html", context)
 
 
@@ -124,19 +119,13 @@ def new_person(request):
         return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
         print(error)
-        msg = (
-            error.message  # type: ignore
-            if getattr(error, "message", False)
-            else "Erro ao cadastrar, verifique os campos, por favor."
-        )
-        messages.error(request, msg)
+        messages.error(request, gem(error))
         return render(request, "people/new.html", context)
 
 
 def get_person(request, person_id):
     person = get_object_or_404(
-        Person.objects.select_related("resident", "visitor", "worker")
-        .prefetch_related(
+        Person.objects.select_related("resident", "visitor", "worker").prefetch_related(
             "resident__residenthome_set__home", "worker__workerhome_set__home"
         ),
         id=person_id,
@@ -164,7 +153,8 @@ def edit_person(request, person_id: int):
         Person.objects.select_related("resident", "visitor", "worker"),
         id=person_id,
     )
-    context = {"person": person}
+
+    context: dict = {"person": person}
 
     if person.type == "R":
         context["homes"] = Home.objects.all()  # type: ignore
@@ -223,12 +213,7 @@ def edit_person(request, person_id: int):
         return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
         print(error)
-        msg = (
-            error.message  # type: ignore
-            if getattr(error, "message", False)
-            else "Erro ao editar, verifique os campos, por favor."
-        )
-        messages.error(request, msg)
+        messages.error(request, gem(error))
         return render(request, "people/edit.html", context)
 
 
@@ -249,12 +234,7 @@ def new_visit(request, visitor_id: int):
             messages.success(request, "Visita registada")
             return redirect(reverse("people:details", args=[visitor.person.id]))
         except Exception as error:
-            msg = (
-                error.message  # type: ignore
-                if getattr(error, "message", False)
-                else "Erro ao adicionar visita, verifique os campos."
-            )
-            messages.error(request, msg)
+            messages.error(request, gem(error))
     return render(
         request, "people/new_visit.html", {"visitor": visitor, "residents": residents}
     )

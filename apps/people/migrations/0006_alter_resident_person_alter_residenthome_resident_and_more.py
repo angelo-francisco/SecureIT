@@ -5,45 +5,60 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0005_visitorhost_visited_at'),
+        ("people", "0005_visitorhost_visited_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='resident',
-            name='person',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.person'),
+            model_name="resident",
+            name="person",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="people.person"
+            ),
         ),
         migrations.AlterField(
-            model_name='residenthome',
-            name='resident',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.resident'),
+            model_name="residenthome",
+            name="resident",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="people.resident"
+            ),
         ),
         migrations.AlterField(
-            model_name='visitor',
-            name='person',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='people.person'),
+            model_name="visitor",
+            name="person",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="people.person"
+            ),
         ),
         migrations.AlterField(
-            model_name='visitorhost',
-            name='host',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.resident'),
+            model_name="visitorhost",
+            name="host",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="people.resident"
+            ),
         ),
         migrations.AlterField(
-            model_name='visitorhost',
-            name='visitor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.visitor'),
+            model_name="visitorhost",
+            name="visitor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="people.visitor"
+            ),
         ),
         migrations.AlterField(
-            model_name='worker',
-            name='person',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='worker', to='people.person'),
+            model_name="worker",
+            name="person",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="worker",
+                to="people.person",
+            ),
         ),
         migrations.AlterField(
-            model_name='workerhome',
-            name='worker',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.worker'),
+            model_name="workerhome",
+            name="worker",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="people.worker"
+            ),
         ),
     ]

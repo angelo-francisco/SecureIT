@@ -9,6 +9,7 @@ DATABASE_DIR = BASE_DIR / "db.sqlite3"
 
 _db_connection = None
 
+
 def get_conn():
     global _db_connection
     if _db_connection is None:
@@ -33,7 +34,6 @@ def insert_person_embedding(person, embedding):
     db.commit()
 
 
-
 def search_person_by_embedding(embedding, k=1):
     db = get_conn()
     cursor = db.cursor()
@@ -47,7 +47,7 @@ def search_person_by_embedding(embedding, k=1):
         """,
         (embedding, k),
     )
-    rows = cursor.fetchall()    
+    rows = cursor.fetchall()
     return rows
 
 

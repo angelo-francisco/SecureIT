@@ -6,61 +6,85 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0005_alter_camera_name_alter_wificamera_password_and_more'),
+        ("cameras", "0005_alter_camera_name_alter_wificamera_password_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='camera',
-            options={'verbose_name': 'Câmara', 'verbose_name_plural': 'Câmaras'},
+            name="camera",
+            options={"verbose_name": "Câmara", "verbose_name_plural": "Câmaras"},
         ),
         migrations.AlterModelOptions(
-            name='localcamera',
-            options={'verbose_name': 'Câmara Local', 'verbose_name_plural': 'Câmaras Locais'},
+            name="localcamera",
+            options={
+                "verbose_name": "Câmara Local",
+                "verbose_name_plural": "Câmaras Locais",
+            },
         ),
         migrations.AlterModelOptions(
-            name='wificamera',
-            options={'verbose_name': 'Câmara Wifi', 'verbose_name_plural': 'Câmaras Wifi'},
+            name="wificamera",
+            options={
+                "verbose_name": "Câmara Wifi",
+                "verbose_name_plural": "Câmaras Wifi",
+            },
         ),
         migrations.RemoveField(
-            model_name='wificamera',
-            name='password',
+            model_name="wificamera",
+            name="password",
         ),
         migrations.RemoveField(
-            model_name='wificamera',
-            name='username',
+            model_name="wificamera",
+            name="username",
         ),
         migrations.AlterField(
-            model_name='camera',
-            name='connection_type',
-            field=models.CharField(blank=True, choices=[('L', 'Local'), ('W', 'Wi-Fi')], max_length=1, null=True, verbose_name='Tipo de Conexão'),
+            model_name="camera",
+            name="connection_type",
+            field=models.CharField(
+                blank=True,
+                choices=[("L", "Local"), ("W", "Wi-Fi")],
+                max_length=1,
+                null=True,
+                verbose_name="Tipo de Conexão",
+            ),
         ),
         migrations.AlterField(
-            model_name='camera',
-            name='location',
-            field=models.CharField(blank=True, max_length=150, null=True, verbose_name='Localizaão'),
+            model_name="camera",
+            name="location",
+            field=models.CharField(
+                blank=True, max_length=150, null=True, verbose_name="Localizaão"
+            ),
         ),
         migrations.AlterField(
-            model_name='camera',
-            name='name',
-            field=models.CharField(blank=True, max_length=30, null=True, verbose_name='Nome'),
+            model_name="camera",
+            name="name",
+            field=models.CharField(
+                blank=True, max_length=30, null=True, verbose_name="Nome"
+            ),
         ),
         migrations.AlterField(
-            model_name='camera',
-            name='status',
-            field=models.BooleanField(blank=True, default=True, null=True, verbose_name='Estado'),
+            model_name="camera",
+            name="status",
+            field=models.BooleanField(
+                blank=True, default=True, null=True, verbose_name="Estado"
+            ),
         ),
         migrations.AlterField(
-            model_name='camera',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cameras', to=settings.AUTH_USER_MODEL, verbose_name='Utilizador'),
+            model_name="camera",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="cameras",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Utilizador",
+            ),
         ),
         migrations.AlterField(
-            model_name='wificamera',
-            name='stream_url',
-            field=models.URLField(blank=True, max_length=255, null=True, verbose_name='URL de Transmissão'),
+            model_name="wificamera",
+            name="stream_url",
+            field=models.URLField(
+                blank=True, max_length=255, null=True, verbose_name="URL de Transmissão"
+            ),
         ),
     ]

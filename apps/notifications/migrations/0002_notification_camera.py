@@ -5,16 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0005_alter_camera_name_alter_wificamera_password_and_more'),
-        ('notifications', '0001_initial'),
+        ("cameras", "0005_alter_camera_name_alter_wificamera_password_and_more"),
+        ("notifications", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='notification',
-            name='camera',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='cameras.camera'),
+            model_name="notification",
+            name="camera",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="cameras.camera",
+            ),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0012_merge_20260217_0123'),
+        ("people", "0012_merge_20260217_0123"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='visitorhost',
-            name='desc',
+            model_name="visitorhost",
+            name="desc",
             field=models.TextField(blank=True, null=True),
         ),
     ]

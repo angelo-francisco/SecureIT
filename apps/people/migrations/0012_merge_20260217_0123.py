@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0011_alter_person_first_name_alter_person_last_name_and_more'),
-        ('people', '0011_alter_visitor_type'),
+        ("people", "0011_alter_person_first_name_alter_person_last_name_and_more"),
+        ("people", "0011_alter_visitor_type"),
     ]
 
-    operations = [
-    ]
+    operations = []

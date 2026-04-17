@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0004_rename_field_worker_fields'),
+        ("people", "0004_rename_field_worker_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='visitorhost',
-            name='visited_at',
+            model_name="visitorhost",
+            name="visited_at",
             field=models.DateTimeField(auto_now_add=True),
             preserve_default=False,
         ),

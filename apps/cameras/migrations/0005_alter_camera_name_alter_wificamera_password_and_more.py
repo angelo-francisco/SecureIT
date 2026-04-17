@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0004_camera_name'),
+        ("cameras", "0004_camera_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='camera',
-            name='name',
+            model_name="camera",
+            name="name",
             field=models.CharField(blank=True, max_length=30, null=True),
         ),
         migrations.AlterField(
-            model_name='wificamera',
-            name='password',
+            model_name="wificamera",
+            name="password",
             field=models.CharField(blank=True, max_length=80, null=True),
         ),
         migrations.AlterField(
-            model_name='wificamera',
-            name='username',
+            model_name="wificamera",
+            name="username",
             field=models.CharField(blank=True, max_length=30, null=True),
         ),
     ]

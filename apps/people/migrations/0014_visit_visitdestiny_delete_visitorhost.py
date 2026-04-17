@@ -5,30 +5,61 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0013_visitorhost_desc'),
+        ("people", "0013_visitorhost_desc"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Visit',
+            name="Visit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('desc', models.TextField(blank=True, null=True)),
-                ('visited_at', models.DateTimeField(auto_now_add=True)),
-                ('visitor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.visitor')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("desc", models.TextField(blank=True, null=True)),
+                ("visited_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "visitor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="people.visitor"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='VisitDestiny',
+            name="VisitDestiny",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('resident', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.resident')),
-                ('visit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.visit')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "resident",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="people.resident",
+                    ),
+                ),
+                (
+                    "visit",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="people.visit"
+                    ),
+                ),
             ],
         ),
         migrations.DeleteModel(
-            name='VisitorHost',
+            name="VisitorHost",
         ),
     ]

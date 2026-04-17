@@ -15,7 +15,7 @@ from django.urls import path  # NOQA
 from apps.cameras.consumers import CameraConsumer  # NOQA
 
 ws_urlpatterns = [
-    path("ws/camera/<int:camera_id>/", CameraConsumer.as_asgi()), # type: ignore
+    path("ws/camera/<int:camera_id>/", CameraConsumer.as_asgi()),  # type: ignore
 ]
 
 application = ProtocolTypeRouter(

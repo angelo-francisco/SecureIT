@@ -2,6 +2,7 @@ import subprocess
 from platform import system as HOST_SYSTEM_NAME
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 
 
 def get_binary_location(name: str) -> str:
@@ -15,3 +16,12 @@ def get_binary_location(name: str) -> str:
 
 def invalidate_cache(key):
     return cache.delete(key)
+
+
+def get_error_message(error):
+    if isinstance(error, ValidationError):
+        if hasattr(error, "messages"):
+            return " | ".join(error.messages)
+        return str(error)
+
+    return "Ocorreu um erro inesperado. Tente novamente."

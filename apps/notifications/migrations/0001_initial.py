@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,16 +14,42 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=50)),
-                ('description', models.TextField()),
-                ('level', models.CharField(choices=[('I', 'Informação'), ('E', 'Erro'), ('S', 'Suspeito'), ('P', 'Perigo')], max_length=1)),
-                ('readed', models.BooleanField(default=False)),
-                ('photo', models.ImageField(upload_to='notifications_frames/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=50)),
+                ("description", models.TextField()),
+                (
+                    "level",
+                    models.CharField(
+                        choices=[
+                            ("I", "Informação"),
+                            ("E", "Erro"),
+                            ("S", "Suspeito"),
+                            ("P", "Perigo"),
+                        ],
+                        max_length=1,
+                    ),
+                ),
+                ("readed", models.BooleanField(default=False)),
+                ("photo", models.ImageField(upload_to="notifications_frames/")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

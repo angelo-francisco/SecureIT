@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0007_visitor_type'),
+        ("people", "0007_visitor_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='resident',
-            name='person',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='people.person'),
+            model_name="resident",
+            name="person",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="people.person"
+            ),
         ),
     ]

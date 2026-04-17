@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0003_alter_localcamera_camera_alter_wificamera_camera'),
+        ("cameras", "0003_alter_localcamera_camera_alter_wificamera_camera"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='camera',
-            name='name',
+            model_name="camera",
+            name="name",
             field=models.CharField(blank=True, max_length=80, null=True),
         ),
     ]

@@ -4,20 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0008_alter_resident_person'),
+        ("people", "0008_alter_resident_person"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='visitor',
-            name='type',
-            field=models.CharField(choices=[('VR', 'Visitanto residente'), ('PE', 'Procurando emprego'), ('PS', 'Prestador de serviço'), ('E', 'Entregador'), ('O', 'Outro(a)')], max_length=3),
+            model_name="visitor",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("VR", "Visitanto residente"),
+                    ("PE", "Procurando emprego"),
+                    ("PS", "Prestador de serviço"),
+                    ("E", "Entregador"),
+                    ("O", "Outro(a)"),
+                ],
+                max_length=3,
+            ),
         ),
         migrations.AlterField(
-            model_name='worker',
-            name='fields',
-            field=models.CharField(choices=[('G', 'Guarda'), ('M', 'Motorista'), ('E', 'Electricista'), ('J', 'Jardineiro(a)'), ('AL', 'Auxiliar de Limpeza'), ('MA', 'Membro da Administração'), ('O', 'Outra(a)')], max_length=30),
+            model_name="worker",
+            name="fields",
+            field=models.CharField(
+                choices=[
+                    ("G", "Guarda"),
+                    ("M", "Motorista"),
+                    ("E", "Electricista"),
+                    ("J", "Jardineiro(a)"),
+                    ("AL", "Auxiliar de Limpeza"),
+                    ("MA", "Membro da Administração"),
+                    ("O", "Outra(a)"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

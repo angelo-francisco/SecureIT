@@ -6,7 +6,6 @@ from .views import (
     edit_camera,
     get_cameras,
     new_camera,
-    new_detection_area,
     view_camera,
 )
 
@@ -18,6 +17,5 @@ urlpatterns = [
     path("<int:id>/", view_camera, name="view"),
     path("<int:id>/del/", delete_camera, name="delete"),
     path("<int:id>/edit/", edit_camera, name="edit"),
-    path("<int:id>/new-detection-area/", new_detection_area, name="new-detection-area"),
     path("get-cameras/", get_cameras, name="get-cameras"),
 ]

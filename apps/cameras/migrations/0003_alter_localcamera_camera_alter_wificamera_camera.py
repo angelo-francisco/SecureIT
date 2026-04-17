@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0002_camera_user'),
+        ("cameras", "0002_camera_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='localcamera',
-            name='camera',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='cameras.camera'),
+            model_name="localcamera",
+            name="camera",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="cameras.camera"
+            ),
         ),
         migrations.AlterField(
-            model_name='wificamera',
-            name='camera',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='cameras.camera'),
+            model_name="wificamera",
+            name="camera",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="cameras.camera"
+            ),
         ),
     ]

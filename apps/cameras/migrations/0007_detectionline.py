@@ -5,21 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cameras', '0006_alter_camera_options_alter_localcamera_options_and_more'),
+        ("cameras", "0006_alter_camera_options_alter_localcamera_options_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DetectionLine',
+            name="DetectionLine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('x1', models.FloatField()),
-                ('y1', models.FloatField()),
-                ('x2', models.FloatField()),
-                ('y2', models.FloatField()),
-                ('camera', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='cameras.camera')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("x1", models.FloatField()),
+                ("y1", models.FloatField()),
+                ("x2", models.FloatField()),
+                ("y2", models.FloatField()),
+                (
+                    "camera",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to="cameras.camera"
+                    ),
+                ),
             ],
         ),
     ]

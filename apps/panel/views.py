@@ -9,8 +9,13 @@ from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from apps.people.utils import update_instace
 
+from core.utils import get_error_message as gem
+
 import logging
+
 logger = logging.Logger(__name__)
+
+
 def panel(request):
     user = request.user
     cameras = cache.get_or_set(
@@ -54,9 +59,11 @@ def settings(request):
 
             if alert_cooldown.isdigit() and int(alert_cooldown) < 0:
                 raise ValidationError("O tempo de espera deve ser um número positivo")
-            
+
             if detect_every.isdigit() and int(detect_every) < 1:
-                raise ValidationError("O número de detecções por frames deve ser um número maior que 1")
+                raise ValidationError(
+                    "O número de detecções por frames deve ser um número maior que 1"
+                )
 
             if mst and not settings.is_valid_time(mst):
                 raise ValidationError("Horário de início inválido")
@@ -72,16 +79,11 @@ def settings(request):
                     "monitoring_start_time": parse_time(mst),
                     "alert_cooldown": alert_cooldown,
                     "detect_every": detect_every,
-                    "allow_draw": bool(allow_draw)
+                    "allow_draw": bool(allow_draw),
                 },
             )
 
             messages.success(request, "As suas alterações foram salvas")
         except Exception as error:
-            msg = (
-                error.message  # type: ignore
-                if getattr(error, "message", False)
-                else "Erro ao salvar"
-            )
-            messages.error(request, msg)
+            messages.error(request, gem(error))
     return render(request, "panel/settings.html", {"settings": settings})

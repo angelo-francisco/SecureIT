@@ -17,7 +17,7 @@ from .utils import (
     valid_connection_type,
 )
 from .utils import get_cameras as func_get_cameras
-
+from core.utils import get_error_message as gem
 
 def cameras(request):
     """
@@ -72,12 +72,7 @@ def new_camera(request):
         messages.success(request, "Câmara registada.")
         return redirect("cameras:home")
     except Exception as error:
-        msg = (
-            error.message  # type: ignore
-            if getattr(error, "message", False)
-            else "Erro ao registar câmara."
-        )
-        messages.error(request, msg)
+        messages.error(request, gem(error))
         return render(request, "cameras/new.html", context)
 
 
@@ -173,12 +168,7 @@ def edit_camera(request, id):
             messages.success(request, "Dados editados com sucesso.")
             return redirect(reverse("cameras:view", args=[camera.pk]))
         except Exception as error:
-            msg = (
-                error.message  # type: ignore
-                if getattr(error, "message", False)
-                else "Erro ao registar câmara."
-            )
-            messages.error(request, msg)
+            messages.error(request, gem(error))
     return render(request, "cameras/edit.html", {"camera": camera})
 
 
@@ -191,74 +181,3 @@ def get_cameras(request):
         ).exists():
             cameras.append(camera)
     return JsonResponse(cameras, safe=False)
-
-
-def new_detection_area(request, id):
-    user = request.user
-    camera = get_object_or_404(Camera, id=id)
-
-    if camera.user != user:
-        messages.error(request, "Esta câmara não é sua")
-        return redirect("cameras:home")
-
-    if request.method == "POST":
-        try:
-            if not request.body:
-                raise ValidationError("Dados não fornecidos")
-
-            try:
-                data = json.loads(request.body)
-            except json.JSONDecodeError:
-                raise ValidationError("JSON inválido")
-
-            points = data.get("points")
-
-            if not points or not isinstance(points, list):
-                raise ValidationError("Pontos inválidos")
-
-            if len(points) != 2:
-                raise ValidationError("Deve fornecer exatamente 2 pontos")
-
-            def validate_point(p):
-                if not isinstance(p, dict):
-                    raise ValidationError("Formato de ponto inválido")
-
-                x = p.get("x")
-                y = p.get("y")
-
-                if x is None or y is None:
-                    raise ValidationError("Coordenadas em falta")
-
-                if not isinstance(x, (int, float)) or not isinstance(y, (int, float)):
-                    raise ValidationError("Coordenadas devem ser numéricas")
-
-                if not (0 <= x <= 1) or not (0 <= y <= 1):
-                    raise ValidationError("Coordenadas devem estar entre 0 e 1")
-
-                return float(x), float(y)
-
-            x1, y1 = validate_point(points[0])
-            x2, y2 = validate_point(points[1])
-
-            if x1 == x2 and y1 == y2:
-                raise ValidationError("Os pontos não podem ser iguais")
-
-            DetectionLine.objects.update_or_create(
-                camera=camera,
-                defaults={
-                    "x1": x1,
-                    "y1": y1,
-                    "x2": x2,
-                    "y2": y2,
-                },
-            )
-
-            return JsonResponse({"success": True})
-
-        except ValidationError as error:
-            return JsonResponse({"success": False, "error": error.message}, status=400)
-
-        except Exception:
-            return JsonResponse({"success": False, "error": "Erro interno"}, status=500)
-
-    return render(request, "cameras/new-detection-area.html", {"camera": camera})

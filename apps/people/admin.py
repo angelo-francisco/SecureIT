@@ -13,7 +13,6 @@ from .models import (
 )
 
 
-
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     list_display = (

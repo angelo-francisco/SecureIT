@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('notifications', '0002_notification_camera'),
+        ("notifications", "0002_notification_camera"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='notification',
-            name='deleted',
+            model_name="notification",
+            name="deleted",
             field=models.BooleanField(default=False),
         ),
     ]

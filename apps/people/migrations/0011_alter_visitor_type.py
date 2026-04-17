@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('people', '0010_alter_worker_fields'),
+        ("people", "0010_alter_worker_fields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='visitor',
-            name='type',
-            field=models.CharField(choices=[('VR', 'Visitando residente'), ('PE', 'Procurando emprego'), ('PS', 'Prestador de serviço'), ('E', 'Entregador'), ('O', 'Outro(a)')], max_length=3),
+            model_name="visitor",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("VR", "Visitando residente"),
+                    ("PE", "Procurando emprego"),
+                    ("PS", "Prestador de serviço"),
+                    ("E", "Entregador"),
+                    ("O", "Outro(a)"),
+                ],
+                max_length=3,
+            ),
         ),
     ]

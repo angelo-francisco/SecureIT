@@ -7,45 +7,67 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('panel', '0002_rename_userconfiguration_configuration'),
+        ("panel", "0002_rename_userconfiguration_configuration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='configuration',
-            options={'verbose_name': 'Configuração', 'verbose_name_plural': 'Configurações'},
+            name="configuration",
+            options={
+                "verbose_name": "Configuração",
+                "verbose_name_plural": "Configurações",
+            },
         ),
         migrations.AddField(
-            model_name='configuration',
-            name='alert_cooldown',
-            field=models.PositiveIntegerField(default=5, validators=[django.core.validators.MinValueValidator(3)], verbose_name='Tempo de espera (segundos)'),
+            model_name="configuration",
+            name="alert_cooldown",
+            field=models.PositiveIntegerField(
+                default=5,
+                validators=[django.core.validators.MinValueValidator(3)],
+                verbose_name="Tempo de espera (segundos)",
+            ),
         ),
         migrations.AddField(
-            model_name='configuration',
-            name='detect_every',
-            field=models.PositiveIntegerField(default=3, validators=[django.core.validators.MinValueValidator(3)], verbose_name='Número de frames a detectar'),
+            model_name="configuration",
+            name="detect_every",
+            field=models.PositiveIntegerField(
+                default=3,
+                validators=[django.core.validators.MinValueValidator(3)],
+                verbose_name="Número de frames a detectar",
+            ),
         ),
         migrations.AlterField(
-            model_name='configuration',
-            name='fps',
-            field=models.PositiveIntegerField(default=15, validators=[django.core.validators.MinValueValidator(1)], verbose_name='FPS'),
+            model_name="configuration",
+            name="fps",
+            field=models.PositiveIntegerField(
+                default=15,
+                validators=[django.core.validators.MinValueValidator(1)],
+                verbose_name="FPS",
+            ),
         ),
         migrations.AlterField(
-            model_name='configuration',
-            name='monitoring_end_time',
-            field=models.TimeField(blank=True, null=True, verbose_name='Término do Monitoramento'),
+            model_name="configuration",
+            name="monitoring_end_time",
+            field=models.TimeField(
+                blank=True, null=True, verbose_name="Término do Monitoramento"
+            ),
         ),
         migrations.AlterField(
-            model_name='configuration',
-            name='monitoring_start_time',
-            field=models.TimeField(blank=True, null=True, verbose_name='Início do Monitoramento'),
+            model_name="configuration",
+            name="monitoring_start_time",
+            field=models.TimeField(
+                blank=True, null=True, verbose_name="Início do Monitoramento"
+            ),
         ),
         migrations.AlterField(
-            model_name='configuration',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='settings', to=settings.AUTH_USER_MODEL),
+            model_name="configuration",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="settings",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

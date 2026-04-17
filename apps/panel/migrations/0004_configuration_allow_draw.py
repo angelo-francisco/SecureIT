@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('panel', '0003_alter_configuration_options_and_more'),
+        ("panel", "0003_alter_configuration_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='configuration',
-            name='allow_draw',
-            field=models.BooleanField(default=True, verbose_name='Permitir desenho'),
+            model_name="configuration",
+            name="allow_draw",
+            field=models.BooleanField(default=True, verbose_name="Permitir desenho"),
         ),
     ]

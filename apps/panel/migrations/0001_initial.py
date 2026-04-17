@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -16,13 +15,34 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='UserConfiguration',
+            name="UserConfiguration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('fps', models.PositiveIntegerField(default=15, validators=[django.core.validators.MinValueValidator(1)])),
-                ('monitoring_start_time', models.TimeField(blank=True, null=True)),
-                ('monitoring_end_time', models.TimeField(blank=True, null=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='configurations', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "fps",
+                    models.PositiveIntegerField(
+                        default=15,
+                        validators=[django.core.validators.MinValueValidator(1)],
+                    ),
+                ),
+                ("monitoring_start_time", models.TimeField(blank=True, null=True)),
+                ("monitoring_end_time", models.TimeField(blank=True, null=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="configurations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

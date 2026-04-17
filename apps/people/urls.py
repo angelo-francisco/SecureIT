@@ -10,5 +10,5 @@ urlpatterns = [
     path("<int:person_id>/", get_person, name="details"),
     path("<int:person_id>/edit/", edit_person, name="edit"),
     path("<int:person_id>/del/", delete_person, name="delete"),
-    path("<int:visitor_id>/new-visit/", new_visit, name="new-visit")
+    path("<int:visitor_id>/new-visit/", new_visit, name="new-visit"),
 ]

@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('panel', '0005_alter_configuration_alert_cooldown_and_more'),
+        ("panel", "0005_alter_configuration_alert_cooldown_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='configuration',
-            name='detect_every',
-            field=models.PositiveIntegerField(default=3, validators=[django.core.validators.MinValueValidator(1)], verbose_name='Número de detecções por frames'),
+            model_name="configuration",
+            name="detect_every",
+            field=models.PositiveIntegerField(
+                default=3,
+                validators=[django.core.validators.MinValueValidator(1)],
+                verbose_name="Número de detecções por frames",
+            ),
         ),
     ]

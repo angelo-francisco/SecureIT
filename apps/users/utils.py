@@ -43,8 +43,8 @@ def without_login(view_func):
         if request.user.is_authenticated:
             return redirect(
                 "panel:home"
-                #if request.COOKIES.get("pin_verified", False)
-               # else "users:pin"
+                # if request.COOKIES.get("pin_verified", False)
+                # else "users:pin"
             )
         return view_func(request, *args, **kwargs)
 

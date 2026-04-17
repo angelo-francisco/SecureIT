@@ -109,6 +109,7 @@ class WifiCamera(models.Model):
         verbose_name = "Câmara Wifi"
         verbose_name_plural = "Câmaras Wifi"
 
+
 class DetectionLine(models.Model):
     camera = models.OneToOneField(Camera, on_delete=models.CASCADE)
     x1 = models.FloatField()
