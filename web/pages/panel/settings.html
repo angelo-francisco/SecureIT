@@ -25,22 +25,19 @@
                 <div class="border-b border-gray-300 py-2 flex items-center justify-between">
                     <span class="text-lg font-mediun text-nowrap">Início do monitoramento</span>
                     <div class="max-w-[150px]">
-                        {% include 'components/lucide_input.html' with type="text" name="mst" icon="timer"
-                        value=settings.monitoring_start_time|time:"H:i:s" %}
+                        {% include 'components/lucide_input.html' with type="text" name="mst" icon="timer" value=settings.monitoring_start_time|time:"H:i:s" %}
                     </div>
                 </div>
                 <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
                     <span class="text-lg font-mediun">Término do monitoramento</span>
                     <div class="max-w-[150px]">
-                        {% include 'components/lucide_input.html' with type="text" name="met" icon="timer"
-                        value=settings.monitoring_end_time|time:"H:i:s" %}
+                        {% include 'components/lucide_input.html' with type="text" name="met" icon="timer" value=settings.monitoring_end_time|time:"H:i:s" %}
                     </div>
                 </div>
                 <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
                     <span class="text-lg font-mediun">Tempo de espera extra (segundos)</span>
                     <div class="max-w-[150px]">
-                        {% include 'components/lucide_input.html' with type="number" name="alert_cooldown" icon="timer"
-                        value=settings.alert_cooldown %}
+                        {% include 'components/lucide_input.html' with type="number" name="alert_cooldown" icon="timer" value=settings.alert_cooldown %}
                     </div>
                 </div>
                 <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
