@@ -23,7 +23,7 @@ from .models import (
 )
 
 mtcnn = MTCNN(
-    image_size=160,
+    image_size=320,
     margin=0,
     select_largest=True,
     post_process=True,
@@ -54,7 +54,8 @@ def generate_face_embedding(base64_str=None, image=None):
 
     face = mtcnn(image)
     if face is None:
-        return None
+        raise ValidationError("Nenhum rosto detectado, ajuste a iluminação  ")
+
 
     with torch.no_grad():
         embedding = resnet(face.unsqueeze(0))
@@ -197,6 +198,9 @@ def create_resident(person_id: int, _homes: list[str], bi: str) -> Resident:
 
     if not homes:
         raise ValidationError("Informe pelo menos uma residência")
+
+    if Resident.objects.filter(bi=bi).exists():
+        raise ValidationError("BI já está em uso")
 
     resident = Resident.objects.create(person_id=person_id, bi=bi)  # type: ignore
     ResidentHome.objects.bulk_create(  # type: ignore

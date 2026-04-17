@@ -13,9 +13,12 @@ def get_conn():
     global _db_connection
     if _db_connection is None:
         _db_connection = sqlite3.connect(DATABASE_DIR, check_same_thread=False)
-        _db_connection.enable_load_extension(True)
-        sqlite_vec.load(_db_connection)
-        _db_connection.enable_load_extension(False)
+        try:
+            _db_connection.enable_load_extension(True)
+            sqlite_vec.load(_db_connection)
+            _db_connection.enable_load_extension(False)
+        except AttributeError:
+            print("Extensões SQLite não suportadas neste ambiente")
     return _db_connection
 
 
@@ -28,6 +31,7 @@ def insert_person_embedding(person, embedding):
         (person, embedding),
     )
     db.commit()
+
 
 
 def search_person_by_embedding(embedding, k=1):
@@ -43,7 +47,7 @@ def search_person_by_embedding(embedding, k=1):
         """,
         (embedding, k),
     )
-    rows = cursor.fetchall()
+    rows = cursor.fetchall()    
     return rows
 
 

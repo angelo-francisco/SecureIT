@@ -123,6 +123,7 @@ def new_person(request):
         messages.success(request, "Pessoa cadastrada com sucesso")
         return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
+        print(error)
         msg = (
             error.message  # type: ignore
             if getattr(error, "message", False)
@@ -215,11 +216,13 @@ def edit_person(request, person_id: int):
         if content_file and image:
             close_old_connections()
             embedding = generate_face_embedding(image=image)
+            print(type(embedding))
             insert_person_embedding(person.pk, embedding)
 
         messages.success(request, "Pessoa editada com sucesso")
         return redirect(reverse("people:details", args=[person.pk]))
     except Exception as error:
+        print(error)
         msg = (
             error.message  # type: ignore
             if getattr(error, "message", False)
