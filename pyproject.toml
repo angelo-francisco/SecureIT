@@ -11,6 +11,7 @@ dependencies = [
     "djade>=1.9.0",
     "django>=6.0",
     "django-debug-toolbar>=6.2.0",
+    "django-extensions>=4.1",
     "django-google-fonts>=0.0.3",
     "django-stubs>=5.2.9",
     "django-tailwind[cookiecutter,honcho,reload]>=4.4.2",

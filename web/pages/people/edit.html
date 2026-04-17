@@ -16,13 +16,11 @@
                     <div class="mb-4 flex justify-between gap-2">
                         <div>
                             <label class="ml-1 text-base text-white font-medium">Primeiro nome *</label>
-                            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text"
-                            name="first_name" value=person.first_name required=True %}
+                            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="first_name" value=person.first_name required=True %}
                         </div>
                         <div>
                             <label class="ml-1 text-base text-white font-medium">Sobrenome *</label>
-                            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text"
-                            name="last_name" value=person.last_name required=True %}
+                            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="last_name" value=person.last_name required=True %}
                         </div>
                     </div>
                     <div class="mb-4 flex flex-col justify-start gap-1">
@@ -31,9 +29,9 @@
                                 name="person_type"
                                 disabled
                                 class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-                            <option value="R" {% if person.type=="R" %}selected{% endif %}>Residente</option>
-                            <option value="V" {% if person.type=="V" %}selected{% endif %}>Visitante</option>
-                            <option value="W" {% if person.type=="W" %}selected{% endif %}>Trabalhador(a)</option>
+                            <option value="R" {% if person.type == "R" %}selected{% endif %}>Residente</option>
+                            <option value="V" {% if person.type == "V" %}selected{% endif %}>Visitante</option>
+                            <option value="W" {% if person.type == "W" %}selected{% endif %}>Trabalhador(a)</option>
                         </select>
                     </div>
                     <div class="space-y-4">
@@ -58,8 +56,7 @@
                                 </div>
                                 <div class="mb-4 flex flex-col gap-1">
                                     <label class=" ml-1 text-base text-white font-medium">Nº. do BI</label>
-                                    {% include 'components/input.html' with placeholder="Número do BI" type="text"
-                                    icon="id_card" name="resident-bi" value=person.resident.bi required=True %}
+                                    {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="resident-bi" value=person.resident.bi required=True %}
                                 </div>
                             </div>
                         {% elif person.type == "V" %}
@@ -71,8 +68,10 @@
                                             required
                                             class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                                         {% for visitor_type in visitor_types %}
-                                            <option value="{{ visitor_type.0 }}" {% if person.visitor.type==visitor_type.0
-                                                %}selected{% endif %}>{{ visitor_type.1 }}</option>
+                                            <option value="{{ visitor_type.0 }}"
+                                                    {% if person.visitor.type == visitor_type.0 %}selected{% endif %}>
+                                                {{ visitor_type.1 }}
+                                            </option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -94,8 +93,10 @@
                                             required
                                             class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                                         {% for field in fields %}
-                                            <option value="{{ field.0 }}" {% if field.0 in person.worker.list_fields %}selected{%
-                                                endif %}>{{ field.1 }}</option>
+                                            <option value="{{ field.0 }}"
+                                                    {% if field.0 in person.worker.list_fields %}selected{% endif %}>
+                                                {{ field.1 }}
+                                            </option>
                                         {% endfor %}
                                     </select>
                                 </div>

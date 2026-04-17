@@ -15,8 +15,7 @@
                     <div class="mb-4 flex flex-col justify-between gap-2">
                         <div class="mb-3">
                             <label class="ml-1 text-lg text-white font-medium">Visitante</label>
-                            {% include 'components/lucide_input.html' with type="text" name="visitor" icon="user"
-                            value=visitor.person.full_name disabled="True" %}
+                            {% include 'components/lucide_input.html' with type="text" name="visitor" icon="user" value=visitor.person.full_name disabled="True" %}
                         </div>
                         <div class="mb-3 flex flex-col">
                             <label class="ml-1 text-lg text-white font-medium">Descrição (Opcional)</label>
@@ -27,8 +26,7 @@
                         </div>
                         <div class="mb-3 flex flex-col gap-1">
                             <label class="ml-1 text-lg text-white font-medium">Anfitrião/Destinos</label>
-                            {% include 'components/lucide_input.html' with placeholder="Pesquise por uma casa" type="text"
-                            icon="search" class="home-search" %}
+                            {% include 'components/lucide_input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
                             <select name="destinies"
                                     multiple
                                     required

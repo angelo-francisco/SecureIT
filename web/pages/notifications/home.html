@@ -15,7 +15,7 @@
                     <input id="default-checkbox"
                            type="radio"
                            value="A"
-                           {% if search_query=="A" %}checked{% endif %}
+                           {% if search_query == "A" %}checked{% endif %}
                            name="search-query"
                            class="cursor-pointer w-4 h-4 border rounded-lg bg-none focus:ring-2 focus:ring-brand-soft">
                     <label for="default-checkbox"
@@ -25,7 +25,7 @@
                     <input id="default-checkbox"
                            type="radio"
                            value="NR"
-                           {% if search_query=="NR" %}checked{% endif %}
+                           {% if search_query == "NR" %}checked{% endif %}
                            name="search-query"
                            class=" cursor-pointer w-4 h-4 border rounded-lg bg-none focus:ring-2 focus:ring-brand-soft">
                     <label for="default-checkbox"
@@ -38,7 +38,7 @@
                     <input id="default-checkbox"
                            type="radio"
                            value="R"
-                           {% if search_query=="R" %}checked{% endif %}
+                           {% if search_query == "R" %}checked{% endif %}
                            name="search-query"
                            class="cursor-pointer w-4 h-4 border rounded-lg bg-none focus:ring-2 focus:ring-brand-soft">
                     <label for="default-checkbox"
@@ -69,8 +69,7 @@
                                                 data-photo-url="{{ n.photo.url }}">Ver Imagem</button>
                                     {% endif %}
                                     <a href="{% url 'cameras:view' n.camera.id %}"
-                                       class="px-5 text-lg text-gray-200 underline">{{
-                                    n.camera.get_name }}</a>
+                                       class="px-5 text-lg text-gray-200 underline">{{ n.camera.get_name }}</a>
                                     <span class="px-5 text-lg text-gray-300">{{ n.created_at }}</span>
                                 </div>
                             </div>
@@ -84,8 +83,7 @@
                             {% if notifications.has_previous %}
                                 <a href="?page={{ notifications.previous_page_number }}">{% lucide "chevron-left" %}</a>
                             {% endif %}
-                            <span class="current">Pág. {{ notifications.number }} / {{ notifications.paginator.num_pages
-                            }}</span>
+                            <span class="current">Pág. {{ notifications.number }} / {{ notifications.paginator.num_pages }}</span>
                             {% if notifications.has_next %}
                                 <a href="?page={{ notifications.next_page_number }}">{% lucide "chevron-right" %}</a>
                             {% endif %}

@@ -1,8 +1,7 @@
 {% extends 'bases/panel.html' %}
 {% block title %}Pessoas{% endblock %}
 {% block content %}
-    {% include 'components/photo_capture.html' with input="photo" start_button="openImageCaptureModel"
-    search="searchByFaceForm" %}
+    {% include 'components/photo_capture.html' with input="photo" start_button="openImageCaptureModel" search="searchByFaceForm" %}
     {% if search_results %}
         <div class="fixed inset-0 flex justify-center items-center backdrop-blur-sm z-[1000]"
              id="search-results-modal">
@@ -106,14 +105,8 @@
                                             {% endif %}
                                         </span>
                                     </td>
-                                    <td class="p-4 border border-gray-500">
-                                        {{ person.added_at|date:"d/m/y" }} às {{
-                                        person.added_at|date:"H:i" }}
-                                    </td>
-                                    <td class="p-4 border border-gray-500">
-                                        {{ person.updated_at|date:"d/m/y" }} às {{
-                                        person.updated_at|date:"H:i" }}
-                                    </td>
+                                    <td class="p-4 border border-gray-500">{{ person.added_at|date:"d/m/y" }} às {{ person.added_at|date:"H:i" }}</td>
+                                    <td class="p-4 border border-gray-500">{{ person.updated_at|date:"d/m/y" }} às {{ person.updated_at|date:"H:i" }}</td>
                                     <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
                                         <a href="{% url 'people:details' person.id %}"
                                            class="p-2 rounded bg-surface-hover text-text-secondary hover:text-gray-500 transition-colors"

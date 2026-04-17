@@ -50,8 +50,7 @@
                                     <td class="p-4 border border-gray-500">{{ camera.get_name }}</td>
                                     <td class="p-4 border border-gray-500">
                                         <a href="{% url 'cameras:view' camera.id %}"
-                                           class="text-blue-500 hover:underline">{{
-                                        camera.name }}</a>
+                                           class="text-blue-500 hover:underline">{{ camera.name }}</a>
                                     </td>
                                     <td class="p-4 border border-gray-500">{{ camera.location }}</td>
                                     <td class="p-4 border border-gray-500">
@@ -66,10 +65,7 @@
                                     <td class="p-4 border border-gray-500">
                                         {{ camera.created_at|date:"d/m/y H:m" }} às {{ camera.created_at|date:"H:i" }}
                                     </td>
-                                    <td class="p-4 border border-gray-500">
-                                        {{ camera.updated_at|date:"d/m/y" }} às {{
-                                        camera.updated_at|date:"H:i" }}
-                                    </td>
+                                    <td class="p-4 border border-gray-500">{{ camera.updated_at|date:"d/m/y" }} às {{ camera.updated_at|date:"H:i" }}</td>
                                     <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
                                         <a href="{% url 'cameras:edit' id=camera.id %}"
                                            class="p-2 rounded bg-surface-hover text-text-secondary hover:text-primary transition-colors"
