@@ -54,7 +54,9 @@ def generate_face_embedding(base64_str=None, image=None):
 
     face = mtcnn(image)
     if face is None:
-        raise ValidationError("Nenhum rosto detectado, ajuste a iluminação  ")
+        raise ValidationError(
+            "Nenhum rosto detectado. Tente novamente com melhor iluminação e o rosto visível."
+        )
 
     with torch.no_grad():
         embedding = resnet(face.unsqueeze(0))
@@ -75,7 +77,7 @@ def treat_photo(
 
 def validate_bi(bi: str):
     if not bi or len(bi) != 14:
-        raise ValidationError("Preencha correctamente o BI")
+        raise ValidationError("O BI deve conter exatamente 14 caracteres.")
     return bi.upper()
 
 
@@ -83,10 +85,10 @@ def validate_homes(_homes: list[str]) -> list[int]:
     try:
         homes = [int(h) for h in _homes]
     except:  # NOQA
-        raise ValidationError("Informe correctamente os nºs. das casas")
+        raise ValidationError("Selecione casas válidas.")
 
     if homes and not Home.objects.filter(id__in=homes).exists():  # type: ignore
-        raise ValidationError("As casas selecionadas não existem")
+        raise ValidationError("Algumas casas selecionadas não existem.")
 
     return homes
 
@@ -95,10 +97,10 @@ def validate_residents(_residents: list[str]) -> list[int]:
     try:
         residents = [int(h) for h in _residents]
     except:  # NOQA
-        raise ValidationError("Informe correctamente os residentes")
+        raise ValidationError("Selecione residentes válidos.")
 
     if residents and not Resident.objects.filter(id__in=residents).exists():  # type: ignore
-        raise ValidationError("Os residentes selecionados não existem")
+        raise ValidationError("Alguns residentes não existem.")
 
     return residents
 
@@ -110,22 +112,22 @@ def validate_fields(fields: list[str]) -> str:
         raise ValidationError("Áreas de trabalho não informadas")
 
     if set(fields) - vfl:
-        raise ValidationError("Área de trabalho inválida")
+        raise ValidationError("Uma ou mais áreas de trabalho são inválidas.")
     return ",".join(fields)
 
 
 def validate_visitor_type(visitor_type: str):
     if not visitor_type:
-        raise ValidationError("Tipo de visitante não informado")
+        raise ValidationError("Informe o tipo de visitante")
 
     if visitor_type not in VALID_VISITORS:
-        raise ValidationError("Tipo de visitante inválida")
+        raise ValidationError("Informe um tipo de visitante válido")
     return visitor_type
 
 
 def validate_host(host_id: str):
     if not host_id.isdigit():
-        raise ValidationError("Anfitrião inválido")
+        raise ValidationError("Selecione um anfitrião válido.")
 
     host = Resident.objects.filter(id=int(host_id)).only("id").first()  # type: ignore
     if not host:
@@ -167,10 +169,10 @@ def update_m2m(model, k1_name, k1_value, k2: str, new: set):
 
 def create_person(first_name: str, last_name: str, person_type: str, photo) -> Person:
     if not first_name or not last_name or not person_type:
-        raise ValidationError("Preencha todos os campos")
+        raise ValidationError("Preencha todos os campos, por favor.")
 
     if not photo:
-        raise ValidationError("Faça a captura de rosto")
+        raise ValidationError("Faça a captura de um rosto")
 
     if person_type not in ["W", "V", "R"]:
         raise ValidationError("Tipo de pessoa inválido")
@@ -183,7 +185,7 @@ def create_person(first_name: str, last_name: str, person_type: str, photo) -> P
 
 def edit_person(person: Person, first_name: str, last_name: str, photo):
     if not first_name or not last_name:
-        raise ValidationError("Preencha todos os campos")
+        raise ValidationError("Preencha todos os campos, por favor.")
 
     update_instace(person, {"first_name": first_name, "last_name": last_name})
 
@@ -199,7 +201,7 @@ def create_resident(person_id: int, _homes: list[str], bi: str) -> Resident:
         raise ValidationError("Informe pelo menos uma residência")
 
     if Resident.objects.filter(bi=bi).exists():
-        raise ValidationError("BI já está em uso")
+        raise ValidationError("Este BI já foi registado")
 
     resident = Resident.objects.create(person_id=person_id, bi=bi)  # type: ignore
     ResidentHome.objects.bulk_create(  # type: ignore

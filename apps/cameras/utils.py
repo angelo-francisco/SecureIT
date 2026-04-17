@@ -8,7 +8,7 @@ def create_camera(user, name, location, connection_type):
     if not location or not connection_type or not name:
         raise ValidationError("Preencha todos os campos, por favor.")
     if connection_type not in ["L", "W"]:
-        raise ValidationError("Só aceitamos câmaras locais ou Wi-Fi")
+        raise ValidationError("Tipo de conexão inválido. Use Local ou Wi-Fi.")
 
     camera = Camera.objects.create(
         user=user, name=name, location=location, connection_type=connection_type
@@ -19,7 +19,11 @@ def create_camera(user, name, location, connection_type):
 
 def create_wifi_camera(camera_id, stream_url):
     if not stream_url:
-        raise ValidationError("Informe a url de video da câmara")
+        raise ValidationError("Informe a URL de transmissão da câmara Wi-Fi.")
+    if not stream_url.startswith(("http://", "https://", "rtsp://")):
+        raise ValidationError(
+            "URL inválida. Use um endereço HTTP, HTTPS, etc."
+        )
     return WifiCamera.objects.create(  # type: ignore
         camera_id=camera_id,
         stream_url=stream_url,
@@ -28,7 +32,9 @@ def create_wifi_camera(camera_id, stream_url):
 
 def create_local_camera(camera_id, camera_path, cameras_list):
     if not camera_path:
-        raise ValidationError("Informe a câmara local, por favor.")
+        raise ValidationError(
+            "Selecione uma câmara local disponível."
+        )
 
     camera_info = None
     for cam in cameras_list:
@@ -37,8 +43,9 @@ def create_local_camera(camera_id, camera_path, cameras_list):
             break
 
     if not camera_info:
-        raise ValidationError("Dados da câmara indisponíveis.")
-
+        raise ValidationError(
+            "A câmara selecionada não está disponível. Atualize a página e tente novamente."
+        )
     return LocalCamera.objects.create(camera_id=camera_id, info=camera_info)  # type: ignore
 
 
@@ -62,8 +69,10 @@ def get_cameras():
 
 def valid_connection_type(connection_type):
     if not connection_type:
-        raise ValidationError("Informe o tipo de conexão")
+        raise ValidationError("Selecione o tipo de conexão da câmara.")
 
     if connection_type not in ["L", "W"]:
-        raise ValidationError("Tipo de conexão desconhecido")
+        raise ValidationError(
+            "Tipo de conexão inválido. Escolha entre Local ou Wi-Fi."
+        )
     return connection_type

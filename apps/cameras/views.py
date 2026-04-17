@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from core.utils import invalidate_cache
 
-from .models import Camera, DetectionLine, LocalCamera, WifiCamera
+from .models import Camera, LocalCamera, WifiCamera
 from .utils import (
     create_camera,
     create_local_camera,
@@ -100,7 +100,7 @@ def view_camera(request, id):
         user=request.user,
     )
     if not camera:
-        messages.error(request, "Esta câmara não é sua")
+        messages.error(request, "Você não tem permissão para acessar esta câmara.")
         return redirect("cameras:home")
     return render(request, "cameras/view.html", {"camera": camera})
 
@@ -121,7 +121,9 @@ def edit_camera(request, id):
             )
 
             if not name or not location:
-                raise ValidationError("Informe o nome e a localização")
+                raise ValidationError(
+                    "Nome e localização são obrigatórios para atualizar a câmara."
+                )
 
             camera.name = name
             camera.location = location
