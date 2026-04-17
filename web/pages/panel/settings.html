@@ -1,63 +1,62 @@
 {% extends 'bases/panel.html' %}
 {% block title %}Configurações{% endblock %}
 {% block content %}
-<div class="hidden fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-10" id="seeImageModal">
-</div>
-<form action="{% url 'panel:settings' %}" method="POST"
-    class="w-full flex-1 h-full flex flex-col items-center overflow-hidden py-6 px-4">
-    {% csrf_token %}
-    <header class="max-w-3xl w-full flex flex-row items-center justify-between gap-4 border-b border-gray-500 pb-3">
-        <h2 class="text-white text-2xl md:text-4xl font-bold">Configurações</h2>
-        <button
-            class="text-center flex items-center gap-2 font-semibold rounded-lg px-3 py-2 bg-blue-600 text-white cursor-pointer p-3">
-            {% lucide "save" %}
-            Salvar
-        </button>
-    </header>
-    <div class="max-w-3xl w-full flex-1 pt-3">
-        <div class="flex flex-col gap-3">
-            <div class="border-b border-gray-300 py-2 flex items-center justify-between">
-                <span class="text-lg font-mediun text-nowrap">Frames por segundo (FPS)</span>
-                <div class="max-w-[150px]">
-                    {% include 'components/lucide_input.html' with type="number" name="fps" value=settings.fps %}
+    <div class="hidden fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-10"
+         id="seeImageModal"></div>
+    <form action="{% url 'panel:settings' %}"
+          method="post"
+          class="w-full flex-1 h-full flex flex-col items-center overflow-hidden py-6 px-4">
+        {% csrf_token %}
+        <header class="max-w-3xl w-full flex flex-row items-center justify-between gap-4 border-b border-gray-500 pb-3">
+            <h2 class="text-white text-2xl md:text-4xl font-bold">Configurações</h2>
+            <button class="text-center flex items-center gap-2 font-semibold rounded-lg px-3 py-2 bg-blue-600 text-white cursor-pointer p-3">
+                {% lucide "save" %}
+                Salvar
+            </button>
+        </header>
+        <div class="max-w-3xl w-full flex-1 pt-3">
+            <div class="flex flex-col gap-3">
+                <div class="border-b border-gray-300 py-2 flex items-center justify-between">
+                    <span class="text-lg font-mediun text-nowrap">Frames por segundo (FPS)</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide_input.html' with type="number" name="fps" value=settings.fps %}
+                    </div>
+                </div>
+                <div class="border-b border-gray-300 py-2 flex items-center justify-between">
+                    <span class="text-lg font-mediun text-nowrap">Início do monitoramento</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide_input.html' with type="text" name="mst" icon="timer"
+                        value=settings.monitoring_start_time|time:"H:i:s" %}
+                    </div>
+                </div>
+                <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Término do monitoramento</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide_input.html' with type="text" name="met" icon="timer"
+                        value=settings.monitoring_end_time|time:"H:i:s" %}
+                    </div>
+                </div>
+                <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Tempo de espera extra (segundos)</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide_input.html' with type="number" name="alert_cooldown" icon="timer"
+                        value=settings.alert_cooldown %}
+                    </div>
+                </div>
+                <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Número de detecções por frames</span>
+                    <div class="max-w-[150px]">
+                        {% include 'components/lucide_input.html' with type="number" name="detect_every" icon="timer" value=settings.detect_every %}
+                    </div>
+                </div>
+                <div class="py-2 flex items-center justify-between text-nowrap">
+                    <span class="text-lg font-mediun">Permitir desenho</span>
+                    <div class="max-w-[150px]">
+                        <input type="checkbox" name="allow_draw" id="allow_draw" {% if settings.allow_draw %}checked{% endif
+                            %}>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="border-b border-gray-300 py-2 flex items-center justify-between">
-                <span class="text-lg font-mediun text-nowrap">Início do monitoramento</span>
-                <div class="max-w-[150px]">
-                    {% include 'components/lucide_input.html' with type="text" name="mst" icon="timer"
-                    value=settings.monitoring_start_time|time:"H:i:s" %}
-                </div>
-            </div>
-            <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
-                <span class="text-lg font-mediun">Término do monitoramento</span>
-                <div class="max-w-[150px]">
-                    {% include 'components/lucide_input.html' with type="text" name="met" icon="timer"
-                    value=settings.monitoring_end_time|time:"H:i:s" %}
-                </div>
-            </div>
-            <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
-                <span class="text-lg font-mediun">Tempo de espera extra (segundos)</span>
-                <div class="max-w-[150px]">
-                    {% include 'components/lucide_input.html' with type="number" name="alert_cooldown" icon="timer"
-                    value=settings.alert_cooldown %}
-                </div>
-            </div>
-            <div class="border-b border-gray-300 py-2 py-2 flex items-center justify-between text-nowrap">
-                <span class="text-lg font-mediun">Número de detecções por frames</span>
-                <div class="max-w-[150px]">
-                    {% include 'components/lucide_input.html' with type="number" name="detect_every" icon="timer"
-                    value=settings.detect_every %}
-                </div>
-            </div>
-            <div class="py-2 flex items-center justify-between text-nowrap">
-                <span class="text-lg font-mediun">Permitir desenho</span>
-                <div class="max-w-[150px]">
-                    <input type="checkbox" name="allow_draw" id="allow_draw" {% if settings.allow_draw %}checked{% endif
-                        %}>
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
-{% endblock %}
+        </form>
+    {% endblock content %}

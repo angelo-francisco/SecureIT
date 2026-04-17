@@ -1,7 +1,8 @@
 {% extends 'bases/panel.html' %}
 {% block title %}Pessoas{% endblock %}
 {% block content %}
-    {% include 'components/photo_capture.html' with input="photo" start_button="openImageCaptureModel" search="searchByFaceForm" %}
+    {% include 'components/photo_capture.html' with input="photo" start_button="openImageCaptureModel"
+    search="searchByFaceForm" %}
     {% if search_results %}
         <div class="fixed inset-0 flex justify-center items-center backdrop-blur-sm z-[1000]"
              id="search-results-modal">
@@ -45,7 +46,7 @@
                     <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                         <form class="relative w-full lg:w-96"
                               action="{% url 'people:home' %}"
-                              method="GET">
+                              method="get">
                             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-secondary">
                                 {% lucide "search" %}
                             </div>
@@ -105,8 +106,14 @@
                                             {% endif %}
                                         </span>
                                     </td>
-                                    <td class="p-4 border border-gray-500">{{ person.added_at|date:"d/m/y" }} às {{ person.added_at|date:"H:i" }}</td>
-                                    <td class="p-4 border border-gray-500">{{ person.updated_at|date:"d/m/y" }} às {{ person.updated_at|date:"H:i" }}</td>
+                                    <td class="p-4 border border-gray-500">
+                                        {{ person.added_at|date:"d/m/y" }} às {{
+                                        person.added_at|date:"H:i" }}
+                                    </td>
+                                    <td class="p-4 border border-gray-500">
+                                        {{ person.updated_at|date:"d/m/y" }} às {{
+                                        person.updated_at|date:"H:i" }}
+                                    </td>
                                     <td class="flex gap-1 justify-center items-center p-4 border border-gray-500">
                                         <a href="{% url 'people:details' person.id %}"
                                            class="p-2 rounded bg-surface-hover text-text-secondary hover:text-gray-500 transition-colors"
@@ -140,7 +147,10 @@
                         <div class="flex items-center justify-center">{% lucide "users-x" %}</div>
                         <div class="flex flex-col gap-2 max-w-md">
                             <h3 class="text-white text-xl font-bold">Nenhuma pessoa registada</h3>
-                            <p class="text-text-secondary text-sm leading-relaxed">Clique no botão 'Adicionar Pessoa' para registar alguém</p>
+                            <p class="text-text-secondary text-sm leading-relaxed">
+                                Clique no botão 'Adicionar Pessoa' para
+                                registar alguém
+                            </p>
                         </div>
                     </div>
                 {% endif %}
@@ -148,8 +158,8 @@
         </div>
     </main>
     <script>
-  function closeModal() {
-    document.getElementById('search-results-modal').classList.toggle('hidden')
-  }
+    function closeModal() {
+        document.getElementById('search-results-modal').classList.toggle('hidden')
+    }
     </script>
-{% endblock %}
+{% endblock content %}

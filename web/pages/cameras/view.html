@@ -20,8 +20,7 @@
             <div class="flex items-center justify-between border-b border-gray-700 pb-3 gap-5">
                 <h2 class="text-2xl font-semibold truncate max-w-2xl">{{ camera.name }}</h2>
                 <div class="flex gap-2">
-                    <!-- <a href="{% url 'cameras:new-detection-area' camera.id %}"
-                       class="px-2 py-1 bg-blue-500 text-white rounded-lg text-center flex items-center justify-center">
+                    <!-- <a href="{% url 'cameras:new-detection-area' camera.id %}" class="px-2 py-1 bg-blue-500 text-white rounded-lg text-center flex items-center justify-center">
                         {% if camera.detectionline %}
                             Editar Delimitada
                         {% else %}
@@ -30,9 +29,12 @@
                     </a> -->
                     <a href="{% url 'cameras:edit' camera.id %}"
                        class="p-2 rounded-lg bg-gray-600/20 hover:bg-gray-600/30 transition">{% lucide "pencil" %}</a>
-                    <form action="{% url 'cameras:delete' camera.id %}" method="GET">
+                    <form action="{% url 'cameras:delete' camera.id %}" method="get">
                         {% csrf_token %}
-                        <button class="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition">{% lucide "trash" %}</button>
+                        <button class="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition">
+                            {% lucide
+                            "trash" %}
+                        </button>
                     </form>
                 </div>
             </div>
@@ -90,10 +92,12 @@
 
     function connectCameraWs(cameraId, videoSource) {
         if (!videoSource) return
-        const ws = new WebSocket(`ws://${window.location.host}/ws/{% if camera.detectionline %}area-detection{% else %}camera{%endif%}/${cameraId}/?vs=${videoSource}`)
+        const ws = new WebSocket(`ws://${window.location.host}/ws/{% if camera.detectionline %}area-detection{% else %}camera{% endif %}/${cameraId}/?vs=${videoSource}`)
         ws.binaryType = "arraybuffer"
         ws.onmessage = e => {
-            const blob = new Blob([e.data], { type: "image/jpeg" })
+            const blob = new Blob([e.data], {
+                type: "image/jpeg"
+            })
             const url = URL.createObjectURL(blob)
             imageELement.src = url
             setTimeout(() => URL.revokeObjectURL(url), 500)
@@ -113,4 +117,4 @@
         mainHTML.classList.remove("hidden")
     })
     </script>
-{% endblock %}
+{% endblock content %}

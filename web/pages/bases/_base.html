@@ -7,44 +7,42 @@
         <link rel="shortcut icon"
               href="{% static 'imgs/logo.png' %}"
               type="image/x-icon">
-        <link rel="stylesheet"
-              href="{% static 'fonts/notosans.css' %}">
-        <link rel="stylesheet"
-              href="{% static 'fonts/poppins.css' %}">
+        <link rel="stylesheet" href="{% static 'fonts/notosans.css' %}">
+        <link rel="stylesheet" href="{% static 'fonts/poppins.css' %}">
         {% tailwind_css %}
         <style>
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #101922;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #3b4754;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #137fec;
-        }
-
-        @keyframes slide-in {
-            0% {
-                opacity: 0;
-                transform: translateX(100%);
+            ::-webkit-scrollbar {
+                width: 8px;
             }
 
-            100% {
-                opacity: 1;
-                transform: translateX(0);
+            ::-webkit-scrollbar-track {
+                background: #101922;
             }
-        }
 
-        .animate-slide-in {
-            animation: slide-in 0.3s ease forwards;
-        }
+            ::-webkit-scrollbar-thumb {
+                background: #3b4754;
+                border-radius: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #137fec;
+            }
+
+            @keyframes slide-in {
+                0% {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .animate-slide-in {
+                animation: slide-in 0.3s ease forwards;
+            }
         </style>
         {% block head %}{% endblock %}
         <title>
@@ -72,15 +70,15 @@
         {% endif %}
         {% block body %}{% endblock %}
         <script>
-        let messages = document.querySelectorAll('.messages-div')
+            let messages = document.querySelectorAll('.messages-div')
 
-        if (messages) {
-            setTimeout(() => {
-                messages.forEach(element => {
-                    element.remove()
-                });
-            }, 3000);
-        }
+            if (messages) {
+                setTimeout(() => {
+                    messages.forEach(element => {
+                        element.remove()
+                    });
+                }, 3000);
+            }
         </script>
     </body>
 </html>

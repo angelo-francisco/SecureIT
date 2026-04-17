@@ -3,75 +3,75 @@
 {% block title %}Painel de Controle{% endblock %}
 {% block subhead %}
     <style>
-    #container[data-count="1"] {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr;
-    }
-
-    #container[data-count="2"] {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: 1fr;
-    }
-
-    #container[data-count="3"],
-    #container[data-count="4"] {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-    }
-
-    #container[data-count="5"],
-    #container[data-count="6"] {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-    }
-
-    #container[data-count="7"],
-    #container[data-count="8"],
-    #container[data-count="9"] {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-    }
-
-    @keyframes float-up {
-        0% {
-            opacity: 0;
-            transform: scale(0);
+        #container[data-count="1"] {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
         }
 
-        20% {
-            opacity: 1;
-            transform: scale(1);
+        #container[data-count="2"] {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: 1fr;
         }
 
-        80% {
-            opacity: 1;
-            transform: scale(1);
+        #container[data-count="3"],
+        #container[data-count="4"] {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
         }
 
-        100% {
-            opacity: 0;
-            transform: scale(1);
+        #container[data-count="5"],
+        #container[data-count="6"] {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
         }
-    }
 
-    .notification-float {
-        position: fixed;
-        top: 0;
-        right: 0;
-        z-index: 1000;
-        animation: float-up 5s ease-in-out;
-        background: rgba(19, 127, 236, 0.2);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(19, 127, 236, 0.3);
-        border-radius: 100px;
-        padding: 8px 16px;
-        margin: 10px;
-        color: white;
-        font-weight: bold;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
+        #container[data-count="7"],
+        #container[data-count="8"],
+        #container[data-count="9"] {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            20% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            80% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1);
+            }
+        }
+
+        .notification-float {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+            animation: float-up 5s ease-in-out;
+            background: rgba(19, 127, 236, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(19, 127, 236, 0.3);
+            border-radius: 100px;
+            padding: 8px 16px;
+            margin: 10px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
     </style>
-{% endblock %}
+{% endblock subhead %}
 {% block content %}
     <div id="loader"
          class="flex items-center justify-center h-[calc(100vh-76px)] w-full">
@@ -105,118 +105,122 @@
         {% endfor %}
     </main>
     <script>
-    const mainHTML = document.getElementById("container")
-    const loader = document.getElementById("loader")
-    const audio = document.getElementById("soundEffect")
+        const mainHTML = document.getElementById("container")
+        const loader = document.getElementById("loader")
+        const audio = document.getElementById("soundEffect")
 
-    function addNotificationCounters() {
-        document.querySelectorAll(".notificationCounter")
-            .forEach(nc => {
-                console.log(nc.innerHTML)
-                console.log(parseInt(nc.innerHTML))
-                nc.innerHTML = parseInt(nc.innerHTML) + 1;
+        function addNotificationCounters() {
+            document.querySelectorAll(".notificationCounter")
+                .forEach(nc => {
+                    console.log(nc.innerHTML)
+                    console.log(parseInt(nc.innerHTML))
+                    nc.innerHTML = parseInt(nc.innerHTML) + 1;
+                });
+        }
+
+        function showDetectionAnimation(peopleCount) {
+            const notificationBtn = document.getElementById('notificationBtn');
+
+            const floatElement = document.createElement('div');
+            floatElement.className = 'notification-float flex items-center gap-2'
+
+            const message = peopleCount === 1 ?
+                'Detectamos 1 pessoa agora' :
+                `Detectamos ${peopleCount} pessoas agora`;
+
+            floatElement.innerHTML = `{% lucide 'info' %}${message}`;
+
+            document.body.appendChild(floatElement);
+
+            setTimeout(() => {
+                floatElement.remove();
+            }, 5000);
+        }
+
+        function playNotificationSound() {
+            audio.currentTime = 0;
+            audio.play().catch(err => console.log("Falha ao tocar som: " + err))
+        }
+
+        function convertToInt(id) {
+            if (typeof id === "number") return id
+            return parseInt(id)
+        }
+
+        function handleJson(text) {
+            const data = JSON.parse(text)
+            if (data.type === "notification") {
+                addNotificationCounters()
+                playNotificationSound()
+                if (data.people) {
+                    showDetectionAnimation(data.people)
+                }
+            }
+        }
+
+        function connectCameraWs(cameraId, videoSource, consumerName) {
+            let ws;
+            const imageElement = document.getElementById(`cam-${cameraId}`)
+            const containerDiv = document.getElementById(`img-div-${cameraId}`);
+
+            if (!videoSource || !cameraId) return;
+
+            const createWs = () => {
+                try {
+                    ws = new WebSocket(`ws://localhost:8000/ws/${consumerName}/${cameraId}/?vs=${videoSource}`)
+                } catch (err) {
+                    console.log(err)
+                    return;
+                }
+                ws.binaryType = "arraybuffer"
+
+                ws.onmessage = (event) => {
+                    if (typeof event.data === "string") {
+                        handleJson(event.data)
+                    }
+
+                    if (event.data instanceof ArrayBuffer) {
+                        const blob = new Blob([event.data], {
+                            type: "image/jpeg"
+                        });
+                        const url = URL.createObjectURL(blob);
+                        imageElement.src = url
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }
+                }
+
+                ws.onclose = (e) => {
+                    console.warn(`WS fechado na câmera ${cameraId}`);
+                    containerDiv.innerHTML = `{% lucide "video-off" class="text-white" width="50" height="50" %}`;
+                };
+            }
+            createWs()
+
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await navigator.mediaDevices.getUserMedia({
+                audio: true
+            })
+            const cameras = document.querySelectorAll('.camera')
+            mainHTML.dataset.count = cameras.length
+
+            cameras.forEach(camera => {
+                const cameraId = camera.dataset.cameraId
+                let cameraType = camera.dataset.connectionType
+                let videoSource = camera.dataset.videoSource
+                const consumerName = camera.dataset.consumerName
+
+                if (cameraType === "L") {
+                    videoSource = convertToInt(videoSource)
+                }
+                if (!videoSource || !cameraId) return
+
+                connectCameraWs(cameraId, videoSource, consumerName)
             });
-    }
 
-    function showDetectionAnimation(peopleCount) {
-        const notificationBtn = document.getElementById('notificationBtn');
-
-        const floatElement = document.createElement('div');
-        floatElement.className = 'notification-float flex items-center gap-2'
-
-        const message = peopleCount === 1
-            ? 'Detectamos 1 pessoa agora'
-            : `Detectamos ${peopleCount} pessoas agora`;
-
-        floatElement.innerHTML = `{% lucide 'info' %}${message}`;
-
-        document.body.appendChild(floatElement);
-
-        setTimeout(() => {
-            floatElement.remove();
-        }, 5000);
-    }
-
-    function playNotificationSound() {
-        audio.currentTime = 0;
-        audio.play().catch(err => console.log("Falha ao tocar som: " + err))
-    }
-
-    function convertToInt(id) {
-        if (typeof id === "number") return id
-        return parseInt(id)
-    }
-
-    function handleJson(text) {
-        const data = JSON.parse(text)
-        if (data.type === "notification") {
-            addNotificationCounters()
-            playNotificationSound()
-            if(data.people) {
-                showDetectionAnimation(data.people)
-            }
-        }
-    }
-
-    function connectCameraWs(cameraId, videoSource, consumerName) {
-        let ws;
-        const imageElement = document.getElementById(`cam-${cameraId}`)
-        const containerDiv = document.getElementById(`img-div-${cameraId}`);
-
-        if (!videoSource || !cameraId) return;
-
-        const createWs = () => {
-            try {
-                ws = new WebSocket(`ws://localhost:8000/ws/${consumerName}/${cameraId}/?vs=${videoSource}`)
-            } catch (err) {
-                console.log(err)
-                return;
-            }
-            ws.binaryType = "arraybuffer"
-
-            ws.onmessage = (event) => {
-                if (typeof event.data === "string") {
-                    handleJson(event.data)
-                }
-
-                if (event.data instanceof ArrayBuffer) {
-                    const blob = new Blob([event.data], { type: "image/jpeg" });
-                    const url = URL.createObjectURL(blob);
-                    imageElement.src = url
-                    setTimeout(() => URL.revokeObjectURL(url), 1000);
-                }
-            }
-
-            ws.onclose = (e) => {
-                console.warn(`WS fechado na câmera ${cameraId}`);
-                containerDiv.innerHTML = `{% lucide "video-off" class="text-white" width="50" height="50" %}`;
-            };
-        }
-        createWs()
-
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        await navigator.mediaDevices.getUserMedia({ audio: true })
-        const cameras = document.querySelectorAll('.camera')
-        mainHTML.dataset.count = cameras.length
-
-        cameras.forEach(camera => {
-            const cameraId = camera.dataset.cameraId
-            let cameraType = camera.dataset.connectionType
-            let videoSource = camera.dataset.videoSource
-            const consumerName = camera.dataset.consumerName
-
-            if (cameraType === "L") {
-                videoSource = convertToInt(videoSource)
-            }
-            if (!videoSource || !cameraId) return
-
-            connectCameraWs(cameraId, videoSource, consumerName)
-        });
-
-        loader.classList.add('hidden')
-        mainHTML.classList.remove('hidden')
-    })
+            loader.classList.add('hidden')
+            mainHTML.classList.remove('hidden')
+        })
     </script>
-{% endblock %}
+{% endblock content %}

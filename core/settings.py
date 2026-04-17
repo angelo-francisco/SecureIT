@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .utils import get_binary_location
+# from .utils import get_binary_location
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     "tailwind_config",
     # "django_google_fonts",
     "lucide",
-    "whitenoise.runserver_nostatic",
 ]
 
 AUTH_USER_MODEL = "users.User"

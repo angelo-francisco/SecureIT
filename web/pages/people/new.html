@@ -14,11 +14,13 @@
                     <div class="mb-4 flex justify-between gap-2">
                         <div>
                             <label class="ml-1 text-base text-white font-medium">Primeiro nome *</label>
-                            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text" name="first_name" value=request.POST.first_name required=True %}
+                            {% include 'components/input.html' with placeholder="Seu primeiro nome" type="text"
+                            name="first_name" value=request.POST.first_name required=True %}
                         </div>
                         <div>
                             <label class="ml-1 text-base text-white font-medium">Sobrenome *</label>
-                            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text" name="last_name" value=request.POST.last_name required=True %}
+                            {% include 'components/input.html' with placeholder="Informe o seu sobrenome" type="text"
+                            name="last_name" value=request.POST.last_name required=True %}
                         </div>
                     </div>
                     <div class="mb-4 flex flex-col justify-start gap-1">
@@ -39,7 +41,8 @@
                         <div id="resident-fields" class="hidden space-y-2">
                             <div class="mb-4 flex flex-col gap-1">
                                 <label class="ml-1 text-base text-white font-medium">Nº. da Casa</label>
-                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text"
+                                icon="search" class="home-search" %}
                                 <select name="resident-homes"
                                         id="home"
                                         multiple
@@ -55,7 +58,8 @@
                                     Nº. do
                                     BI
                                 </label>
-                                {% include 'components/input.html' with placeholder="Número do BI" type="text" icon="id_card" name="resident-bi" value=request.POST.bi required=True %}
+                                {% include 'components/input.html' with placeholder="Número do BI" type="text"
+                                icon="id_card" name="resident-bi" value=request.POST.bi required=True %}
                             </div>
                         </div>
                         <div id="visitor-fields" class="hidden space-y-2">
@@ -66,12 +70,18 @@
                                         required
                                         class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                                     <option value="" selected disabled>Selecione um tipo de visitante</option>
-                                    {% for visitor_type in visitor_types %}<option value="{{ visitor_type.0 }}">{{ visitor_type.1 }}</option>{% endfor %}
+                                    {% for visitor_type in visitor_types %}
+                                        <option value="{{ visitor_type.0 }}">
+                                            {{
+                                            visitor_type.1 }}
+                                        </option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="mb-4 flex flex-col gap-1">
                                 <label class=" ml-1 text-base text-white font-medium">Anfitrião/Destinatário(a)</label>
-                                {% include 'components/input.html' with class="home-search" placeholder="Nome do anfitrião/destinatário" type="text" icon="person" name="visitor-host" %}
+                                {% include 'components/input.html' with class="home-search" placeholder="Nome do
+                                anfitrião/destinatário" type="text" icon="person" name="visitor-host" %}
                                 <select name="visitor-host"
                                         id="visitor-hosts"
                                         multiple
@@ -79,7 +89,8 @@
                                         class="w-full max-h-[100px] rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                                     {% for host in hosts %}
                                         <option value="{{ host.resident.id }}">
-                                            {{ host.resident.person.first_name }} {{ host.resident.person.last_name }} - I{{ host.home.number }}
+                                            {{ host.resident.person.first_name }} {{ host.resident.person.last_name }} - I{{
+                                            host.home.number }}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -91,7 +102,8 @@
                                     Nº. do
                                     BI *
                                 </label>
-                                {% include 'components/input.html' with placeholder="Número do BI" type="text" name="worker-bi" icon="id_card" value=request.POST.bi required=True %}
+                                {% include 'components/input.html' with placeholder="Número do BI" type="text"
+                                name="worker-bi" icon="id_card" value=request.POST.bi required=True %}
                             </div>
                             <div class="mb-4 flex flex-col gap-1">
                                 <label class="ml-1 text-base text-white font-medium">Áreas de Trabalho *</label>
@@ -101,12 +113,16 @@
                                         required
                                         class="w-full h-30 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white">
                                     <option disabled selected>Selecione as área de trabalho</option>
-                                    {% for field in fields %}<option value="{{ field.0 }}">{{ field.1 }}</option>{% endfor %}
+                                    {% for field in fields %}
+                                        <option value="{{ field.0 }}">{{ field.1 }}</option>
+                                    {% endfor
+                                    %}
                                 </select>
                             </div>
                             <div class="mb-4 flex flex-col gap-1">
                                 <label class="ml-1 text-base text-white font-medium">Casas em que Trabalha</label>
-                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text" icon="search" class="home-search" %}
+                                {% include 'components/input.html' with placeholder="Pesquise por uma casa" type="text"
+                                icon="search" class="home-search" %}
                                 <select name="worker-homes"
                                         id="home"
                                         multiple
@@ -140,82 +156,81 @@
         </main>
     </form>
     <script>
-  const homeSearchInputs = document.querySelectorAll('.home-search')
+    const homeSearchInputs = document.querySelectorAll('.home-search')
 
-  homeSearchInputs.forEach(input => {
-    const select = input.parentElement.nextElementSibling
-    const originalOptions = Array.from(select.options)
+    homeSearchInputs.forEach(input => {
+        const select = input.parentElement.nextElementSibling
+        const originalOptions = Array.from(select.options)
 
-    input.addEventListener('input', (e) => {
-      console.log(e)
-      const search = e.target.value.trim()
-      select.innerHTML = ""
-      const filteredOptions = originalOptions.filter(option => {
-        const text = String(option.text).toLowerCase()
-        return text.includes(search.toLowerCase())
-      })
-      filteredOptions.forEach(option => select.append(option))
+        input.addEventListener('input', (e) => {
+            console.log(e)
+            const search = e.target.value.trim()
+            select.innerHTML = ""
+            const filteredOptions = originalOptions.filter(option => {
+                const text = String(option.text).toLowerCase()
+                return text.includes(search.toLowerCase())
+            })
+            filteredOptions.forEach(option => select.append(option))
+        })
     })
-  })  
-  const residentFields = document.getElementById("resident-fields");
-  const personTypeSelect = document.getElementById("person_type");
-  const visitorFields = document.getElementById("visitor-fields");
-  const workerFields = document.getElementById("worker-fields");
+    const residentFields = document.getElementById("resident-fields");
+    const personTypeSelect = document.getElementById("person_type");
+    const visitorFields = document.getElementById("visitor-fields");
+    const workerFields = document.getElementById("worker-fields");
 
-  // const modal = document.getElementById("photoCaptureModel")
-  // const photoCapture = document.getElementById("photoCapture")
-  // const replayVideo = document.getElementById("replayVideo")
-  // const takePhotoBtn = document.getElementById("takePhoto")
-  // const startVideo = document.getElementById("startVideo")
-  // const canvas = document.getElementById("canvas")
-  // const photo = document.getElementById("photo")
-  // const video = document.querySelector("video");
+    // const modal = document.getElementById("photoCaptureModel")
+    // const photoCapture = document.getElementById("photoCapture")
+    // const replayVideo = document.getElementById("replayVideo")
+    // const takePhotoBtn = document.getElementById("takePhoto")
+    // const startVideo = document.getElementById("startVideo")
+    // const canvas = document.getElementById("canvas")
+    // const photo = document.getElementById("photo")
+    // const video = document.querySelector("video");
 
-  // let stream;
+    // let stream;
 
-  function toggleFields() {
-    const value = personTypeSelect.value;
-    residentFields.classList.toggle("hidden", value !== "R");
-    visitorFields.classList.toggle("hidden", value !== "V");
-    workerFields.classList.toggle("hidden", value !== "W");
-  }
+    function toggleFields() {
+        const value = personTypeSelect.value;
+        residentFields.classList.toggle("hidden", value !== "R");
+        visitorFields.classList.toggle("hidden", value !== "V");
+        workerFields.classList.toggle("hidden", value !== "W");
+    }
 
-  personTypeSelect.addEventListener("change", toggleFields);
-  toggleFields();
+    personTypeSelect.addEventListener("change", toggleFields);
+    toggleFields();
 
-  // startVideo.addEventListener('click', async (e) => {
-  //   e.preventDefault()
+    // startVideo.addEventListener('click', async (e) => {
+    //   e.preventDefault()
 
-  //   try {
-  //     stream = navigator.mediaDevices.getUserMedia({ video: true })
+    //   try {
+    //     stream = navigator.mediaDevices.getUserMedia({ video: true })
 
-  //     video.srcObject = stream
-  //     await video.play()
-  //     modal.classList.toggle('hidden')
-  //   } catch(error) {
-  //     modal.classList.toggle('hidden')
-  //     await video.pause()
-  //   }
-  // })
+    //     video.srcObject = stream
+    //     await video.play()
+    //     modal.classList.toggle('hidden')
+    //   } catch(error) {
+    //     modal.classList.toggle('hidden')
+    //     await video.pause()
+    //   }
+    // })
 
-  // takePhotoBtn.addEventListener('click', (e) => {
-  //   e.preventDefault()
-  //   const ctx = canvas.getContext("2d");
+    // takePhotoBtn.addEventListener('click', (e) => {
+    //   e.preventDefault()
+    //   const ctx = canvas.getContext("2d");
 
-  //   canvas.width = video.videoWidth;
-  //   canvas.height = video.videoHeight;
+    //   canvas.width = video.videoWidth;
+    //   canvas.height = video.videoHeight;
 
-  //   ctx.drawImage(video, 0, 0);
-  //   const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+    //   ctx.drawImage(video, 0, 0);
+    //   const dataURL = canvas.toDataURL("image/jpeg", 0.9);
 
-  //   photo.value = dataURL;
-  //   video.pause()
-  // })
+    //   photo.value = dataURL;
+    //   video.pause()
+    // })
 
-  // replayVideo.addEventListener('click', (e) => {
-  //   e.preventDefault()
-  //   video.play()
-  // })
-
+    // replayVideo.addEventListener('click', (e) => {
+    //   e.preventDefault()
+    //   video.play()
+    // })
     </script>
-{% endblock %}
+{% endblock content %}

@@ -45,11 +45,11 @@
     document.addEventListener('DOMContentLoaded', (e) => {
         let stream;
         const modal = document.getElementById('photo_capture_modal')
-        const photo = document.getElementById("{{input}}")
+        const photo = document.getElementById("{{ input }}")
         const video = document.getElementById("photo_capture_video_element");
         const canvas = document.getElementById("photo_capture_canvas_element")
-        const startVideo = document.getElementById("{{start_button}}")
-        const searchForm = document.getElementById("{{search}}")
+        const startVideo = document.getElementById("{{ start_button }}")
+        const searchForm = document.getElementById("{{ search }}")
         const replayVideo = document.getElementById("replayVideo")
         const takePhotoBtn = document.getElementById("takePhoto")
         const searchButton = document.getElementById("photo_capture_search_button_element")
@@ -57,7 +57,9 @@
         startVideo.addEventListener('click', async (e) => {
             e.preventDefault()
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true })
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: true
+                })
 
                 video.srcObject = stream
                 await video.play()
