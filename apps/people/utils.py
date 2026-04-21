@@ -68,6 +68,10 @@ def treat_photo(
     base64_photo: str, filename=f"{uuid4()}.jpeg"
 ) -> tuple[ContentFile, ImageFile]:
     image_data = base64_to_bytes(base64_photo)
+    
+    if not image_data:
+        raise ValidationError("Capture o rosto do indivíduo, por favor.")
+    
     image = Image.open(BytesIO(image_data))
     buffer = BytesIO()
     image.save(buffer, format=image.format or "JPEG")
