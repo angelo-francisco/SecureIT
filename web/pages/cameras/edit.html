@@ -18,22 +18,14 @@
                     </div>
                     <div class="mb-4 flex flex-col justify-start gap-1">
                         <label class="text-base text-white font-medium">Localização</label>
-                        {% include 'components/input.html' with placeholder="Localização da câmara" type="text" icon="pin_drop" name="location" value=camera.location required=True %}
+                        {% include 'components/lucide_input.html' with placeholder="Localização da câmara" type="text" icon="map-pin" name="location" value=camera.location required=True %}
                     </div>
-                    <div class="mb-4 flex flex-col justify-start gap-1">
-                        <label class="block text-base font-medium text-white mb-1">Tipo de Conexão</label>
-                        <select id="connection-type-select"
-                                name="connection_type"
-                                class="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-                            <option value="L" {% if camera.connection_type == "L" %}selected{% endif %}>Local / USB</option>
-                            <option value="W" {% if camera.connection_type == "W" %}selected{% endif %}>Wi-Fi</option>
-                        </select>
-                    </div>
+                    {% if camera.connection_type == "W" %}
                     <div class="space-y-4">
                         <div id="wifi-fields" class="space-y-2">
                             <div class="mb-4 flex flex-col gap-1">
                                 <label class="text-base text-white font-medium">URL da Câmera</label>
-                                {% include 'components/input.html' with placeholder="Exemplo: http://192.168.100.181:5555/stream" type="url" icon="link" name="stream_url" value=camera.wificamera.stream_url %}
+                                {% include 'components/lucide_input.html' with placeholder="Exemplo: http://192.168.100.181:5555/stream" type="url" icon="link" name="stream_url" value=camera.wificamera.stream_url %}
                             </div>
                         </div>
                         <div id="local-fields" class="hidden space-y-2">
@@ -46,6 +38,7 @@
                             <p class="text-xs text-gray-400 mt-1">Dispositivo conectado fisicamente ao servidor</p>
                         </div>
                     </div>
+                    {% endif %}
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="submit"
                                 onclick="window.history.back()"
@@ -55,7 +48,7 @@
                         <button type="submit"
                                 onclick="this.disabled = true; this.form.submit()"
                                 class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white font-bold text-base">
-                            Adicionar
+                            Salvar
                         </button>
                     </div>
                 </div>

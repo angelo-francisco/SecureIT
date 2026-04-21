@@ -259,7 +259,7 @@ def create_visitor(person_id: int, host_id: str, visitor_type: str) -> Visitor:
 
     visitor = Visitor.objects.create(person_id=person_id, type=visitor_type)  # type: ignore
     visit = Visit.objects.create(visitor_id=visitor.id)  # type: ignore
-    VisitDestiny.objects.create(visit_id=visit.id, resident_id=host)  # type: ignore
+    VisitDestiny.objects.create(visit_id=visit.id, resident_id=host.id)  # type: ignore
     return visitor
 
 

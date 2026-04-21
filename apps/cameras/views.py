@@ -116,9 +116,6 @@ def edit_camera(request, id):
         try:
             name = request.POST.get("name", "").strip()
             location = request.POST.get("location", "").strip()
-            connection_type = valid_connection_type(
-                request.POST.get("connection_type", "").strip().upper()
-            )
 
             if not name or not location:
                 raise ValidationError(
@@ -128,44 +125,16 @@ def edit_camera(request, id):
             camera.name = name
             camera.location = location
 
-            if camera.connection_type != connection_type:
-                if camera.connection_type == "L":
-                    camera.localcamera.delete()  # type: ignore
-                else:
-                    camera.wificamera.delete()  # type: ignore
-
-                camera.connection_type = connection_type
-
             camera.save()
 
-            match camera.connection_type:
-                case "L":
-                    cameras_list, _ = func_get_cameras()
-                    camera_path = request.POST.get("local_camera", "").strip()
+            if camera.connection_type ==  "W":
+                stream_url = request.POST.get("stream_url", "").strip()
+                if not stream_url:
+                    raise ValidationError("URL de transmissão não informada")
 
-                    if not camera_path:
-                        raise ValidationError("Informe a câmara local, por favor.")
-
-                    camera_info = None
-                    for cam in cameras_list:
-                        if cam["path"] == camera_path:
-                            camera_info = cam
-                            break
-
-                    if not camera_info:
-                        raise ValidationError("Dados da câmara indisponíveis.")
-
-                    LocalCamera.objects.update_or_create(  # type: ignore
-                        camera=camera, defaults={"info": camera_info}
-                    )
-                case "W":
-                    stream_url = request.POST.get("stream_url", "").strip()
-                    if not stream_url:
-                        raise ValidationError("URL de transmissão não informada")
-
-                    WifiCamera.objects.update_or_create(  # type: ignore
-                        camera=camera, defaults={"stream_url": stream_url}
-                    )
+                WifiCamera.objects.update_or_create(  # type: ignore
+                    camera=camera, defaults={"stream_url": stream_url}
+                )
             invalidate_cache(f"user_{user.id}_cameras")
             messages.success(request, "Dados editados com sucesso.")
             return redirect(reverse("cameras:view", args=[camera.pk]))
