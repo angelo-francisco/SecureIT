@@ -1,183 +1,188 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logoSrc from "../../assets/logo.png";
-import bgLoginSrc from "../../assets/bgLogin.png";
-import { Input } from "../../ui/components/ui/input";
+import { CustomizablePin } from "../../ui";
 import * as Lucide from "lucide-react";
-import { useAuth } from "../../hooks";
+import { useAuth, useOnlineStatus } from "../../hooks";
+import type { Account } from "../../types";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const { pinLogin, accounts, isAuthenticated, fetchAccounts } = useAuth();
+  const [accountsLoaded, setAccountsLoaded] = useState(accounts.length > 0);
+
+  useEffect(() => {
+    if (accounts.length === 0 && !accountsLoaded) {
+      fetchAccounts().then((fetched) => {
+        setAccountsLoaded(true);
+        if (fetched.length === 0) {
+          navigate("/signup", { replace: true });
+        }
+      }).catch(() => {
+        setAccountsLoaded(true);
+      });
+    }
+  }, []);
+
+  // If accounts were already loaded (from App.tsx) and empty, redirect
+  useEffect(() => {
+    if (accountsLoaded && accounts.length === 0) {
+      navigate("/signup", { replace: true });
+    }
+  }, [accountsLoaded, accounts, navigate]);
+  const [selectedId, setSelectedId] = useState<number | null>(() => {
+    const remembered = localStorage.getItem("remembered_account");
+    if (remembered && isAuthenticated) {
+      const match = accounts.find((a) => a.email === remembered);
+      return match ? match.id : null;
+    }
+    return null;
+  });
+  const [pin, setPin] = useState("");
+  const [remember, setRemember] = useState(!!localStorage.getItem("remembered_account"));
+  const pinRef = useRef<HTMLDivElement>(null);
+  const { isOnline, checked } = useOnlineStatus();
+  const [pinError, setPinError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const handleAccountClick = (id: number) => {
+    setPinError(false);
+    if (selectedId === id) {
+      setSelectedId(null);
+      setPin("");
+      return;
+    }
+    setSelectedId(id);
+    setPin("");
+  };
+
+  const handlePinLogin = async (account: Account) => {
+    if (!pin) return;
+    setPinError(false);
     setLoading(true);
     try {
-      await login({ email, password });
+      await pinLogin(account.email, pin);
+      if (remember) {
+        localStorage.setItem("remembered_account", account.email);
+      } else {
+        localStorage.removeItem("remembered_account");
+      }
       navigate("/panel");
     } catch {
-      setError("Credenciais inválidas. Tente novamente.");
+      setPinError(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#031427] text-[#d3e4fe] relative overflow-hidden">
-      {/* Background */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${bgLoginSrc})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#031427]/80 via-transparent to-[#031427]/80 z-10" />
-      </div>
-
-      {/* Corner accents */}
-      <div className="fixed top-8 left-8 z-30 pointer-events-none opacity-20">
-        <div className="w-24 h-px bg-[#adc7ff] mb-2" />
-        <div className="w-px h-24 bg-[#adc7ff]" />
-      </div>
-      <div className="fixed bottom-8 right-8 z-30 pointer-events-none opacity-20 rotate-180">
-        <div className="w-24 h-px bg-[#adc7ff] mb-2" />
-        <div className="w-px h-24 bg-[#adc7ff]" />
-      </div>
-
-      <main className="relative z-20 w-full">
-        <div className="flex justify-center">
-        {/* Card */}
-        <div
-          className="p-10 flex flex-col items-center w-full max-w-[480px]"
-          style={{
-            background: "rgba(16, 32, 52, 0.8)",
-            backdropFilter: "blur(12px)",
-            borderBottom: "1px solid rgba(65, 71, 84, 0.5)",
-            boxShadow: "0 0 20px rgba(173, 199, 255, 0.15)",
-          }}
-        >
-          <div className="w-full flex flex-col items-center">
-            {/* Brand */}
-            <div className="mb-10 text-center">
-              <img src={logoSrc} alt="SecureIT" className="h-16 mb-6 mx-auto" />
-              <h1 className="text-[32px] font-semibold leading-10 text-[#adc7ff] tracking-tight font-display">
+    <div className="min-h-screen flex items-center justify-center bg-bg text-text">
+      <div className="p-10 flex flex-col items-center w-full max-w-[480px]">
+        <div className="w-full flex flex-col">
+          <div className="mb-12 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <img src={logoSrc} alt="SecureIT" className="h-16" />
+              <h1 className="text-5xl font-display font-bold leading-10 text-text tracking-tight">
                 SecureIT
               </h1>
-              <p className="text-sm leading-5 tracking-widest uppercase text-[#c1c6d7] mt-1" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                Enterprise Gateway
-              </p>
             </div>
+            <p className="text-xl text-text mt-1">
+              A segurança mais próximo de si.
+            </p>
+          </div>
 
-            {/* Form */}
-            <form className="w-full space-y-6" onSubmit={handleLogin}>
-              {error && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
-                  {error}
-                </div>
-              )}
+          <p className="text-base text-text-muted mb-2 text-left">Selecione a conta</p>
 
-              <div className="space-y-1.5">
-                <label className="text-xs tracking-widest text-[#c1c6d7] flex items-center gap-2 uppercase" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                  <Lucide.Mail size={14} />
-                  Email Address
-                </label>
-                <Input
-                  type="email"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-[#0b1c30] border-[#414754] text-[#d3e4fe] placeholder:text-[#8b90a0] focus:border-[#adc7ff] focus:ring-[#adc7ff]/50 rounded-lg h-12"
-                  style={{ boxShadow: "none" }}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs tracking-widest text-[#c1c6d7] flex items-center gap-2 uppercase" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                  <Lucide.Lock size={14} />
-                  Secure Password
-                </label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-[#0b1c30] border-[#414754] text-[#d3e4fe] placeholder:text-[#8b90a0] focus:border-[#adc7ff] focus:ring-[#adc7ff]/50 rounded-lg h-12 pr-12"
-                    style={{ boxShadow: "none" }}
-                  />
+          <div className="w-full">
+            {accounts.map((account, i) => {
+              const isOpen = selectedId === account.id;
+              return (
+                <div key={account.id}>
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#c1c6d7] hover:text-[#adc7ff] transition-colors"
+                    onClick={() => handleAccountClick(account.id)}
+                    className={`w-full flex items-center gap-3 px-0 py-3 bg-transparent text-text hover:opacity-70 transition-opacity text-left ${i < accounts.length - 1 && !isOpen ? "" : ""}`}
                   >
-                    {showPassword ? <Lucide.EyeOff size={18} /> : <Lucide.Eye size={18} />}
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                      {account.first_name.charAt(0).toUpperCase()}
+                      {account.last_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm truncate">
+                        {account.first_name} {account.last_name}
+                      </p>
+                      <p className="text-xs text-text-muted truncate">{account.email}</p>
+                    </div>
+                    <Lucide.ChevronDown
+                      size={18}
+                      className={`text-text-muted transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
+
+                  <div
+                    className={`overflow-hidden transition-all duration-400 ease-in-out ${
+                      isOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div ref={pinRef} className="pb-5 pt-1 pl-12 pr-0">
+                      <div className="space-y-3">
+                        <CustomizablePin
+                          onChange={setPin}
+                          error={pinError}
+                          pinClass="h-12 w-full bg-transparent border-0 border-b-2 border-border rounded-none text-center text-text text-base font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
+                        />
+
+                        <div className="flex items-center justify-between">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={remember}
+                              onChange={(e) => setRemember(e.target.checked)}
+                              className="w-3.5 h-3.5 rounded border-border bg-transparent accent-primary"
+                            />
+                            <span className="text-xs text-text-muted">Lembrar</span>
+                          </label>
+
+                          <button
+                            onClick={() => handlePinLogin(account)}
+                            disabled={loading || !pin}
+                            className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-40"
+                          >
+                            {loading ? (
+                              <Lucide.Loader size={16} className="animate-spin" />
+                            ) : (
+                              <Lucide.ArrowRight size={18} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {i < accounts.length - 1 && <div className="h-px bg-border" />}
                 </div>
-              </div>
+              );
+            })}
+          </div>
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-[#414754] bg-[#0b1c30] text-[#adc7ff] focus:ring-[#adc7ff]/50 transition-all"
-                  />
-                  <span className="text-xs tracking-widest text-[#c1c6d7] group-hover:text-[#d3e4fe] transition-colors" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                    Remember Device
-                  </span>
-                </label>
-                <a href="#" className="text-xs tracking-widest text-[#adc7ff] hover:underline" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                  Forgot Access?
-                </a>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#adc7ff] text-[#002e68] text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ boxShadow: "0 0 20px rgba(173, 199, 255, 0.15)" }}
-              >
-                <Lucide.LogIn size={20} />
-                {loading ? "A autenticar..." : "Authenticate"}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="w-full flex items-center gap-4 my-8">
-              <div className="h-px flex-1 bg-[#414754]" />
-              <span className="text-xs tracking-widest text-[#414754]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                OU CONTINUE COM
-              </span>
-              <div className="h-px flex-1 bg-[#414754]" />
-            </div>
-
-            {/* Social */}
-            <div className="w-full grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center gap-3 bg-[#1b2b3f] border border-[#414754] rounded-lg py-3 hover:bg-[#26364a] transition-colors active:scale-95">
-                <span className="text-xs tracking-widest">Google</span>
-              </button>
-              <button className="flex items-center justify-center gap-3 bg-[#1b2b3f] border border-[#414754] rounded-lg py-3 hover:bg-[#26364a] transition-colors active:scale-95">
-                <span className="text-xs tracking-widest">Apple</span>
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div className="mt-10 text-center">
-              <p className="text-base text-[#c1c6d7]">
-                Não tem conta?{" "}
-                <Link to="/signup" className="text-[#adc7ff] font-bold hover:underline ml-1">
-                  Criar Conta
-                </Link>
+          {checked && !isOnline && (
+            <div className="flex items-center justify-center gap-2 mt-8 mb-2">
+              <Lucide.WifiOff size={14} className="text-text-muted shrink-0" />
+              <p className="text-xs text-text-muted">
+                É necessária uma conexão com a internet para fazer login
               </p>
             </div>
+          )}
+
+          <div className="mt-10 text-center flex flex-col items-center justify-center gap-2">
+            <p className="text-base text-text-muted">
+              Não tem conta?{" "}
+              <Link to="/signup" className="text-primary font-bold hover:underline ml-1">
+                Criar Conta
+              </Link>
+            </p>
           </div>
         </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,89 @@
+export function getBearerToken(): string | null {
+  return localStorage.getItem("access_token");
+}
+
+interface RequestConfig {
+  method?: string;
+  body?: unknown;
+  params?: Record<string, string>;
+  headers?: Record<string, string>;
+}
+
+class ApiClient {
+  private baseUrl: string;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
+
+  private async request<T>(path: string, config: RequestConfig = {}): Promise<T> {
+    const url = new URL(`${this.baseUrl}${path}`);
+    if (config.params) {
+      Object.entries(config.params).forEach(([k, v]) =>
+        url.searchParams.set(k, v)
+      );
+    }
+
+    const headers: Record<string, string> = {
+      ...config.headers,
+    };
+
+    const token = getBearerToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    if (config.body && !(config.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const res = await fetch(url.toString(), {
+      method: config.method ?? "GET",
+      headers,
+      body: config.body
+        ? config.body instanceof FormData
+          ? config.body
+          : JSON.stringify(config.body)
+        : undefined,
+    });
+
+    if (!res.ok) {
+      let message = "Erro inesperado. Tente novamente.";
+      try {
+        const body = await res.json();
+        if (typeof body?.detail === "string") {
+          message = body.detail;
+        } else if (Array.isArray(body?.detail)) {
+          message = body.detail.map((d: { msg?: string }) => d.msg || "").filter(Boolean).join("; ");
+        } else if (typeof body?.error === "string") {
+          message = body.error;
+        } else if (typeof body?.message === "string") {
+          message = body.message;
+        }
+      } catch {
+        // body is not JSON
+      }
+      throw new Error(message);
+    }
+
+    return res.json();
+  }
+
+  async get<T>(path: string, params?: Record<string, string>): Promise<T> {
+    return this.request<T>(path, { params });
+  }
+
+  async post<T>(path: string, body?: unknown): Promise<T> {
+    return this.request<T>(path, { method: "POST", body });
+  }
+
+  async put<T>(path: string, body?: unknown): Promise<T> {
+    return this.request<T>(path, { method: "PUT", body });
+  }
+
+  async delete<T>(path: string): Promise<T> {
+    return this.request<T>(path, { method: "DELETE" });
+  }
+}
+
+export const apiClient = new ApiClient(import.meta.env.VITE_API_URL ?? "http://localhost:8000");

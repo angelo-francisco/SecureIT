@@ -3,8 +3,8 @@
 @import "./theme/tokens.css";
 
 @theme {
-  --color-primary: #137FEC;
-  --color-primary-hover: #0d6bcc;
+  --color-primary: #2C9ED5;
+  --color-primary-hover: #2586B5;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
