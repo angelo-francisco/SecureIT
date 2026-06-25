@@ -2,15 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+RUN pip install --upgrade pip
+
 COPY requirements.txt .
-
-ENV PIP_TIMEOUT 3600
-
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt --timeout $PIP_TIMEOUT
-
-COPY . .
+RUN pip install -r requirements.txt --timeout 3600
 
 EXPOSE 8000
 
-CMD ["python3", "main.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

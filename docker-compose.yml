@@ -1,0 +1,24 @@
+services:
+  api:
+    build: ./api
+    container_name: secureit-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+    environment:
+      - DEBUG=1
+
+  desktop:
+    build: ./frontend/apps/desktop
+    container_name: secureit-desktop
+    ports:
+      - "1420:1420"
+      - "1421:1421"
+    volumes:
+      - ./frontend/apps/desktop:/app
+      - /app/node_modules
+    environment:
+      - TAURI_DEV_HOST=0.0.0.0
+    depends_on:
+      - api
