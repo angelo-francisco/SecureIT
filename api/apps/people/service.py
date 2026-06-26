@@ -1,8 +1,14 @@
 import base64
+import sqlite3
 from io import BytesIO
 from uuid import uuid4
 
 import numpy as np
+import sqlite_vec
+import torch
+from core.config import settings
+from core.exceptions import NotFound, ValidationError_
+from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image
 from tortoise.expressions import Q
 
@@ -18,8 +24,6 @@ from apps.people.models import (
     WorkerHome,
 )
 from apps.people.schemas import VALID_VISITOR_KEYS
-from core.config import settings
-from core.exceptions import NotFound, ValidationError_
 
 _mtcnn = None
 _resnet = None
@@ -28,8 +32,6 @@ _resnet = None
 def _get_mtcnn():
     global _mtcnn
     if _mtcnn is None:
-        from facenet_pytorch import MTCNN
-
         _mtcnn = MTCNN(
             image_size=320,
             margin=0,
@@ -43,9 +45,6 @@ def _get_mtcnn():
 def _get_resnet():
     global _resnet
     if _resnet is None:
-        import torch
-        from facenet_pytorch import InceptionResnetV1
-
         _resnet = InceptionResnetV1(pretrained="vggface2").eval().to("cpu")
     return _resnet
 
@@ -57,8 +56,9 @@ def base64_to_bytes(photo_b64: str) -> bytes:
     return base64.b64decode(data)
 
 
-def generate_face_embedding(base64_str: str | None = None, image: Image.Image | None = None) -> bytes:
-    import torch
+def generate_face_embedding(
+    base64_str: str | None = None, image: Image.Image | None = None
+) -> bytes:
 
     if base64_str:
         image_data = base64_to_bytes(base64_str)
@@ -100,8 +100,7 @@ async def list_people(
     )
     if search_query:
         query = query.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query)
+            Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query)
         )
     total = await query.count()
     offset = (page - 1) * per_page
@@ -174,7 +173,9 @@ async def create_person(
                 raise ValidationError_("O BI deve conter exatamente 14 caracteres")
             if not fields:
                 raise ValidationError_("Áreas de trabalho não informadas")
-            worker = await Worker.create(person=person, bi=bi.upper(), fields=",".join(fields))
+            worker = await Worker.create(
+                person=person, bi=bi.upper(), fields=",".join(fields)
+            )
             for home_id in homes:
                 await WorkerHome.create(worker=worker, home_id=home_id)
 
@@ -287,10 +288,9 @@ async def create_visit(
 async def search_by_face(photo_base64: str) -> Person | None:
     embedding = generate_face_embedding(base64_str=photo_base64)
 
-    import sqlite3
-    import sqlite_vec
-
-    conn = sqlite3.connect(str(settings.BASE_DIR / "db.sqlite3"), check_same_thread=False)
+    conn = sqlite3.connect(
+        str(settings.BASE_DIR / "db.sqlite3"), check_same_thread=False
+    )
     conn.enable_load_extension(True)
     sqlite_vec.load(conn)
     conn.enable_load_extension(False)

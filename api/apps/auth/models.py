@@ -4,6 +4,8 @@ from core.security import hash_password, verify_password
 
 
 class User(models.Model):
+    is_authenticated = True
+
     id = fields.IntField(pk=True)
     email = fields.CharField(max_length=255, unique=True, index=True)
     hashed_password = fields.CharField(max_length=255)

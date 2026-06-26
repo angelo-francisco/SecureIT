@@ -43,6 +43,7 @@ class PinLoginRequest(BaseModel):
 
 
 class PinRequest(BaseModel):
+    email: EmailStr
     pin: str
 
     @field_validator("pin")

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
+import { getWsBaseUrl } from "../api-client/client";
 
 interface WebSocketHandlers {
   onFrame?: (blob: Blob) => void;
@@ -20,7 +21,7 @@ export function useWebSocket(
   const connect = useCallback(() => {
     if (!enabled || !cameraId || !videoSource) return;
 
-    const url = `ws://localhost:8000/ws/${consumerName}/${cameraId}/?vs=${videoSource}`;
+    const url = `${getWsBaseUrl()}/ws/${consumerName}/${cameraId}/?vs=${videoSource}`;
 
     try {
       const ws = new WebSocket(url);

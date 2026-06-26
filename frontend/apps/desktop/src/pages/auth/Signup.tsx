@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import logoSrc from "../../assets/logo.png";
 import { FloatingLabelInput } from "../../ui";
 import { CustomizablePin } from "../../ui";
@@ -8,6 +8,8 @@ import { useAuth, useOnlineStatus } from "../../hooks";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const hasAccounts = searchParams.get("hasAccounts") === "true";
   const { signup, fetchAccounts } = useAuth();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -103,14 +105,16 @@ export default function Signup() {
                     </p>
                   </div>
                 )}
-                <div className="text-center pt-4">
-                  <p className="text-base text-text-muted">
-                    Já tem conta?{" "}
-                    <Link to="/login" className="text-primary font-bold hover:underline ml-1">
-                      Entrar
-                    </Link>
-                  </p>
-                </div>
+                {hasAccounts && (
+                  <div className="text-center pt-4">
+                    <p className="text-base text-text-muted">
+                      Já tem conta?{" "}
+                      <Link to="/login" className="text-primary font-bold hover:underline ml-1">
+                        Entrar
+                      </Link>
+                    </p>
+                  </div>
+                )}
               </>
             )}
 

@@ -1,6 +1,3 @@
-from pathlib import Path
-
-import cv2
 import torch
 from ultralytics.models import YOLO
 from ultralytics.utils import LOGGER

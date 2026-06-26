@@ -1,8 +1,11 @@
+from datetime import timedelta
+
+from core.exceptions import Unauthorized, ValidationError_
+from core.security import create_access_token
+
 from apps.auth.models import User
 from apps.auth.schemas import SignupRequest
 from apps.panel.models import Configuration
-from core.exceptions import ValidationError_, Unauthorized
-from core.security import create_access_token
 
 
 async def create_user(data: SignupRequest) -> User:
@@ -53,7 +56,6 @@ async def list_accounts() -> list[User]:
 
 
 def generate_token(user: User) -> str:
-    from datetime import timedelta
     return create_access_token(
         data={"sub": str(user.id)},
         expires_delta=timedelta(days=365),
@@ -61,7 +63,6 @@ def generate_token(user: User) -> str:
 
 
 def generate_pin_token(user: User) -> str:
-    from datetime import timedelta
     return create_access_token(
         data={"sub": str(user.id), "type": "pin"},
         expires_delta=timedelta(hours=1),

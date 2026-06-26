@@ -86,4 +86,14 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(import.meta.env.VITE_API_URL ?? "http://localhost:8000");
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
+export const apiClient = new ApiClient(API_BASE);
+
+export function getApiBaseUrl(): string {
+  return API_BASE;
+}
+
+export function getWsBaseUrl(): string {
+  return API_BASE.replace(/^http/, "ws");
+}

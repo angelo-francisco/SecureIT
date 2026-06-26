@@ -15,10 +15,15 @@ TORTOISE_MODELS = [
 
 
 async def init_db():
-    await Tortoise.init(
+    kwargs = dict(
         db_url=settings.DATABASE_URL,
         modules={"models": TORTOISE_MODELS},
     )
+    try:
+        await Tortoise.init(**kwargs, _enable_global_fallback=True)
+    except TypeError:
+        await Tortoise.init(**kwargs)
+
     if settings.DEBUG:
         await Tortoise.generate_schemas()
 

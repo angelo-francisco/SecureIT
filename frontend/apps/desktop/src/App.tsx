@@ -25,7 +25,7 @@ function App() {
       try {
         const accounts = await authApi.accounts();
         setAccounts(accounts);
-        setDestination(accounts.length === 0 ? "/signup" : "/login");
+        setDestination(accounts.length === 0 ? "/signup?hasAccounts=false" : "/login");
       } catch {
         setDestination("/login");
       }

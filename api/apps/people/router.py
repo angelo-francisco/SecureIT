@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
-from apps.auth.models import User
 from apps.people.schemas import (
     FaceSearchRequest,
     HomeResponse,
@@ -27,7 +26,6 @@ from apps.people.service import (
     treat_photo,
     update_person,
 )
-from core.deps import verify_pin
 
 router = APIRouter(prefix="/people", tags=["people"])
 
@@ -36,7 +34,6 @@ router = APIRouter(prefix="/people", tags=["people"])
 async def list_people_endpoint(
     search_query: str = Query(""),
     page: int = Query(1, ge=1),
-    current_user: User = Depends(verify_pin),
 ):
     people, _ = await list_people(search_query, page)
     return [PersonResponse.model_validate(p) for p in people]
@@ -48,7 +45,6 @@ async def create_person_endpoint(
     resident: ResidentCreate | None = None,
     worker: WorkerCreate | None = None,
     visitor: VisitorCreate | None = None,
-    current_user: User = Depends(verify_pin),
 ):
     photo_bytes, image = treat_photo(data.photo_base64)
     embedding = generate_face_embedding(image=image)
@@ -91,17 +87,13 @@ async def create_person_endpoint(
 
 
 @router.get("/homes", response_model=list[HomeResponse])
-async def list_homes_endpoint(
-    current_user: User = Depends(verify_pin),
-):
+async def list_homes_endpoint():
     homes = await list_homes()
     return [HomeResponse.model_validate(h) for h in homes]
 
 
 @router.get("/residents")
-async def list_residents_endpoint(
-    current_user: User = Depends(verify_pin),
-):
+async def list_residents_endpoint():
     residents = await list_residents()
     return [
         {"id": r.id, "person_id": r.person_id, "full_name": r.person.full_name}
@@ -112,7 +104,6 @@ async def list_residents_endpoint(
 @router.get("/{person_id}", response_model=PersonResponse)
 async def get_person_endpoint(
     person_id: int,
-    current_user: User = Depends(verify_pin),
 ):
     person = await get_person(person_id)
     return PersonResponse.model_validate(person)
@@ -125,7 +116,6 @@ async def update_person_endpoint(
     resident: ResidentCreate | None = None,
     worker: WorkerCreate | None = None,
     visitor: VisitorCreate | None = None,
-    current_user: User = Depends(verify_pin),
 ):
     photo_bytes = None
     if data.photo_base64:
@@ -162,7 +152,6 @@ async def update_person_endpoint(
 @router.delete("/{person_id}", status_code=204)
 async def delete_person_endpoint(
     person_id: int,
-    current_user: User = Depends(verify_pin),
 ):
     await delete_person(person_id)
 
@@ -171,7 +160,6 @@ async def delete_person_endpoint(
 async def create_visit_endpoint(
     visitor_id: int,
     data: VisitCreate,
-    current_user: User = Depends(verify_pin),
 ):
     visit = await create_visit(visitor_id, data.desc, data.destinies)
     return VisitResponse.model_validate(visit)
@@ -180,7 +168,6 @@ async def create_visit_endpoint(
 @router.post("/search-by-face")
 async def search_face_endpoint(
     data: FaceSearchRequest,
-    current_user: User = Depends(verify_pin),
 ):
     person = await search_by_face(data.photo_base64)
     if person:

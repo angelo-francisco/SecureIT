@@ -8,6 +8,7 @@ from apps.panel.router import router as panel_router
 from apps.people.router import router as people_router
 from core.config import settings
 from core.database import close_db, init_db
+from core.middleware import AuthMiddleware, authentication_not_required
 from websocket.camera_stream import CameraStreamManager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +36,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AuthMiddleware)
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(cameras_router, prefix="/api")
@@ -47,6 +49,7 @@ if settings.MEDIA_ROOT.exists():
 
 
 @app.get("/api/health")
+@authentication_not_required
 async def health():
     return {"status": "ok"}
 

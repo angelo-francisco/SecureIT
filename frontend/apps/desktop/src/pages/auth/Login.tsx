@@ -16,7 +16,7 @@ export default function Login() {
       fetchAccounts().then((fetched) => {
         setAccountsLoaded(true);
         if (fetched.length === 0) {
-          navigate("/signup", { replace: true });
+          navigate("/signup?hasAccounts=false", { replace: true });
         }
       }).catch(() => {
         setAccountsLoaded(true);
@@ -27,7 +27,7 @@ export default function Login() {
   // If accounts were already loaded (from App.tsx) and empty, redirect
   useEffect(() => {
     if (accountsLoaded && accounts.length === 0) {
-      navigate("/signup", { replace: true });
+      navigate("/signup?hasAccounts=false", { replace: true });
     }
   }, [accountsLoaded, accounts, navigate]);
   const [selectedId, setSelectedId] = useState<number | null>(() => {
@@ -176,7 +176,7 @@ export default function Login() {
           <div className="mt-10 text-center flex flex-col items-center justify-center gap-2">
             <p className="text-base text-text-muted">
               Não tem conta?{" "}
-              <Link to="/signup" className="text-primary font-bold hover:underline ml-1">
+              <Link to="/signup?hasAccounts=true" className="text-primary font-bold hover:underline ml-1">
                 Criar Conta
               </Link>
             </p>
