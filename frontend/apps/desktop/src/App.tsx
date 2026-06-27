@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppRoutes from "./routes";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { ReAuthModal } from "./components/ReAuthModal";
 import { authApi } from "./api-client";
 import { useAuthStore } from "./hooks";
 import splashGif from "./assets/splash.gif";
@@ -102,6 +103,7 @@ function App() {
         <AppRoutes />
         {isAuthPage && <ThemeToggle />}
       </div>
+      <ReAuthModal />
     </>
   );
 }

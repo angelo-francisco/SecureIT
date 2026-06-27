@@ -1,3 +1,5 @@
+import logging
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -5,44 +7,44 @@ from starlette.responses import JSONResponse
 from apps.auth.models import User
 from core.security import decode_access_token
 
+logger = logging.getLogger("auth.middleware")
 
-class AnonymousUser:
-    is_authenticated = False
-    id = None
-
-    def check_pin(self, pin: str) -> bool:
-        return False
-
-
-def authentication_not_required(func):
-    setattr(func, "_auth_not_required", True)
-    return func
+PUBLIC_PREFIXES = (
+    "/api/auth/",
+    "/api/health",
+)
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        user: User | AnonymousUser = AnonymousUser()
+        user: User | None = None
+        path = request.url.path
 
-        pin_token = request.headers.get("X-Pin-Token")
-        if pin_token:
-            payload = decode_access_token(pin_token)
-            if payload and payload.get("type") == "pin" and payload.get("sub"):
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header.removeprefix("Bearer ")
+            payload = decode_access_token(token)
+            if payload and payload.get("sub"):
                 try:
-                    db_user = await User.get_or_none(id=int(payload["sub"]))
-                    if db_user:
-                        user = db_user
+                    user = await User.get_or_none(id=int(payload["sub"]))
                 except (ValueError, TypeError):
                     pass
 
         request.state.user = user
 
-        endpoint = request.scope.get("endpoint")
-        auth_not_required = getattr(endpoint, "_auth_not_required", False) if endpoint else True
+        authed = user is not None
+        is_public = path.startswith(PUBLIC_PREFIXES)
 
-        if not auth_not_required and not user.is_authenticated:
+        logger.critical(
+            "path=%s authed=%s user_id=%s is_public=%s",
+            path, authed, user.id if authed else None, is_public,
+        )
+
+        if not authed and not is_public:
+            logger.critical(">>> BLOQUEANDO 401: %s", path)
             return JSONResponse(
                 status_code=401,
-                content={"detail": "PIN não verificado"},
+                content={"detail": "UNAUTHENTICATED"},
             )
 
         response = await call_next(request)

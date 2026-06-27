@@ -7,6 +7,7 @@ interface RequestConfig {
   body?: unknown;
   params?: Record<string, string>;
   headers?: Record<string, string>;
+  skipReAuth?: boolean;
 }
 
 class ApiClient {
@@ -48,6 +49,15 @@ class ApiClient {
     });
 
     if (!res.ok) {
+      if (res.status === 401 && !config.skipReAuth) {
+        const { useReAuthStore } = await import("../stores/reauth");
+        const store = useReAuthStore.getState();
+        if (!store.pending) {
+          await store.show();
+        }
+        return this.request<T>(path, config);
+      }
+
       let message = "Erro inesperado. Tente novamente.";
       try {
         const body = await res.json();
@@ -73,8 +83,8 @@ class ApiClient {
     return this.request<T>(path, { params });
   }
 
-  async post<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>(path, { method: "POST", body });
+  async post<T>(path: string, body?: unknown, skipReAuth?: boolean): Promise<T> {
+    return this.request<T>(path, { method: "POST", body, skipReAuth });
   }
 
   async put<T>(path: string, body?: unknown): Promise<T> {

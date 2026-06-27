@@ -4,6 +4,7 @@ import type {
   PinLoginTokenResponse,
   SignupRequest,
   AuthResponse,
+  ReAuthData,
 } from "../types";
 import { apiClient } from "./client";
 
@@ -21,4 +22,9 @@ export const authApi = {
     apiClient.post<{ pin_token: string }>("/api/auth/pin"),
 
   lock: () => apiClient.post<{ message: string }>("/api/auth/lock"),
+
+  check: () => apiClient.get<{ valid: boolean }>("/api/auth/check"),
+
+  reAuth: (data: ReAuthData) =>
+    apiClient.post<PinLoginTokenResponse>("/api/auth/re-auth", data, true),
 };

@@ -15,6 +15,7 @@ from tortoise.expressions import Q
 from apps.people.models import (
     Home,
     Person,
+    PersonRole,
     Resident,
     ResidentHome,
     Visit,
@@ -97,6 +98,7 @@ async def list_people(
         "resident__resident_homes__home",
         "visitor",
         "worker__worker_homes__home",
+        "person_roles__role",
     )
     if search_query:
         query = query.filter(
@@ -113,6 +115,7 @@ async def get_person(person_id: int) -> Person:
         "resident__resident_homes__home",
         "visitor",
         "worker__worker_homes__home",
+        "person_roles__role",
     )
     if not person:
         raise NotFound("Pessoa não encontrada")
@@ -122,16 +125,12 @@ async def get_person(person_id: int) -> Person:
 async def create_person(
     first_name: str,
     last_name: str,
-    person_type: str,
     photo_bytes: bytes,
-    resident_data=None,
-    worker_data=None,
-    visitor_data=None,
+    user_id: int | None = None,
+    roles_data: list | None = None,
 ) -> Person:
-    if not first_name or not last_name or not person_type:
+    if not first_name or not last_name:
         raise ValidationError_("Preencha todos os campos, por favor.")
-    if person_type not in ("R", "V", "W"):
-        raise ValidationError_("Tipo de pessoa inválido")
 
     filename = f"{uuid4()}.jpeg"
     photo_path = f"people_photos/{filename}"
@@ -143,52 +142,34 @@ async def create_person(
     person = await Person.create(
         first_name=first_name,
         last_name=last_name,
-        type=person_type,
+        type="U",
         photo=photo_path,
     )
 
-    match person_type:
-        case "R":
-            if not resident_data:
-                raise ValidationError_("Dados do residente são necessários")
-            homes = resident_data.get("homes", [])
-            bi = resident_data.get("bi", "")
-            if not homes:
-                raise ValidationError_("Informe pelo menos uma residência")
-            if not bi or len(bi) != 14:
-                raise ValidationError_("O BI deve conter exatamente 14 caracteres")
-            resident = await Resident.create(person=person, bi=bi.upper())
-            for home_id in homes:
-                await ResidentHome.create(resident=resident, home_id=home_id)
+    if roles_data:
+        for role_data in roles_data:
+            role_id = role_data.get("role_id")
+            if not role_id:
+                raise ValidationError_("ID do cargo é obrigatório")
 
-        case "W":
-            if not worker_data:
-                raise ValidationError_("Dados do trabalhador são necessários")
-            homes = worker_data.get("homes", [])
-            bi = worker_data.get("bi", "")
-            fields = worker_data.get("fields", [])
-            if not homes:
-                raise ValidationError_("Informe o seu local de trabalho")
-            if not bi or len(bi) != 14:
-                raise ValidationError_("O BI deve conter exatamente 14 caracteres")
-            if not fields:
-                raise ValidationError_("Áreas de trabalho não informadas")
-            worker = await Worker.create(
-                person=person, bi=bi.upper(), fields=",".join(fields)
+            from apps.people.models import Role
+            role = await Role.get_or_none(id=role_id)
+            if not role:
+                raise ValidationError_(f"Cargo {role_id} não encontrado")
+
+            field_values = role_data.get("field_values") or {}
+
+            if role.fields:
+                await role.fetch_related("fields")
+                for field in role.fields:
+                    if field.required and field.label not in field_values:
+                        raise ValidationError_(f"O campo '{field.label}' é obrigatório para o cargo '{role.name}'")
+
+            await PersonRole.create(
+                person=person,
+                role_id=role_id,
+                field_values=field_values,
             )
-            for home_id in homes:
-                await WorkerHome.create(worker=worker, home_id=home_id)
-
-        case "V":
-            if not visitor_data:
-                raise ValidationError_("Dados do visitante são necessários")
-            host_id = visitor_data.get("host_id")
-            visitor_type = visitor_data.get("visitor_type", "")
-            if visitor_type not in VALID_VISITOR_KEYS:
-                raise ValidationError_("Tipo de visitante inválido")
-            visitor = await Visitor.create(person=person, type=visitor_type)
-            visit = await Visit.create(visitor=visitor)
-            await VisitDestiny.create(visit=visit, resident_id=host_id)
 
     return person
 

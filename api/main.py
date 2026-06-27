@@ -8,7 +8,7 @@ from apps.panel.router import router as panel_router
 from apps.people.router import router as people_router
 from core.config import settings
 from core.database import close_db, init_db
-from core.middleware import AuthMiddleware, authentication_not_required
+from core.middleware import AuthMiddleware
 from websocket.camera_stream import CameraStreamManager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     yield
     await close_db()
 
- 
+
 
 app = FastAPI(
     title="SecureIT API",
@@ -50,7 +50,6 @@ if settings.MEDIA_ROOT.exists():
 
 
 @app.get("/api/health")
-@authentication_not_required
 async def health():
     return {"status": "ok"}
 

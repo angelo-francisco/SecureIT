@@ -55,7 +55,7 @@ class CameraStreamManager:
     async def get_camera_queryset(self, camera_id: int):
         self.camera_object = await CameraModel.get_or_none(
             id=camera_id, user_id=self.user_id
-        ).prefetch_related("localcamera", "wificamera")
+        )
         return self.camera_object
 
     async def create_notification(self, title: str, description: str, level: str, frame: bytes):

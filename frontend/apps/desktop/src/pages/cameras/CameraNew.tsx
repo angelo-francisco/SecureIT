@@ -1,10 +1,14 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import { useCreateCamera, useLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
-import { Input, LucideInput, Button } from "../../ui";
+import { Input, LucideInput, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
+import * as Lucide from "lucide-react";
 
-export default function CameraNew() {
+interface CameraNewProps {
+  onClose?: () => void;
+}
+
+export default function CameraNew({ onClose }: CameraNewProps) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [connectionType, setConnectionType] = useState("L");
@@ -12,133 +16,119 @@ export default function CameraNew() {
   const [localCamera, setLocalCamera] = useState("");
   const createCamera = useCreateCamera();
   const { data: localDevices } = useLocalDevices();
-  const navigate = useNavigate();
   const panelNavigate = usePanelNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const connection_info: Record<string, unknown> = {};
+    if (connectionType === "W") {
+      connection_info.stream_url = streamUrl;
+    } else if (connectionType === "L") {
+      connection_info.path = localCamera;
+    }
     await createCamera.mutateAsync({
       name,
       location,
       connection_type: connectionType as "L" | "W",
-      stream_url: connectionType === "W" ? streamUrl : undefined,
-      local_camera: connectionType === "L" ? localCamera : undefined,
+      connection_info,
     });
-    if (panelNavigate) {
-      panelNavigate("cameras");
-    } else {
-      navigate("/cameras");
-    }
+    panelNavigate?.("cameras");
   };
 
   return (
-    <form onSubmit={handleSubmit} className="h-full relative z-10">
-      <main className="flex-1 h-full flex flex-col relative overflow-hidden">
-        <header className="w-full px-6 py-4 text-center">
-          <h1 className="text-white text-2xl font-black">Adicionar câmara</h1>
-          <p className="text-[#9dabb9] mt-1 text-sm">
-            Selecione o tipo de conexão da câmera e configure o acesso
-          </p>
-        </header>
-        <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl rounded-xl bg-[#1c2127] px-8 py-5 border border-[#283039] shadow-xl">
-            <div className="mb-4 flex flex-col justify-start gap-1">
-              <label className="text-base text-white font-medium">
-                Nome da câmara
-              </label>
-              <Input
-                placeholder="Nome da câmara"
-                type="text"
-                name="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-4 flex flex-col justify-start gap-1">
-              <label className="text-base text-white font-medium">
-                Localização
-              </label>
+    <form onSubmit={handleSubmit} className="flex-1 h-full flex flex-col relative overflow-hidden">
+      <header className="flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <Lucide.Plus size={22} className="text-primary" />
+          <h2 className="text-xl font-bold text-text">Nova Câmera</h2>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+          >
+            <Lucide.X size={16} strokeWidth={2} />
+          </button>
+        )}
+      </header>
+
+      <div className="flex-1 overflow-y-auto mt-6 flex justify-center">
+        <div className="w-full max-w-xl space-y-5">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-text">Nome da câmara</label>
+            <Input
+              placeholder="Nome da câmara"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-text">Localização</label>
+            <LucideInput
+              placeholder="Localização da câmara"
+              icon="MapPin"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-text">Tipo de Conexão</label>
+            <Select value={connectionType} onValueChange={setConnectionType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="L">Local / USB</SelectItem>
+                <SelectItem value="W">Wi-Fi</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {connectionType === "W" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-text">URL da Câmera</label>
               <LucideInput
-                placeholder="Localização da câmara"
-                type="text"
-                icon="MapPin"
-                name="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                required
+                placeholder="http://192.168.100.181:5555/stream"
+                icon="Wifi"
+                value={streamUrl}
+                onChange={(e) => setStreamUrl(e.target.value)}
               />
+              <p className="text-xs text-text-muted">URL de streaming da câmera Wi-Fi</p>
             </div>
-            <div className="mb-4 flex flex-col justify-start gap-1">
-              <label className="block text-base font-medium text-white mb-1">
-                Tipo de Conexão
-              </label>
-              <select
-                value={connectionType}
-                onChange={(e) => setConnectionType(e.target.value)}
-                className="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-              >
-                <option value="L">Local / USB</option>
-                <option value="W">Wi-Fi</option>
-              </select>
+          )}
+
+          {connectionType === "L" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-text">Dispositivo Local</label>
+              <Select value={localCamera} onValueChange={setLocalCamera}>
+                <SelectTrigger>
+                  <SelectValue placeholder={localDevices ? "Selecione uma câmara" : "Carregando..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {localDevices?.map((cam) => (
+                    <SelectItem key={cam.path} value={cam.path}>
+                      {cam.name} ({cam.path})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-text-muted">Dispositivo conectado fisicamente ao servidor</p>
             </div>
-            <div className="space-y-4">
-              {connectionType === "W" && (
-                <div className="space-y-2">
-                  <div className="mb-4 flex flex-col gap-1">
-                    <label className="text-base text-white font-medium">
-                      URL da Câmera
-                    </label>
-                    <Input
-                      placeholder="Exemplo: http://192.168.100.181:5555/stream"
-                      type="url"
-                      name="stream_url"
-                      value={streamUrl}
-                      onChange={(e) => setStreamUrl(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-              {connectionType === "L" && (
-                <div className="space-y-2">
-                  <label className="text-sm text-white font-medium">
-                    Dispositivo Detectado
-                  </label>
-                  <select
-                    name="local_camera"
-                    value={localCamera}
-                    onChange={(e) => setLocalCamera(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-[#3b4754] bg-[#283039] px-3 text-white"
-                  >
-                    <option disabled value="">
-                      {localDevices
-                        ? "Selecione uma das câmaras"
-                        : "Carregando..."}
-                    </option>
-                    {localDevices?.map((cam) => (
-                      <option key={cam.path} value={cam.path}>
-                        {cam.name} ({cam.path})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Dispositivo conectado fisicamente ao servidor
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button
-                variant="secondary"
-                onClick={() => navigate(-1)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit">Adicionar</Button>
-            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="secondary" onClick={() => panelNavigate?.("cameras")}>
+              <Lucide.ArrowLeft size={16} />
+              Voltar
+            </Button>
+            <Button type="submit">Adicionar</Button>
           </div>
         </div>
-      </main>
+      </div>
     </form>
   );
 }

@@ -6,8 +6,6 @@ from apps.cameras.schemas import (
     CameraDetailResponse,
     CameraResponse,
     CameraUpdate,
-    LocalCameraCreate,
-    WifiCameraCreate,
 )
 from apps.cameras.service import (
     create_camera as create_camera_service,
@@ -40,15 +38,8 @@ async def list_cameras_endpoint(
 async def create_camera_endpoint(
     request: Request,
     data: CameraCreate,
-    local: LocalCameraCreate | None = None,
-    wifi: WifiCameraCreate | None = None,
 ):
-    local_data = {"path": local.camera_path, "id": 0} if local else None
-    camera = await create_camera_service(
-        request.state.user.id, data,
-        local_data=local_data,
-        wifi_data=wifi,
-    )
+    camera = await create_camera_service(request.state.user.id, data)
     return CameraDetailResponse.model_validate(camera)
 
 

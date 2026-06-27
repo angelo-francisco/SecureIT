@@ -17,17 +17,36 @@ export function useCreatePerson() {
   });
 }
 
-export function useVisitorTypes() {
+export function useRoles() {
   return useQuery({
-    queryKey: ["visitor-types"],
-    queryFn: () => peopleApi.getVisitorTypes(),
+    queryKey: ["roles"],
+    queryFn: () => peopleApi.listRoles(),
   });
 }
 
-export function useFields() {
-  return useQuery({
-    queryKey: ["fields"],
-    queryFn: () => peopleApi.getFields(),
+export function useCreateRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; description?: string; fields?: { label: string; field_type?: string; required?: boolean; options?: string[] }[] }) =>
+      peopleApi.createRole(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["roles"] }),
+  });
+}
+
+export function useUpdateRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: number; name?: string; description?: string; fields?: { label: string; field_type?: string; required?: boolean; options?: string[] }[] }) =>
+      peopleApi.updateRole(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["roles"] }),
+  });
+}
+
+export function useDeleteRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => peopleApi.deleteRole(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["roles"] }),
   });
 }
 
@@ -35,12 +54,5 @@ export function useHomes() {
   return useQuery({
     queryKey: ["homes"],
     queryFn: () => peopleApi.getHomes(),
-  });
-}
-
-export function useHosts() {
-  return useQuery({
-    queryKey: ["hosts"],
-    queryFn: () => peopleApi.getHosts(),
   });
 }

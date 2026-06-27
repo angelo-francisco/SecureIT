@@ -1,9 +1,13 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useSettings, useUpdateSettings } from "../../hooks";
-import { LucideInput, Loader } from "../../ui";
+import { LucideInput, Loader, Button } from "../../ui";
 import * as Lucide from "lucide-react";
 
-export default function Settings() {
+interface SettingsProps {
+  onClose?: () => void;
+}
+
+export default function Settings({ onClose }: SettingsProps) {
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
 
@@ -38,115 +42,71 @@ export default function Settings() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full flex-1 h-full flex flex-col items-center overflow-hidden py-6 px-4 relative z-10"
-    >
-      <header className="max-w-3xl w-full flex flex-row items-center justify-between gap-4 border-b border-gray-500 pb-3">
-        <h2 className="text-white text-2xl md:text-4xl font-bold">
-          Configurações
-        </h2>
-        <button
-          type="submit"
-          className="text-center flex items-center gap-2 font-semibold rounded-lg px-3 py-2 bg-blue-600 text-white cursor-pointer"
-        >
-          <Lucide.Save size={20} />
-          Salvar
-        </button>
-      </header>
-      {isLoading ? (
-        <div className="flex items-center justify-center flex-1">
-          <Loader w={50} />
+    <form onSubmit={handleSubmit} className="flex-1 h-full flex flex-col relative overflow-hidden">
+      <header className="flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+          >
+            <Lucide.ArrowLeft size={16} strokeWidth={2} />
+          </button>
+          <Lucide.Settings size={22} className="text-primary" />
+          <h2 className="text-xl font-bold text-text">Configurações</h2>
         </div>
-      ) : (
-        <div className="max-w-3xl w-full flex-1 pt-3">
-          <div className="flex flex-col gap-3">
-            <div className="border-b border-gray-300 py-2 flex items-center justify-between">
-              <span className="text-lg font-medium text-nowrap">
-                Frames por segundo (FPS)
-              </span>
-              <div className="max-w-[150px]">
-                <LucideInput
-                  type="number"
-                  name="fps"
-                  value={fps}
-                  onChange={(e) => setFps(e.target.value)}
-                />
+        <div className="flex items-center gap-3">
+          <Button type="submit" size="sm" icon={<Lucide.Save size={14} />}>
+            Salvar
+          </Button>
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto mt-6 flex justify-center">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader w={50} />
+          </div>
+        ) : (
+          <div className="w-full max-w-xl space-y-4">
+            {[
+              { label: "Frames por segundo (FPS)", value: fps, setter: setFps, icon: "Eye" as const, type: "number" },
+              { label: "Início do monitoramento", value: mst, setter: setMst, icon: "Timer" as const, type: "text" },
+              { label: "Término do monitoramento", value: met, setter: setMet, icon: "Timer" as const, type: "text" },
+              { label: "Tempo de espera extra (segundos)", value: alertCooldown, setter: setAlertCooldown, icon: "Timer" as const, type: "number" },
+              { label: "Nº de detecções por frames", value: detectEvery, setter: setDetectEvery, icon: "Timer" as const, type: "number" },
+            ].map((field) => (
+              <div key={field.label} className="flex items-center justify-between gap-4 py-3 border-b border-white/[0.06]">
+                <span className="text-sm font-medium text-text">{field.label}</span>
+                <div className="max-w-[160px]">
+                  <LucideInput
+                    type={field.type}
+                    icon={field.icon}
+                    value={field.value}
+                    onChange={(e) => field.setter(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="border-b border-gray-300 py-2 flex items-center justify-between">
-              <span className="text-lg font-medium text-nowrap">
-                Início do monitoramento
-              </span>
-              <div className="max-w-[150px]">
-                <LucideInput
-                  type="text"
-                  name="mst"
-                  icon="Timer"
-                  value={mst}
-                  onChange={(e) => setMst(e.target.value)}
+            ))}
+            <div className="flex items-center justify-between py-3">
+              <span className="text-sm font-medium text-text">Permitir desenho</span>
+              <button
+                type="button"
+                onClick={() => setAllowDraw(!allowDraw)}
+                className={`relative w-10 h-6 rounded-full transition-colors ${
+                  allowDraw ? "bg-primary" : "bg-white/[0.12]"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                    allowDraw ? "translate-x-4" : "translate-x-0"
+                  }`}
                 />
-              </div>
-            </div>
-            <div className="border-b border-gray-300 py-2 flex items-center justify-between text-nowrap">
-              <span className="text-lg font-medium">
-                Término do monitoramento
-              </span>
-              <div className="max-w-[150px]">
-                <LucideInput
-                  type="text"
-                  name="met"
-                  icon="Timer"
-                  value={met}
-                  onChange={(e) => setMet(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="border-b border-gray-300 py-2 flex items-center justify-between text-nowrap">
-              <span className="text-lg font-medium">
-                Tempo de espera extra (segundos)
-              </span>
-              <div className="max-w-[150px]">
-                <LucideInput
-                  type="number"
-                  name="alert_cooldown"
-                  icon="Timer"
-                  value={alertCooldown}
-                  onChange={(e) => setAlertCooldown(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="border-b border-gray-300 py-2 flex items-center justify-between text-nowrap">
-              <span className="text-lg font-medium">
-                Número de detecções por frames
-              </span>
-              <div className="max-w-[150px]">
-                <LucideInput
-                  type="number"
-                  name="detect_every"
-                  icon="Timer"
-                  value={detectEvery}
-                  onChange={(e) => setDetectEvery(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="py-2 flex items-center justify-between text-nowrap">
-              <span className="text-lg font-medium">
-                Permitir desenho
-              </span>
-              <div className="max-w-[150px]">
-                <input
-                  type="checkbox"
-                  name="allow_draw"
-                  checked={allowDraw}
-                  onChange={(e) => setAllowDraw(e.target.checked)}
-                  className="w-4 h-4"
-                />
-              </div>
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </form>
   );
 }

@@ -68,3 +68,8 @@ export interface SignupResponse {
   pin_token: string;
   user: User;
 }
+
+export interface ReAuthData {
+  email: string;
+  pin: string;
+}

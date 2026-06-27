@@ -1,15 +1,13 @@
 import type {
   Person,
   PersonFormData,
-  Visit,
-  VisitorType,
-  Field,
-  Host,
+  Role,
   Home,
 } from "../types";
 import { apiClient } from "./client";
 
 export const peopleApi = {
+  // People
   list: (search_query?: string, page?: number) =>
     apiClient.get<{ results: Person[]; has_next: boolean; has_previous: boolean; number: number; num_pages: number }>(
       "/api/people",
@@ -28,18 +26,21 @@ export const peopleApi = {
     apiClient.delete<{ message: string }>(`/api/people/${id}`),
 
   searchByFace: (photo: string) =>
-    apiClient.post<[number, string, string, string][]>("/api/people/search-by-face", { photo }),
-
-  getVisits: (id: number) => apiClient.get<Visit[]>(`/api/people/${id}/visits`),
-
-  getVisitorTypes: () => apiClient.get<VisitorType[]>("/api/people/visitor-types"),
-
-  getFields: () => apiClient.get<Field[]>("/api/people/fields"),
+    apiClient.post<Person>("/api/people/search-by-face", { photo_base64: photo }),
 
   getHomes: () => apiClient.get<Home[]>("/api/people/homes"),
 
-  getHosts: () => apiClient.get<Host[]>("/api/people/hosts"),
+  // Roles
+  listRoles: () => apiClient.get<Role[]>("/api/people/roles"),
 
-  newVisit: (visitorId: number, data: { destinies: number[]; desc?: string }) =>
-    apiClient.post<Visit>(`/api/people/${visitorId}/visits`, data),
+  createRole: (data: { name: string; description?: string; fields?: { label: string; field_type?: string; required?: boolean; options?: string[] }[] }) =>
+    apiClient.post<Role>("/api/people/roles", data),
+
+  getRole: (id: number) => apiClient.get<Role>(`/api/people/roles/${id}`),
+
+  updateRole: (id: number, data: { name?: string; description?: string; fields?: { label: string; field_type?: string; required?: boolean; options?: string[] }[] }) =>
+    apiClient.put<Role>(`/api/people/roles/${id}`, data),
+
+  deleteRole: (id: number) =>
+    apiClient.delete<{ message: string }>(`/api/people/roles/${id}`),
 };

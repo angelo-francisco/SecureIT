@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { FloatingNavbar } from "../../components/FloatingNavbar";
 import type { ViewId } from "../../components/FloatingNavbar";
 import { PanelSheet } from "../../ui";
@@ -9,16 +9,24 @@ import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
 import PeopleList from "../people/PeopleList";
 import PersonNew from "../people/PersonNew";
+import RoleManagement from "../people/RoleManagement";
 import NotificationList from "../notifications/NotificationList";
 import Settings from "./Settings";
 
-const viewConfig: Partial<Record<ViewId, { title: string; icon: React.ReactNode }>> = {
-  cameras: { title: "Câmeras", icon: <Lucide.Video size={20} /> },
-  "camera-new": { title: "Nova Câmera", icon: <Lucide.Plus size={20} /> },
-  people: { title: "Pessoas", icon: <Lucide.Users size={20} /> },
-  "person-new": { title: "Nova Pessoa", icon: <Lucide.UserPlus size={20} /> },
-  notifications: { title: "Notificações", icon: <Lucide.Bell size={20} /> },
-  settings: { title: "Configurações", icon: <Lucide.Settings size={20} /> },
+interface ViewConfigEntry {
+  title: string;
+  icon: React.ReactNode;
+  component: ComponentType<{ onClose?: () => void }>;
+}
+
+const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
+  cameras: { title: "Câmeras", icon: <Lucide.Video size={20} />, component: CameraList },
+  "camera-new": { title: "Nova Câmera", icon: <Lucide.Plus size={20} />, component: CameraNew },
+  people: { title: "Pessoas", icon: <Lucide.Users size={20} />, component: PeopleList },
+  "person-new": { title: "Nova Pessoa", icon: <Lucide.UserPlus size={20} />, component: PersonNew },
+  "role-management": { title: "Gerenciar Cargos", icon: <Lucide.FolderTree size={20} />, component: RoleManagement },
+  notifications: { title: "Notificações", icon: <Lucide.Bell size={20} />, component: NotificationList },
+  settings: { title: "Configurações", icon: <Lucide.Settings size={20} />, component: Settings },
 };
 
 const mockCameras: {
@@ -59,7 +67,10 @@ export default function Dashboard() {
     };
   }, []);
 
-  const cfg = activeView ? viewConfig[activeView] : undefined;
+  const close = () => setActiveView(null);
+
+  const viewEntry = activeView ? viewConfig[activeView] : undefined;
+  const ViewComponent = viewEntry?.component;
 
   return (
     <>
@@ -114,18 +125,8 @@ export default function Dashboard() {
       <PanelNavContext.Provider
         value={(view) => setActiveView(view as ViewId)}
       >
-        <PanelSheet
-          open={activeView !== null}
-          onClose={() => setActiveView(null)}
-          title={cfg?.title ?? ""}
-          icon={cfg?.icon}
-        >
-          {activeView === "cameras" && <CameraList />}
-          {activeView === "camera-new" && <CameraNew />}
-          {activeView === "people" && <PeopleList />}
-          {activeView === "person-new" && <PersonNew />}
-          {activeView === "notifications" && <NotificationList />}
-          {activeView === "settings" && <Settings />}
+        <PanelSheet open={activeView !== null} onClose={close}>
+          {ViewComponent && <ViewComponent onClose={close} />}
         </PanelSheet>
       </PanelNavContext.Provider>
     </>

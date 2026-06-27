@@ -1,32 +1,39 @@
-export type PersonType = "R" | "V" | "W";
+export interface RoleField {
+  id: number;
+  label: string;
+  field_type: "text" | "number" | "select" | "boolean" | "date";
+  required: boolean;
+  options: string[] | null;
+  sort_order: number;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  description: string | null;
+  fields: RoleField[];
+  created_at: string;
+}
 
 export interface Person {
   id: number;
   first_name: string;
   last_name: string;
   full_name: string;
-  type: PersonType;
+  type: string;
   banned: boolean;
   photo?: string;
   added_at: string;
   updated_at: string;
   get_type_display: string;
-  resident?: Resident;
-  visitor?: Visitor;
-  worker?: Worker;
+  roles?: PersonRole[];
 }
 
-export interface Resident {
+export interface PersonRole {
   id: number;
-  person: Person;
-  bi: string;
-  residenthome_set: ResidentHome[];
-}
-
-export interface ResidentHome {
-  id: number;
-  home: Home;
-  resident: Resident;
+  role_id: number;
+  role_name: string;
+  field_values: Record<string, unknown> | null;
 }
 
 export interface Home {
@@ -35,72 +42,9 @@ export interface Home {
   street: string;
 }
 
-export interface Visitor {
-  id: number;
-  person: Person;
-  type: string;
-  get_type_display: string;
-  visit_set: Visit[];
-}
-
-export interface Visit {
-  id: number;
-  visitor: Visitor;
-  visited_at: string;
-  description?: string;
-  visitdestiny_set: VisitDestiny[];
-}
-
-export interface VisitDestiny {
-  id: number;
-  visit: Visit;
-  resident: Resident;
-}
-
-export interface Worker {
-  id: number;
-  person: Person;
-  bi: string;
-  list_fields: string[];
-  get_formatted_fields: string;
-  workerhome_set: WorkerHome[];
-  work_homes: number[];
-}
-
-export interface WorkerHome {
-  id: number;
-  home: Home;
-  worker: Worker;
-}
-
-export interface VisitorType {
-  value: string;
-  label: string;
-}
-
-export interface Field {
-  value: string;
-  label: string;
-}
-
-export interface Host {
-  resident: Resident;
-  home: Home;
-}
-
 export interface PersonFormData {
   first_name: string;
   last_name: string;
-  person_type: PersonType;
-  photo?: string;
-  // Resident
-  "resident-homes"?: string[];
-  "resident-bi"?: string;
-  // Visitor
-  "visitor-type"?: string;
-  "visitor-host"?: string[];
-  // Worker
-  "worker-bi"?: string;
-  "worker-fields"?: string[];
-  "worker-homes"?: string[];
+  photo_base64: string;
+  roles: { role_id: number; field_values?: Record<string, unknown> }[];
 }

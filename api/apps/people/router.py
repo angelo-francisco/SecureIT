@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
 from apps.people.schemas import (
@@ -6,12 +6,11 @@ from apps.people.schemas import (
     HomeResponse,
     PersonCreate,
     PersonResponse,
-    PersonUpdate,
-    ResidentCreate,
+    RoleCreate,
+    RoleFieldCreate,
+    RoleResponse,
     VisitCreate,
     VisitResponse,
-    VisitorCreate,
-    WorkerCreate,
 )
 from apps.people.service import (
     create_person,
@@ -26,9 +25,65 @@ from apps.people.service import (
     treat_photo,
     update_person,
 )
+from apps.people.role_service import (
+    create_role,
+    create_role_field,
+    delete_role,
+    delete_role_field,
+    get_role,
+    list_roles,
+    update_role,
+    update_role_field,
+)
 
 router = APIRouter(prefix="/people", tags=["people"])
 
+
+# ── Role CRUD ──────────────────────────────────────────────
+
+@router.get("/roles", response_model=list[RoleResponse])
+async def list_roles_endpoint(request: Request):
+    roles = await list_roles(request.state.user.id)
+    return [RoleResponse.model_validate(r) for r in roles]
+
+
+@router.post("/roles", response_model=RoleResponse, status_code=201)
+async def create_role_endpoint(request: Request, data: RoleCreate):
+    role = await create_role(
+        user_id=request.state.user.id,
+        name=data.name,
+        description=data.description,
+        fields=[f.model_dump() for f in data.fields],
+    )
+    return RoleResponse.model_validate(role)
+
+
+@router.get("/roles/{role_id}", response_model=RoleResponse)
+async def get_role_endpoint(request: Request, role_id: int):
+    role = await get_role(role_id, request.state.user.id)
+    return RoleResponse.model_validate(role)
+
+
+@router.put("/roles/{role_id}", response_model=RoleResponse)
+async def update_role_endpoint(request: Request, role_id: int, data: RoleCreate):
+    role = await update_role(
+        role_id, request.state.user.id,
+        name=data.name, description=data.description,
+    )
+    if data.fields:
+        from apps.people.models import RoleField
+        await RoleField.filter(role_id=role_id).delete()
+        for f in data.fields:
+            await create_role_field(role_id, request.state.user.id, f.model_dump())
+    return await get_role(role_id, request.state.user.id)
+
+
+@router.delete("/roles/{role_id}", status_code=204)
+async def delete_role_endpoint(request: Request, role_id: int):
+    await delete_role(role_id, request.state.user.id)
+
+
+# ── Person CRUD ─────────────────────────────────────────────
 
 @router.get("")
 async def list_people_endpoint(
@@ -44,37 +99,22 @@ async def list_people_endpoint(
         "number": page,
         "num_pages": (total + per_page - 1) // per_page,
     }
-    
+
 
 @router.post("", response_model=PersonResponse, status_code=201)
 async def create_person_endpoint(
+    request: Request,
     data: PersonCreate,
-    resident: ResidentCreate | None = None,
-    worker: WorkerCreate | None = None,
-    visitor: VisitorCreate | None = None,
 ):
     photo_bytes, image = treat_photo(data.photo_base64)
     embedding = generate_face_embedding(image=image)
 
-    resident_data = None
-    worker_data = None
-    visitor_data = None
-
-    if data.person_type == "R" and resident:
-        resident_data = resident.model_dump()
-    elif data.person_type == "W" and worker:
-        worker_data = worker.model_dump()
-    elif data.person_type == "V" and visitor:
-        visitor_data = visitor.model_dump()
-
     person = await create_person(
         first_name=data.first_name,
         last_name=data.last_name,
-        person_type=data.person_type,
         photo_bytes=photo_bytes,
-        resident_data=resident_data,
-        worker_data=worker_data,
-        visitor_data=visitor_data,
+        user_id=request.state.user.id,
+        roles_data=[r.model_dump() for r in data.roles],
     )
 
     import sqlite3
@@ -119,40 +159,9 @@ async def get_person_endpoint(
 @router.put("/{person_id}", response_model=PersonResponse)
 async def update_person_endpoint(
     person_id: int,
-    data: PersonUpdate,
-    resident: ResidentCreate | None = None,
-    worker: WorkerCreate | None = None,
-    visitor: VisitorCreate | None = None,
+    data: dict,
 ):
-    photo_bytes = None
-    if data.photo_base64:
-        photo_bytes, image = treat_photo(data.photo_base64)
-
-    person = await update_person(
-        person_id,
-        first_name=data.first_name,
-        last_name=data.last_name,
-        photo_bytes=photo_bytes,
-        resident_data=resident.model_dump() if resident else None,
-        worker_data=worker.model_dump() if worker else None,
-        visitor_data=visitor.model_dump() if visitor else None,
-    )
-
-    if photo_bytes:
-        embedding = generate_face_embedding(image=image)
-        import sqlite3
-        import sqlite_vec
-        conn = sqlite3.connect("db.sqlite3", check_same_thread=False)
-        conn.enable_load_extension(True)
-        sqlite_vec.load(conn)
-        conn.enable_load_extension(False)
-        conn.execute(
-            "INSERT INTO PersonEmbedding (person, embedding) VALUES (?, ?)",
-            (person.id, embedding),
-        )
-        conn.commit()
-        conn.close()
-
+    person = await update_person(person_id, **(data.get("person", {})))
     return PersonResponse.model_validate(person)
 
 

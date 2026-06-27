@@ -7,6 +7,7 @@ export type ViewId =
   | "camera-new"
   | "people"
   | "person-new"
+  | "role-management"
   | "notifications"
   | "settings";
 

@@ -92,3 +92,15 @@ class PinLoginTokenResponse(BaseModel):
 class PinTokenResponse(BaseModel):
     pin_token: str
     token_type: str = "pin"
+
+
+class ReAuthRequest(BaseModel):
+    email: EmailStr
+    pin: str
+
+    @field_validator("pin")
+    @classmethod
+    def validate_pin(cls, v: str) -> str:
+        if len(v) != 4 or not v.isdigit():
+            raise ValueError("PIN deve conter 4 dígitos")
+        return v
