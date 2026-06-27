@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCameras, useDeleteCamera } from "../../hooks";
+import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { Button, Table, Badge, Loader, Modal } from "../../ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
@@ -10,6 +11,7 @@ export default function CameraList() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { data: cameras, isLoading } = useCameras(search || undefined);
   const deleteCamera = useDeleteCamera();
+  const panelNavigate = usePanelNavigate();
 
   const handleDelete = async () => {
     if (deleteId) {
@@ -115,13 +117,23 @@ export default function CameraList() {
             >
               <Lucide.Eraser size={16} />
             </Link>
-            <Link
-              to="/cameras/new"
-              className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20"
-            >
-              <Lucide.Plus size={16} />
-              <span className="hidden xl:block">Adicionar Nova Câmera</span>
-            </Link>
+            {panelNavigate ? (
+              <button
+                onClick={() => panelNavigate("camera-new")}
+                className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20 cursor-pointer"
+              >
+                <Lucide.Plus size={16} />
+                <span className="hidden xl:block">Adicionar Nova Câmera</span>
+              </button>
+            ) : (
+              <Link
+                to="/cameras/new"
+                className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 text-white text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20"
+              >
+                <Lucide.Plus size={16} />
+                <span className="hidden xl:block">Adicionar Nova Câmera</span>
+              </Link>
+            )}
           </div>
         </div>
       </header>

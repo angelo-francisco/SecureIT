@@ -42,3 +42,4 @@ export { Loader } from "./Loader/Loader";
 export { FullLogo } from "./FullLogo/FullLogo";
 export { PhotoCapture, usePhotoCapture } from "./PhotoCapture/PhotoCapture";
 export { Pagination } from "./Pagination/Pagination";
+export { PanelSheet } from "./PanelSheet/PanelSheet";

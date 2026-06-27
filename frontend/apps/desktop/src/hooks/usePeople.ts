@@ -9,58 +9,11 @@ export function usePeople(search?: string, page?: number) {
   });
 }
 
-export function usePerson(id: number) {
-  return useQuery({
-    queryKey: ["person", id],
-    queryFn: () => peopleApi.get(id),
-    enabled: !!id,
-  });
-}
-
 export function useCreatePerson() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: PersonFormData) => peopleApi.create(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["people"] }),
-  });
-}
-
-export function useUpdatePerson(id: number) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: Partial<PersonFormData>) => peopleApi.update(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["people"] }),
-  });
-}
-
-export function useDeletePerson() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => peopleApi.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["people"] }),
-  });
-}
-
-export function useSearchByFace() {
-  return useMutation({
-    mutationFn: (photo: string) => peopleApi.searchByFace(photo),
-  });
-}
-
-export function useVisits(personId: number) {
-  return useQuery({
-    queryKey: ["visits", personId],
-    queryFn: () => peopleApi.getVisits(personId),
-    enabled: !!personId,
-  });
-}
-
-export function useNewVisit(visitorId: number) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { destinies: number[]; desc?: string }) =>
-      peopleApi.newVisit(visitorId, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["visits"] }),
   });
 }
 

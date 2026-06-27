@@ -69,7 +69,7 @@ export default function NotificationList() {
           <div className="flex items-center justify-center h-64">
             <Loader w={50} />
           </div>
-        ) : data && data.results.length > 0 ? (
+        ) : data && Array.isArray(data.results) && data.results.length > 0 ? (
           <div className="flex flex-col gap-3">
             {data.results.map((n) => (
               <div
@@ -111,10 +111,10 @@ export default function NotificationList() {
               </div>
             ))}
             <Pagination
-              page={data.number}
-              numPages={data.num_pages}
-              hasNext={data.has_next}
-              hasPrevious={data.has_previous}
+              page={data.number ?? 1}
+              numPages={data.num_pages ?? 1}
+              hasNext={data.has_next ?? false}
+              hasPrevious={data.has_previous ?? false}
               onPageChange={setPage}
             />
           </div>

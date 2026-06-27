@@ -30,14 +30,21 @@ from apps.people.service import (
 router = APIRouter(prefix="/people", tags=["people"])
 
 
-@router.get("", response_model=list[PersonResponse])
+@router.get("")
 async def list_people_endpoint(
     search_query: str = Query(""),
     page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100),
 ):
-    people, _ = await list_people(search_query, page)
-    return [PersonResponse.model_validate(p) for p in people]
-
+    people, total = await list_people(search_query, page, per_page)
+    return {
+        "results": [PersonResponse.model_validate(p) for p in people],
+        "has_next": total > page * per_page,
+        "has_previous": page > 1,
+        "number": page,
+        "num_pages": (total + per_page - 1) // per_page,
+    }
+    
 
 @router.post("", response_model=PersonResponse, status_code=201)
 async def create_person_endpoint(

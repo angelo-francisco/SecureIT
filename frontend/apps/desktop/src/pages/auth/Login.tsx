@@ -164,15 +164,6 @@ export default function Login() {
             })}
           </div>
 
-          {checked && !isOnline && (
-            <div className="flex items-center justify-center gap-2 mt-8 mb-2">
-              <Lucide.WifiOff size={14} className="text-text-muted shrink-0" />
-              <p className="text-xs text-text-muted">
-                É necessária uma conexão com a internet para fazer login
-              </p>
-            </div>
-          )}
-
           <div className="mt-10 text-center flex flex-col items-center justify-center gap-2">
             <p className="text-base text-text-muted">
               Não tem conta?{" "}

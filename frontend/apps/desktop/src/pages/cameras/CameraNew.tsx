@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateCamera, useLocalDevices } from "../../hooks";
+import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { Input, LucideInput, Button } from "../../ui";
 
 export default function CameraNew() {
@@ -12,6 +13,7 @@ export default function CameraNew() {
   const createCamera = useCreateCamera();
   const { data: localDevices } = useLocalDevices();
   const navigate = useNavigate();
+  const panelNavigate = usePanelNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -22,7 +24,11 @@ export default function CameraNew() {
       stream_url: connectionType === "W" ? streamUrl : undefined,
       local_camera: connectionType === "L" ? localCamera : undefined,
     });
-    navigate("/cameras");
+    if (panelNavigate) {
+      panelNavigate("cameras");
+    } else {
+      navigate("/cameras");
+    }
   };
 
   return (

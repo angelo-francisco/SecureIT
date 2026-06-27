@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { usePeople } from "../../hooks";
+import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { Button, Table, Badge, Loader, Pagination } from "../../ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
@@ -12,6 +13,7 @@ export default function PeopleList() {
   const [searchResults, setSearchResults] = useState<
     [number, string, string, string][] | null
   >(null);
+  const panelNavigate = usePanelNavigate();
 
   const columns = [
     {
@@ -104,11 +106,20 @@ export default function PeopleList() {
             >
               Limpar
             </Button>
-            <Link to="/people/new">
-              <Button icon={<Lucide.Plus size={16} />}>
+            {panelNavigate ? (
+              <Button
+                icon={<Lucide.Plus size={16} />}
+                onClick={() => panelNavigate("person-new")}
+              >
                 Adicionar Pessoa
               </Button>
-            </Link>
+            ) : (
+              <Link to="/people/new">
+                <Button icon={<Lucide.Plus size={16} />}>
+                  Adicionar Pessoa
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -118,17 +129,17 @@ export default function PeopleList() {
           <div className="flex items-center justify-center h-64">
             <Loader w={50} />
           </div>
-        ) : data && data.results.length > 0 ? (
+        ) : data && Array.isArray(data.results) && data.results.length > 0 ? (
           <>
             <Table
               columns={columns}
               data={data.results as unknown as Record<string, unknown>[]}
             />
             <Pagination
-              page={data.number}
-              numPages={data.num_pages}
-              hasNext={data.has_next}
-              hasPrevious={data.has_previous}
+              page={data.number ?? 1}
+              numPages={data.num_pages ?? 1}
+              hasNext={data.has_next ?? false}
+              hasPrevious={data.has_previous ?? false}
               onPageChange={setPage}
             />
           </>

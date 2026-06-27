@@ -97,14 +97,6 @@ export default function Signup() {
                 >
                   Continuar <Lucide.ArrowRight size={20} />
                 </button>
-                {checked && !isOnline && (
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <Lucide.WifiOff size={14} className="text-text-muted shrink-0" />
-                    <p className="text-xs text-text-muted">
-                      É necessária uma conexão com a internet para fazer cadastro
-                    </p>
-                  </div>
-                )}
                 {hasAccounts && (
                   <div className="text-center pt-4">
                     <p className="text-base text-text-muted">
@@ -207,15 +199,6 @@ export default function Signup() {
               </>
             )}
           </form>
-
-          {checked && !isOnline && (
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <Lucide.WifiOff size={14} className="text-text-muted shrink-0" />
-              <p className="text-xs text-text-muted">
-                É necessária uma conexão com a internet para fazer cadastro
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

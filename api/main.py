@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
     yield
     await close_db()
 
+ 
 
 app = FastAPI(
     title="SecureIT API",

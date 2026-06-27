@@ -1,10 +1,12 @@
-FROM node:22-alpine
+FROM ghcr.io/pnpm/pnpm:11
+
+RUN pnpm runtime set node 22 -g
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .
 
-RUN npm install
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 

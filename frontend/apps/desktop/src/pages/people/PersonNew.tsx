@@ -7,6 +7,7 @@ import {
   useVisitorTypes,
   useFields,
 } from "../../hooks";
+import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { Input, LucideInput, Button } from "../../ui";
 
 export default function PersonNew() {
@@ -27,6 +28,7 @@ export default function PersonNew() {
   const { data: visitorTypes } = useVisitorTypes();
   const { data: fields } = useFields();
   const navigate = useNavigate();
+  const panelNavigate = usePanelNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -50,7 +52,11 @@ export default function PersonNew() {
     }
 
     await createPerson.mutateAsync(data as unknown as Parameters<typeof createPerson.mutateAsync>[0]);
-    navigate("/people");
+    if (panelNavigate) {
+      panelNavigate("people");
+    } else {
+      navigate("/people");
+    }
   };
 
   return (
