@@ -7,7 +7,8 @@ import torch
 from core.config import settings
 from core.exceptions import NotFound, ValidationError_
 from facenet_pytorch import MTCNN, InceptionResnetV1
-from PIL import Image
+from PIL import Image, ImageOps
+from tortoise import Tortoise
 from tortoise.expressions import Q, RawSQL
 
 from apps.people.models import (
@@ -41,29 +42,39 @@ def _get_resnet():
 
 
 def base64_to_bytes(photo_b64: str) -> bytes:
-    data = ""
     if "," in photo_b64:
-        data = photo_b64.split(",")[1]
-    return base64.b64decode(data)
+        photo_b64 = photo_b64.split(",")[1]
+    return base64.b64decode(photo_b64)
 
 
 def generate_face_embedding(
-    base64_str: str | None = None, image: Image.Image | None = None
+    base64_str: str | None = None,
+    image: Image.Image | None = None,
+    detect_face: bool = True
 ) -> bytes:
 
     if base64_str:
         image_data = base64_to_bytes(base64_str)
-        image = Image.open(BytesIO(image_data)).convert("RGB")
+        image = Image.open(BytesIO(image_data))
+        image = ImageOps.exif_transpose(image).convert("RGB")
     elif image:
-        image = image.convert("RGB")
+        image = ImageOps.exif_transpose(image).convert("RGB")
     else:
         raise ValueError("É necessário fornecer base64 ou uma imagem PIL")
 
-    face = _get_mtcnn()(image)
-    if face is None:
-        raise ValidationError_(
-            "Nenhum rosto detectado. Tente novamente com melhor iluminação e o rosto visível."
-        )
+    if detect_face:
+        face = _get_mtcnn()(image)
+        if face is None:
+            raise ValidationError_(
+                "Nenhum rosto detectado. Tente novamente com melhor iluminação e o rosto visível."
+            )
+    else:
+        mtcnn_instance = _get_mtcnn()
+        img_size = mtcnn_instance.image_size if hasattr(mtcnn_instance, "image_size") else 160
+        face_img = image.resize((img_size, img_size), Image.BILINEAR)
+        face = torch.tensor(np.array(face_img), dtype=torch.float32).permute(2, 0, 1)
+        face = (face - 127.5) / 128.0
+        face = face.to("cpu")
 
     with torch.no_grad():
         embedding = _get_resnet()(face.unsqueeze(0))
@@ -76,7 +87,13 @@ def treat_photo(base64_photo: str) -> tuple[bytes, Image.Image]:
     if not image_data:
         raise ValidationError_("Capture o rosto do indivíduo, por favor.")
     image = Image.open(BytesIO(image_data))
-    return image_data, image
+    image = ImageOps.exif_transpose(image)
+    
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    photo_bytes = buffer.getvalue()
+    
+    return photo_bytes, image
 
 
 async def list_people(
@@ -160,6 +177,7 @@ async def update_person(
     last_name: str | None = None,
     photo_bytes: bytes | None = None,
     roles_data: list | None = None,
+    banned: bool | None = None,
 ) -> Person:
     person = await get_person(person_id)
 
@@ -167,6 +185,8 @@ async def update_person(
         person.first_name = first_name
     if last_name:
         person.last_name = last_name
+    if banned is not None:
+        person.banned = banned
 
     if photo_bytes:
         filename = f"{uuid4()}.jpeg"
@@ -206,6 +226,25 @@ async def delete_person(person_id: int):
     if not person:
         raise NotFound("Pessoa não encontrada")
     await person.delete()
+
+
+async def search_by_embedding(emb_list: list[float]) -> Person | None:
+    emb_str = "[" + ",".join(map(str, emb_list)) + "]"
+    conn = Tortoise.get_connection("default")
+    result = await conn.execute_query(
+        f"""
+        SELECT p.id
+        FROM person_embeddings pe
+        INNER JOIN people p ON p.id = pe.person_id
+        ORDER BY pe.embedding <=> '{emb_str}'::vector
+        LIMIT 1
+        """,
+    )
+    if result and result[1]:
+        person = await Person.get(id=result[1][0]["id"])
+        await person.fetch_related("person_roles__role")
+        return person
+    return None
 
 
 async def search_by_face(photo_base64: str) -> Person | None:

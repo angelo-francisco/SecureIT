@@ -105,5 +105,5 @@ export function usePhotoCapture() {
     setShowCapture(false);
   }, []);
 
-  return { photo, showCapture, startCapture, handleCapture };
+  return { photo, setPhoto, showCapture, startCapture, handleCapture };
 }

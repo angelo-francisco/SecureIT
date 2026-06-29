@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNotifications, useDeleteNotification } from "../../hooks";
+import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { Loader, Pagination, Modal } from "../../ui";
 import * as Lucide from "lucide-react";
 
@@ -17,6 +18,7 @@ export default function NotificationList({ onClose }: NotificationListProps) {
   const [filter, setFilter] = useState<"A" | "NR" | "R">("A");
   const [page, setPage] = useState(1);
   const [imageModal, setImageModal] = useState<string | null>(null);
+  const panelNavigate = usePanelNavigate();
 
   const { data, isLoading } = useNotifications(
     { search_query: filter },
@@ -101,9 +103,12 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                       </button>
                     )}
                     {n.camera_name && (
-                      <span className="text-xs text-text-muted">
+                      <button
+                        onClick={() => panelNavigate?.("camera-monitor")}
+                        className="text-xs text-primary hover:underline"
+                      >
                         {n.camera_name}
-                      </span>
+                      </button>
                     )}
                     <span className="text-xs text-text-muted">
                       {n.created_at}

@@ -15,6 +15,7 @@ PUBLIC_ENDPOINTS = {
     "/api/auth/pin-login",
     "/api/auth/re-auth",
     "/api/auth/accounts",
+    "/media/people_photos/"
     "/api/health",
 }
 
@@ -38,8 +39,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.user = user
 
         authed = user is not None
-        is_public = path in PUBLIC_ENDPOINTS
-
+        is_public = path in PUBLIC_ENDPOINTS or path.startswith('/media/')
+        
         if not authed and not is_public:
             return JSONResponse(
                 status_code=401,

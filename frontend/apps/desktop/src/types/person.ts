@@ -38,5 +38,6 @@ export interface PersonFormData {
   first_name: string;
   last_name: string;
   photo_base64: string;
+  banned?: boolean;
   roles: { role_id: number; field_values?: Record<string, unknown> }[];
 }

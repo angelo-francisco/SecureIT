@@ -44,8 +44,9 @@ app.include_router(notifications_router, prefix="/api")
 app.include_router(panel_router, prefix="/api")
 app.include_router(people_router, prefix="/api")
 
-if settings.MEDIA_ROOT.exists():
-    app.mount("/media", StaticFiles(directory=str(settings.MEDIA_ROOT)), name="media")
+# Ensure the media directory exists before mounting (StaticFiles validates it immediately)
+settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=str(settings.MEDIA_ROOT), html=False), name="media")
 
 
 @app.get("/api/health")

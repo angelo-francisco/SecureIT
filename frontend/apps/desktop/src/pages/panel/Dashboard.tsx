@@ -8,8 +8,10 @@ import * as Lucide from "lucide-react";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
 import CameraView from "../cameras/CameraView";
+import CameraMonitor from "./CameraMonitor";
 import PeopleList from "../people/PeopleList";
 import PersonNew from "../people/PersonNew";
+import PersonView from "../people/PersonView";
 import RoleManagement from "../people/RoleManagement";
 import NotificationList from "../notifications/NotificationList";
 import Settings from "./Settings";
@@ -24,8 +26,10 @@ const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
   cameras: { title: "Câmeras", icon: <Lucide.Video size={20} />, component: CameraList },
   "camera-new": { title: "Nova Câmera", icon: <Lucide.Plus size={20} />, component: CameraNew },
   "camera-view": { title: "Detalhes da Câmera", icon: <Lucide.Video size={20} />, component: CameraView },
+  "camera-monitor": { title: "Monitoramento", icon: <Lucide.Monitor size={20} />, component: CameraMonitor },
   people: { title: "Pessoas", icon: <Lucide.Users size={20} />, component: PeopleList },
   "person-new": { title: "Nova Pessoa", icon: <Lucide.UserPlus size={20} />, component: PersonNew },
+  "person-view": { title: "Detalhes da Pessoa", icon: <Lucide.User size={20} />, component: PersonView },
   "role-management": { title: "Gerenciar Cargos", icon: <Lucide.FolderTree size={20} />, component: RoleManagement },
   notifications: { title: "Notificações", icon: <Lucide.Bell size={20} />, component: NotificationList },
   settings: { title: "Configurações", icon: <Lucide.Settings size={20} />, component: Settings },

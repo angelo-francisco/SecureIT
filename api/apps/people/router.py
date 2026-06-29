@@ -28,6 +28,9 @@ from apps.people.service import (
     treat_photo,
     update_person,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/people", tags=["people"])
 
@@ -121,7 +124,6 @@ async def create_person_endpoint(
 
     emb_list = np.frombuffer(embedding, dtype=np.float32).tolist()
     await PersonEmbedding.create(person=person, embedding=emb_list)
-
     return PersonResponse.model_validate(person)
 
 
@@ -149,11 +151,18 @@ async def update_person_endpoint(
         last_name=data.last_name,
         photo_bytes=photo_bytes,
         roles_data=[r.model_dump() for r in data.roles],
+        banned=data.banned,
     )
 
     if embedding:
         emb_list = np.frombuffer(embedding, dtype=np.float32).tolist()
-        await PersonEmbedding.filter(person_id=person.id).update(embedding=emb_list)
+        emb_record, created = await PersonEmbedding.get_or_create(
+            person_id=person.id,
+            defaults={"embedding": emb_list}
+        )
+        if not created:
+            emb_record.embedding = emb_list
+            await emb_record.save()
 
     return PersonResponse.model_validate(person)
 

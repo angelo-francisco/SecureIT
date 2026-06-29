@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { usePeople } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
+import { usePersonViewStore } from "../../stores";
 import { Button, Table, Badge, Loader, Pagination, Input } from "../../ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
@@ -19,9 +20,20 @@ export default function PeopleList({ onClose }: PeopleListProps) {
     {
       key: "full_name",
       header: "Nome",
-      render: (row: Record<string, unknown>) => (
-        <span className="text-text font-medium">{row.full_name as string}</span>
-      ),
+      render: (row: Record<string, unknown>) => {
+        const person = row as unknown as { id: number; full_name: string };
+        return (
+          <span
+            className="text-primary font-medium hover:underline cursor-pointer"
+            onClick={() => {
+              usePersonViewStore.getState().setPersonId(person.id);
+              panelNavigate?.("person-view");
+            }}
+          >
+            {person.full_name}
+          </span>
+        );
+      },
     },
     {
       key: "roles",

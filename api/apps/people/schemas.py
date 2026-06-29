@@ -81,6 +81,7 @@ class PersonCreate(BaseModel):
     first_name: str
     last_name: str
     photo_base64: str
+    banned: bool = False
     roles: list[PersonRoleCreate] = []
 
 

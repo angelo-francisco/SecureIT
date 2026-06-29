@@ -1,17 +1,23 @@
+import asyncio
 import json
 from asyncio import CancelledError, create_task, sleep as async_sleep
 from datetime import datetime, timezone
 from time import time
 from uuid import uuid4
 
+import cv2
+import numpy as np
 from fastapi import WebSocket, WebSocketDisconnect
+from PIL import Image
 
 from apps.cameras.models import Camera as CameraModel
 from apps.notifications.models import Notification
 from apps.panel.models import Configuration
+from apps.people.service import search_by_embedding
 from core.config import settings
 from core.security import decode_access_token
 from services.camera import CameraService
+from services.facenet import detect_faces_in_frame
 
 
 class CameraStreamManager:
@@ -32,6 +38,7 @@ class CameraStreamManager:
         self.allow_draw = True
         self.user_id = None
         self.camera_id = None
+        self.face_recognition = False
 
     async def authenticate(self, token: str | None) -> bool:
         if not token:
@@ -92,6 +99,67 @@ class CameraStreamManager:
     def check_cooldown(self) -> bool:
         return time() - self.last_alert > self.alert_cooldown
 
+    async def stream_face_recognition(self):
+        last_faces: list[dict] = []
+        self.camera_service.allow_draw = False  # no YOLO drawing
+
+        try:
+            while self.running:
+                self.frame_index += 1
+                detect = self.frame_index % (self.detect_every * 5) == 0  # ~every 1s at 15fps
+                frame, _ = self.camera_service.get_frame(detect=False)
+                pil_img = None
+                faces: list[dict] = []
+
+                if detect:
+                    try:
+                        pil_img = Image.fromarray(
+                            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        )
+                        detected = await asyncio.to_thread(
+                            detect_faces_in_frame, pil_img, 0.9
+                        )
+                        for d in detected:
+                            person = await search_by_embedding(
+                                np.frombuffer(d["embedding"], dtype=np.float32).tolist()
+                            )
+                            faces.append({
+                                "bbox": d["bbox"],
+                                "person_id": person.id if person else None,
+                                "name": person.full_name if person else None,
+                                "unknown": person is None,
+                                "confidence": d["probability"],
+                            })
+                        last_faces = faces
+                    except Exception:
+                        faces = last_faces
+                else:
+                    faces = last_faces
+
+                # Draw face boxes on frame
+                if faces:
+                    for f in faces:
+                        x1, y1, x2, y2 = f["bbox"]
+                        color = (0, 255, 0) if f.get("person_id") else (0, 0, 255)
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                        label = f.get("name") or "Desconhecido"
+                        cv2.putText(
+                            frame, label, (x1, y1 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2,
+                        )
+
+                _, jpeg = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                await self.websocket.send_bytes(jpeg.tobytes())
+
+                if detect and faces:
+                    await self.websocket.send_text(
+                        json.dumps({"type": "faces", "faces": faces})
+                    )
+
+                await async_sleep(1 / self.fps)
+        except CancelledError:
+            pass
+
     async def stream(self):
         try:
             while self.running:
@@ -144,6 +212,8 @@ class CameraStreamManager:
             if camera_id:
                 self.camera_id = int(camera_id)
                 await self.get_camera_queryset(self.camera_id)
+                if self.camera_object:
+                    self.face_recognition = self.camera_object.face_recognition
 
             self.camera_service = CameraService(
                 video_source, fps=self.fps, allow_draw=self.allow_draw
@@ -155,7 +225,8 @@ class CameraStreamManager:
             return
 
         self.running = True
-        self.task = create_task(self.stream())
+        stream_fn = self.stream_face_recognition if self.face_recognition else self.stream
+        self.task = create_task(stream_fn())
 
         try:
             while self.running:

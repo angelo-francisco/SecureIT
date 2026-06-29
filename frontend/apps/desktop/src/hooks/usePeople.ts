@@ -17,6 +17,31 @@ export function useCreatePerson() {
   });
 }
 
+export function usePerson(id: number | null) {
+  return useQuery({
+    queryKey: ["people", id],
+    queryFn: () => peopleApi.get(id!),
+    enabled: id !== null,
+  });
+}
+
+export function useUpdatePerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<PersonFormData> }) =>
+      peopleApi.update(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["people"] }),
+  });
+}
+
+export function useDeletePerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => peopleApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["people"] }),
+  });
+}
+
 export function useRoles() {
   return useQuery({
     queryKey: ["roles"],
