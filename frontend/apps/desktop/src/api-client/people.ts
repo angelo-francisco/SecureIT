@@ -2,7 +2,6 @@ import type {
   Person,
   PersonFormData,
   Role,
-  Home,
 } from "../types";
 import { apiClient } from "./client";
 
@@ -27,8 +26,6 @@ export const peopleApi = {
 
   searchByFace: (photo: string) =>
     apiClient.post<Person>("/api/people/search-by-face", { photo_base64: photo }),
-
-  getHomes: () => apiClient.get<Home[]>("/api/people/homes"),
 
   // Roles
   listRoles: () => apiClient.get<Role[]>("/api/people/roles"),

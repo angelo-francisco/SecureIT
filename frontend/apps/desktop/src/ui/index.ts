@@ -43,3 +43,5 @@ export { FullLogo } from "./FullLogo/FullLogo";
 export { PhotoCapture, usePhotoCapture } from "./PhotoCapture/PhotoCapture";
 export { Pagination } from "./Pagination/Pagination";
 export { PanelSheet } from "./PanelSheet/PanelSheet";
+export { Toggle } from "./Toggle/Toggle";
+export { ToastContainer } from "./Toast/Toast";

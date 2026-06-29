@@ -2,6 +2,11 @@ from platform import system
 
 from tortoise import fields, models
 
+from enum import StrEnum
+
+class CameraType(StrEnum):
+    LOCAL = "L"
+    WIFI = "W"
 
 class Camera(models.Model):
     id = fields.IntField(pk=True)
@@ -9,20 +14,23 @@ class Camera(models.Model):
     name = fields.CharField(max_length=30, null=True)
     location = fields.CharField(max_length=150, null=True)
     status = fields.BooleanField(default=True, null=True)
-    connection_type = fields.CharField(max_length=1, null=True)
+    connection_type = fields.CharEnumField(CameraType, max_length=1, null=True)
     connection_info = fields.JSONField(default=dict, null=True)
+    face_recognition = fields.BooleanField(default=False)
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    class Meta:
+    class Meta: # type: ignore
         table = "cameras"
 
-    @property
+    class PydanticMeta:
+        exclude = ["user"]
+        computed = ["get_name", "video_source"]
+
     def get_name(self) -> str:
         return f"CAM-{self.id}"
 
-    @property
-    async def video_source(self) -> str | int | None:
+    def video_source(self) -> str | int | None:
         if not self.connection_info:
             return None
         if self.connection_type == "W":
@@ -35,4 +43,4 @@ class Camera(models.Model):
         return None
 
     def __str__(self) -> str:
-        return self.get_name
+        return self.get_name()

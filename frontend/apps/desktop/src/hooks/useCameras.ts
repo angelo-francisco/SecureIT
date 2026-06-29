@@ -9,10 +9,27 @@ export function useCameras(search?: string) {
   });
 }
 
+export function useCamera(id: number | null) {
+  return useQuery({
+    queryKey: ["cameras", id],
+    queryFn: () => camerasApi.get(id!),
+    enabled: id !== null,
+  });
+}
+
 export function useCreateCamera() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CameraFormData) => camerasApi.create(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cameras"] }),
+  });
+}
+
+export function useUpdateCamera() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<CameraFormData> }) =>
+      camerasApi.update(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cameras"] }),
   });
 }

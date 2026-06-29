@@ -8,6 +8,7 @@ export interface Camera {
   connection_type: ConnectionType;
   connection_info: Record<string, unknown> | null;
   video_source: string | number | null;
+  face_recognition: boolean;
   created_at: string;
   updated_at: string;
   get_name: string;
@@ -18,4 +19,5 @@ export interface CameraFormData {
   location: string;
   connection_type: ConnectionType;
   connection_info: Record<string, unknown>;
+  face_recognition?: boolean;
 }

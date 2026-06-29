@@ -1,10 +1,18 @@
 import { useState, useMemo, type FormEvent } from "react";
 import { useCreatePerson, useRoles } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
+import { useToast } from "../../hooks/useToast";
 import { Button, Input, PhotoCapture, usePhotoCapture } from "../../ui";
 import * as Lucide from "lucide-react";
+
 interface PersonNewProps {
   onClose?: () => void;
+}
+
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  photo?: string;
 }
 
 export default function PersonNew({ onClose }: PersonNewProps) {
@@ -14,6 +22,8 @@ export default function PersonNew({ onClose }: PersonNewProps) {
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [roleFields, setRoleFields] = useState<Record<string, Record<string, unknown>>>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+  const { toast } = useToast();
 
   const createPerson = useCreatePerson();
   const { data: roles } = useRoles();
@@ -53,13 +63,23 @@ export default function PersonNew({ onClose }: PersonNewProps) {
     }));
   };
 
+  function validate(): FormErrors {
+    const errs: FormErrors = {};
+    if (!firstName.trim()) errs.firstName = "O primeiro nome é obrigatório";
+    if (!lastName.trim()) errs.lastName = "O sobrenome é obrigatório";
+    if (!photo) errs.photo = "A fotografia é obrigatória";
+    return errs;
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (selectedRoleIds.length === 0) return;
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
 
     const data = {
-      first_name: firstName,
-      last_name: lastName,
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
       photo_base64: photo,
       roles: selectedRoles.map((role) => ({
         role_id: role.id,
@@ -67,8 +87,18 @@ export default function PersonNew({ onClose }: PersonNewProps) {
       })),
     };
 
-    await createPerson.mutateAsync(data);
-    panelNavigate?.("people");
+    try {
+      await createPerson.mutateAsync(data);
+      toast("Pessoa criada com sucesso", "success");
+      panelNavigate?.("people");
+    } catch (err: unknown) {
+      const msg =
+        (err as { detail?: string })?.detail ||
+        (err as Error)?.message ||
+        "Erro ao criar pessoa";
+      setErrors((prev) => ({ ...prev, firstName: msg }));
+      toast(msg, "error");
+    }
   };
 
   return (
@@ -96,18 +126,20 @@ export default function PersonNew({ onClose }: PersonNewProps) {
               <Input
                 placeholder="Primeiro nome"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
+                onChange={(e) => { setFirstName(e.target.value); setErrors((prev) => ({ ...prev, firstName: undefined })); }}
+                className={errors.firstName ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
               />
+              {errors.firstName && <p className="text-xs text-red-400">{errors.firstName}</p>}
             </div>
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium text-text">Sobrenome *</label>
               <Input
                 placeholder="Sobrenome"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
+                onChange={(e) => { setLastName(e.target.value); setErrors((prev) => ({ ...prev, lastName: undefined })); }}
+                className={errors.lastName ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
               />
+              {errors.lastName && <p className="text-xs text-red-400">{errors.lastName}</p>}
             </div>
           </div>
 
@@ -208,7 +240,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
           ))}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-text">Fotografia</label>
+            <label className="text-sm font-medium text-text mb-2">Fotografia *</label>
             {photo ? (
               <div className="relative w-40 h-40 rounded-xl overflow-hidden border border-border">
                 <img src={photo} alt="Preview" className="w-full h-full object-cover" />
@@ -224,20 +256,40 @@ export default function PersonNew({ onClose }: PersonNewProps) {
               <button
                 type="button"
                 onClick={startCapture}
-                className="flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed border-border text-text-muted hover:text-primary hover:border-primary transition-colors text-sm"
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
+                  errors.photo ? "border-red-400 text-red-400" : "border-border"
+                }`}
               >
                 <Lucide.Camera size={18} />
                 Capturar fotografia
               </button>
             )}
+            {errors.photo && <p className="text-xs text-red-400">{errors.photo}</p>}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" onClick={() => panelNavigate?.("people")}>
-              <Lucide.ArrowLeft size={16} />
-              Voltar
-            </Button>
-            <Button type="submit">Adicionar</Button>
+          <div className="flex flex-col items-end gap-2 pt-4">
+            {createPerson.isPending && (
+              <p className="text-xs text-text-muted flex items-center gap-1.5">
+                <Lucide.Loader2 size={12} className="animate-spin" />
+                A processar fotografia, pode levar até 5 segundos...
+              </p>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => panelNavigate?.("people")}>
+                <Lucide.ArrowLeft size={16} />
+                Voltar
+              </Button>
+              <Button type="submit" disabled={createPerson.isPending}>
+                {createPerson.isPending ? (
+                  <>
+                    <Lucide.Loader2 size={16} className="animate-spin" />
+                    A criar...
+                  </>
+                ) : (
+                  "Adicionar"
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

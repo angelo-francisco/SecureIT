@@ -1,11 +1,19 @@
 import { useState, type FormEvent } from "react";
 import { useCreateCamera, useLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
-import { Input, LucideInput, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
+import { useToast } from "../../hooks/useToast";
+import { Input, LucideInput, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Toggle } from "../../ui";
 import * as Lucide from "lucide-react";
 
 interface CameraNewProps {
   onClose?: () => void;
+}
+
+interface FormErrors {
+  name?: string;
+  location?: string;
+  streamUrl?: string;
+  localCamera?: string;
 }
 
 export default function CameraNew({ onClose }: CameraNewProps) {
@@ -14,25 +22,64 @@ export default function CameraNew({ onClose }: CameraNewProps) {
   const [connectionType, setConnectionType] = useState("L");
   const [streamUrl, setStreamUrl] = useState("");
   const [localCamera, setLocalCamera] = useState("");
+  const [faceRecognition, setFaceRecognition] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
   const createCamera = useCreateCamera();
   const { data: localDevices } = useLocalDevices();
   const panelNavigate = usePanelNavigate();
+  const { toast } = useToast();
+
+  function validate(): FormErrors {
+    const errs: FormErrors = {};
+    if (!name.trim()) {
+      errs.name = "O nome é obrigatório";
+    } else if (name.length > 30) {
+      errs.name = "O nome deve ter no máximo 30 caracteres";
+    }
+    if (!location.trim()) {
+      errs.location = "A localização é obrigatória";
+    } else if (location.length > 150) {
+      errs.location = "A localização deve ter no máximo 150 caracteres";
+    }
+    if (connectionType === "W") {
+      if (!streamUrl.trim()) {
+        errs.streamUrl = "O URL de streaming é obrigatório";
+      } else if (!/^https?:\/\/|^rtsp:\/\//.test(streamUrl.trim())) {
+        errs.streamUrl = "URL inválida. Use HTTP, HTTPS ou RTSP.";
+      }
+    }
+    if (connectionType === "L" && !localCamera) {
+      errs.localCamera = "Selecione um dispositivo local";
+    }
+    return errs;
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     const connection_info: Record<string, unknown> = {};
     if (connectionType === "W") {
-      connection_info.stream_url = streamUrl;
+      connection_info.stream_url = streamUrl.trim();
     } else if (connectionType === "L") {
       connection_info.path = localCamera;
     }
-    await createCamera.mutateAsync({
-      name,
-      location,
-      connection_type: connectionType as "L" | "W",
-      connection_info,
-    });
-    panelNavigate?.("cameras");
+    try {
+      await createCamera.mutateAsync({
+        name: name.trim(),
+        location: location.trim(),
+        connection_type: connectionType as "L" | "W",
+        connection_info,
+        face_recognition: faceRecognition,
+      });
+      toast("Câmara criada com sucesso", "success");
+      panelNavigate?.("cameras");
+    } catch (err: unknown) {
+      const msg = (err as { detail?: string })?.detail || "Erro ao criar câmara. Verifique os dados e tente novamente.";
+      setErrors({ name: msg });
+      toast(msg, "error");
+    }
   };
 
   return (
@@ -59,9 +106,10 @@ export default function CameraNew({ onClose }: CameraNewProps) {
             <Input
               placeholder="Nome da câmara"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              onChange={(e) => { setName(e.target.value); setErrors((prev) => ({ ...prev, name: undefined })); }}
+              className={errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
             />
+            {errors.name && <p className="text-xs text-red-400">{errors.name}</p>}
           </div>
 
           <div className="space-y-2">
@@ -70,14 +118,15 @@ export default function CameraNew({ onClose }: CameraNewProps) {
               placeholder="Localização da câmara"
               icon="MapPin"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
+              onChange={(e) => { setLocation(e.target.value); setErrors((prev) => ({ ...prev, location: undefined })); }}
+              className={errors.location ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
             />
+            {errors.location && <p className="text-xs text-red-400">{errors.location}</p>}
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-text">Tipo de Conexão</label>
-            <Select value={connectionType} onValueChange={setConnectionType}>
+            <Select value={connectionType} onValueChange={(v) => { setConnectionType(v); setErrors({}); }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -95,8 +144,10 @@ export default function CameraNew({ onClose }: CameraNewProps) {
                 placeholder="http://192.168.100.181:5555/stream"
                 icon="Wifi"
                 value={streamUrl}
-                onChange={(e) => setStreamUrl(e.target.value)}
+                onChange={(e) => { setStreamUrl(e.target.value); setErrors((prev) => ({ ...prev, streamUrl: undefined })); }}
+                className={errors.streamUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
               />
+              {errors.streamUrl && <p className="text-xs text-red-400">{errors.streamUrl}</p>}
               <p className="text-xs text-text-muted">URL de streaming da câmera Wi-Fi</p>
             </div>
           )}
@@ -104,8 +155,8 @@ export default function CameraNew({ onClose }: CameraNewProps) {
           {connectionType === "L" && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-text">Dispositivo Local</label>
-              <Select value={localCamera} onValueChange={setLocalCamera}>
-                <SelectTrigger>
+              <Select value={localCamera} onValueChange={(v) => { setLocalCamera(v); setErrors((prev) => ({ ...prev, localCamera: undefined })); }}>
+                <SelectTrigger className={errors.localCamera ? "border-red-400" : ""}>
                   <SelectValue placeholder={localDevices ? "Selecione uma câmara" : "Carregando..."} />
                 </SelectTrigger>
                 <SelectContent>
@@ -116,9 +167,21 @@ export default function CameraNew({ onClose }: CameraNewProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.localCamera && <p className="text-xs text-red-400">{errors.localCamera}</p>}
               <p className="text-xs text-text-muted">Dispositivo conectado fisicamente ao servidor</p>
             </div>
           )}
+
+          <div className="pt-4 border-t border-border">
+            <Toggle
+              label="Reconhecimento facial"
+              checked={faceRecognition}
+              onChange={(e) => setFaceRecognition(e.target.checked)}
+            />
+            <p className="text-xs text-text-muted mt-1">
+              Detetar e reconhecer rostos automaticamente nesta câmara
+            </p>
+          </div>
 
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={() => panelNavigate?.("cameras")}>

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 export type ViewId =
   | "cameras"
   | "camera-new"
+  | "camera-view"
   | "people"
   | "person-new"
   | "role-management"

@@ -7,6 +7,7 @@ import { connectCamera, disconnectCamera } from "../../lib/websocket";
 import * as Lucide from "lucide-react";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
+import CameraView from "../cameras/CameraView";
 import PeopleList from "../people/PeopleList";
 import PersonNew from "../people/PersonNew";
 import RoleManagement from "../people/RoleManagement";
@@ -22,6 +23,7 @@ interface ViewConfigEntry {
 const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
   cameras: { title: "Câmeras", icon: <Lucide.Video size={20} />, component: CameraList },
   "camera-new": { title: "Nova Câmera", icon: <Lucide.Plus size={20} />, component: CameraNew },
+  "camera-view": { title: "Detalhes da Câmera", icon: <Lucide.Video size={20} />, component: CameraView },
   people: { title: "Pessoas", icon: <Lucide.Users size={20} />, component: PeopleList },
   "person-new": { title: "Nova Pessoa", icon: <Lucide.UserPlus size={20} />, component: PersonNew },
   "role-management": { title: "Gerenciar Cargos", icon: <Lucide.FolderTree size={20} />, component: RoleManagement },

@@ -18,6 +18,10 @@ anyio==4.14.0
     #   watchfiles
 asyncclick==8.3.0.7
     # via aerich
+asyncpg==0.30.0
+    # via
+    #   secureit-api (pyproject.toml)
+    #   tortoise-orm
 bcrypt==5.0.0
     # via passlib
 certifi==2026.6.17
@@ -119,6 +123,7 @@ numpy==2.5.0
     #   facenet-pytorch
     #   matplotlib
     #   opencv-python-headless
+    #   pgvector
     #   torchvision
     #   ultralytics-opencv-headless
     #   ultralytics-thop
@@ -133,6 +138,8 @@ orjson==3.11.9
 packaging==26.2
     # via matplotlib
 passlib==1.7.4
+    # via secureit-api (pyproject.toml)
+pgvector==0.3.6
     # via secureit-api (pyproject.toml)
 pillow==12.2.0
     # via
@@ -215,10 +222,6 @@ six==1.17.0
     # via
     #   ecdsa
     #   python-dateutil
-sqlean-py==3.50.4.5
-    # via secureit-api (pyproject.toml)
-sqlite-vec==0.1.9
-    # via secureit-api (pyproject.toml)
 starlette==1.3.1
     # via fastapi
 sympy==1.14.0
@@ -238,6 +241,9 @@ tortoise-orm==1.1.7
     # via
     #   secureit-api (pyproject.toml)
     #   aerich
+    #   tortoise-vector
+tortoise-vector==0.2.0
+    # via secureit-api (pyproject.toml)
 typer==0.26.7
     # via
     #   fastapi-cli

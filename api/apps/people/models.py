@@ -1,4 +1,5 @@
 from tortoise import fields, models
+from tortoise_vector.field import VectorField
 
 
 class Role(models.Model):
@@ -50,6 +51,18 @@ class Person(models.Model):
 
     def __str__(self) -> str:
         return self.full_name
+
+
+class PersonEmbedding(models.Model):
+    id = fields.IntField(pk=True)
+    person = fields.ForeignKeyField("models.Person", related_name="embeddings")
+    embedding = VectorField(vector_size=512)
+
+    class Meta:
+        table = "person_embeddings"
+
+    def __str__(self) -> str:
+        return f"Embedding({self.person_id})"
 
 
 class PersonRole(models.Model):

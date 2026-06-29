@@ -34,6 +34,7 @@ async def create_camera(user_id: int, data: CameraCreate) -> Camera:
         location=data.location,
         connection_type=data.connection_type,
         connection_info=data.connection_info,
+        face_recognition=data.face_recognition,
     )
     return camera
 
@@ -49,6 +50,8 @@ async def update_camera(camera_id: int, user_id: int, data: dict) -> Camera:
         info = camera.connection_info or {}
         info.update(data["connection_info"])
         camera.connection_info = info
+    if "face_recognition" in data:
+        camera.face_recognition = data["face_recognition"]
 
     await camera.save()
     return camera

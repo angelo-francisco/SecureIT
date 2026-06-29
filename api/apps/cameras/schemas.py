@@ -1,5 +1,17 @@
-from datetime import datetime
 from pydantic import BaseModel, field_validator
+from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
+
+from .models import Camera
+
+CameraDetail = pydantic_model_creator(Camera, name="CameraDetail")
+ListCameras = pydantic_queryset_creator(Camera, name="ListCameras")
+
+
+class CameraUpdate(BaseModel):
+    name: str | None = None
+    location: str | None = None
+    connection_info: dict | None = None
+    face_recognition: bool | None = None
 
 
 class CameraCreate(BaseModel):
@@ -7,6 +19,7 @@ class CameraCreate(BaseModel):
     location: str
     connection_type: str
     connection_info: dict = {}
+    face_recognition: bool = False
 
     @field_validator("connection_type")
     @classmethod
@@ -25,32 +38,6 @@ class CameraCreate(BaseModel):
             if not stream_url.startswith(("http://", "https://", "rtsp://")):
                 raise ValueError("URL inválida. Use HTTP, HTTPS ou RTSP.")
         return v
-
-
-class CameraUpdate(BaseModel):
-    name: str | None = None
-    location: str | None = None
-    connection_info: dict | None = None
-
-
-class CameraResponse(BaseModel):
-    id: int
-    user_id: int
-    name: str | None
-    location: str | None
-    status: bool | None
-    connection_type: str | None
-    connection_info: dict | None
-    get_name: str
-    video_source: str | int | None
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = {"from_attributes": True, "arbitrary_types_allowed": True}
-
-
-class CameraDetailResponse(CameraResponse):
-    pass
 
 
 class AvailableCamera(BaseModel):

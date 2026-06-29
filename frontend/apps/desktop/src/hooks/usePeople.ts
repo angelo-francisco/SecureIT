@@ -50,9 +50,4 @@ export function useDeleteRole() {
   });
 }
 
-export function useHomes() {
-  return useQuery({
-    queryKey: ["homes"],
-    queryFn: () => peopleApi.getHomes(),
-  });
-}
+

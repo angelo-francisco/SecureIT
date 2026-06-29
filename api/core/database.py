@@ -1,8 +1,6 @@
-import sqlite3
-
-import sqlite_vec
-from core.config import settings
 from tortoise import Tortoise
+
+from .config import settings
 
 TORTOISE_MODELS = [
     "apps.auth.models",
@@ -12,6 +10,16 @@ TORTOISE_MODELS = [
     "apps.people.models",
     "aerich.models",
 ]
+
+TORTOISE_ORM = {
+    "connections": {"default": settings.DATABASE_URL},
+    "apps": {
+        "models": {
+            "models": TORTOISE_MODELS,
+            "default_connection": "default",
+        },
+    },
+}
 
 
 async def init_db():
@@ -24,34 +32,20 @@ async def init_db():
     except TypeError:
         await Tortoise.init(**kwargs)
 
+    conn = Tortoise.get_connection("default")
+
+    await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
+
+    # HNSW index for fast cosine similarity search on embeddings
+    # Tortoise generates the person_embeddings table schema from the model
+    await conn.execute_query("""
+        CREATE INDEX IF NOT EXISTS idx_person_embeddings_vector
+        ON person_embeddings USING hnsw (embedding vector_cosine_ops)
+    """)
+
     if settings.DEBUG:
         await Tortoise.generate_schemas()
 
 
 async def close_db():
     await Tortoise.close_connections()
-
-
-def init_vec_db():
-    db_path = settings.DATABASE_PATH
-    conn = sqlite3.connect(db_path)
-    conn.enable_load_extension(True)
-    sqlite_vec.load(conn)
-    conn.enable_load_extension(False)
-    conn.execute(
-        """
-        CREATE VIRTUAL TABLE IF NOT EXISTS PersonEmbedding 
-        USING vec0(
-            id_person_embedding INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            person INTEGER NOT NULL,
-            embedding FLOAT[512]
-        )
-        """
-    )
-    conn.commit()
-    conn.close()
-    print("PersonEmbedding table ready.")
-
-
-if __name__ == "__main__":
-    init_vec_db()

@@ -9,6 +9,9 @@ services:
     privileged: true
     environment:
       - DEBUG=1
+    depends_on:
+      db:
+        condition: service_healthy
 
   desktop:
     build: ./frontend/apps/desktop
@@ -24,3 +27,23 @@ services:
       - CI=TAURI_DEV_HOST
     depends_on:
       - api
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: secureit-db
+    environment:
+      POSTGRES_USER: secureit
+      POSTGRES_PASSWORD: secureit
+      POSTGRES_DB: secureit
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secureit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

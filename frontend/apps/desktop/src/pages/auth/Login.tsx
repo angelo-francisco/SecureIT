@@ -4,6 +4,7 @@ import logoSrc from "../../assets/logo.png";
 import { CustomizablePin } from "../../ui";
 import * as Lucide from "lucide-react";
 import { useAuth, useOnlineStatus } from "../../hooks";
+import { useToast } from "../../hooks/useToast";
 import type { Account } from "../../types";
 
 export default function Login() {
@@ -44,6 +45,7 @@ export default function Login() {
   const { isOnline, checked } = useOnlineStatus();
   const [pinError, setPinError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleAccountClick = (id: number) => {
     setPinError(false);
@@ -66,6 +68,7 @@ export default function Login() {
       navigate("/panel");
     } catch {
       setPinError(true);
+      toast("PIN incorreto. Tente novamente.", "error");
     } finally {
       setLoading(false);
     }

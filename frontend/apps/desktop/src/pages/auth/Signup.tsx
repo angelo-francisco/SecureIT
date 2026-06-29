@@ -5,6 +5,7 @@ import { FloatingLabelInput } from "../../ui";
 import { CustomizablePin } from "../../ui";
 import * as Lucide from "lucide-react";
 import { useAuth, useOnlineStatus } from "../../hooks";
+import { useToast } from "../../hooks/useToast";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function Signup() {
   const { isOnline, checked } = useOnlineStatus();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +53,7 @@ export default function Signup() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao registar. Verifique os dados.";
       setError(message);
+      toast(message, "error");
     } finally {
       setLoading(false);
     }

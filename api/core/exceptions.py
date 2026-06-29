@@ -23,4 +23,4 @@ class Forbidden(AppException):
 
 class ValidationError_(AppException):
     def __init__(self, detail: str):
-        super().__init__(detail=detail, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        super().__init__(detail=detail, status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)

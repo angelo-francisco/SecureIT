@@ -19,13 +19,15 @@ dependencies = [
     "numpy>=2.2.6",
     "orjson>=3.11.7",
     "pillow>=12.1.0",
-    "sqlean-py>=3.50.4.5",
-    "sqlite-vec>=0.1.6",
+    "asyncpg>=0.30.0",
+    "pgvector>=0.3.0",
+    "tortoise-vector>=0.2.0",
     "torch",
     "torchvision",
     "facenet-pytorch>=2.5.3",
     "opencv-python-headless>=4.13.0.92",
     "ultralytics-opencv-headless>=8.4.80",
+    "tortoise-vector>=0.2.0",
 ]
 
 [tool.taskipy.tasks]
@@ -34,3 +36,8 @@ run = "uvicorn main:app --reload"
 [tool.uv.sources]
 torch = { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp312-cp312-linux_x86_64.whl" }
 torchvision = { url = "https://download-r2.pytorch.org/whl/cpu/torchvision-0.18.1%2Bcpu-cp312-cp312-linux_x86_64.whl" }
+
+[tool.aerich]
+tortoise_orm = "core.database.TORTOISE_ORM"
+location = "./migrations"
+src_folder = "./."

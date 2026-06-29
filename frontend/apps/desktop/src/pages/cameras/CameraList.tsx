@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useCameras, useDeleteCamera } from "../../hooks";
+import { useCameras } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
-import { Button, Table, Badge, Loader, Modal, Input } from "../../ui";
+import { useCameraViewStore } from "../../stores/cameraView";
+import { Button, Table, Badge, Loader, Input } from "../../ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
 
@@ -11,17 +12,8 @@ interface CameraListProps {
 
 export default function CameraList({ onClose }: CameraListProps) {
   const [search, setSearch] = useState("");
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const { data: cameras, isLoading } = useCameras(search || undefined);
-  const deleteCamera = useDeleteCamera();
   const panelNavigate = usePanelNavigate();
-
-  const handleDelete = async () => {
-    if (deleteId) {
-      await deleteCamera.mutateAsync(deleteId);
-      setDeleteId(null);
-    }
-  };
 
   const columns = [
     {
@@ -30,7 +22,12 @@ export default function CameraList({ onClose }: CameraListProps) {
       render: (row: Record<string, unknown>) => {
         const cam = row as unknown as { id: number; get_name: string };
         return (
-          <span className="text-primary font-medium">{cam.get_name}</span>
+
+          <span className="text-primary font-medium hover:underline cursor-pointer" onClick={() => {
+            useCameraViewStore.getState().setCameraId(cam.id);
+            panelNavigate?.("camera-view");
+          }
+          }>{cam.get_name}</span>
         );
       },
     },
@@ -59,26 +56,7 @@ export default function CameraList({ onClose }: CameraListProps) {
       header: "Última actualização",
       render: (row: Record<string, unknown>) =>
         formatDateTime(row.updated_at as string),
-    },
-    {
-      key: "actions",
-      header: "Acções",
-      className: "text-center",
-      render: (row: Record<string, unknown>) => {
-        const cam = row as unknown as { id: number };
-        return (
-          <div className="flex gap-1 justify-center items-center">
-            <button
-              onClick={() => setDeleteId(cam.id)}
-              className="p-2 rounded-lg bg-surface-hover text-text-secondary hover:text-red-500 transition-colors"
-              title="Remover"
-            >
-              <Lucide.Trash size={16} />
-            </button>
-          </div>
-        );
-      },
-    },
+    }
   ];
 
   return (
@@ -142,27 +120,6 @@ export default function CameraList({ onClose }: CameraListProps) {
           </div>
         )}
       </div>
-
-      <Modal
-        open={deleteId !== null}
-        onClose={() => setDeleteId(null)}
-        className="max-w-md bg-surface-dark border border-border-dark rounded-xl p-6"
-      >
-        <h3 className="text-xl font-bold text-text mb-4">
-          Confirmar remoção
-        </h3>
-        <p className="text-text-muted mb-6">
-          Tem a certeza que deseja remover esta câmara?
-        </p>
-        <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => setDeleteId(null)}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Remover
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 }

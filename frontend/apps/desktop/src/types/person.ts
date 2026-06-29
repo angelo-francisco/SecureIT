@@ -20,12 +20,10 @@ export interface Person {
   first_name: string;
   last_name: string;
   full_name: string;
-  type: string;
   banned: boolean;
   photo?: string;
   added_at: string;
   updated_at: string;
-  get_type_display: string;
   roles?: PersonRole[];
 }
 
@@ -34,12 +32,6 @@ export interface PersonRole {
   role_id: number;
   role_name: string;
   field_values: Record<string, unknown> | null;
-}
-
-export interface Home {
-  id: number;
-  number: string;
-  street: string;
 }
 
 export interface PersonFormData {

@@ -16,16 +16,26 @@ export function PhotoCapture({ onCapture, onSearch, search }: PhotoCaptureProps)
   useEffect(() => {
     async function init() {
       try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          alert("O navegador não suporta acesso à câmera.");
+          return;
+        }
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" },
+          video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
         });
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
         }
-      } catch {
-        alert("Não foi possível acessar a câmera. Verifique as permissões.");
+      } catch (err: unknown) {
+        const msg =
+          (err as { name?: string })?.name === "NotAllowedError"
+            ? "Permissão da câmera negada. Aceite as permissões nas configurações do navegador."
+            : (err as { name?: string })?.name === "NotFoundError"
+            ? "Nenhuma câmara encontrada no dispositivo."
+            : "Não foi possível acessar a câmera. Verifique as permissões.";
+        alert(msg);
       }
     }
     init();
@@ -46,6 +56,10 @@ export function PhotoCapture({ onCapture, onSearch, search }: PhotoCaptureProps)
     canvas.getContext("2d")?.drawImage(video, 0, 0);
     onCapture(canvas.toDataURL("image/jpeg", 0.85));
     video.pause();
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
   }, [onCapture]);
 
   const replay = useCallback(() => {

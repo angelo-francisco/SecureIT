@@ -1,30 +1,20 @@
 import base64
-import sqlite3
 from io import BytesIO
 from uuid import uuid4
 
 import numpy as np
-import sqlite_vec
 import torch
 from core.config import settings
 from core.exceptions import NotFound, ValidationError_
 from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image
-from tortoise.expressions import Q
+from tortoise.expressions import Q, RawSQL
 
 from apps.people.models import (
-    Home,
     Person,
+    PersonEmbedding,
     PersonRole,
-    Resident,
-    ResidentHome,
-    Visit,
-    VisitDestiny,
-    Visitor,
-    Worker,
-    WorkerHome,
 )
-from apps.people.schemas import VALID_VISITOR_KEYS
 
 _mtcnn = None
 _resnet = None
@@ -94,12 +84,7 @@ async def list_people(
     page: int = 1,
     per_page: int = 10,
 ) -> tuple[list[Person], int]:
-    query = Person.all().prefetch_related(
-        "resident__resident_homes__home",
-        "visitor",
-        "worker__worker_homes__home",
-        "person_roles__role",
-    )
+    query = Person.all().prefetch_related("person_roles__role")
     if search_query:
         query = query.filter(
             Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query)
@@ -111,12 +96,7 @@ async def list_people(
 
 
 async def get_person(person_id: int) -> Person:
-    person = await Person.get_or_none(id=person_id).prefetch_related(
-        "resident__resident_homes__home",
-        "visitor",
-        "worker__worker_homes__home",
-        "person_roles__role",
-    )
+    person = await Person.get_or_none(id=person_id).prefetch_related("person_roles__role")
     if not person:
         raise NotFound("Pessoa não encontrada")
     return person
@@ -179,9 +159,7 @@ async def update_person(
     first_name: str | None = None,
     last_name: str | None = None,
     photo_bytes: bytes | None = None,
-    resident_data=None,
-    worker_data=None,
-    visitor_data=None,
+    roles_data: list | None = None,
 ) -> Person:
     person = await get_person(person_id)
 
@@ -201,40 +179,24 @@ async def update_person(
 
     await person.save()
 
-    if person.type == "R" and resident_data:
-        resident = await Resident.get_or_none(person=person)
-        if resident:
-            bi = resident_data.get("bi", resident.bi)
-            resident.bi = bi.upper()
-            await resident.save()
-            homes = resident_data.get("homes")
-            if homes is not None:
-                await ResidentHome.filter(resident=resident).delete()
-                for home_id in homes:
-                    await ResidentHome.create(resident=resident, home_id=home_id)
+    if roles_data is not None:
+        await PersonRole.filter(person=person).delete()
+        for role_data in roles_data:
+            role_id = role_data.get("role_id")
+            if not role_id:
+                raise ValidationError_("ID do cargo é obrigatório")
 
-    elif person.type == "W" and worker_data:
-        worker = await Worker.get_or_none(person=person)
-        if worker:
-            bi = worker_data.get("bi", worker.bi)
-            fields = worker_data.get("fields")
-            worker.bi = bi.upper()
-            if fields:
-                worker.fields = ",".join(fields)
-            await worker.save()
-            homes = worker_data.get("homes")
-            if homes is not None:
-                await WorkerHome.filter(worker=worker).delete()
-                for home_id in homes:
-                    await WorkerHome.create(worker=worker, home_id=home_id)
+            from apps.people.models import Role
+            role = await Role.get_or_none(id=role_id)
+            if not role:
+                raise ValidationError_(f"Cargo {role_id} não encontrado")
 
-    elif person.type == "V" and visitor_data:
-        visitor = await Visitor.get_or_none(person=person)
-        if visitor:
-            vt = visitor_data.get("visitor_type")
-            if vt:
-                visitor.type = vt
-                await visitor.save()
+            field_values = role_data.get("field_values") or {}
+            await PersonRole.create(
+                person=person,
+                role_id=role_id,
+                field_values=field_values,
+            )
 
     return person
 
@@ -246,58 +208,23 @@ async def delete_person(person_id: int):
     await person.delete()
 
 
-async def create_visit(
-    visitor_id: int,
-    desc: str | None = None,
-    destinies: list[int] | None = None,
-) -> Visit:
-    visitor = await Visitor.get_or_none(id=visitor_id)
-    if not visitor:
-        raise NotFound("Visitante não encontrado")
-
-    visit = await Visit.create(visitor=visitor, desc=desc)
-
-    if destinies:
-        for resident_id in destinies:
-            resident = await Resident.get_or_none(id=resident_id)
-            if resident:
-                await VisitDestiny.create(visit=visit, resident=resident)
-
-    return visit
-
-
 async def search_by_face(photo_base64: str) -> Person | None:
     embedding = generate_face_embedding(base64_str=photo_base64)
+    emb_list = np.frombuffer(embedding, dtype=np.float32).tolist()
+    emb_str = "[" + ",".join(map(str, emb_list)) + "]"
 
-    conn = sqlite3.connect(
-        str(settings.BASE_DIR / "db.sqlite3"), check_same_thread=False
+    pe = await (
+        PersonEmbedding
+        .annotate(distance=RawSQL(f"embedding <=> '{emb_str}'::vector"))
+        .order_by("distance")
+        .limit(1)
+        .select_related("person")
+        .first()
     )
-    conn.enable_load_extension(True)
-    sqlite_vec.load(conn)
-    conn.enable_load_extension(False)
 
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT PP.id
-        FROM PersonEmbedding AS PE
-        INNER JOIN people AS PP ON PE.person = PP.id
-        WHERE PE.embedding MATCH ? AND k = ?
-        ORDER BY PE.distance
-        """,
-        (embedding, 1),
-    )
-    row = cursor.fetchone()
-    conn.close()
-
-    if row:
-        return await get_person(row[0])
+    if pe:
+        return pe.person
     return None
 
 
-async def list_homes() -> list[Home]:
-    return await Home.all()
 
-
-async def list_residents() -> list[Resident]:
-    return await Resident.all().prefetch_related("person")
