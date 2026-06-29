@@ -1,0 +1,46 @@
+import { useToastStore } from "../../stores/toast";
+import * as Lucide from "lucide-react";
+
+const iconMap = {
+  success: Lucide.CheckCircle,
+  error: Lucide.AlertCircle,
+  warning: Lucide.AlertTriangle,
+  info: Lucide.Info,
+};
+
+const bgMap = {
+  success: "bg-green-500/15 border-green-500/30 text-green-400",
+  error: "bg-red-500/15 border-red-500/30 text-red-400",
+  warning: "bg-yellow-500/15 border-yellow-500/30 text-yellow-400",
+  info: "bg-primary/15 border-primary/30 text-primary",
+};
+
+export function ToastContainer() {
+  const toasts = useToastStore((s) => s.toasts);
+  const removeToast = useToastStore((s) => s.removeToast);
+
+  if (toasts.length === 0) return null;
+
+  return (
+    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      {toasts.map((toast) => {
+        const Icon = iconMap[toast.type];
+        return (
+          <div
+            key={toast.id}
+            className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-sm animate-in slide-in-from-right ${bgMap[toast.type]}`}
+          >
+            <Icon size={18} className="shrink-0 mt-0.5" />
+            <p className="text-sm flex-1">{toast.message}</p>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+            >
+              <Lucide.X size={14} />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
