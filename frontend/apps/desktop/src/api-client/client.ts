@@ -1,3 +1,6 @@
+const log = (...args: unknown[]) => console.log("[ApiClient]", ...args);
+const err = (...args: unknown[]) => console.error("[ApiClient]", ...args);
+
 export function getBearerToken(): string | null {
   return localStorage.getItem("access_token");
 }
@@ -9,6 +12,8 @@ interface RequestConfig {
   headers?: Record<string, string>;
   skipReAuth?: boolean;
 }
+
+let globalReAuthPromise: Promise<void> | null = null;
 
 class ApiClient {
   private baseUrl: string;
@@ -49,12 +54,32 @@ class ApiClient {
     });
 
     if (!res.ok) {
+      err(String(res));
+
       if (res.status === 401 && !config.skipReAuth) {
+        log(`401 on ${path} — starting/awaiting re-auth`);
         const { useReAuthStore } = await import("../stores/reauth");
         const store = useReAuthStore.getState();
-        if (!store.pending) {
-          await store.show();
+
+        if (!globalReAuthPromise) {
+          globalReAuthPromise = store
+            .show()
+            .then(() => {
+              log("Re-auth succeeded, retrying", path);
+            })
+            .catch((err: Error) => {
+              log("Re-auth failed/cancelled:", err.message);
+              throw err;
+            })
+            .finally(() => {
+              globalReAuthPromise = null;
+            });
+        } else {
+          log("Re-auth already in progress, waiting...");
         }
+
+        await globalReAuthPromise;
+        log("Retrying", path, "with refreshed token");
         return this.request<T>(path, config);
       }
 
@@ -73,6 +98,7 @@ class ApiClient {
       } catch {
         // body is not JSON
       }
+      log(`Error on ${path}:`, message);
       throw new Error(message);
     }
 

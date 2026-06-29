@@ -62,11 +62,7 @@ export default function Login() {
     setLoading(true);
     try {
       await pinLogin(account.email, pin);
-      if (remember) {
-        localStorage.setItem("remembered_account", account.email);
-      } else {
-        localStorage.removeItem("remembered_account");
-      }
+      localStorage.setItem("remembered_account", account.email);
       navigate("/panel");
     } catch {
       setPinError(true);

@@ -21,5 +21,6 @@ services:
       - /app/node_modules
     environment:
       - TAURI_DEV_HOST=0.0.0.0
+      - CI=TAURI_DEV_HOST
     depends_on:
       - api

@@ -9,10 +9,10 @@ from apps.people.router import router as people_router
 from core.config import settings
 from core.database import close_db, init_db
 from core.middleware import AuthMiddleware
-from websocket.camera_stream import CameraStreamManager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from websocket.camera_stream import CameraStreamManager
 
 
 @asynccontextmanager
@@ -22,7 +22,6 @@ async def lifespan(app: FastAPI):
     await close_db()
 
 
-
 app = FastAPI(
     title="SecureIT API",
     description="API do sistema de segurança SecureIT",
@@ -30,6 +29,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,7 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(AuthMiddleware)
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(cameras_router, prefix="/api")

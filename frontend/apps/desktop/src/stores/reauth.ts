@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+const log = (...args: unknown[]) => console.log("[ReAuthStore]", ...args);
+
 interface ReAuthState {
   pending: boolean;
   attempts: number;
@@ -18,6 +20,7 @@ export const useReAuthStore = create<ReAuthState>((set, get) => ({
   attempts: 0,
   cooldownUntil: null,
   show: () => {
+    log("show() called — pending = true");
     return new Promise<void>((resolve, reject) => {
       resolveReAuth = resolve;
       rejectReAuth = reject;
@@ -25,6 +28,7 @@ export const useReAuthStore = create<ReAuthState>((set, get) => ({
     });
   },
   dismiss: () => {
+    log("dismiss() called — rejecting and closing modal");
     rejectReAuth?.(new Error("Re-autenticação cancelada"));
     resolveReAuth = null;
     rejectReAuth = null;
@@ -32,6 +36,7 @@ export const useReAuthStore = create<ReAuthState>((set, get) => ({
   },
   fail: () => {
     const attempts = get().attempts + 1;
+    log("fail() called — attempt", attempts, "of 3");
     if (attempts >= 3) {
       set({ attempts, cooldownUntil: Date.now() + 15000 });
       setTimeout(() => set({ cooldownUntil: null, attempts: 0 }), 15000);
@@ -41,6 +46,7 @@ export const useReAuthStore = create<ReAuthState>((set, get) => ({
     return false;
   },
   succeed: () => {
+    log("succeed() called — resolving, new token saved");
     const cb = resolveReAuth;
     resolveReAuth = null;
     rejectReAuth = null;

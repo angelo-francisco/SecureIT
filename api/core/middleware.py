@@ -9,16 +9,21 @@ from core.security import decode_access_token
 
 logger = logging.getLogger("auth.middleware")
 
-PUBLIC_PREFIXES = (
-    "/api/auth/",
+PUBLIC_ENDPOINTS = {
+    "/api/auth/signup",
+    "/api/auth/login",
+    "/api/auth/pin-login",
+    "/api/auth/re-auth",
+    "/api/auth/accounts",
     "/api/health",
-)
+}
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         user: User | None = None
         path = request.url.path
+
 
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
@@ -33,18 +38,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.user = user
 
         authed = user is not None
-        is_public = path.startswith(PUBLIC_PREFIXES)
-
-        logger.critical(
-            "path=%s authed=%s user_id=%s is_public=%s",
-            path, authed, user.id if authed else None, is_public,
-        )
+        is_public = path in PUBLIC_ENDPOINTS
 
         if not authed and not is_public:
-            logger.critical(">>> BLOQUEANDO 401: %s", path)
             return JSONResponse(
                 status_code=401,
-                content={"detail": "UNAUTHENTICATED"},
+                content={"detail": "USER_IS_NOT_AUTHENTICATED"},
             )
 
         response = await call_next(request)

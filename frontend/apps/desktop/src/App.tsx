@@ -5,8 +5,7 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { ReAuthModal } from "./components/ReAuthModal";
 import { authApi } from "./api-client";
 import { useAuthStore } from "./hooks";
-import splashGif from "./assets/splash.gif";
-import { Loader } from "lucide-react";
+
 
 function App() {
   const [phase, setPhase] = useState<"splash" | "loader" | "fading" | "app">("splash");
@@ -85,15 +84,20 @@ function App() {
     <>
       {phase !== "app" && (
         <div
-          className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-bg transition-opacity duration-500 ${
-            phase === "fading" ? "opacity-0" : "opacity-100"
-          }`}
+          className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center text-center bg-bg transition-opacity duration-500 ${phase === "fading" ? "opacity-0" : "opacity-100"
+            }`}
         >
-          {phase === "splash" ? (
-            <img src={splashGif} alt="Loading" className="w-150 h-auto object-cover" />
-          ) : (
-            <Loader size={28} className="animate-spin text-primary" />
-          )}
+          <div className="flex items-center justify-center gap-1 mb-2">
+              <img
+                src={"/logo.png"}
+                alt="Logo"
+                className="relative w-15 h-auto z-10"
+              />
+            <h1 className="text-text font-display text-4xl font-bold">
+              SecureIT
+            </h1>
+          </div>
+          <div className="LinearLoader"></div>
         </div>
       )}
 

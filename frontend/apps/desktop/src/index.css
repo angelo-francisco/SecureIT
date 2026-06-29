@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 @import "./theme/tokens.css";
+@import "./App.css";
 
 @theme {
   --color-primary: #2C9ED5;
