@@ -218,6 +218,9 @@ async def update_person(
                 field_values=field_values,
             )
 
+    # Refresh the relation cache so the serializer sees the updated roles
+    await person.fetch_related("person_roles__role")
+
     return person
 
 

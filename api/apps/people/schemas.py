@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 VALID_FIELD_TYPES = {"text", "number", "select", "boolean", "date"}
 
@@ -76,6 +76,18 @@ class PersonRoleResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+    @model_validator(mode="before")
+    @classmethod
+    def extract_role_name(cls, v: object) -> object:
+        # When coming from ORM, role_name is accessed via the nested role relation
+        if hasattr(v, "role") and hasattr(v.role, "name"):
+            try:
+                # Tortoise ORM: .role may be a coroutine or already resolved
+                v.__dict__["role_name"] = v.role.name
+            except Exception:
+                pass
+        return v
+
 
 class PersonCreate(BaseModel):
     first_name: str
@@ -103,6 +115,21 @@ class PersonResponse(BaseModel):
     roles: list[PersonRoleResponse] = []
 
     model_config = {"from_attributes": True}
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_person_roles(cls, v: object) -> object:
+        # When coming from ORM, roles are stored in the person_roles related manager
+        if hasattr(v, "person_roles") and not isinstance(v, dict):
+            try:
+                fetched = v.person_roles  # already prefetched as a list
+                if hasattr(fetched, "related_objects"):
+                    v.__dict__["roles"] = fetched.related_objects
+                elif isinstance(fetched, list):
+                    v.__dict__["roles"] = fetched
+            except Exception:
+                pass
+        return v
 
 
 class FaceSearchRequest(BaseModel):
