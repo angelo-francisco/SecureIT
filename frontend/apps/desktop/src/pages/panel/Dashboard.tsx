@@ -62,7 +62,7 @@ export default function Dashboard() {
       const key = connectCamera(
         camera.id,
         camera.video_source,
-        camera.face_recognition ? "area-detection" : "camera",
+        camera.face_recognition ? "face-recognition" : "area-detection",
         (blob) => {
           const img = imageRefs.current.get(`cam-${camera.id}`);
           if (img) {

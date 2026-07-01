@@ -45,7 +45,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
       const key = connectCamera(
         cam.id,
         cam.video_source,
-        "camera",
+        "area-detection",
         (blob) => {
           const img = imageRefs.current.get(`cam-${cam.id}`);
           if (img) {

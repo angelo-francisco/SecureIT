@@ -12,7 +12,8 @@ from core.middleware import AuthMiddleware
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from websocket.camera_stream import CameraStreamManager
+from websocket.area_detection import AreaDetectionManager
+from websocket.face_recognition import FaceRecognitionManager
 
 
 @asynccontextmanager
@@ -54,9 +55,14 @@ async def health():
     return {"status": "ok"}
 
 
-@app.websocket("/ws/camera")
-async def camera_websocket(websocket: WebSocket):
-    manager = CameraStreamManager(websocket)
+@app.websocket("/ws/area-detection")
+async def area_detection_ws(websocket: WebSocket):
+    manager = AreaDetectionManager(websocket)
+    await manager.handle()
+
+@app.websocket("/ws/face-recognition")
+async def face_recognition_ws(websocket: WebSocket):
+    manager = FaceRecognitionManager(websocket)
     await manager.handle()
 
 
