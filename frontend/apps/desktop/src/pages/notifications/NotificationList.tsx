@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNotifications, useDeleteNotification } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
+import { getApiBaseUrl } from "../../api-client/client";
 import { Loader, Pagination, Modal } from "../../ui";
 import * as Lucide from "lucide-react";
 
@@ -96,7 +97,7 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                   <div className="flex items-center gap-4 mt-2">
                     {n.photo && (
                       <button
-                        onClick={() => setImageModal(n.photo || null)}
+                        onClick={() => setImageModal(`${getApiBaseUrl()}/media/${n.photo}`)}
                         className="text-xs text-primary hover:underline"
                       >
                         Ver Imagem
