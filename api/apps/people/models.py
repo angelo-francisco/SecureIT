@@ -36,7 +36,6 @@ class Person(models.Model):
     id = fields.IntField(pk=True)
     first_name = fields.CharField(max_length=30)
     last_name = fields.CharField(max_length=30)
-    type = fields.CharField(max_length=1)
     photo = fields.CharField(max_length=255, null=True)
     added_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)

@@ -18,7 +18,7 @@ interface FormErrors {
 export default function PersonNew({ onClose }: PersonNewProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const { photo, showCapture, startCapture, handleCapture } = usePhotoCapture();
+  const { photo, showCapture, setShowCapture, startCapture, handleCapture } = usePhotoCapture();
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [roleFields, setRoleFields] = useState<Record<string, Record<string, unknown>>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,7 +110,10 @@ export default function PersonNew({ onClose }: PersonNewProps) {
         </div>
         {onClose && (
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              onClose();
+            }}
             className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
           >
             <Lucide.X size={16} strokeWidth={2} />
@@ -294,7 +297,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
         </div>
       </div>
 
-      {showCapture && <PhotoCapture onCapture={handleCapture} />}
+      {showCapture && <PhotoCapture onCapture={handleCapture} onCancel={() => setShowCapture(false)} />}
     </form>
   );
 }

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useRoles, useCreateRole, useUpdateRole, useDeleteRole } from "../../hooks";
-import { useToast } from "../../hooks/useToast";
+import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { Button, Input, Loader, Modal } from "../../ui";
+import { useToast } from "../../hooks/useToast";
 import * as Lucide from "lucide-react";
 
 interface RoleManagementProps {
@@ -40,6 +41,7 @@ const emptyForm: FormState = {
 
 export default function RoleManagement({ onClose }: RoleManagementProps) {
   const { data: roles, isLoading } = useRoles();
+  const panelNavigate = usePanelNavigate();
   const createRole = useCreateRole();
   const updateRole = useUpdateRole();
   const deleteRole = useDeleteRole();
@@ -140,6 +142,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
       <div className="flex-1 h-full flex flex-col relative overflow-hidden">
         <header className="flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
+
             <Lucide.FolderTree size={22} className="text-primary" />
             <h2 className="text-xl font-bold text-text">
               {form.id ? "Editar Cargo" : "Novo Cargo"}
@@ -305,6 +308,13 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
     <div className="flex-1 h-full flex flex-col relative overflow-hidden">
       <header className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => panelNavigate?.("people")}
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+          >
+            <Lucide.ArrowLeft size={16} strokeWidth={2} />
+          </button>
           <Lucide.FolderTree size={22} className="text-primary" />
           <h2 className="text-xl font-bold text-text">Gerenciar Cargos</h2>
         </div>

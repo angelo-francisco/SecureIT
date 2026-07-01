@@ -45,13 +45,6 @@ export default function Settings({ onClose }: SettingsProps) {
     <form onSubmit={handleSubmit} className="flex-1 h-full flex flex-col relative overflow-hidden">
       <header className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
-          >
-            <Lucide.ArrowLeft size={16} strokeWidth={2} />
-          </button>
           <Lucide.Settings size={22} className="text-primary" />
           <h2 className="text-xl font-bold text-text">Configurações</h2>
         </div>
@@ -59,6 +52,17 @@ export default function Settings({ onClose }: SettingsProps) {
           <Button type="submit" size="sm" icon={<Lucide.Save size={14} />}>
             Salvar
           </Button>
+          {onClose && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onClose();
+            }}
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+          >
+            <Lucide.X size={16} strokeWidth={2} />
+          </button>
+        )}
         </div>
       </header>
 

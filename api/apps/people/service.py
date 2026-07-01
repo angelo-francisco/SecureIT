@@ -11,11 +11,7 @@ from PIL import Image, ImageOps
 from tortoise import Tortoise
 from tortoise.expressions import Q, RawSQL
 
-from apps.people.models import (
-    Person,
-    PersonEmbedding,
-    PersonRole,
-)
+from apps.people.models import Person, PersonEmbedding, PersonRole, Role
 
 _mtcnn = None
 _resnet = None
@@ -50,7 +46,7 @@ def base64_to_bytes(photo_b64: str) -> bytes:
 def generate_face_embedding(
     base64_str: str | None = None,
     image: Image.Image | None = None,
-    detect_face: bool = True
+    detect_face: bool = True,
 ) -> bytes:
 
     if base64_str:
@@ -70,7 +66,9 @@ def generate_face_embedding(
             )
     else:
         mtcnn_instance = _get_mtcnn()
-        img_size = mtcnn_instance.image_size if hasattr(mtcnn_instance, "image_size") else 160
+        img_size = (
+            mtcnn_instance.image_size if hasattr(mtcnn_instance, "image_size") else 160
+        )
         face_img = image.resize((img_size, img_size), Image.BILINEAR)
         face = torch.tensor(np.array(face_img), dtype=torch.float32).permute(2, 0, 1)
         face = (face - 127.5) / 128.0
@@ -88,11 +86,11 @@ def treat_photo(base64_photo: str) -> tuple[bytes, Image.Image]:
         raise ValidationError_("Capture o rosto do indivíduo, por favor.")
     image = Image.open(BytesIO(image_data))
     image = ImageOps.exif_transpose(image)
-    
+
     buffer = BytesIO()
     image.save(buffer, format="JPEG")
     photo_bytes = buffer.getvalue()
-    
+
     return photo_bytes, image
 
 
@@ -113,7 +111,9 @@ async def list_people(
 
 
 async def get_person(person_id: int) -> Person:
-    person = await Person.get_or_none(id=person_id).prefetch_related("person_roles__role")
+    person = await Person.get_or_none(id=person_id).prefetch_related(
+        "person_roles__role"
+    )
     if not person:
         raise NotFound("Pessoa não encontrada")
     return person
@@ -123,7 +123,6 @@ async def create_person(
     first_name: str,
     last_name: str,
     photo_bytes: bytes,
-    user_id: int | None = None,
     roles_data: list | None = None,
 ) -> Person:
     if not first_name or not last_name:
@@ -139,35 +138,46 @@ async def create_person(
     person = await Person.create(
         first_name=first_name,
         last_name=last_name,
-        type="U",
         photo=photo_path,
     )
 
     if roles_data:
-        for role_data in roles_data:
-            role_id = role_data.get("role_id")
+        all_person_role = []
+        role_ids = []
+
+        for role in roles_data:
+            role_id = role.get("role_id")
             if not role_id:
                 raise ValidationError_("ID do cargo é obrigatório")
+            role_ids.append(role_id)
 
-            from apps.people.models import Role
-            role = await Role.get_or_none(id=role_id)
+        roles_fetched = await Role.filter(id__in=role_ids).prefetch_related("fields")
+        roles_map = {role.id: role for role in roles_fetched}
+
+        for role_data in roles_data:
+            field_values = role_data.get("field_values") or {}
+            role_id = role_data.get("role_id")
+            role = roles_map.get(role_id)
+
             if not role:
                 raise ValidationError_(f"Cargo {role_id} não encontrado")
 
-            field_values = role_data.get("field_values") or {}
 
-            if role.fields:
-                await role.fetch_related("fields")
-                for field in role.fields:
-                    if field.required and field.label not in field_values:
-                        raise ValidationError_(f"O campo '{field.label}' é obrigatório para o cargo '{role.name}'")
-
-            await PersonRole.create(
-                person=person,
-                role_id=role_id,
-                field_values=field_values,
+            if role.fields:  # type: ignore
+                for field in role.fields:  # type: ignore
+                    if field.required and field_values.get(field.label):
+                        raise ValidationError_(
+                            f"O campo '{field.label}' é obrigatório para o cargo '{role.name}'"
+                        )
+            all_person_role.append(
+                PersonRole(
+                    person=person,
+                    role_id=role_id,
+                    field_values=field_values,
+                )
             )
 
+        await PersonRole.bulk_create(all_person_role)
     return person
 
 
@@ -207,6 +217,7 @@ async def update_person(
                 raise ValidationError_("ID do cargo é obrigatório")
 
             from apps.people.models import Role
+
             role = await Role.get_or_none(id=role_id)
             if not role:
                 raise ValidationError_(f"Cargo {role_id} não encontrado")
@@ -256,8 +267,7 @@ async def search_by_face(photo_base64: str) -> Person | None:
     emb_str = "[" + ",".join(map(str, emb_list)) + "]"
 
     pe = await (
-        PersonEmbedding
-        .annotate(distance=RawSQL(f"embedding <=> '{emb_str}'::vector"))
+        PersonEmbedding.annotate(distance=RawSQL(f"embedding <=> '{emb_str}'::vector"))
         .order_by("distance")
         .limit(1)
         .select_related("person")
@@ -267,6 +277,3 @@ async def search_by_face(photo_base64: str) -> Person | None:
     if pe:
         return pe.person
     return None
-
-
-

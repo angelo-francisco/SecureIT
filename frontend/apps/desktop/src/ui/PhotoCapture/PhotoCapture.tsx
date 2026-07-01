@@ -4,90 +4,158 @@ import * as Lucide from "lucide-react";
 
 interface PhotoCaptureProps {
   onCapture: (dataUrl: string) => void;
-  onSearch?: () => void;
-  search?: boolean;
+  onCancel?: () => void;
 }
-
-export function PhotoCapture({ onCapture, onSearch, search }: PhotoCaptureProps) {
+export function PhotoCapture({
+  onCapture,
+  onCancel,
+}: PhotoCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  useEffect(() => {
-    async function init() {
-      try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          alert("O navegador não suporta acesso à câmera.");
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
-        });
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-      } catch (err: unknown) {
-        const msg =
-          (err as { name?: string })?.name === "NotAllowedError"
-            ? "Permissão da câmera negada. Aceite as permissões nas configurações do navegador."
-            : (err as { name?: string })?.name === "NotFoundError"
-            ? "Nenhuma câmara encontrada no dispositivo."
-            : "Não foi possível acessar a câmera. Verifique as permissões.";
-        alert(msg);
+  const startCamera = useCallback(async () => {
+    try {
+      if (streamRef.current) return;
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        },
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+    } catch (err) {
+      if (!(err instanceof DOMException)) {
+        alert("Erro desconhecido ao acessar a câmera.");
+        return;
+      }
+
+      switch (err.name) {
+        case "NotAllowedError":
+          alert("Permissão da câmera negada.");
+          break;
+
+        case "NotFoundError":
+          alert("Nenhuma câmera encontrada.");
+          break;
+
+        case "NotReadableError":
+          alert("A câmera já está sendo utilizada por outro aplicativo.");
+          break;
+
+        case "AbortError":
+          console.warn("Inicialização da câmera abortada.");
+          break;
+
+        default:
+          console.error(err);
+          alert(err.message);
       }
     }
-    init();
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-      }
-    };
   }, []);
+
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (cancelled) return;
+      await startCamera();
+    })();
+
+    return () => {
+      cancelled = true;
+      stopCamera();
+    };
+  }, [startCamera, stopCamera]);
 
   const capturePhoto = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video?.videoWidth || !canvas) return;
+
+    if (!video || !canvas) return;
+    if (video.videoWidth === 0) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext("2d")?.drawImage(video, 0, 0);
-    onCapture(canvas.toDataURL("image/jpeg", 0.85));
-    video.pause();
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-  }, [onCapture]);
 
-  const replay = useCallback(() => {
-    videoRef.current?.play();
-  }, []);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+
+    onCapture(canvas.toDataURL("image/jpeg", 0.9));
+
+    stopCamera();
+  }, [onCapture, stopCamera]);
+
+  const replay = useCallback(async () => {
+    stopCamera();
+    await startCamera();
+  }, [startCamera, stopCamera]);
+
+  const handleCancel = useCallback(() => {
+    stopCamera();
+    if (onCancel) {
+      onCancel();
+    }
+  }, [stopCamera, onCancel]);
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center backdrop-blur-sm z-[1000]">
-      <div className="max-w-3xl p-5 py-10 rounded-xl space-y-4 w-full flex flex-col justify-center items-center gap-3">
-        <canvas ref={canvasRef} className="hidden rounded-lg" />
+    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-[1000]">
+      <div className="max-w-3xl w-full p-5 py-10 flex flex-col items-center gap-4">
+
+        <canvas ref={canvasRef} className="hidden" />
+
         <video
           ref={videoRef}
           autoPlay
           playsInline
+          muted
           className="aspect-video rounded-lg"
         />
+
         <div className="flex gap-2">
-          <Button variant="danger" onClick={capturePhoto} icon={<Lucide.Camera />}>
+          <Button
+            variant="danger"
+            onClick={capturePhoto}
+            icon={<Lucide.Camera />}
+          >
             Capturar
           </Button>
-          <Button variant="secondary" onClick={replay} icon={<Lucide.RotateCcw />}>
+
+          <Button
+            variant="secondary"
+            onClick={replay}
+            icon={<Lucide.RotateCcw />}
+          >
             Repetir
           </Button>
-          {search && (
-            <Button variant="ghost" onClick={onSearch} icon={<Lucide.Search />}>
-              Pesquisar
-            </Button>
-          )}
+
+
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            icon={<Lucide.X />}
+          >
+            Cancelar
+          </Button>
         </div>
       </div>
     </div>
@@ -95,15 +163,30 @@ export function PhotoCapture({ onCapture, onSearch, search }: PhotoCaptureProps)
 }
 
 export function usePhotoCapture() {
-  const [photo, setPhoto] = useState<string>("");
+  const [photo, setPhoto] = useState("");
   const [showCapture, setShowCapture] = useState(false);
 
-  const startCapture = useCallback(() => setShowCapture(true), []);
+  const startCapture = useCallback(() => {
+    setShowCapture(true);
+  }, []);
 
   const handleCapture = useCallback((dataUrl: string) => {
     setPhoto(dataUrl);
     setShowCapture(false);
   }, []);
 
-  return { photo, setPhoto, showCapture, startCapture, handleCapture };
+  const cancelCapture = useCallback(() => {
+    setShowCapture(false);
+  }, []);
+
+
+  return {
+    photo,
+    setPhoto,
+    showCapture,
+    setShowCapture,
+    startCapture,
+    handleCapture,
+    cancelCapture,
+  };
 }
