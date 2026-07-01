@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useCamera, useUpdateCamera, useDeleteCamera } from "../../hooks";
 import { useCameraViewStore } from "../../stores/cameraView";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
+import { useToast } from "../../hooks/useToast";
 import { Button, Loader, Input, Toggle, Modal } from "../../ui";
 import * as Lucide from "lucide-react";
 
@@ -11,6 +12,7 @@ export default function CameraView() {
   const updateCamera = useUpdateCamera();
   const deleteCamera = useDeleteCamera();
   const panelNavigate = usePanelNavigate();
+  const { toast } = useToast();
 
   const [editingField, setEditingField] = useState<"name" | "location" | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -41,6 +43,7 @@ export default function CameraView() {
     });
     setEditingField(null);
     setEditValue("");
+    toast("As alterações apenas serão aplicadas após recarregar a página (F5)", "warning");
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -62,6 +65,7 @@ export default function CameraView() {
       id: camera.id,
       data: { face_recognition: checked },
     });
+    toast("As alterações apenas serão aplicadas após recarregar a página (F5)", "warning");
   }
 
   return (
