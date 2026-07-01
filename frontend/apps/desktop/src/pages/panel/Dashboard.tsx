@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import { FloatingNavbar } from "../../components/FloatingNavbar";
 import type { ViewId } from "../../components/FloatingNavbar";
-import { PanelSheet } from "../../ui";
+import { PanelSheet, Loader } from "../../ui";
 import { PanelNavContext } from "../../hooks/usePanelNavigate";
 import { connectCamera, disconnectCamera } from "../../lib/websocket";
+import { useCameras } from "../../hooks";
 import * as Lucide from "lucide-react";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
@@ -35,27 +36,33 @@ const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
   settings: { title: "Configurações", icon: <Lucide.Settings size={20} />, component: Settings },
 };
 
-const mockCameras: {
-  id: number;
-  name: string;
-  video_source: string;
-  connection_type: string;
-  detectionline: boolean;
-}[] = [];
-
 export default function Dashboard() {
   const [activeView, setActiveView] = useState<ViewId | null>(null);
   const imageRefs = useRef<Map<string, HTMLImageElement>>(new Map());
+  const { data: cameras, isLoading } = useCameras();
+  const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
+  const wsKeysRef = useRef<string[]>([]);
+  const cameraIdsRef = useRef<string>("");
 
   useEffect(() => {
-    const wsKeys: string[] = [];
-    mockCameras.forEach((camera) => {
+    const ids = cameras?.map((c) => c.id).sort().join(",") || "";
+    if (cameraIdsRef.current === ids && wsKeysRef.current.length > 0) return;
+    cameraIdsRef.current = ids;
+
+    wsKeysRef.current.forEach(disconnectCamera);
+    wsKeysRef.current = [];
+
+    if (!cameras || cameras.length === 0) return;
+
+    const keys: string[] = [];
+
+    cameras.forEach((camera) => {
       if (!camera.video_source) return;
 
       const key = connectCamera(
         camera.id,
         camera.video_source,
-        camera.detectionline ? "area-detection" : "camera",
+        camera.face_recognition ? "area-detection" : "camera",
         (blob) => {
           const img = imageRefs.current.get(`cam-${camera.id}`);
           if (img) {
@@ -63,27 +70,51 @@ export default function Dashboard() {
             img.src = url;
             setTimeout(() => URL.revokeObjectURL(url), 1000);
           }
-        }
+          setConnectingCameras((prev) => {
+            const next = new Set(prev);
+            next.delete(camera.id);
+            return next;
+          });
+        },
+        undefined,
+        undefined,
+        `dash-${camera.id}`,
       );
-      wsKeys.push(key);
+      keys.push(key);
     });
 
+    wsKeysRef.current = keys;
+
+    setConnectingCameras(
+      new Set(cameras.filter((c) => c.video_source).map((c) => c.id))
+    );
+
     return () => {
-      wsKeys.forEach(disconnectCamera);
+      wsKeysRef.current.forEach(disconnectCamera);
+      wsKeysRef.current = [];
     };
-  }, []);
+  }, [cameras]);
 
   const close = () => setActiveView(null);
 
   const viewEntry = activeView ? viewConfig[activeView] : undefined;
   const ViewComponent = viewEntry?.component;
 
+  if (isLoading) {
+    return (
+      <div className="w-full h-[100vh] flex flex-col items-center justify-center bg-black gap-4">
+        <Loader w={48} />
+        <span className="text-lg text-white/60">A carregar câmeras...</span>
+      </div>
+    );
+  }
+
   return (
     <>
       <audio id="soundEffect" src="/static/sounds/notify.mp3" preload="auto" />
 
       <div className={`w-full min-h-screen bg-black relative z-10 transition-all duration-500 ${activeView ? "brightness-[0.3]" : ""}`}>
-        {mockCameras.length === 0 ? (
+        {!cameras || cameras.length === 0 ? (
           <div className="w-full h-[100vh] flex flex-col items-center justify-center bg-black">
             <Lucide.VideoOff size={60} className="text-white" />
             <span className="text-xl text-white mt-4">
@@ -94,11 +125,11 @@ export default function Dashboard() {
           <main
             className="w-full h-[100vh] bg-black grid"
             style={{
-              gridTemplateColumns: `repeat(${Math.min(mockCameras.length, 3)}, 1fr)`,
-              gridTemplateRows: `repeat(${Math.ceil(mockCameras.length / 3)}, 1fr)`,
+              gridTemplateColumns: `repeat(${Math.min(cameras.length, 3)}, 1fr)`,
+              gridTemplateRows: `repeat(${Math.ceil(cameras.length / 3)}, 1fr)`,
             }}
           >
-            {mockCameras.map((camera) => (
+            {cameras.map((camera) => (
               <div
                 key={camera.id}
                 className="border border-gray-600 relative bg-black w-full h-full overflow-hidden"
@@ -111,6 +142,11 @@ export default function Dashboard() {
                     className="relative w-full h-full object-contain bg-black"
                     alt={camera.name}
                   />
+                  {connectingCameras.has(camera.id) && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+                      <Loader w={36} />
+                    </div>
+                  )}
                   <span className="px-2 absolute bottom-1 right-1 text-lg text-green-400 font-mono">
                     {camera.name}
                   </span>

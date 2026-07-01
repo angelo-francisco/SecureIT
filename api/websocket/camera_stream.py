@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from asyncio import CancelledError, create_task, sleep as async_sleep
 from datetime import datetime, timezone
 from time import time
@@ -9,6 +10,8 @@ import cv2
 import numpy as np
 from fastapi import WebSocket, WebSocketDisconnect
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 from apps.cameras.models import Camera as CameraModel
 from apps.notifications.models import Notification
@@ -42,12 +45,18 @@ class CameraStreamManager:
 
     async def authenticate(self, token: str | None) -> bool:
         if not token:
+            logger.warning("[auth] token is None")
             return False
         payload = decode_access_token(token)
         if payload is None:
+            logger.warning("[auth] token decode failed")
             return False
         self.user_id = int(payload.get("sub", 0))
-        return self.user_id > 0
+        if self.user_id <= 0:
+            logger.warning("[auth] invalid user_id=%s", self.user_id)
+            return False
+        logger.info("[auth] authenticated user_id=%s", self.user_id)
+        return True
 
     async def load_user_confs(self):
         confs = await Configuration.get_or_none(user_id=self.user_id)
@@ -92,12 +101,31 @@ class CameraStreamManager:
         now = datetime.now(timezone.utc).time()
         if not self.mst or not self.met:
             return True
-        if self.mst <= self.met:
-            return self.mst <= now < self.met
-        return now >= self.mst or now < self.met
+        try:
+            start = datetime.strptime(self.mst, "%H:%M").time()
+            end = datetime.strptime(self.met, "%H:%M").time()
+        except (ValueError, TypeError):
+            return True
+        if start <= end:
+            return start <= now < end
+        return now >= start or now < end
 
     def check_cooldown(self) -> bool:
         return time() - self.last_alert > self.alert_cooldown
+
+    async def _cleanup(self, cancel_task: bool = True, reason: str = ""):
+        logger.info("[cleanup] reason=%s user=%s camera=%s", reason, self.user_id, self.camera_id)
+        self.running = False
+        if self.camera_service:
+            logger.info("[cleanup] releasing camera resource")
+            self.camera_service.stop()
+            self.camera_service = None
+        if cancel_task and self.task:
+            logger.info("[cleanup] cancelling stream task")
+            self.task.cancel()
+            self.task = None
+        await self.update_camera_status(False)
+        logger.info("[cleanup] done user=%s camera=%s", self.user_id, self.camera_id)
 
     async def stream_face_recognition(self):
         last_faces: list[dict] = []
@@ -158,7 +186,12 @@ class CameraStreamManager:
 
                 await async_sleep(1 / self.fps)
         except CancelledError:
-            pass
+            logger.info("[stream_fr] cancelled user=%s camera=%s", self.user_id, self.camera_id)
+        except WebSocketDisconnect:
+            logger.info("[stream_fr] websocket disconnect user=%s camera=%s", self.user_id, self.camera_id)
+            await self._cleanup(cancel_task=False, reason="ws_disconnect")
+        finally:
+            self.running = False
 
     async def stream(self):
         try:
@@ -187,13 +220,22 @@ class CameraStreamManager:
                             )
                             self.last_alert = time()
                             self.last_people_count = people
-                except Exception:
+                except Exception as e:
+                    logger.warning(
+                        "[stream] get_frame failed user=%s camera=%s err=%s",
+                        self.user_id, self.camera_id, e,
+                    )
                     break
 
                 await self.websocket.send_bytes(frame)
                 await async_sleep(1 / self.fps)
         except CancelledError:
-            pass
+            logger.info("[stream] cancelled user=%s camera=%s", self.user_id, self.camera_id)
+        except WebSocketDisconnect:
+            logger.info("[stream] websocket disconnect user=%s camera=%s", self.user_id, self.camera_id)
+            await self._cleanup(cancel_task=False, reason="ws_disconnect")
+        finally:
+            self.running = False
 
     async def handle(self):
         query_params = self.websocket.query_params
@@ -201,11 +243,19 @@ class CameraStreamManager:
         camera_id = query_params.get("camera_id")
         video_source = query_params.get("vs")
 
+        logger.info(
+            "[handle] new connection camera_id=%s vs=%s",
+            camera_id, video_source,
+        )
+
         if not await self.authenticate(token):
+            logger.warning("[handle] auth failed, closing camera_id=%s", camera_id)
             await self.websocket.close(code=4001)
             return
 
         await self.websocket.accept()
+        logger.info("[handle] websocket accepted user=%s", self.user_id)
+
         await self.load_user_confs()
 
         try:
@@ -214,12 +264,24 @@ class CameraStreamManager:
                 await self.get_camera_queryset(self.camera_id)
                 if self.camera_object:
                     self.face_recognition = self.camera_object.face_recognition
+                    logger.info(
+                        "[handle] camera found id=%s face_recognition=%s",
+                        self.camera_id, self.face_recognition,
+                    )
+                else:
+                    logger.warning("[handle] camera not found id=%s", self.camera_id)
 
+            logger.info(
+                "[handle] opening camera vs=%s fps=%s",
+                video_source, self.fps,
+            )
             self.camera_service = CameraService(
                 video_source, fps=self.fps, allow_draw=self.allow_draw
             )
             await self.update_camera_status(True)
-        except Exception:
+            logger.info("[handle] camera opened successfully")
+        except Exception as e:
+            logger.error("[handle] failed to open camera: %s", e)
             await self.update_camera_status(False)
             await self.websocket.close(code=4001)
             return
@@ -227,14 +289,15 @@ class CameraStreamManager:
         self.running = True
         stream_fn = self.stream_face_recognition if self.face_recognition else self.stream
         self.task = create_task(stream_fn())
+        logger.info("[handle] stream task started user=%s camera=%s", self.user_id, self.camera_id)
 
         try:
-            while self.running:
-                await async_sleep(1)
+            await self.task
+            logger.info("[handle] stream task finished normally user=%s camera=%s", self.user_id, self.camera_id)
+        except CancelledError:
+            logger.info("[handle] handle cancelled user=%s camera=%s", self.user_id, self.camera_id)
         except WebSocketDisconnect:
-            self.running = False
-            if self.camera_service:
-                self.camera_service.stop()
-            if self.task:
-                self.task.cancel()
-            await self.update_camera_status(False)
+            logger.info("[handle] websocket disconnect (outer) user=%s camera=%s", self.user_id, self.camera_id)
+        finally:
+            await self._cleanup(reason="handle_end")
+            logger.info("[handle] connection fully closed user=%s camera=%s", self.user_id, self.camera_id)

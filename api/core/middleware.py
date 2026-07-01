@@ -9,15 +9,7 @@ from core.security import decode_access_token
 
 logger = logging.getLogger("auth.middleware")
 
-PUBLIC_ENDPOINTS = {
-    "/api/auth/signup",
-    "/api/auth/login",
-    "/api/auth/pin-login",
-    "/api/auth/re-auth",
-    "/api/auth/accounts",
-    "/media/people_photos/"
-    "/api/health",
-}
+PUBLIC_PREFIXES = {"/api/auth/", "/media/", "/ws/", "/api/health"}
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -39,7 +31,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.user = user
 
         authed = user is not None
-        is_public = path in PUBLIC_ENDPOINTS or path.startswith('/media/')
+        is_public = any(path.startswith(p) for p in PUBLIC_PREFIXES)
         
         if not authed and not is_public:
             return JSONResponse(

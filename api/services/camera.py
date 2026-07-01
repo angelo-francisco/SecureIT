@@ -1,9 +1,12 @@
+import logging
 from threading import Thread
 from time import sleep
 
 import cv2
 
 from services.yolo import YOLOService
+
+logger = logging.getLogger(__name__)
 
 
 class CameraService:
@@ -18,20 +21,33 @@ class CameraService:
         if isinstance(video_source, str) and video_source.isdigit():
             video_source = int(video_source)
 
-        self.video = cv2.VideoCapture(video_source)
-
-        if not self.video.isOpened():
-            raise RuntimeError("Erro ao abrir câmara")
+        for attempt in range(3):
+            self.video = cv2.VideoCapture(video_source)
+            if self.video.isOpened():
+                logger.info("camera opened on attempt %d source=%s", attempt + 1, video_source)
+                break
+            logger.warning("camera NOT opened attempt %d source=%s", attempt + 1, video_source)
+            self.video.release()
+            sleep(0.5)
+        else:
+            logger.error("camera failed after 3 attempts source=%s", video_source)
+            raise RuntimeError("Erro ao abrir câmara após várias tentativas")
 
         self.grabbed, self.frame = self.video.read()
+        if not self.grabbed:
+            logger.warning("first frame not grabbed source=%s", video_source)
         self.thread = Thread(target=self.update, daemon=True)
         self.thread.start()
+        logger.info("capture thread started source=%s", video_source)
 
     def stop(self) -> None:
+        logger.info("stopping camera service")
         self.running = False
 
         if self.video.isOpened():
             self.video.release()
+            logger.info("camera released")
+            sleep(0.3)
 
     def get_frame(self, detect: bool = True) -> tuple[bytes, int]:
         frame = self.frame
