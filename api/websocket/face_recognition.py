@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError, create_task, sleep as async_sleep
+from time import time
 
 import cv2
 import numpy as np
@@ -32,7 +33,9 @@ class FaceRecognitionManager:
         self.camera_id = None
         self.frame_index = 0
         self.fps = 15
-        self.detect_every = 3
+        self.detect_every = 10
+        self._notified: dict[int, float] = {}
+        self._match_cooldown = 30
 
     async def _cleanup(self, reason: str = ""):
         logger.info("[fr] cleanup reason=%s user=%s camera=%s", reason, self.user_id, self.camera_id)
@@ -51,7 +54,7 @@ class FaceRecognitionManager:
         try:
             while self.running:
                 self.frame_index += 1
-                detect = self.frame_index % (self.detect_every * 5) == 0
+                detect = self.frame_index % self.detect_every == 0
 
                 frame = self.camera_service.frame
                 if frame is None:
@@ -94,6 +97,18 @@ class FaceRecognitionManager:
 
                 if detect and faces:
                     await self.ws.send_text(json.dumps({"type": "faces", "faces": faces}))
+                    now = time()
+                    for f in faces:
+                        pid = f.get("person_id")
+                        if pid and (pid not in self._notified or now - self._notified[pid] > self._match_cooldown):
+                            self._notified[pid] = now
+                            await self.ws.send_text(json.dumps({
+                                "type": "face_match",
+                                "person_id": pid,
+                                "name": f.get("name"),
+                                "camera_id": self.camera_id,
+                                "camera_name": self.camera.name if self.camera else None,
+                            }))
 
                 await async_sleep(1 / self.fps)
         except CancelledError:

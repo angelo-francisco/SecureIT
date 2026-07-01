@@ -45,3 +45,5 @@ export { Pagination } from "./Pagination/Pagination";
 export { PanelSheet } from "./PanelSheet/PanelSheet";
 export { Toggle } from "./Toggle/Toggle";
 export { ToastContainer } from "./Toast/Toast";
+export { InspectorPanel } from "./InspectorPanel/InspectorPanel";
+export { PersonInspector } from "./InspectorPanel/PersonInspector";

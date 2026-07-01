@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import { FloatingNavbar } from "../../components/FloatingNavbar";
 import type { ViewId } from "../../components/FloatingNavbar";
-import { PanelSheet, Loader } from "../../ui";
+import { PanelSheet, Loader, InspectorPanel, PersonInspector } from "../../ui";
+import { useToastStore } from "../../stores/toast";
 import { PanelNavContext } from "../../hooks/usePanelNavigate";
 import { connectCamera, disconnectCamera } from "../../lib/websocket";
 import { useCameras } from "../../hooks";
@@ -38,11 +39,13 @@ const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
 
 export default function Dashboard() {
   const [activeView, setActiveView] = useState<ViewId | null>(null);
+  const [inspectedPersonId, setInspectedPersonId] = useState<number | null>(null);
   const imageRefs = useRef<Map<string, HTMLImageElement>>(new Map());
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
   const wsKeysRef = useRef<string[]>([]);
   const cameraIdsRef = useRef<string>("");
+  const addToast = useToastStore((s) => s.addToast);
 
   useEffect(() => {
     const ids = cameras?.map((c) => c.id).sort().join(",") || "";
@@ -58,6 +61,19 @@ export default function Dashboard() {
 
     cameras.forEach((camera) => {
       if (!camera.video_source) return;
+
+      const onMessage = camera.face_recognition
+        ? (data: Record<string, unknown>) => {
+            if (data.type === "face_match") {
+              addToast(
+                `Rosto de ${data.name ?? "desconhecido"} encontrado!`,
+                "info",
+                6000,
+                () => setInspectedPersonId(data.person_id as number),
+              );
+            }
+          }
+        : undefined;
 
       const key = connectCamera(
         camera.id,
@@ -76,7 +92,7 @@ export default function Dashboard() {
             return next;
           });
         },
-        undefined,
+        onMessage,
         undefined,
         `dash-${camera.id}`,
       );
@@ -171,6 +187,19 @@ export default function Dashboard() {
           {ViewComponent && <ViewComponent onClose={close} />}
         </PanelSheet>
       </PanelNavContext.Provider>
+
+      <InspectorPanel
+        open={inspectedPersonId !== null}
+        onClose={() => setInspectedPersonId(null)}
+        title="Detalhes da Pessoa"
+      >
+        {inspectedPersonId !== null && (
+          <PersonInspector
+            personId={inspectedPersonId}
+            onClose={() => setInspectedPersonId(null)}
+          />
+        )}
+      </InspectorPanel>
     </>
   );
 }
