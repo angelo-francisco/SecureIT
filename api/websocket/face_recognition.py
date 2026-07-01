@@ -53,7 +53,11 @@ class FaceRecognitionManager:
                 self.frame_index += 1
                 detect = self.frame_index % (self.detect_every * 5) == 0
 
-                frame, _ = self.camera_service.get_frame(detect=False)
+                frame = self.camera_service.frame
+                if frame is None:
+                    await async_sleep(1 / self.fps)
+                    continue
+
                 faces: list[dict] = []
 
                 if detect:
