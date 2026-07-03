@@ -45,17 +45,18 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
               title={navbarHidden ? "Mostrar navbar" : "Ocultar navbar"}
             >
               {navbarHidden ? (
-                <Lucide.ChevronUp size={16} />
+                <Lucide.PanelBottom size={16} />
               ) : (
-                <Lucide.ChevronDown size={16} />
+                <Lucide.PanelBottomClose size={16} />
               )}
             </button>
           )}
           {events.length > 0 && (
             <button
               onClick={clearEvents}
-              className="text-xs text-text-muted hover:text-white transition-colors px-1.5 py-1"
+              className="flex items-center gap-1 text-xs text-text-muted hover:text-white transition-colors px-1.5 py-1"
             >
+              <Lucide.Trash2 size={13} />
               Limpar
             </button>
           )}
