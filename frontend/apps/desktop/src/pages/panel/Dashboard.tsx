@@ -44,8 +44,9 @@ export default function Dashboard() {
   const imageRefs = useRef<Map<string, HTMLImageElement>>(new Map());
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
-  const [faceSidebarOpen, setFaceSidebarOpen] = useState(false);
   const wsKeysRef = useRef<string[]>([]);
+
+  const hasFaceRecognition = cameras?.some((c) => c.face_recognition) ?? false;
 
   const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
 
@@ -150,11 +151,11 @@ export default function Dashboard() {
     <>
       <audio id="soundEffect" src="/static/sounds/notify.mp3" preload="auto" />
 
-      <div className={`flex ${faceSidebarOpen ? "" : ""}`}>
+      <div className="flex">
         <div
           className={`min-h-screen bg-black relative z-10 transition-all duration-500 ${
             activeView ? "brightness-[0.3]" : ""
-          } ${faceSidebarOpen ? "flex-1 min-w-0" : "w-full"}`}
+          } ${hasFaceRecognition ? "flex-1 min-w-0" : "w-full"}`}
         >
           {!cameras || cameras.length === 0 ? (
             <div className="w-full h-[100vh] flex flex-col items-center justify-center bg-black">
@@ -199,7 +200,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {faceSidebarOpen && (
+        {hasFaceRecognition && (
           <FaceSidebar
             onInspectPerson={(pid) => setInspectedPersonId(pid)}
           />
@@ -211,8 +212,6 @@ export default function Dashboard() {
         onSelect={(view) =>
           setActiveView((prev) => (prev === view ? null : view))
         }
-        faceSidebarOpen={faceSidebarOpen}
-        onFaceSidebarToggle={() => setFaceSidebarOpen((prev) => !prev)}
       />
 
       <PanelNavContext.Provider
