@@ -60,10 +60,13 @@ export default function Dashboard() {
     cameras.forEach((camera) => {
       if (!camera.video_source) return;
 
-      const faceThrottle = new Map<string, number>();
+      let lastFaceKey = "";
       const onMessage = camera.face_recognition
         ? (data: Record<string, unknown>) => {
             if (data.type === "face_match" && data.person_id) {
+              const key = `known-${data.person_id}`;
+              if (key === lastFaceKey) return;
+              lastFaceKey = key;
               useFaceEventsStore.getState().addEvent({
                 person_id: data.person_id as number,
                 name: data.name as string | null,
@@ -77,10 +80,9 @@ export default function Dashboard() {
               const now = Date.now();
               for (const f of data.faces as Record<string, unknown>[]) {
                 const pid = f.person_id as number | null;
-                const key = `${camera.id}-${pid ?? "unk"}`;
-                const last = faceThrottle.get(key) ?? 0;
-                if (now - last < 5000) continue;
-                faceThrottle.set(key, now);
+                const key = pid ? `known-${pid}` : "unknown";
+                if (key === lastFaceKey) continue;
+                lastFaceKey = key;
                 useFaceEventsStore.getState().addEvent({
                   person_id: pid,
                   name: f.name as string | null,
