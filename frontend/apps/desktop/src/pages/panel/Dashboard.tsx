@@ -44,18 +44,15 @@ export default function Dashboard() {
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
   const wsKeysRef = useRef<string[]>([]);
-  const cameraIdsRef = useRef<string>("");
   const addToast = useToastStore((s) => s.addToast);
 
+  const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
+
   useEffect(() => {
-    const ids = cameras?.map((c) => c.id).sort().join(",") || "";
-    if (cameraIdsRef.current === ids && wsKeysRef.current.length > 0) return;
-    cameraIdsRef.current = ids;
+    if (!cameras || cameras.length === 0) return;
 
     wsKeysRef.current.forEach(disconnectCamera);
     wsKeysRef.current = [];
-
-    if (!cameras || cameras.length === 0) return;
 
     const keys: string[] = [];
 
@@ -106,10 +103,9 @@ export default function Dashboard() {
     );
 
     return () => {
-      wsKeysRef.current.forEach(disconnectCamera);
-      wsKeysRef.current = [];
+      keys.forEach(disconnectCamera);
     };
-  }, [cameras]);
+  }, [cameraIds]);
 
   const close = () => setActiveView(null);
 

@@ -35,8 +35,14 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
     }));
   }, []);
 
+  const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
+
   useEffect(() => {
     if (!cameras || !Array.isArray(cameras)) return;
+
+    wsKeysRef.current.forEach(disconnectCamera);
+    wsKeysRef.current = [];
+
     const keys: string[] = [];
 
     cameras.forEach((cam) => {
@@ -72,7 +78,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
     return () => {
       keys.forEach(disconnectCamera);
     };
-  }, [cameras, updateCamState]);
+  }, [cameraIds, updateCamState]);
 
   const selectedCam = cameras?.find((c) => c.id === selectedCamera);
   const regularCams = cameras?.filter((c) => !c.face_recognition) ?? [];
