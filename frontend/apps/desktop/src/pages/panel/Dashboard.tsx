@@ -41,6 +41,7 @@ const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
 export default function Dashboard() {
   const [activeView, setActiveView] = useState<ViewId | null>(null);
   const [inspectedPersonId, setInspectedPersonId] = useState<number | null>(null);
+  const [navbarHidden, setNavbarHidden] = useState(false);
   const imageRefs = useRef<Map<string, HTMLImageElement>>(new Map());
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
@@ -70,7 +71,7 @@ export default function Dashboard() {
           useDetectionEventsStore.getState().addEvent({
             type: "people",
             person_id: null,
-            name: `${data.people} pessoa(s)`,
+            name: `${data.people} pessoa(s) detetada(s)`,
             unknown: false,
             confidence: null,
             camera_id: camera.id,
@@ -217,16 +218,20 @@ export default function Dashboard() {
         {hasCameras && (
           <DetectionSidebar
             onInspectPerson={(pid) => setInspectedPersonId(pid)}
+            navbarHidden={navbarHidden}
+            onToggleNavbar={() => setNavbarHidden((v) => !v)}
           />
         )}
       </div>
 
-      <FloatingNavbar
-        activeView={activeView}
-        onSelect={(view) =>
-          setActiveView((prev) => (prev === view ? null : view))
-        }
-      />
+      {!navbarHidden && (
+        <FloatingNavbar
+          activeView={activeView}
+          onSelect={(view) =>
+            setActiveView((prev) => (prev === view ? null : view))
+          }
+        />
+      )}
 
       <PanelNavContext.Provider
         value={(view) => setActiveView(view as ViewId)}

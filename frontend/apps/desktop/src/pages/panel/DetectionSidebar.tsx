@@ -4,6 +4,8 @@ import * as Lucide from "lucide-react";
 
 interface DetectionSidebarProps {
   onInspectPerson?: (personId: number) => void;
+  navbarHidden?: boolean;
+  onToggleNavbar?: () => void;
 }
 
 function eventTitle(
@@ -12,10 +14,10 @@ function eventTitle(
   name: string | null,
 ): string {
   if (type === "face") return unknown ? "Desconhecido" : name ?? "Desconhecido";
-  return "Pessoa(s) detectada(s)";
+  return name ?? "Pessoa(s) detectada(s)";
 }
 
-export default function DetectionSidebar({ onInspectPerson }: DetectionSidebarProps) {
+export default function DetectionSidebar({ onInspectPerson, navbarHidden, onToggleNavbar }: DetectionSidebarProps) {
   const events = useDetectionEventsStore((s) => s.events);
   const clearEvents = useDetectionEventsStore((s) => s.clearEvents);
   const listRef = useRef<HTMLDivElement>(null);
@@ -35,14 +37,29 @@ export default function DetectionSidebar({ onInspectPerson }: DetectionSidebarPr
             {events.length}
           </span>
         </div>
-        {events.length > 0 && (
-          <button
-            onClick={clearEvents}
-            className="text-xs text-text-muted hover:text-white transition-colors"
-          >
-            Limpar
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {onToggleNavbar && (
+            <button
+              onClick={onToggleNavbar}
+              className="p-1.5 rounded-lg text-text-muted hover:text-white hover:bg-white/[0.06] transition-colors"
+              title={navbarHidden ? "Mostrar navbar" : "Ocultar navbar"}
+            >
+              {navbarHidden ? (
+                <Lucide.ChevronUp size={16} />
+              ) : (
+                <Lucide.ChevronDown size={16} />
+              )}
+            </button>
+          )}
+          {events.length > 0 && (
+            <button
+              onClick={clearEvents}
+              className="text-xs text-text-muted hover:text-white transition-colors px-1.5 py-1"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
       </div>
 
       <div ref={listRef} className="flex-1 overflow-y-auto">
