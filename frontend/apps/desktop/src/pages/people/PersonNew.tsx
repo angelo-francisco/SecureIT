@@ -1,4 +1,4 @@
-import { useState, useMemo, type FormEvent } from "react";
+import { useState, useMemo, useRef, type FormEvent } from "react";
 import { useCreatePerson, useRoles } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
@@ -24,6 +24,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createPerson = useCreatePerson();
   const { data: roles } = useRoles();
@@ -247,26 +248,64 @@ export default function PersonNew({ onClose }: PersonNewProps) {
             {photo ? (
               <div className="relative w-40 h-40 rounded-xl overflow-hidden border border-border">
                 <img src={photo} alt="Preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => { startCapture(); }}
-                  className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
-                >
-                  <Lucide.RefreshCw size={14} />
-                </button>
+                <div className="absolute bottom-2 right-2 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    title="Upload foto"
+                  >
+                    <Lucide.Upload size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { startCapture(); }}
+                    className="p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    title="Capturar da câmara"
+                  >
+                    <Lucide.RefreshCw size={14} />
+                  </button>
+                </div>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={startCapture}
-                className={`flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
-                  errors.photo ? "border-red-400 text-red-400" : "border-border"
-                }`}
-              >
-                <Lucide.Camera size={18} />
-                Capturar fotografia
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={startCapture}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
+                    errors.photo ? "border-red-400 text-red-400" : "border-border"
+                  }`}
+                >
+                  <Lucide.Camera size={18} />
+                  Capturar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
+                    errors.photo ? "border-red-400 text-red-400" : "border-border"
+                  }`}
+                >
+                  <Lucide.Upload size={18} />
+                  Upload
+                </button>
+              </div>
             )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  handleCapture(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+              }}
+              className="hidden"
+            />
             {errors.photo && <p className="text-xs text-red-400">{errors.photo}</p>}
           </div>
 
