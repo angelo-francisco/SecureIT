@@ -9,6 +9,7 @@ import numpy as np
 from fastapi import WebSocket, WebSocketDisconnect
 from PIL import Image
 
+from apps.face_detection.service import save_face_detection
 from apps.people.service import search_by_embedding
 from services.facenet import detect_faces_in_frame
 from websocket.helpers import (
@@ -36,6 +37,8 @@ class FaceRecognitionManager:
         self.detect_every = 10
         self._notified: dict[int, float] = {}
         self._match_cooldown = 30
+        self._last_unknown_save: float = 0
+        self._unknown_save_cooldown = 60
 
     async def _cleanup(self, reason: str = ""):
         logger.info("[fr] cleanup reason=%s user=%s camera=%s", reason, self.user_id, self.camera_id)
@@ -93,7 +96,8 @@ class FaceRecognitionManager:
                         cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
                 _, jpeg = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
-                await self.ws.send_bytes(jpeg.tobytes())
+                jpeg_bytes = jpeg.tobytes()
+                await self.ws.send_bytes(jpeg_bytes)
 
                 if detect and faces:
                     await self.ws.send_text(json.dumps({"type": "faces", "faces": faces}))
@@ -109,6 +113,28 @@ class FaceRecognitionManager:
                                 "camera_id": self.camera_id,
                                 "camera_name": self.camera.name if self.camera else None,
                             }))
+                            await save_face_detection(
+                                user_id=self.user_id,
+                                person_id=pid,
+                                name=f.get("name"),
+                                unknown=False,
+                                confidence=f.get("confidence", 0.0),
+                                camera_id=self.camera_id,
+                                camera_name=self.camera.name if self.camera else None,
+                                frame_bytes=jpeg_bytes,
+                            )
+                        elif not pid and now - self._last_unknown_save > self._unknown_save_cooldown:
+                            self._last_unknown_save = now
+                            await save_face_detection(
+                                user_id=self.user_id,
+                                person_id=None,
+                                name=None,
+                                unknown=True,
+                                confidence=f.get("confidence", 0.0),
+                                camera_id=self.camera_id,
+                                camera_name=self.camera.name if self.camera else None,
+                                frame_bytes=jpeg_bytes,
+                            )
 
                 await async_sleep(1 / self.fps)
         except CancelledError:

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from apps.auth.router import router as auth_router
 from apps.cameras.router import router as cameras_router
+from apps.face_detection.router import router as face_detection_router
 from apps.notifications.router import router as notifications_router
 from apps.panel.router import router as panel_router
 from apps.people.router import router as people_router
@@ -41,6 +42,7 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(cameras_router, prefix="/api")
+app.include_router(face_detection_router, prefix="/api")
 app.include_router(notifications_router, prefix="/api")
 app.include_router(panel_router, prefix="/api")
 app.include_router(people_router, prefix="/api")

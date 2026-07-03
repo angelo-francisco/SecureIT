@@ -5,6 +5,7 @@ from .config import settings
 TORTOISE_MODELS = [
     "apps.auth.models",
     "apps.cameras.models",
+    "apps.face_detection.models",
     "apps.notifications.models",
     "apps.panel.models",
     "apps.people.models",

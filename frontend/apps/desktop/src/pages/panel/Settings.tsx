@@ -2,12 +2,16 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useSettings, useUpdateSettings } from "../../hooks";
 import { LucideInput, Loader, Button } from "../../ui";
 import * as Lucide from "lucide-react";
+import DetectedFaces from "./DetectedFaces";
 
 interface SettingsProps {
   onClose?: () => void;
 }
 
+type Tab = "config" | "faces";
+
 export default function Settings({ onClose }: SettingsProps) {
+  const [tab, setTab] = useState<Tab>("config");
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
 
@@ -41,6 +45,48 @@ export default function Settings({ onClose }: SettingsProps) {
     });
   };
 
+  if (tab === "faces") {
+    return (
+      <div className="flex-1 h-full flex flex-col relative overflow-hidden">
+        <header className="flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <Lucide.ScanFace size={22} className="text-primary" />
+            <h2 className="text-xl font-bold text-text">Rostos Detectados</h2>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+            >
+              <Lucide.X size={16} strokeWidth={2} />
+            </button>
+          )}
+        </header>
+
+        <div className="flex gap-1 mt-4 p-1 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit">
+          <button
+            onClick={() => setTab("config")}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors text-text-muted hover:text-text"
+          >
+            <Lucide.Settings size={14} />
+            Configurações
+          </button>
+          <button
+            onClick={() => setTab("faces")}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-primary/15 text-primary"
+          >
+            <Lucide.ScanFace size={14} />
+            Rostos Detectados
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto mt-4">
+          <DetectedFaces />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex-1 h-full flex flex-col relative overflow-hidden">
       <header className="flex items-center justify-between shrink-0">
@@ -65,6 +111,23 @@ export default function Settings({ onClose }: SettingsProps) {
         )}
         </div>
       </header>
+
+      <div className="flex gap-1 mt-4 p-1 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit">
+        <button
+          onClick={() => setTab("config")}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-primary/15 text-primary"
+        >
+          <Lucide.Settings size={14} />
+          Configurações
+        </button>
+        <button
+          onClick={() => setTab("faces")}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors text-text-muted hover:text-text"
+        >
+          <Lucide.ScanFace size={14} />
+          Rostos Detectados
+        </button>
+      </div>
 
       <div className="flex-1 overflow-y-auto mt-6 flex justify-center">
         {isLoading ? (
