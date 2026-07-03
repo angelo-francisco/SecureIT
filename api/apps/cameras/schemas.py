@@ -1,7 +1,12 @@
+import logging
+import os
+
 from pydantic import BaseModel, field_validator
 from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 
 from .models import Camera
+
+logger = logging.getLogger(__name__)
 
 CameraDetail = pydantic_model_creator(Camera, name="CameraDetail")
 ListCameras = pydantic_queryset_creator(Camera, name="ListCameras")
@@ -37,6 +42,11 @@ class CameraCreate(BaseModel):
             stream_url = v.get("stream_url", "")
             if not stream_url.startswith(("http://", "https://", "rtsp://")):
                 raise ValueError("URL inválida. Use HTTP, HTTPS ou RTSP.")
+        if connection_type == "L":
+            path = v.get("path", "")
+            if path and any(path.lower().endswith(ext) for ext in (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")):
+                if not os.path.isfile(path):
+                    logger.warning("demo video file not found on disk: %s", path)
         return v
 
 

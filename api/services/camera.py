@@ -1,4 +1,5 @@
 import logging
+import re
 from threading import Thread
 from time import sleep
 
@@ -8,18 +9,26 @@ from services.yolo import YOLOService
 
 logger = logging.getLogger(__name__)
 
+VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
+
+
+def _is_video_file(path: str) -> bool:
+    return any(path.lower().endswith(ext) for ext in VIDEO_EXTENSIONS)
+
 
 class CameraService:
     def __init__(self, video_source, fps=15, allow_draw=True):
-        self.fps = fps
         self.allow_draw = allow_draw
         self.running = True
+        self.is_video_file = False
 
         if not video_source:
             raise RuntimeError("Origem do vídeo não informada")
 
         if isinstance(video_source, str) and video_source.isdigit():
             video_source = int(video_source)
+        elif isinstance(video_source, str) and _is_video_file(video_source):
+            self.is_video_file = True
 
         for attempt in range(3):
             self.video = cv2.VideoCapture(video_source)
@@ -32,6 +41,15 @@ class CameraService:
         else:
             logger.error("camera failed after 3 attempts source=%s", video_source)
             raise RuntimeError("Erro ao abrir câmara após várias tentativas")
+
+        if self.is_video_file:
+            raw_fps = self.video.get(cv2.CAP_PROP_FPS)
+            if raw_fps > 0:
+                fps = raw_fps
+            self.total_frames = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
+            logger.info("video file fps=%.2f total_frames=%s", fps, self.total_frames)
+
+        self.fps = fps
 
         self.grabbed, self.frame = self.video.read()
         if not self.grabbed:
@@ -70,6 +88,12 @@ class CameraService:
         while self.running:
             grabbed, frame = self.video.read()
             if not grabbed:
-                break
+                if self.is_video_file:
+                    self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    grabbed, frame = self.video.read()
+                    if not grabbed:
+                        break
+                else:
+                    break
             self.frame = frame
             sleep(1 / self.fps)

@@ -4,9 +4,17 @@ from tortoise import fields, models
 
 from enum import StrEnum
 
+VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
+
+
+def _is_video_file(path: str) -> bool:
+    return any(path.lower().endswith(ext) for ext in VIDEO_EXTENSIONS)
+
+
 class CameraType(StrEnum):
     LOCAL = "L"
     WIFI = "W"
+
 
 class Camera(models.Model):
     id = fields.IntField(pk=True)
@@ -20,7 +28,7 @@ class Camera(models.Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    class Meta: # type: ignore
+    class Meta:  # type: ignore
         table = "cameras"
 
     class PydanticMeta:
@@ -37,6 +45,8 @@ class Camera(models.Model):
             return self.connection_info.get("stream_url")
         if self.connection_type == "L":
             path = self.connection_info.get("path", "")
+            if _is_video_file(path):
+                return path
             if system() == "Linux":
                 return path.split("video")[-1] if "video" in path else path
             return self.connection_info.get("id", path)

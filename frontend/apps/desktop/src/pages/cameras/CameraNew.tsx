@@ -14,6 +14,7 @@ interface FormErrors {
   location?: string;
   streamUrl?: string;
   localCamera?: string;
+  demoPath?: string;
 }
 
 export default function CameraNew({ onClose }: CameraNewProps) {
@@ -22,6 +23,8 @@ export default function CameraNew({ onClose }: CameraNewProps) {
   const [connectionType, setConnectionType] = useState("L");
   const [streamUrl, setStreamUrl] = useState("");
   const [localCamera, setLocalCamera] = useState("");
+  const [isDemo, setIsDemo] = useState(false);
+  const [demoPath, setDemoPath] = useState("");
   const [faceRecognition, setFaceRecognition] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const createCamera = useCreateCamera();
@@ -48,8 +51,11 @@ export default function CameraNew({ onClose }: CameraNewProps) {
         errs.streamUrl = "URL inválida. Use HTTP, HTTPS ou RTSP.";
       }
     }
-    if (connectionType === "L" && !localCamera) {
+    if (connectionType === "L" && !isDemo && !localCamera) {
       errs.localCamera = "Selecione um dispositivo local";
+    }
+    if (connectionType === "L" && isDemo && !demoPath.trim()) {
+      errs.demoPath = "O caminho do ficheiro é obrigatório";
     }
     return errs;
   }
@@ -63,7 +69,7 @@ export default function CameraNew({ onClose }: CameraNewProps) {
     if (connectionType === "W") {
       connection_info.stream_url = streamUrl.trim();
     } else if (connectionType === "L") {
-      connection_info.path = localCamera;
+      connection_info.path = isDemo ? demoPath.trim() : localCamera;
     }
     try {
       await createCamera.mutateAsync({
@@ -153,23 +159,52 @@ export default function CameraNew({ onClose }: CameraNewProps) {
           )}
 
           {connectionType === "L" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-text">Dispositivo Local</label>
-              <Select value={localCamera} onValueChange={(v) => { setLocalCamera(v); setErrors((prev) => ({ ...prev, localCamera: undefined })); }}>
-                <SelectTrigger className={errors.localCamera ? "border-red-400" : ""}>
-                  <SelectValue placeholder={localDevices ? "Selecione uma câmara" : "Carregando..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {localDevices?.map((cam) => (
-                    <SelectItem key={cam.path} value={cam.path}>
-                      {cam.name} ({cam.path})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.localCamera && <p className="text-xs text-red-400">{errors.localCamera}</p>}
-              <p className="text-xs text-text-muted">Dispositivo conectado fisicamente ao servidor</p>
-            </div>
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-text">Modo de Captura</label>
+                <Select value={isDemo ? "demo" : "camera"} onValueChange={(v) => { setIsDemo(v === "demo"); setErrors({}); }}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="camera">Câmara Real</SelectItem>
+                    <SelectItem value="demo">Ficheiro de Vídeo (Demo)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {isDemo ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text">Caminho do Ficheiro</label>
+                  <Input
+                    placeholder="/home/user/videos/demo.mp4"
+                    value={demoPath}
+                    onChange={(e) => { setDemoPath(e.target.value); setErrors((prev) => ({ ...prev, demoPath: undefined })); }}
+                    className={errors.demoPath ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
+                  />
+                  {errors.demoPath && <p className="text-xs text-red-400">{errors.demoPath}</p>}
+                  <p className="text-xs text-text-muted">Caminho absoluto no servidor para o ficheiro de vídeo (.mp4, .avi, .mov)</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text">Dispositivo Local</label>
+                  <Select value={localCamera} onValueChange={(v) => { setLocalCamera(v); setErrors((prev) => ({ ...prev, localCamera: undefined })); }}>
+                    <SelectTrigger className={errors.localCamera ? "border-red-400" : ""}>
+                      <SelectValue placeholder={localDevices ? "Selecione uma câmara" : "Carregando..."} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {localDevices?.map((cam) => (
+                        <SelectItem key={cam.path} value={cam.path}>
+                          {cam.name} ({cam.path})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.localCamera && <p className="text-xs text-red-400">{errors.localCamera}</p>}
+                  <p className="text-xs text-text-muted">Dispositivo conectado fisicamente ao servidor</p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="pt-4 border-t border-border">
