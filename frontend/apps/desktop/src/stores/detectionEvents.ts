@@ -1,25 +1,28 @@
 import { create } from "zustand";
 
-export interface FaceEvent {
+export type DetectionType = "face" | "people";
+
+export interface DetectionEvent {
   id: number;
+  type: DetectionType;
   person_id: number | null;
   name: string | null;
   unknown: boolean;
-  confidence: number;
+  confidence: number | null;
   camera_id: number;
   camera_name: string;
   timestamp: number;
 }
 
-interface FaceEventsState {
-  events: FaceEvent[];
-  addEvent: (event: Omit<FaceEvent, "id">) => void;
+interface DetectionEventsState {
+  events: DetectionEvent[];
+  addEvent: (event: Omit<DetectionEvent, "id">) => void;
   clearEvents: () => void;
 }
 
 let nextId = 0;
 
-export const useFaceEventsStore = create<FaceEventsState>((set) => ({
+export const useDetectionEventsStore = create<DetectionEventsState>((set) => ({
   events: [],
   addEvent: (event) =>
     set((state) => ({

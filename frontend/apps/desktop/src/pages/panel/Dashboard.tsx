@@ -5,13 +5,13 @@ import { PanelSheet, Loader, InspectorPanel, PersonInspector } from "../../ui";
 import { PanelNavContext } from "../../hooks/usePanelNavigate";
 import { connectCamera, disconnectCamera } from "../../lib/websocket";
 import { useCameras } from "../../hooks";
-import { useFaceEventsStore } from "../../stores/faceEvents";
+import { useDetectionEventsStore } from "../../stores/detectionEvents";
 import * as Lucide from "lucide-react";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
 import CameraView from "../cameras/CameraView";
 import CameraMonitor from "./CameraMonitor";
-import FaceSidebar from "./FaceSidebar";
+import DetectionSidebar from "./DetectionSidebar";
 import PeopleList from "../people/PeopleList";
 import PersonNew from "../people/PersonNew";
 import PersonView from "../people/PersonView";
@@ -46,7 +46,7 @@ export default function Dashboard() {
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
   const wsKeysRef = useRef<string[]>([]);
 
-  const hasFaceRecognition = cameras?.some((c) => c.face_recognition) ?? false;
+  const hasCameras = cameras && cameras.some((c) => c.video_source);
 
   const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
 
@@ -61,42 +61,56 @@ export default function Dashboard() {
     cameras.forEach((camera) => {
       if (!camera.video_source) return;
 
-      let lastFaceKey = "";
-      const onMessage = camera.face_recognition
-        ? (data: Record<string, unknown>) => {
-            if (data.type === "face_match" && data.person_id) {
-              const key = `known-${data.person_id}`;
-              if (key === lastFaceKey) return;
-              lastFaceKey = key;
-              useFaceEventsStore.getState().addEvent({
-                person_id: data.person_id as number,
-                name: data.name as string | null,
-                unknown: false,
-                confidence: 1.0,
-                camera_id: camera.id,
-                camera_name: camera.name,
-                timestamp: Date.now(),
-              });
-            } else if (data.type === "faces" && Array.isArray(data.faces)) {
-              const now = Date.now();
-              for (const f of data.faces as Record<string, unknown>[]) {
-                const pid = f.person_id as number | null;
-                const key = pid ? `known-${pid}` : "unknown";
-                if (key === lastFaceKey) continue;
-                lastFaceKey = key;
-                useFaceEventsStore.getState().addEvent({
-                  person_id: pid,
-                  name: f.name as string | null,
-                  unknown: !pid,
-                  confidence: f.confidence as number,
-                  camera_id: camera.id,
-                  camera_name: camera.name,
-                  timestamp: now,
-                });
-              }
-            }
+      let lastKey = "";
+      const onMessage = (data: Record<string, unknown>) => {
+        if (data.type === "notification" && typeof data.people === "number") {
+          const key = `people-${data.people}`;
+          if (key === lastKey) return;
+          lastKey = key;
+          useDetectionEventsStore.getState().addEvent({
+            type: "people",
+            person_id: null,
+            name: `${data.people} pessoa(s)`,
+            unknown: false,
+            confidence: null,
+            camera_id: camera.id,
+            camera_name: camera.name,
+            timestamp: Date.now(),
+          });
+        } else if (data.type === "face_match" && data.person_id) {
+          const key = `known-${data.person_id}`;
+          if (key === lastKey) return;
+          lastKey = key;
+          useDetectionEventsStore.getState().addEvent({
+            type: "face",
+            person_id: data.person_id as number,
+            name: data.name as string | null,
+            unknown: false,
+            confidence: null,
+            camera_id: camera.id,
+            camera_name: camera.name,
+            timestamp: Date.now(),
+          });
+        } else if (data.type === "faces" && Array.isArray(data.faces)) {
+          const now = Date.now();
+          for (const f of data.faces as Record<string, unknown>[]) {
+            const pid = f.person_id as number | null;
+            const key = pid ? `known-${pid}` : "unknown";
+            if (key === lastKey) continue;
+            lastKey = key;
+            useDetectionEventsStore.getState().addEvent({
+              type: "face",
+              person_id: pid,
+              name: f.name as string | null,
+              unknown: !pid,
+              confidence: f.confidence as number,
+              camera_id: camera.id,
+              camera_name: camera.name,
+              timestamp: now,
+            });
           }
-        : undefined;
+        }
+      };
 
       const key = connectCamera(
         camera.id,
@@ -155,7 +169,7 @@ export default function Dashboard() {
         <div
           className={`min-h-screen bg-black relative z-10 transition-all duration-500 ${
             activeView ? "brightness-[0.3]" : ""
-          } ${hasFaceRecognition ? "flex-1 min-w-0" : "w-full"}`}
+          } ${hasCameras ? "flex-1 min-w-0" : "w-full"}`}
         >
           {!cameras || cameras.length === 0 ? (
             <div className="w-full h-[100vh] flex flex-col items-center justify-center bg-black">
@@ -200,8 +214,8 @@ export default function Dashboard() {
           )}
         </div>
 
-        {hasFaceRecognition && (
-          <FaceSidebar
+        {hasCameras && (
+          <DetectionSidebar
             onInspectPerson={(pid) => setInspectedPersonId(pid)}
           />
         )}
