@@ -2,15 +2,16 @@ import { useEffect, useRef, useState, type ComponentType } from "react";
 import { FloatingNavbar } from "../../components/FloatingNavbar";
 import type { ViewId } from "../../components/FloatingNavbar";
 import { PanelSheet, Loader, InspectorPanel, PersonInspector } from "../../ui";
-import { useToastStore } from "../../stores/toast";
 import { PanelNavContext } from "../../hooks/usePanelNavigate";
 import { connectCamera, disconnectCamera } from "../../lib/websocket";
 import { useCameras } from "../../hooks";
+import { useFaceEventsStore } from "../../stores/faceEvents";
 import * as Lucide from "lucide-react";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
 import CameraView from "../cameras/CameraView";
 import CameraMonitor from "./CameraMonitor";
+import FaceSidebar from "./FaceSidebar";
 import PeopleList from "../people/PeopleList";
 import PersonNew from "../people/PersonNew";
 import PersonView from "../people/PersonView";
@@ -43,8 +44,8 @@ export default function Dashboard() {
   const imageRefs = useRef<Map<string, HTMLImageElement>>(new Map());
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
+  const [faceSidebarOpen, setFaceSidebarOpen] = useState(false);
   const wsKeysRef = useRef<string[]>([]);
-  const addToast = useToastStore((s) => s.addToast);
 
   const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
 
@@ -59,15 +60,37 @@ export default function Dashboard() {
     cameras.forEach((camera) => {
       if (!camera.video_source) return;
 
+      const faceThrottle = new Map<string, number>();
       const onMessage = camera.face_recognition
         ? (data: Record<string, unknown>) => {
-            if (data.type === "face_match") {
-              addToast(
-                `Rosto de ${data.name ?? "desconhecido"} encontrado!`,
-                "info",
-                6000,
-                () => setInspectedPersonId(data.person_id as number),
-              );
+            if (data.type === "face_match" && data.person_id) {
+              useFaceEventsStore.getState().addEvent({
+                person_id: data.person_id as number,
+                name: data.name as string | null,
+                unknown: false,
+                confidence: 1.0,
+                camera_id: camera.id,
+                camera_name: camera.name,
+                timestamp: Date.now(),
+              });
+            } else if (data.type === "faces" && Array.isArray(data.faces)) {
+              const now = Date.now();
+              for (const f of data.faces as Record<string, unknown>[]) {
+                const pid = f.person_id as number | null;
+                const key = `${camera.id}-${pid ?? "unk"}`;
+                const last = faceThrottle.get(key) ?? 0;
+                if (now - last < 5000) continue;
+                faceThrottle.set(key, now);
+                useFaceEventsStore.getState().addEvent({
+                  person_id: pid,
+                  name: f.name as string | null,
+                  unknown: !pid,
+                  confidence: f.confidence as number,
+                  camera_id: camera.id,
+                  camera_name: camera.name,
+                  timestamp: now,
+                });
+              }
             }
           }
         : undefined;
@@ -125,47 +148,59 @@ export default function Dashboard() {
     <>
       <audio id="soundEffect" src="/static/sounds/notify.mp3" preload="auto" />
 
-      <div className={`w-full min-h-screen bg-black relative z-10 transition-all duration-500 ${activeView ? "brightness-[0.3]" : ""}`}>
-        {!cameras || cameras.length === 0 ? (
-          <div className="w-full h-[100vh] flex flex-col items-center justify-center bg-black">
-            <Lucide.VideoOff size={60} className="text-white" />
-            <span className="text-xl text-white mt-4">
-              Sem câmeras registadas
-            </span>
-          </div>
-        ) : (
-          <main
-            className="w-full h-[100vh] bg-black grid"
-            style={{
-              gridTemplateColumns: `repeat(${Math.min(cameras.length, 3)}, 1fr)`,
-              gridTemplateRows: `repeat(${Math.ceil(cameras.length / 3)}, 1fr)`,
-            }}
-          >
-            {cameras.map((camera) => (
-              <div
-                key={camera.id}
-                className="border border-gray-600 relative bg-black w-full h-full overflow-hidden"
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  <img
-                    ref={(el) => {
-                      if (el) imageRefs.current.set(`cam-${camera.id}`, el);
-                    }}
-                    className="relative w-full h-full object-contain bg-black"
-                    alt={camera.name}
-                  />
-                  {connectingCameras.has(camera.id) && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
-                      <Loader w={36} />
-                    </div>
-                  )}
-                  <span className="px-2 absolute bottom-1 right-1 text-lg text-green-400 font-mono">
-                    {camera.name}
-                  </span>
+      <div className={`flex ${faceSidebarOpen ? "" : ""}`}>
+        <div
+          className={`min-h-screen bg-black relative z-10 transition-all duration-500 ${
+            activeView ? "brightness-[0.3]" : ""
+          } ${faceSidebarOpen ? "flex-1 min-w-0" : "w-full"}`}
+        >
+          {!cameras || cameras.length === 0 ? (
+            <div className="w-full h-[100vh] flex flex-col items-center justify-center bg-black">
+              <Lucide.VideoOff size={60} className="text-white" />
+              <span className="text-xl text-white mt-4">
+                Sem câmeras registadas
+              </span>
+            </div>
+          ) : (
+            <main
+              className="w-full h-[100vh] bg-black grid"
+              style={{
+                gridTemplateColumns: `repeat(${Math.min(cameras.length, 3)}, 1fr)`,
+                gridTemplateRows: `repeat(${Math.ceil(cameras.length / 3)}, 1fr)`,
+              }}
+            >
+              {cameras.map((camera) => (
+                <div
+                  key={camera.id}
+                  className="border border-gray-600 relative bg-black w-full h-full overflow-hidden"
+                >
+                  <div className="w-full h-full flex items-center justify-center">
+                    <img
+                      ref={(el) => {
+                        if (el) imageRefs.current.set(`cam-${camera.id}`, el);
+                      }}
+                      className="relative w-full h-full object-contain bg-black"
+                      alt={camera.name}
+                    />
+                    {connectingCameras.has(camera.id) && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+                        <Loader w={36} />
+                      </div>
+                    )}
+                    <span className="px-2 absolute bottom-1 right-1 text-lg text-green-400 font-mono">
+                      {camera.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </main>
+              ))}
+            </main>
+          )}
+        </div>
+
+        {faceSidebarOpen && (
+          <FaceSidebar
+            onInspectPerson={(pid) => setInspectedPersonId(pid)}
+          />
         )}
       </div>
 
@@ -174,6 +209,8 @@ export default function Dashboard() {
         onSelect={(view) =>
           setActiveView((prev) => (prev === view ? null : view))
         }
+        faceSidebarOpen={faceSidebarOpen}
+        onFaceSidebarToggle={() => setFaceSidebarOpen((prev) => !prev)}
       />
 
       <PanelNavContext.Provider

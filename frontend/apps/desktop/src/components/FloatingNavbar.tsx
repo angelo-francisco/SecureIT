@@ -30,9 +30,11 @@ const menuItems: MenuItem[] = [
 interface FloatingNavbarProps {
   activeView: ViewId | null;
   onSelect: (view: ViewId) => void;
+  faceSidebarOpen?: boolean;
+  onFaceSidebarToggle?: () => void;
 }
 
-export function FloatingNavbar({ activeView, onSelect }: FloatingNavbarProps) {
+export function FloatingNavbar({ activeView, onSelect, faceSidebarOpen, onFaceSidebarToggle }: FloatingNavbarProps) {
   return (
     <motion.div
       initial={{ y: 40, opacity: 0 }}
@@ -41,6 +43,35 @@ export function FloatingNavbar({ activeView, onSelect }: FloatingNavbarProps) {
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[997]"
     >
       <div className="flex items-center gap-1.5 px-2 py-2 rounded-2xl bg-[#0B0E14]/85 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.08] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)]">
+        {onFaceSidebarToggle && (
+          <button
+            onClick={onFaceSidebarToggle}
+            className={`
+              relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl
+              text-[13px] font-medium
+              transition-all duration-200
+              ${faceSidebarOpen
+                ? "text-white"
+                : "text-gray-400 hover:text-gray-200"
+              }
+            `}
+          >
+            {faceSidebarOpen && (
+              <motion.div
+                layoutId="fab-active-bg"
+                className="absolute inset-0 rounded-xl bg-[#22D3EE]/15 border border-[#22D3EE]/25"
+                transition={{ type: "spring", stiffness: 400, damping: 35 }}
+              />
+            )}
+            <span className="relative flex items-center justify-center w-5 h-5">
+              <Lucide.ScanFace size={17} strokeWidth={faceSidebarOpen ? 2.5 : 2} />
+            </span>
+            <span className="relative">Rostos</span>
+          </button>
+        )}
+
+        <div className="w-px h-6 bg-white/[0.08]" />
+
         {menuItems.map((item) => {
           const isActive = activeView === item.id;
           return (
