@@ -131,9 +131,8 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
       setMode("list");
       toast("Cargo eliminado com sucesso", "success");
     } catch (err: unknown) {
-      const msg = (err as { detail?: string })?.detail || "Erro ao eliminar cargo";
+      const msg = (err as { detail?: string })?.detail || (err as Error).message || "Erro ao eliminar cargo";
       setDeleteError(msg);
-      toast(msg, "error");
     }
   }
 

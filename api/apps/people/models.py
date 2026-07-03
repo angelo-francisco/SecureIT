@@ -61,7 +61,7 @@ class PersonEmbedding(models.Model):
         table = "person_embeddings"
 
     def __str__(self) -> str:
-        return f"Embedding({self.person_id})"
+        return f"Embedding({self.person.id})"
 
 
 class PersonRole(models.Model):

@@ -1,4 +1,5 @@
 import base64
+import logging
 from io import BytesIO
 from uuid import uuid4
 
@@ -12,9 +13,14 @@ from tortoise import Tortoise
 from tortoise.expressions import Q, RawSQL
 
 from apps.people.models import Person, PersonEmbedding, PersonRole, Role
+from apps.people.schemas import (
+    PersonRoleCreate,
+)
 
 _mtcnn = None
 _resnet = None
+
+logger = logging.getLogger(__name__)
 
 
 def _get_mtcnn():
@@ -47,7 +53,7 @@ def generate_face_embedding(
     base64_str: str | None = None,
     image: Image.Image | None = None,
     detect_face: bool = True,
-) -> bytes:
+) -> list[float]:
 
     if base64_str:
         image_data = base64_to_bytes(base64_str)
@@ -77,7 +83,7 @@ def generate_face_embedding(
     with torch.no_grad():
         embedding = _get_resnet()(face.unsqueeze(0))
 
-    return embedding.cpu().numpy().astype(np.float32).flatten().tobytes()
+    return embedding.cpu().flatten().tolist()
 
 
 def treat_photo(base64_photo: str) -> tuple[bytes, Image.Image]:
@@ -119,11 +125,51 @@ async def get_person(person_id: int) -> Person:
     return person
 
 
+def get_role_ids(roles: list[PersonRoleCreate]):
+    r = []
+    for role in roles:
+        role_id = role.role_id
+        if not role_id:
+            raise ValidationError_("ID do cargo é obrigatório")
+        r.append(role_id)
+    return r
+
+
+def create_person_role_list(
+    person: Person, roles: list[PersonRoleCreate], fetched: list[Role]
+) -> list:
+    r = []
+    roles_map = {role.id: role for role in fetched}
+    for role_data in roles:
+        field_values = role_data.field_values or {}
+        logger.critical(field_values)
+        role_id = role_data.role_id
+        role = roles_map.get(role_id)
+
+        if not role:
+            raise ValidationError_(f"Cargo {role_id} não encontrado")
+
+        if role.fields:  # type: ignore
+            for field in role.fields:  # type: ignore
+                if field.required and not field_values.get(field.label):
+                    raise ValidationError_(
+                        f"O campo '{field.label}' é obrigatório para o cargo '{role.name}'"
+                    )
+        r.append(
+            PersonRole(
+                person=person,
+                role_id=role_id,
+                field_values=field_values,
+            )
+        )
+    return r
+
+
 async def create_person(
     first_name: str,
     last_name: str,
     photo_bytes: bytes,
-    roles_data: list | None = None,
+    roles_data: list[PersonRoleCreate] | None = None,
 ) -> Person:
     if not first_name or not last_name:
         raise ValidationError_("Preencha todos os campos, por favor.")
@@ -142,42 +188,12 @@ async def create_person(
     )
 
     if roles_data:
-        all_person_role = []
-        role_ids = []
-
-        for role in roles_data:
-            role_id = role.get("role_id")
-            if not role_id:
-                raise ValidationError_("ID do cargo é obrigatório")
-            role_ids.append(role_id)
-
+        role_ids = get_role_ids(roles_data)
         roles_fetched = await Role.filter(id__in=role_ids).prefetch_related("fields")
-        roles_map = {role.id: role for role in roles_fetched}
 
-        for role_data in roles_data:
-            field_values = role_data.get("field_values") or {}
-            role_id = role_data.get("role_id")
-            role = roles_map.get(role_id)
-
-            if not role:
-                raise ValidationError_(f"Cargo {role_id} não encontrado")
-
-
-            if role.fields:  # type: ignore
-                for field in role.fields:  # type: ignore
-                    if field.required and field_values.get(field.label):
-                        raise ValidationError_(
-                            f"O campo '{field.label}' é obrigatório para o cargo '{role.name}'"
-                        )
-            all_person_role.append(
-                PersonRole(
-                    person=person,
-                    role_id=role_id,
-                    field_values=field_values,
-                )
-            )
-
-        await PersonRole.bulk_create(all_person_role)
+        await PersonRole.bulk_create(
+            create_person_role_list(person, roles_data, roles_fetched)
+        )
     return person
 
 
@@ -186,7 +202,7 @@ async def update_person(
     first_name: str | None = None,
     last_name: str | None = None,
     photo_bytes: bytes | None = None,
-    roles_data: list | None = None,
+    roles_data: list[PersonRoleCreate] | None = None,
     banned: bool | None = None,
 ) -> Person:
     person = await get_person(person_id)
@@ -211,27 +227,14 @@ async def update_person(
 
     if roles_data is not None:
         await PersonRole.filter(person=person).delete()
-        for role_data in roles_data:
-            role_id = role_data.get("role_id")
-            if not role_id:
-                raise ValidationError_("ID do cargo é obrigatório")
+        role_ids = get_role_ids(roles_data)
+        roles_fetched = await Role.filter(id__in=role_ids).prefetch_related("fields")
 
-            from apps.people.models import Role
+        await PersonRole.bulk_create(
+            create_person_role_list(person, roles_data, roles_fetched)
+        )
 
-            role = await Role.get_or_none(id=role_id)
-            if not role:
-                raise ValidationError_(f"Cargo {role_id} não encontrado")
-
-            field_values = role_data.get("field_values") or {}
-            await PersonRole.create(
-                person=person,
-                role_id=role_id,
-                field_values=field_values,
-            )
-
-    # Refresh the relation cache so the serializer sees the updated roles
     await person.fetch_related("person_roles__role")
-
     return person
 
 

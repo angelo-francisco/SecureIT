@@ -1,9 +1,9 @@
-import numpy as np
+import logging
+
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
-from apps.people.models import PersonEmbedding
-
+from apps.people.models import PersonEmbedding, RoleField
 from apps.people.role_service import (
     create_role,
     delete_role,
@@ -28,7 +28,6 @@ from apps.people.service import (
     treat_photo,
     update_person,
 )
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -60,24 +59,26 @@ async def get_role_endpoint(request: Request, role_id: int):
 
 @router.put("/roles/{role_id}", response_model=RoleResponse)
 async def update_role_endpoint(request: Request, role_id: int, data: RoleCreate):
-    role = await update_role(
+    await update_role(
         role_id,
         request.state.user.id,
         name=data.name,
         description=data.description,
     )
     if data.fields:
-        from apps.people.models import RoleField
-
         await RoleField.filter(role_id=role_id).delete()
+        roles = []
         for f in data.fields:
-            await RoleField.create(
-                role_id=role_id,
-                label=f.label,
-                field_type=f.field_type or "text",
-                required=f.required or False,
-                options=f.options,
+            roles.append(
+                RoleField(
+                    role_id=role_id,
+                    label=f.label,
+                    field_type=f.field_type or "text",
+                    required=f.required or False,
+                    options=f.options,
+                )
             )
+        await RoleField.bulk_create(roles)
     return await get_role(role_id, request.state.user.id)
 
 
@@ -118,12 +119,10 @@ async def create_person_endpoint(
         first_name=data.first_name,
         last_name=data.last_name,
         photo_bytes=photo_bytes,
-        user_id=request.state.user.id,
-        roles_data=[r.model_dump() for r in data.roles],
+        roles_data=data.roles,
     )
 
-    emb_list = np.frombuffer(embedding, dtype=np.float32).tolist()
-    await PersonEmbedding.create(person=person, embedding=emb_list)
+    await PersonEmbedding.create(person=person, embedding=embedding)
     return PersonResponse.model_validate(person)
 
 
@@ -150,19 +149,14 @@ async def update_person_endpoint(
         first_name=data.first_name,
         last_name=data.last_name,
         photo_bytes=photo_bytes,
-        roles_data=[r.model_dump() for r in data.roles],
+        roles_data=data.roles,
         banned=data.banned,
     )
 
     if embedding:
-        emb_list = np.frombuffer(embedding, dtype=np.float32).tolist()
-        emb_record, created = await PersonEmbedding.get_or_create(
-            person_id=person.id,
-            defaults={"embedding": emb_list}
+        await PersonEmbedding.update_or_create(
+            person_id=person.id, defaults={"embedding": embedding}
         )
-        if not created:
-            emb_record.embedding = emb_list
-            await emb_record.save()
 
     return PersonResponse.model_validate(person)
 
