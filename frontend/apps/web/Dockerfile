@@ -10,6 +10,8 @@ RUN pnpm install
 
 COPY . .
 
+RUN pnpm prisma generate
+
 EXPOSE 3000
 
-CMD ["pnpm", "dev"]
+CMD ["sh", "-c", "pnpm prisma db push && pnpm dev"]
