@@ -1,74 +1,101 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logoSrc from "../../assets/logo.png";
-import { CustomizablePin } from "../../ui";
+import { FloatingLabelInput } from "../../ui";
 import * as Lucide from "lucide-react";
-import { useAuth, useOnlineStatus } from "../../hooks";
+import { useAuth } from "../../hooks";
 import { useToast } from "../../hooks/useToast";
-import type { Account } from "../../types";
+
+type LoginMethod = "password" | "email-code" | "totp";
+type LoginStep = "email" | "password" | "email-code-sent" | "email-code-verify" | "totp-verify";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { pinLogin, accounts, isAuthenticated, fetchAccounts } = useAuth();
-  const [accountsLoaded, setAccountsLoaded] = useState(accounts.length > 0);
-
-  useEffect(() => {
-    if (accounts.length === 0 && !accountsLoaded) {
-      fetchAccounts().then((fetched) => {
-        setAccountsLoaded(true);
-        if (fetched.length === 0) {
-          navigate("/signup?hasAccounts=false", { replace: true });
-        }
-      }).catch(() => {
-        setAccountsLoaded(true);
-      });
-    }
-  }, []);
-
-  // If accounts were already loaded (from App.tsx) and empty, redirect
-  useEffect(() => {
-    if (accountsLoaded && accounts.length === 0) {
-      navigate("/signup?hasAccounts=false", { replace: true });
-    }
-  }, [accountsLoaded, accounts, navigate]);
-  const [selectedId, setSelectedId] = useState<number | null>(() => {
-    const remembered = localStorage.getItem("remembered_account");
-    if (remembered && isAuthenticated) {
-      const match = accounts.find((a) => a.email === remembered);
-      return match ? match.id : null;
-    }
-    return null;
-  });
-  const [pin, setPin] = useState("");
-  const [remember, setRemember] = useState(!!localStorage.getItem("remembered_account"));
-  const pinRef = useRef<HTMLDivElement>(null);
-  const { isOnline, checked } = useOnlineStatus();
-  const [pinError, setPinError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { login, sendEmailCode, verifyEmailCode, verifyTOTP } = useAuth();
   const { toast } = useToast();
 
-  const handleAccountClick = (id: number) => {
-    setPinError(false);
-    if (selectedId === id) {
-      setSelectedId(null);
-      setPin("");
-      return;
-    }
-    setSelectedId(id);
-    setPin("");
+  const [step, setStep] = useState<LoginStep>("email");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setStep("password");
   };
 
-  const handlePinLogin = async (account: Account) => {
-    if (!pin) return;
-    setPinError(false);
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password) return;
     setLoading(true);
+    setError("");
+
     try {
-      await pinLogin(account.email, pin);
-      localStorage.setItem("remembered_account", account.email);
+      await login(email, password);
       navigate("/panel");
-    } catch {
-      setPinError(true);
-      toast("PIN incorreto. Tente novamente.", "error");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao fazer login";
+      setError(message);
+      toast(message, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendEmailCode = async (method: LoginMethod) => {
+    if (method === "email-code") {
+      setLoading(true);
+      try {
+        await sendEmailCode(email);
+        setStep("email-code-sent");
+        toast("Código enviado para o seu email", "success");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Erro ao enviar código";
+        setError(message);
+        toast(message, "error");
+      } finally {
+        setLoading(false);
+      }
+    } else if (method === "totp") {
+      setStep("totp-verify");
+    }
+  };
+
+  const handleEmailCodeVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (emailCode.length !== 6) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      await verifyEmailCode(email, emailCode);
+      navigate("/panel");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Código inválido";
+      setError(message);
+      toast(message, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTOTPVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (totpCode.length !== 6) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      await verifyTOTP(totpCode);
+      navigate("/panel");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Código inválido";
+      setError(message);
+      toast(message, "error");
     } finally {
       setLoading(false);
     }
@@ -90,87 +117,240 @@ export default function Login() {
             </p>
           </div>
 
-          <p className="text-base text-text-muted mb-2 text-left">Selecione a conta</p>
-
-          <div className="w-full">
-            {accounts.map((account, i) => {
-              const isOpen = selectedId === account.id;
-              return (
-                <div key={account.id}>
-                  <button
-                    onClick={() => handleAccountClick(account.id)}
-                    className={`w-full flex items-center gap-3 px-0 py-3 bg-transparent text-text hover:opacity-70 transition-opacity text-left ${i < accounts.length - 1 && !isOpen ? "" : ""}`}
+          {step === "email" && (
+            <form onSubmit={handleEmailSubmit} className="space-y-6">
+              <p className="text-base text-text-muted mb-2 text-left">
+                Insira o seu email
+              </p>
+              <FloatingLabelInput
+                id="email"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button
+                type="submit"
+                disabled={!email}
+                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                Continuar <Lucide.ArrowRight size={20} />
+              </button>
+              <div className="text-center pt-4">
+                <p className="text-base text-text-muted">
+                  Não tem conta?{" "}
+                  <Link
+                    to="/signup"
+                    className="text-primary font-bold hover:underline ml-1"
                   >
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
-                      {account.first_name.charAt(0).toUpperCase()}
-                      {account.last_name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm truncate">
-                        {account.first_name} {account.last_name}
-                      </p>
-                      <p className="text-xs text-text-muted truncate">{account.email}</p>
-                    </div>
-                    <Lucide.ChevronDown
-                      size={18}
-                      className={`text-text-muted transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
+                    Criar Conta
+                  </Link>
+                </p>
+              </div>
+            </form>
+          )}
 
-                  <div
-                    className={`overflow-hidden transition-all duration-400 ease-in-out ${
-                      isOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
-                    }`}
-                  >
-                    <div ref={pinRef} className="pb-5 pt-1 pl-12 pr-0">
-                      <div className="space-y-3">
-                        <CustomizablePin
-                          onChange={setPin}
-                          error={pinError}
-                          pinClass="h-12 w-full bg-transparent border-0 border-b-2 border-border rounded-none text-center text-text text-base font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
-                        />
+          {step === "password" && (
+            <form onSubmit={handlePasswordLogin} className="space-y-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("email");
+                  setPassword("");
+                  setError("");
+                }}
+                className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
+              >
+                <Lucide.ArrowLeft size={16} />
+                Voltar
+              </button>
 
-                        <div className="flex items-center justify-between">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={remember}
-                              onChange={(e) => setRemember(e.target.checked)}
-                              className="w-3.5 h-3.5 rounded border-border bg-transparent accent-primary"
-                            />
-                            <span className="text-xs text-text-muted">Lembrar</span>
-                          </label>
+              <p className="text-base text-text-muted">
+                Entrar como <span className="text-text font-medium">{email}</span>
+              </p>
 
-                          <button
-                            onClick={() => handlePinLogin(account)}
-                            disabled={loading || !pin}
-                            className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-40"
-                          >
-                            {loading ? (
-                              <Lucide.Loader size={16} className="animate-spin" />
-                            ) : (
-                              <Lucide.ArrowRight size={18} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {i < accounts.length - 1 && <div className="h-px bg-border" />}
+              {error && (
+                <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
+                  {error}
                 </div>
-              );
-            })}
-          </div>
+              )}
 
-          <div className="mt-10 text-center flex flex-col items-center justify-center gap-2">
-            <p className="text-base text-text-muted">
-              Não tem conta?{" "}
-              <Link to="/signup?hasAccounts=true" className="text-primary font-bold hover:underline ml-1">
-                Criar Conta
-              </Link>
-            </p>
-          </div>
+              <div>
+                <label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
+                  <Lucide.Lock size={14} />
+                  Palavra-passe
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-border rounded-none text-text text-base font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
+                  placeholder="••••••••••••"
+                  autoFocus
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !password}
+                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Lucide.Loader size={18} className="animate-spin" />
+                ) : (
+                  <>
+                    Entrar <Lucide.ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+
+              <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                <p className="text-xs text-text-muted text-center">
+                  Outros métodos de login:
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleSendEmailCode("email-code")}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 py-3 border border-border rounded-lg text-text-muted hover:text-text hover:bg-white/[0.03] transition-all text-sm"
+                >
+                  <Lucide.Mail size={16} />
+                  Código por Email
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSendEmailCode("totp")}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 py-3 border border-border rounded-lg text-text-muted hover:text-text hover:bg-white/[0.03] transition-all text-sm"
+                >
+                  <Lucide.Smartphone size={16} />
+                  Authenticator App
+                </button>
+              </div>
+            </form>
+          )}
+
+          {step === "email-code-sent" && (
+            <div className="space-y-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("password");
+                  setEmailCode("");
+                  setError("");
+                }}
+                className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
+              >
+                <Lucide.ArrowLeft size={16} />
+                Voltar
+              </button>
+
+              <div className="text-center">
+                <Lucide.Mail size={48} className="text-primary mx-auto mb-4" />
+                <p className="text-text font-medium">Código enviado!</p>
+                <p className="text-text-muted text-sm mt-1">
+                  Verifique o seu email e insira o código de 6 dígitos.
+                </p>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleEmailCodeVerify} className="space-y-4">
+                <input
+                  type="text"
+                  value={emailCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setEmailCode(val);
+                  }}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-border rounded-none text-center text-text text-2xl font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary tracking-[0.5em]"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={loading || emailCode.length !== 6}
+                  className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <Lucide.Loader size={18} className="animate-spin" />
+                  ) : (
+                    "Verificar"
+                  )}
+                </button>
+              </form>
+
+              <button
+                type="button"
+                onClick={() => handleSendEmailCode("email-code")}
+                disabled={loading}
+                className="w-full text-center text-sm text-text-muted hover:text-text transition-colors"
+              >
+                Reenviar código
+              </button>
+            </div>
+          )}
+
+          {step === "totp-verify" && (
+            <form onSubmit={handleTOTPVerify} className="space-y-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("password");
+                  setTotpCode("");
+                  setError("");
+                }}
+                className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
+              >
+                <Lucide.ArrowLeft size={16} />
+                Voltar
+              </button>
+
+              <div className="text-center">
+                <Lucide.Smartphone size={48} className="text-primary mx-auto mb-4" />
+                <p className="text-text font-medium">Authenticator App</p>
+                <p className="text-text-muted text-sm mt-1">
+                  Insira o código de 6 dígitos do seu aplicativo autenticador.
+                </p>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
+                  {error}
+                </div>
+              )}
+
+              <input
+                type="text"
+                value={totpCode}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                  setTotpCode(val);
+                }}
+                placeholder="000000"
+                maxLength={6}
+                className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-border rounded-none text-center text-text text-2xl font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary tracking-[0.5em]"
+                autoFocus
+              />
+
+              <button
+                type="submit"
+                disabled={loading || totpCode.length !== 6}
+                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Lucide.Loader size={18} className="animate-spin" />
+                ) : (
+                  "Verificar"
+                )}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

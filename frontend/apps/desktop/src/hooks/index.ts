@@ -6,3 +6,5 @@ export { useSettings, useUpdateSettings } from "./useSettings";
 export { useFaceDetections } from "./useFaceDetections";
 export { useOnlineStatus } from "./useOnlineStatus";
 export { useWebSocket } from "./useWebSocket";
+export { useLicense } from "./useLicense";
+export { useLicenseValidation } from "./useLicenseValidation";

@@ -1,30 +1,68 @@
 import type {
-  Account,
-  PinLoginData,
-  PinLoginTokenResponse,
+  User,
+  LoginRequest,
   SignupRequest,
+  EmailCodeData,
+  TOTPVerifyData,
   AuthResponse,
-  ReAuthData,
 } from "../types";
 import { apiClient } from "./client";
 
-export const authApi = {
-  accounts: () =>
-    apiClient.get<Account[]>("/api/auth/accounts"),
+const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
 
-  pinLogin: (data: PinLoginData) =>
-    apiClient.post<PinLoginTokenResponse>("/api/auth/pin-login", data),
+async function webFetch<T>(
+  path: string,
+  options?: RequestInit
+): Promise<T> {
+  const res = await fetch(`${WEB_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || "Erro na requisição");
+  }
+
+  return data as T;
+}
+
+export const authApi = {
+  login: (data: LoginRequest) =>
+    webFetch<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   signup: (data: SignupRequest) =>
-    apiClient.post<AuthResponse>("/api/auth/signup", data),
+    webFetch<AuthResponse>("/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
-  verifyPin: () =>
-    apiClient.post<{ pin_token: string }>("/api/auth/pin"),
+  sendEmailCode: (email: string) =>
+    webFetch<{ success: boolean }>("/api/auth/email-code/send", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
 
-  lock: () => apiClient.post<{ message: string }>("/api/auth/lock"),
+  verifyEmailCode: (data: EmailCodeData) =>
+    webFetch<AuthResponse>("/api/auth/email-code/verify", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  verifyTOTP: (data: TOTPVerifyData) =>
+    webFetch<{ success: boolean }>("/api/auth/totp/verify", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  me: () => apiClient.get<{ user: User }>("/api/auth/me"),
 
   check: () => apiClient.get<{ valid: boolean }>("/api/auth/check"),
-
-  reAuth: (data: ReAuthData) =>
-    apiClient.post<PinLoginTokenResponse>("/api/auth/re-auth", data, true),
 };

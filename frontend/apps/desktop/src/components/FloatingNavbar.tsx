@@ -12,7 +12,8 @@ export type ViewId =
   | "person-view"
   | "role-management"
   | "notifications"
-  | "settings";
+  | "settings"
+  | "license";
 
 interface MenuItem {
   id: ViewId;
@@ -24,6 +25,7 @@ const menuItems: MenuItem[] = [
   { id: "cameras", icon: Lucide.Video, label: "Câmeras" },
   { id: "people", icon: Lucide.Users, label: "Pessoas" },
   { id: "notifications", icon: Lucide.Bell, label: "Notificações" },
+  { id: "license", icon: Lucide.Key, label: "Licença" },
   { id: "settings", icon: Lucide.Settings, label: "Configurações" },
 ];
 

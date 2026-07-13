@@ -1,36 +1,33 @@
 import { create } from "zustand";
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { User, Account, SignupFormData } from "../types";
-import type { SignupRequest } from "../types";
+import type { User, SignupFormData } from "../types";
 import { authApi } from "../api-client";
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
-  pinToken: string | null;
-  accounts: Account[];
-  setAuth: (user: User, accessToken: string) => void;
-  setPinToken: (token: string | null) => void;
-  setAccounts: (accounts: Account[]) => void;
+  setUser: (user: User | null) => void;
+  setAccessToken: (token: string | null) => void;
   clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   accessToken: localStorage.getItem("access_token"),
-  pinToken: null,
-  accounts: [],
-  setAuth: (user, accessToken) => {
-    localStorage.setItem("access_token", accessToken);
-    set({ user, accessToken });
+  setUser: (user) => set({ user }),
+  setAccessToken: (token) => {
+    if (token) {
+      localStorage.setItem("access_token", token);
+    } else {
+      localStorage.removeItem("access_token");
+    }
+    set({ accessToken: token });
   },
-  setPinToken: (pinToken) => set({ pinToken }),
-  setAccounts: (accounts) => set({ accounts }),
   clearAuth: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("remembered_account");
-    set({ user: null, accessToken: null, pinToken: null, accounts: [] });
+    set({ user: null, accessToken: null });
   },
 }));
 
@@ -38,41 +35,61 @@ export function useAuth() {
   const store = useAuthStore();
   const queryClient = useQueryClient();
 
-  const fetchAccounts = useCallback(async () => {
-    const accounts = await authApi.accounts();
-    store.setAccounts(accounts);
-    return accounts;
-  }, [store]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const res = await authApi.login({ email, password });
+      store.setAccessToken("authenticated");
+      store.setUser(res.user);
+      return res;
+    },
+    [store]
+  );
 
-  const pinLogin = useCallback(async (email: string, pin: string) => {
-    const res = await authApi.pinLogin({ email, pin });
-    store.setAuth(res.user, res.access_token);
-    store.setPinToken(res.pin_token);
-    return res;
-  }, [store]);
+  const signup = useCallback(
+    async (data: SignupFormData) => {
+      const res = await authApi.signup({
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        password: data.password,
+      });
+      return res;
+    },
+    [store]
+  );
 
-  const signup = useCallback(async (data: SignupFormData) => {
-    const body: SignupRequest = {
-      email: data.email,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone: data.phone,
-      password: data.password,
-      pin: data.pin,
-    };
-    const res = await authApi.signup(body);
-    return res;
-  }, [store]);
+  const sendEmailCode = useCallback(async (email: string) => {
+    await authApi.sendEmailCode(email);
+  }, []);
 
-  const verifyPin = useCallback(async () => {
-    const res = await authApi.verifyPin();
-    store.setPinToken(res.pin_token);
-    return res;
-  }, [store]);
+  const verifyEmailCode = useCallback(
+    async (email: string, code: string) => {
+      const res = await authApi.verifyEmailCode({ email, code });
+      store.setAccessToken("authenticated");
+      store.setUser(res.user);
+      return res;
+    },
+    [store]
+  );
 
-  const lock = useCallback(async () => {
-    store.setPinToken(null);
-    await authApi.lock().catch(() => {});
+  const verifyTOTP = useCallback(
+    async (code: string) => {
+      const res = await authApi.verifyTOTP({ code });
+      return res;
+    },
+    [store]
+  );
+
+  const fetchMe = useCallback(async () => {
+    try {
+      const res = await authApi.me();
+      store.setUser(res.user);
+      return res.user;
+    } catch {
+      store.clearAuth();
+      return null;
+    }
   }, [store]);
 
   const logout = useCallback(() => {
@@ -82,16 +99,14 @@ export function useAuth() {
 
   return {
     user: store.user,
-    accounts: store.accounts,
     accessToken: store.accessToken,
-    pinToken: store.pinToken,
     isAuthenticated: !!store.accessToken,
-    pinVerified: !!store.pinToken,
-    fetchAccounts,
-    pinLogin,
+    login,
     signup,
-    verifyPin,
-    lock,
+    sendEmailCode,
+    verifyEmailCode,
+    verifyTOTP,
+    fetchMe,
     logout,
   };
 }

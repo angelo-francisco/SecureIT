@@ -5,3 +5,4 @@ export * from "./auth";
 export * from "./notifications";
 export * from "./settings";
 export * from "./face-detections";
+export * from "./license";

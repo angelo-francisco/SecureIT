@@ -1,17 +1,15 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logoSrc from "../../assets/logo.png";
 import { FloatingLabelInput } from "../../ui";
-import { CustomizablePin } from "../../ui";
 import * as Lucide from "lucide-react";
-import { useAuth, useOnlineStatus } from "../../hooks";
+import { useAuth } from "../../hooks";
 import { useToast } from "../../hooks/useToast";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const hasAccounts = searchParams.get("hasAccounts") === "true";
-  const { signup, fetchAccounts } = useAuth();
+  const { signup } = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -19,11 +17,9 @@ export default function Signup() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [pin, setPin] = useState("");
-  const { isOnline, checked } = useOnlineStatus();
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,25 +29,32 @@ export default function Signup() {
 
   const handleStep2 = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName || !lastName || !phone) return;
+    if (!firstName || !lastName) return;
     setStep(3);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("As palavras-passe não coincidem");
+      return;
+    }
+
+    if (password.length < 12) {
+      setError("Palavra-passe deve ter pelo menos 12 caracteres");
+      return;
+    }
+
     setLoading(true);
     try {
-      await signup({ email, first_name: firstName, last_name: lastName, phone, password, pin });
-      // After signup, fetch accounts and go to login so user can enter PIN
-      try {
-        await fetchAccounts();
-      } catch {
-        // accounts fetch failed, still navigate
-      }
+      await signup({ email, firstName, lastName, phone, password });
+      toast("Conta criada com sucesso!", "success");
       navigate("/login", { replace: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao registar. Verifique os dados.";
+      const message =
+        err instanceof Error ? err.message : "Erro ao criar conta";
       setError(message);
       toast(message, "error");
     } finally {
@@ -75,7 +78,12 @@ export default function Signup() {
             </p>
           </div>
 
-          <form className="w-full space-y-6" onSubmit={step === 1 ? handleStep1 : step === 2 ? handleStep2 : handleSignup}>
+          <form
+            className="w-full space-y-6"
+            onSubmit={
+              step === 1 ? handleStep1 : step === 2 ? handleStep2 : handleSignup
+            }
+          >
             {error && (
               <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
                 {error}
@@ -100,16 +108,17 @@ export default function Signup() {
                 >
                   Continuar <Lucide.ArrowRight size={20} />
                 </button>
-                {hasAccounts && (
-                  <div className="text-center pt-4">
-                    <p className="text-base text-text-muted">
-                      Já tem conta?{" "}
-                      <Link to="/login" className="text-primary font-bold hover:underline ml-1">
-                        Entrar
-                      </Link>
-                    </p>
-                  </div>
-                )}
+                <div className="text-center pt-4">
+                  <p className="text-base text-text-muted">
+                    Já tem conta?{" "}
+                    <Link
+                      to="/login"
+                      className="text-primary font-bold hover:underline ml-1"
+                    >
+                      Entrar
+                    </Link>
+                  </p>
+                </div>
               </>
             )}
 
@@ -138,7 +147,7 @@ export default function Signup() {
                   />
                   <FloatingLabelInput
                     id="phone"
-                    label="Telemóvel"
+                    label="Telemóvel (opcional)"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -146,7 +155,7 @@ export default function Signup() {
                 </div>
                 <button
                   type="submit"
-                  disabled={!firstName || !lastName || !phone}
+                  disabled={!firstName || !lastName}
                   className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
                 >
                   Continuar <Lucide.ArrowRight size={20} />
@@ -178,23 +187,27 @@ export default function Signup() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-0 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
                     >
-                      {showPassword ? <Lucide.EyeOff size={18} /> : <Lucide.Eye size={18} />}
+                      {showPassword ? (
+                        <Lucide.EyeOff size={18} />
+                      ) : (
+                        <Lucide.Eye size={18} />
+                      )}
                     </button>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase">
-                      <Lucide.Lock size={14} />
-                      PIN
-                    </label>
-                    <CustomizablePin
-                      onChange={setPin}
-                      pinClass="h-14 w-full bg-transparent border-0 border-b-2 border-border rounded-none text-center text-text text-lg font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
-                    />
-                  </div>
+                  <FloatingLabelInput
+                    id="confirmPassword"
+                    label="Confirmar Palavra-passe"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <p className="text-xs text-text-muted">
+                    Mínimo de 12 caracteres
+                  </p>
                 </div>
                 <button
                   type="submit"
-                  disabled={!password || !pin || loading}
+                  disabled={!password || !confirmPassword || loading}
                   className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
                 >
                   {loading ? "A criar..." : "Criar Conta"}

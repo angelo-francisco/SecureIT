@@ -17,14 +17,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
         user: User | None = None
         path = request.url.path
 
-
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
             token = auth_header.removeprefix("Bearer ")
             payload = decode_access_token(token)
             if payload and payload.get("sub"):
                 try:
-                    user = await User.get_or_none(id=int(payload["sub"]))
+                    user_id = int(payload["sub"])
+                    user = await User.get_or_none(id=user_id)
                 except (ValueError, TypeError):
                     pass
 

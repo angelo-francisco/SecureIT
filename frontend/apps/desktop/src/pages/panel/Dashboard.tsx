@@ -18,6 +18,8 @@ import PersonView from "../people/PersonView";
 import RoleManagement from "../people/RoleManagement";
 import NotificationList from "../notifications/NotificationList";
 import Settings from "./Settings";
+import LicensePage from "./LicensePage";
+import { useLicenseValidation } from "../../hooks/useLicenseValidation";
 
 interface ViewConfigEntry {
   title: string;
@@ -35,6 +37,7 @@ const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
   "person-view": { title: "Detalhes da Pessoa", icon: <Lucide.User size={20} />, component: PersonView },
   "role-management": { title: "Gerenciar Cargos", icon: <Lucide.FolderTree size={20} />, component: RoleManagement },
   notifications: { title: "Notificações", icon: <Lucide.Bell size={20} />, component: NotificationList },
+  license: { title: "Licença", icon: <Lucide.Key size={20} />, component: LicensePage },
   settings: { title: "Configurações", icon: <Lucide.Settings size={20} />, component: Settings },
 };
 
@@ -46,6 +49,7 @@ export default function Dashboard() {
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
   const wsKeysRef = useRef<string[]>([]);
+  useLicenseValidation();
 
   const hasCameras = cameras && cameras.some((c) => c.video_source);
 
