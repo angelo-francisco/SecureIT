@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { isValidLicenseKeyFormat } from "@/lib/license-key";
 
 export async function POST(request: Request) {
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
       now.getTime() + licenseKey.durationDays * 24 * 60 * 60 * 1000
     );
 
-    const license = await prisma.$transaction(async (tx) => {
+    const license = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const lic = await tx.license.create({
         data: {
           keyId: licenseKey.id,
