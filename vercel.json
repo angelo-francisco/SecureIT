@@ -1,6 +1,5 @@
 {
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build",
-  "outputDirectory": "web/.next",
-  "startCommand": "cd web && npx next start -p $PORT"
+  "outputDirectory": "web/.next"
 }
