@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { Button, Badge } from "@secureit/ui";
 import { ShadcnTable as Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@secureit/ui";
@@ -37,6 +36,8 @@ export default async function AdminLicensesPage({
     }),
     prisma.licenseKey.count({ where }),
   ]);
+
+  type LicenseRow = (typeof licenses)[number];
 
   const pages = Math.ceil(total / limit);
 
@@ -108,7 +109,7 @@ export default async function AdminLicensesPage({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {licenses.map((license: Prisma.LicenseKeyGetPayload<{ include: { license: { include: { user: { select: { email: true; firstName: true; lastName: true } } } } } }>) => (
+          {licenses.map((license: LicenseRow) => (
             <TableRow key={license.id}>
               <TableCell>
                 <Link
