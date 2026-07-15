@@ -1,6 +1,5 @@
 {
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
-  "rootDirectory": "web",
-  "outputDirectory": ".next"
+  "buildCommand": "cd web && pnpm build",
+  "installCommand": "cd web && pnpm install",
+  "outputDirectory": "web/.next"
 }
