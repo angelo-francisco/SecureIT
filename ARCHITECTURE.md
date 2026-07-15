@@ -20,7 +20,7 @@ SecureIT e um sistema de seguranca inteligente com reconhecimento facial e detec
 │                 │   Porta 8000     │                               │
 ├─────────────────┴──────────────────┴───────────────────────────────┤
 │                      MOBILE APP (futuro)                           │
-│              (React Native / Flutter)                               │
+│              (React Native)                                        │
 │          Acede aos servicos via internet ou rede local             │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -29,7 +29,7 @@ SecureIT e um sistema de seguranca inteligente com reconhecimento facial e detec
 
 ## 1. API BACKEND (FastAPI - Python)
 
-**Localizacao:** `api/`
+**Localizacao:** `desktop/api/`
 **Porta:** 8000
 **Framework:** FastAPI v0.138
 **ORM:** Tortoise-ORM + pgvector (PostgreSQL)
