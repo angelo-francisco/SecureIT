@@ -1,0 +1,15 @@
+{
+  "name": "secureit",
+  "private": true,
+  "scripts": {
+    "ui:build": "pnpm --filter @secureit/ui build",
+    "ui:dev": "pnpm --filter @secureit/ui dev",
+    "desktop:dev": "pnpm --filter desktop dev",
+    "web:dev": "pnpm --filter secureit-web dev",
+    "mobile:dev": "pnpm --filter mobile start",
+    "build": "pnpm --filter @secureit/ui build"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
