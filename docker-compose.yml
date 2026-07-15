@@ -1,6 +1,6 @@
 services:
   web:
-    build: ./frontend/apps/web
+    build: ./web
     container_name: secureit-web
     ports:
       - "3000:3000"
@@ -18,7 +18,7 @@ services:
         condition: service_healthy
 
   api:
-    build: ./api
+    build: ./desktop/api
     container_name: secureit-api
     ports:
       - "8000:8000"
@@ -32,7 +32,7 @@ services:
         condition: service_healthy
 
   desktop:
-    build: ./frontend/apps/desktop
+    build: ./desktop
     container_name: secureit-desktop
     ports:
       - "1420:1420"
