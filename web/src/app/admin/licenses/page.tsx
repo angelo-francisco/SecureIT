@@ -5,6 +5,8 @@ import { ShadcnTable as Table, TableHeader, TableBody, TableRow, TableHead, Tabl
 import { Key, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLicensesPage({
   searchParams,
 }: {

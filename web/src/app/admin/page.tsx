@@ -12,6 +12,8 @@ import {
   XCircle,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
   const [totalLicenses, activeLicenses, pendingLicenses, revokedLicenses] =
     await Promise.all([
