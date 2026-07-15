@@ -5,7 +5,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend/apps/web:/app
+      - ./web:/app
       - /app/node_modules
       - /app/.next
     environment:
@@ -23,7 +23,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./api:/app
+      - ./desktop/api:/app
     privileged: true
     environment:
       - DEBUG=1
@@ -38,7 +38,7 @@ services:
       - "1420:1420"
       - "1421:1421"
     volumes:
-      - ./frontend/apps/desktop:/app
+      - ./desktop:/app
       - /app/node_modules
     environment:
       - TAURI_DEV_HOST=0.0.0.0
