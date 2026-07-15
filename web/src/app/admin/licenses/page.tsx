@@ -1,7 +1,7 @@
+import type { LicenseKey } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button } from "@secureit/ui";
-import { Badge } from "@secureit/ui";
+import { Button, Badge } from "@secureit/ui";
 import { ShadcnTable as Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@secureit/ui";
 import { Key, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -108,7 +108,7 @@ export default async function AdminLicensesPage({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {licenses.map((license) => (
+          {licenses.map((license: LicenseKey) => (
             <TableRow key={license.id}>
               <TableCell>
                 <Link
