@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Button } from "@secureit/ui";
+import { Badge } from "@secureit/ui";
+import { ShadcnTable as Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@secureit/ui";
 import { Key, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 

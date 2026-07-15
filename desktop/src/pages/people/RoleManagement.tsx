@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoles, useCreateRole, useUpdateRole, useDeleteRole } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
-import { Button, Input, Loader, Modal } from "../../ui";
+import { Button, Input, Loader, Modal } from "@secureit/ui";
 import { useToast } from "../../hooks/useToast";
 import * as Lucide from "lucide-react";
 

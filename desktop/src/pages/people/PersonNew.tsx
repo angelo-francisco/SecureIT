@@ -2,7 +2,8 @@ import { useState, useMemo, useRef, type FormEvent } from "react";
 import { useCreatePerson, useRoles } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
-import { Button, Input, PhotoCapture, usePhotoCapture } from "../../ui";
+import { Button, Input } from "@secureit/ui";
+import { PhotoCapture, usePhotoCapture } from "../../ui";
 import * as Lucide from "lucide-react";
 
 interface PersonNewProps {

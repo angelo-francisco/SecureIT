@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@secureit/ui";
+import { Input } from "@secureit/ui";
 import { Alert } from "@/components/ui/alert";
 import { Shield, Loader2, ArrowLeft } from "lucide-react";
 

@@ -2,7 +2,8 @@ import { useState, type FormEvent } from "react";
 import { useCreateCamera, useLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
-import { Input, LucideInput, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Toggle } from "../../ui";
+import { Input, Button, Toggle } from "@secureit/ui";
+import { LucideInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
 import * as Lucide from "lucide-react";
 
 interface CameraNewProps {

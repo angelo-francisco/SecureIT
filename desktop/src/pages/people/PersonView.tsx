@@ -3,7 +3,8 @@ import { usePerson, useUpdatePerson, useDeletePerson, useRoles } from "../../hoo
 import { usePersonViewStore } from "../../stores";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
-import { Button, Input, Toggle, Modal, Loader, PhotoCapture, usePhotoCapture } from "../../ui";
+import { Button, Input, Toggle, Modal, Loader } from "@secureit/ui";
+import { PhotoCapture, usePhotoCapture } from "../../ui";
 import { getApiBaseUrl } from "../../api-client/client";
 import * as Lucide from "lucide-react";
 

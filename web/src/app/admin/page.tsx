@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@secureit/ui";
 import { Card } from "@/components/ui/card";
 import {
   LayoutDashboard,
