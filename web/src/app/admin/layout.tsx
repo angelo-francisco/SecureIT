@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Shield, LayoutDashboard, Key, Plus } from "lucide-react";
-import { cn } from "@secureit/ui";
+import { cn } from "secureit-ui";
 
 export default function AdminLayout({
   children,

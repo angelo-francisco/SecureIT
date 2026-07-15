@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@secureit/ui"],
+  transpilePackages: ["secureit-ui"],
   images: {
     remotePatterns: [
       {

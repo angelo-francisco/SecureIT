@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import { FloatingNavbar } from "../../components/FloatingNavbar";
 import type { ViewId } from "../../components/FloatingNavbar";
-import { Loader } from "@secureit/ui";
+import { Loader } from "secureit-ui";
 import { PanelSheet, InspectorPanel, PersonInspector } from "../../ui";
 import { PanelNavContext } from "../../hooks/usePanelNavigate";
 import { connectCamera, disconnectCamera } from "../../lib/websocket";

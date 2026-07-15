@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useCameras } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useCameraViewStore } from "../../stores/cameraView";
-import { Button, Table, Badge, Loader, Input } from "@secureit/ui";
+import { Button, Table, Badge, Loader, Input } from "secureit-ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
 
