@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useSettings, useUpdateSettings } from "../../hooks";
-import { Loader, Button } from "secureit-ui";
+import { Loader, Button } from "../packages/ui";
 import { LucideInput } from "../../ui";
 import * as Lucide from "lucide-react";
 import DetectedFaces from "./DetectedFaces";

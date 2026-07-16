@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "secureit-ui";
-import { Input } from "secureit-ui";
+import { Button } from "../packages/ui";
+import { Input } from "../packages/ui";
 import { Alert } from "@/components/ui/alert";
 import { Shield, Loader2 } from "lucide-react";
 

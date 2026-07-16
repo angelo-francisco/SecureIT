@@ -9,8 +9,9 @@ services:
       - /app/node_modules
       - /app/.next
     environment:
-      - DATABASE_URL=file:./dev.db
+      - DATABASE_URL=postgresql://neondb_owner:npg_6tx7OljCsDpA@ep-young-union-asboe64e-pooler.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - JWT_SECRET=x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-
+      - CI=true
     depends_on:
       db:
         condition: service_healthy

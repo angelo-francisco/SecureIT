@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNotifications, useDeleteNotification } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { getApiBaseUrl } from "../../api-client/client";
-import { Loader, Pagination, Modal } from "secureit-ui";
+import { Loader, Pagination, Modal } from "../packages/ui";
 import * as Lucide from "lucide-react";
 
 interface NotificationListProps {

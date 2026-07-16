@@ -2,7 +2,7 @@ import { useState } from "react";
 import { usePeople } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { usePersonViewStore } from "../../stores";
-import { Button, Table, Badge, Loader, Pagination, Input } from "secureit-ui";
+import { Button, Table, Badge, Loader, Pagination, Input } from "../packages/ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFaceDetections } from "../../hooks";
-import { Button, Loader, Badge, Modal } from "secureit-ui";
+import { Button, Loader, Badge, Modal } from "../packages/ui";
 import * as Lucide from "lucide-react";
 import { getApiBaseUrl } from "../../api-client/client";
 

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Badge } from "secureit-ui";
+import { Badge } from "../packages/ui";
 import { ArrowLeft, Key, User } from "lucide-react";
 
 export default async function AdminLicenseDetailPage({
