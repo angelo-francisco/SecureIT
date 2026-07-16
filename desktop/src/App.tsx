@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppRoutes from "./routes";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { ReAuthModal } from "./components/ReAuthModal";
-import { ToastContainer } from "../packages/ui";
+import { ToastContainer } from "@packages/ui";
 import { authApi } from "./api-client";
 import { useAuthStore } from "./hooks";
 

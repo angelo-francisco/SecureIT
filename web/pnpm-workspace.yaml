@@ -3,6 +3,8 @@ allowBuilds:
   prisma: true
   "@prisma/client": true
   "@prisma/engines": true
+  sharp: true
+  workerd: true
 
 catalogs:
   prisma:

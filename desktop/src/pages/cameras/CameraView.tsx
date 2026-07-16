@@ -3,7 +3,7 @@ import { useCamera, useUpdateCamera, useDeleteCamera } from "../../hooks";
 import { useCameraViewStore } from "../../stores/cameraView";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
-import { Button, Loader, Input, Toggle, Modal } from "../packages/ui";
+import { Button, Loader, Input, Toggle, Modal } from "@packages/ui";
 import * as Lucide from "lucide-react";
 
 export default function CameraView() {
