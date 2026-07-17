@@ -32,6 +32,14 @@ jobs:
         run: pnpm install
         working-directory: web
 
+      - name: Build Next.js
+        run: pnpm next build
+        working-directory: web
+
+      - name: Build for Cloudflare
+        run: pnpm opennextjs-cloudflare build
+        working-directory: web
+
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
         with:
