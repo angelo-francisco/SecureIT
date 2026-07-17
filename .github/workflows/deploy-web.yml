@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "web/**"
 
 jobs:
   deploy:
@@ -14,7 +16,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy with Wrangler
-        uses: cloudflare/wrangler-action@v4
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: deploy
+          wranglerVersion: "4"
+          workingDirectory: "web"
