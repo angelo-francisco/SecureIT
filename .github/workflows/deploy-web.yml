@@ -12,20 +12,13 @@ jobs:
     name: Deploy to Cloudflare
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: web
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
 
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
@@ -33,4 +26,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: deploy
           wranglerVersion: "4"
-          workingDirectory: "web"
+          workingDirectory: web
