@@ -12,16 +12,15 @@ jobs:
     name: Deploy to Cloudflare
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: web
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Change directory
+        run: cd web && pwd
+
       - name: Deploy with Wrangler
-        uses: cloudflare/wrangler-action@v4
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: deploy
