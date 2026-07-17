@@ -2,19 +2,26 @@ import { create } from "zustand";
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { User, SignupFormData } from "../types";
+import type { AccountResponse } from "../api-client/auth";
 import { authApi } from "../api-client";
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
+  accounts: AccountResponse[];
+  pinVerified: boolean;
   setUser: (user: User | null) => void;
   setAccessToken: (token: string | null) => void;
+  setAccounts: (accounts: AccountResponse[]) => void;
+  setPinVerified: (verified: boolean) => void;
   clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   accessToken: localStorage.getItem("access_token"),
+  accounts: [],
+  pinVerified: false,
   setUser: (user) => set({ user }),
   setAccessToken: (token) => {
     if (token) {
@@ -24,10 +31,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     set({ accessToken: token });
   },
+  setAccounts: (accounts) => set({ accounts }),
+  setPinVerified: (verified) => set({ pinVerified: verified }),
   clearAuth: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("remembered_account");
-    set({ user: null, accessToken: null });
+    set({ user: null, accessToken: null, pinVerified: false, accounts: [] });
   },
 }));
 
@@ -92,6 +101,12 @@ export function useAuth() {
     }
   }, [store]);
 
+  const verifyPin = useCallback(async () => {
+    if (!store.user) throw new Error("Utilizador não autenticado");
+    await authApi.verifyPin(store.user.email, "");
+    store.setPinVerified(true);
+  }, [store]);
+
   const logout = useCallback(() => {
     store.clearAuth();
     queryClient.clear();
@@ -101,12 +116,15 @@ export function useAuth() {
     user: store.user,
     accessToken: store.accessToken,
     isAuthenticated: !!store.accessToken,
+    pinVerified: store.pinVerified,
+    accounts: store.accounts,
     login,
     signup,
     sendEmailCode,
     verifyEmailCode,
     verifyTOTP,
     fetchMe,
+    verifyPin,
     logout,
   };
 }

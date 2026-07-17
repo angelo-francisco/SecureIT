@@ -22,5 +22,5 @@ interface PaginatedResponse {
 
 export const faceDetectionsApi = {
   list: (page = 1, knownOnly = false) =>
-    apiClient.get<PaginatedResponse>("/api/face-detections", { page, known_only: knownOnly }),
+    apiClient.get<PaginatedResponse>("/api/face-detections", { page: String(page), known_only: String(knownOnly) }),
 };

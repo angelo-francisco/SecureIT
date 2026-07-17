@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from "react";
 import { useAuth } from "../hooks";
 import * as Lucide from "lucide-react";
-import { Dialog, DialogContent } from "../../src/ui";
+import { Dialog, DialogContent } from "../ui";
 
 function PinInput({ onComplete, error }: { onComplete: (pin: string) => void; error: string }) {
   const inputRefs = [

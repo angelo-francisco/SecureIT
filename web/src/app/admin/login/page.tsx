@@ -2,95 +2,153 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/packages/ui";
-import { Input } from "@/packages/ui";
-import { Alert } from "@/components/ui/alert";
-import { Shield, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { FloatingLabelInput } from "@/components/FloatingLabelInput";
+import { ArrowLeft, ArrowRight, Lock, Loader } from "lucide-react";
+
+type LoginStep = "email" | "password";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const [step, setStep] = useState<LoginStep>("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return;
+    setStep("password");
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password) return;
     setLoading(true);
     setError("");
+
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Erro ao fazer login");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao fazer login");
       router.push("/admin");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer login");
+      const message = err instanceof Error ? err.message : "Erro ao fazer login";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-8 h-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-bg text-text">
+      <div className="p-10 flex flex-col items-center w-full max-w-[480px]">
+        <div className="w-full flex flex-col">
+          <div className="mb-12 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Image src="/logo.png" alt="SecureIT" width={64} height={64} className="h-16 w-auto" />
+              <h1 className="text-5xl font-display font-bold leading-10 text-text tracking-tight">
+                SecureIT
+              </h1>
+            </div>
+            <p className="text-xl text-text-muted mt-1">
+              Painel de administração
+            </p>
           </div>
-          <h1 className="text-3xl font-display font-bold text-white">
-            SecureIT Admin
-          </h1>
-          <p className="text-text-muted mt-2">Painel de administracao</p>
+
+          {step === "email" && (
+            <form onSubmit={handleEmailSubmit} className="space-y-6">
+              <p className="text-base text-text-muted mb-2 text-left">
+                Insira o email de administrador
+              </p>
+              <FloatingLabelInput
+                id="email"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button
+                type="submit"
+                disabled={!email}
+                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                Continuar <ArrowRight size={20} />
+              </button>
+              <div className="text-center pt-4">
+                <p className="text-base text-text-muted">
+                  <a
+                    href="/login"
+                    className="text-primary font-bold hover:underline ml-1"
+                  >
+                    Voltar ao login normal
+                  </a>
+                </p>
+              </div>
+            </form>
+          )}
+
+          {step === "password" && (
+            <form onSubmit={handlePasswordLogin} className="space-y-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("email");
+                  setPassword("");
+                  setError("");
+                }}
+                className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
+              >
+                <ArrowLeft size={16} />
+                Voltar
+              </button>
+
+              <p className="text-base text-text-muted">
+                Entrar como <span className="text-text font-medium">{email}</span>
+              </p>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
+                  <Lock size={14} />
+                  Palavra-passe
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-border rounded-none text-text text-base font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
+                  placeholder="••••••••••••"
+                  autoFocus
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !password}
+                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader size={18} className="animate-spin" />
+                ) : (
+                  <>
+                    Entrar <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-surface border border-border rounded-2xl p-8 space-y-6"
-        >
-          {error && <Alert variant="error">{error}</Alert>}
-          <div>
-            <label className="block text-sm font-medium text-text-muted mb-2">
-              Email
-            </label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text-muted mb-2">
-              Palavra-passe
-            </label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full"
-            size="lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                A entrar...
-              </>
-            ) : (
-              "Entrar"
-            )}
-          </Button>
-        </form>
       </div>
     </div>
   );

@@ -3,61 +3,60 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/packages/ui";
-import { Input } from "@/packages/ui";
-import { Alert } from "@/components/ui/alert";
-import { Shield, Loader2, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { FloatingLabelInput } from "@/components/FloatingLabelInput";
+import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleStep1 = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setStep(2);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStep2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName || !lastName) return;
+    setStep(3);
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (step === 1) {
-      if (!formData.email) return;
-      setStep(2);
+
+    if (password !== confirmPassword) {
+      setError("As palavras-passe não coincidem");
       return;
     }
-    if (step === 2) {
-      if (!formData.firstName || !formData.lastName) return;
-      setStep(3);
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError("As palavras-passe nao coincidem");
-      return;
-    }
-    if (formData.password.length < 12) {
+
+    if (password.length < 12) {
       setError("Palavra-passe deve ter pelo menos 12 caracteres");
       return;
     }
+
     setLoading(true);
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone || undefined,
-          password: formData.password,
+          email,
+          firstName,
+          lastName,
+          phone: phone || undefined,
+          password,
         }),
       });
       const data = await res.json();
@@ -71,148 +70,155 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-display font-bold text-white">
-            SecureIT
-          </h1>
-          <p className="text-text-muted mt-2">Crie a sua conta</p>
-        </div>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-surface border border-border rounded-2xl p-8 space-y-6"
-        >
-          {error && <Alert variant="error">{error}</Alert>}
-
-          {step === 1 && (
-            <div>
-              <label className="block text-sm font-medium text-text-muted mb-2">
-                Email
-              </label>
-              <Input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="seu@email.com"
-                required
-              />
+    <div className="min-h-screen flex items-center justify-center bg-bg text-text">
+      <div className="p-10 flex flex-col items-center w-full max-w-[480px]">
+        <div className="w-full flex flex-col items-center">
+          <div className="mb-10 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Image src="/logo.png" alt="SecureIT" width={64} height={64} className="h-16 w-auto" />
+              <h1 className="text-5xl font-display font-bold leading-10 text-text tracking-tight">
+                SecureIT
+              </h1>
             </div>
-          )}
-
-          {step === 2 && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Primeiro Nome
-                </label>
-                <Input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Ultimo Nome
-                </label>
-                <Input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Telemovel (opcional)
-                </label>
-                <Input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Palavra-passe
-                </label>
-                <Input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Minimo 12 caracteres"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Confirmar Palavra-passe
-                </label>
-                <Input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </>
-          )}
-
-          <div className="flex gap-3">
-            {step > 1 && (
-              <Button
-                type="button"
-                onClick={() => setStep((s) => s - 1)}
-                variant="outline"
-                className="flex-1"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Voltar
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  A criar...
-                </>
-              ) : step === 3 ? (
-                "Criar Conta"
-              ) : (
-                "Continuar"
-              )}
-            </Button>
+            <p className="text-xl text-text mt-1">
+              A segurança mais próximo de si.
+            </p>
           </div>
-        </form>
-        <p className="text-center text-text-muted text-sm mt-6">
-          Ja tem conta?{" "}
-          <Link
-            href="/login"
-            className="text-primary hover:text-primary-hover font-medium transition-colors"
+
+          <form
+            className="w-full space-y-6"
+            onSubmit={
+              step === 1 ? handleStep1 : step === 2 ? handleStep2 : handleSignup
+            }
           >
-            Entrar
-          </Link>
-        </p>
+            {error && (
+              <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
+                {error}
+              </div>
+            )}
+
+            {step === 1 && (
+              <>
+                <div className="space-y-5">
+                  <FloatingLabelInput
+                    id="email"
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!email}
+                  className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
+                >
+                  Continuar <ArrowRight size={20} />
+                </button>
+                <div className="text-center pt-4">
+                  <p className="text-base text-text-muted">
+                    Já tem conta?{" "}
+                    <Link
+                      href="/login"
+                      className="text-primary font-bold hover:underline ml-1"
+                    >
+                      Entrar
+                    </Link>
+                  </p>
+                </div>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                  Voltar
+                </button>
+                <div className="space-y-5">
+                  <FloatingLabelInput
+                    id="firstName"
+                    label="Primeiro Nome"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                  <FloatingLabelInput
+                    id="lastName"
+                    label="Último Nome"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                  <FloatingLabelInput
+                    id="phone"
+                    label="Telemóvel (opcional)"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!firstName || !lastName}
+                  className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
+                >
+                  Continuar <ArrowRight size={20} />
+                </button>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                  Voltar
+                </button>
+                <div className="space-y-5">
+                  <div className="relative">
+                    <FloatingLabelInput
+                      id="password"
+                      label="Palavra-passe"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <FloatingLabelInput
+                    id="confirmPassword"
+                    label="Confirmar Palavra-passe"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <p className="text-xs text-text-muted">
+                    Mínimo de 12 caracteres
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={!password || !confirmPassword || loading}
+                  className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
+                >
+                  {loading ? "A criar..." : "Criar Conta"}
+                </button>
+              </>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );
