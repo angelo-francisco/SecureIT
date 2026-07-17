@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     const token = await createToken({ sub: user.id, email: user.email });
 
     const response = NextResponse.json({
+      access_token: token,
       user: {
         id: user.id,
         email: user.email,

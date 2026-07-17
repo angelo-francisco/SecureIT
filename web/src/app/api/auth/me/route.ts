@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { getSession, createToken } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -18,7 +18,10 @@ export async function GET() {
       return NextResponse.json({ error: "Utilizador não encontrado" }, { status: 404 });
     }
 
+    const token = await createToken({ sub: user.id, email: user.email });
+
     return NextResponse.json({
+      access_token: token,
       user: {
         id: user.id,
         email: user.email,

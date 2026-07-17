@@ -6,7 +6,6 @@ import type {
   TOTPVerifyData,
   AuthResponse,
 } from "../types";
-import { apiClient } from "./client";
 
 const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
 
@@ -29,6 +28,13 @@ async function webFetch<T>(
   }
 
   return data as T;
+}
+
+export interface AccountResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
 }
 
 export const authApi = {
@@ -62,7 +68,22 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
-  me: () => apiClient.get<{ user: User }>("/api/auth/me"),
+  accounts: () => webFetch<AccountResponse[]>("/api/auth/accounts"),
 
-  check: () => apiClient.get<{ valid: boolean }>("/api/auth/check"),
+  pinLogin: (email: string, pin: string) =>
+    webFetch<AuthResponse>("/api/auth/pin-login", {
+      method: "POST",
+      body: JSON.stringify({ email, pin }),
+    }),
+
+  verifyPin: (email: string, pin: string) =>
+    webFetch<{ pin_token: string }>("/api/auth/pin", {
+      method: "POST",
+      body: JSON.stringify({ email, pin }),
+    }),
+
+  me: () =>
+    webFetch<{ access_token: string; user: User }>("/api/auth/me"),
+
+  check: () => webFetch<{ valid: boolean }>("/api/auth/me"),
 };

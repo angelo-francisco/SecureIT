@@ -32,6 +32,7 @@ export interface TOTPVerifyData {
 }
 
 export interface AuthResponse {
+  access_token?: string;
   user: User;
 }
 
@@ -41,6 +42,7 @@ export interface SignupRequest {
   lastName: string;
   phone?: string;
   password: string;
+  pin?: string;
 }
 
 export interface LoginRequest {

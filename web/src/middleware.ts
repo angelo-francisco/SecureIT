@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/login", "/signup", "/api/auth", "/api/licenses/validate"];
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/api/auth", "/api/licenses/validate", "/api/licenses/activate"];
 
 function corsHeaders(response: NextResponse) {
   response.headers.set("Access-Control-Allow-Origin", "*");

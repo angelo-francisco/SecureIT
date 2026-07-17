@@ -43,7 +43,9 @@ services:
       - TAURI_DEV_HOST=0.0.0.0
       - CI=TAURI_DEV_HOST
       - VITE_API_URL=http://localhost:8000
+      # - VITE_WEB_URL=https://secureit-web.ag-fran-dev.workers.dev/
       - VITE_WEB_URL=http://localhost:3000
+
     depends_on:
       - api
       - web

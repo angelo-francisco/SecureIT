@@ -1,4 +1,25 @@
-import { apiClient } from "./client";
+const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
+
+async function webFetch<T>(
+  path: string,
+  options?: RequestInit
+): Promise<T> {
+  const res = await fetch(`${WEB_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || "Erro na requisição");
+  }
+
+  return data as T;
+}
 
 export interface LicenseData {
   valid: boolean;
@@ -30,8 +51,15 @@ export const licenseApi = {
     key: string;
     email: string;
     machineHash?: string;
-  }) => apiClient.post<LicenseData>("/api/licenses/activate", data),
+  }) =>
+    webFetch<LicenseData>("/api/licenses/activate", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   validate: (data: { licenseId: string; machineHash?: string }) =>
-    apiClient.post<LicenseValidationResponse>("/api/licenses/validate", data),
+    webFetch<LicenseValidationResponse>("/api/licenses/validate", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };

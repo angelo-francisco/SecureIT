@@ -5,51 +5,51 @@ import { createToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, pin, firstName, lastName, phone } =
-      await request.json();
+    const { email, pin } = await request.json();
 
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !pin) {
       return NextResponse.json(
-        { error: "Campos obrigatórios em falta" },
+        { error: "Email e PIN são obrigatórios" },
         { status: 400 }
       );
     }
 
-    if (password.length < 12) {
-      return NextResponse.json(
-        { error: "Palavra-passe deve ter pelo menos 12 caracteres" },
-        { status: 400 }
-      );
-    }
-
-    if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
+    if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
       return NextResponse.json(
         { error: "O PIN deve conter 4 dígitos" },
         { status: 400 }
       );
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
       return NextResponse.json(
-        { error: "Email já registado" },
-        { status: 409 }
+        { error: "Email ou PIN incorrectos" },
+        { status: 401 }
       );
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
-    const pinHash = pin ? await bcrypt.hash(pin, 12) : null;
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: "Conta desactivada" },
+        { status: 403 }
+      );
+    }
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        pinHash,
-        firstName,
-        lastName,
-        phone: phone || null,
-      },
-    });
+    if (!user.pinHash) {
+      return NextResponse.json(
+        { error: "PIN não configurado" },
+        { status: 400 }
+      );
+    }
+
+    const validPin = await bcrypt.compare(pin, user.pinHash);
+    if (!validPin) {
+      return NextResponse.json(
+        { error: "Email ou PIN incorrectos" },
+        { status: 401 }
+      );
+    }
 
     const token = await createToken({ sub: user.id, email: user.email });
 
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("[Signup]", error);
+    console.error("[Pin Login]", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
       { status: 500 }
