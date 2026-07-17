@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@packages/ui";
+import { Button } from "@/packages/ui";
 import { useReAuthStore } from "../stores/reauth";
 import { authApi } from "../api-client";
 import { useAuthStore } from "../hooks";

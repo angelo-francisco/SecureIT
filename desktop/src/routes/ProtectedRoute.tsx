@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../hooks";
 import { authApi } from "../api-client";
-import { Loader } from "@packages/ui";
+import { Loader } from "@/packages/ui";
 import type { ReactNode } from "react";
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
