@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as {
   prisma?: PrismaClient;
 };
 
-const adapter = new PrismaNeon({ connectionString });
+const adapter = new PrismaNeon({ connectionString, maxUses: 1 });
 
 export const prisma =
   globalForPrisma.prisma ??
