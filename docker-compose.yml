@@ -10,6 +10,7 @@ services:
       - pnpm_store:/app/.next
     environment:
       - DATABASE_URL=postgresql://neondb_owner:npg_6tx7OljCsDpA@ep-young-union-asboe64e-pooler.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      - DIRECT_URL=postgresql://neondb_owner:npg_6tx7OljCsDpA@ep-young-union-asboe64e.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - JWT_SECRET=x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-
       - ADMIN_EMAIL=admin@secureit.com
       - ADMIN_PASSWORD_HASH=$2a$12$X/4xJAfbpmJWfnwFwJi4CeeITLjd6ViGDn3CWko3eucU9rUt7OKO6
