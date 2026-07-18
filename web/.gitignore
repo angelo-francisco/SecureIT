@@ -1,6 +1,7 @@
 .next
 .open-next
 .wrangler
+src/generated
 
 # Logs
 logs

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { isValidLicenseKeyFormat } from "@/lib/license-key";
 
 export async function POST(request: Request) {
