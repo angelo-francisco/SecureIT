@@ -1,7 +1,8 @@
 generator client {
-  provider = "prisma-client"
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
   engineType = "client"
-  output   = "../src/generated/prisma"
+  runtime    = "cloudflare"
 }
 
 datasource db {
