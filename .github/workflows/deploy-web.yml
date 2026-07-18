@@ -1,48 +1,48 @@
-name: Deploy Web
+# name: Deploy Web
 
-on:
-  push:
-    branches:
-      - main
-    # paths:
-    #   - "web/**"
+# on:
+#   push:
+#     branches:
+#       - main
+#     # paths:
+#     #   - "web/**"
 
-jobs:
-  deploy:
-    name: Deploy to Cloudflare
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     name: Deploy to Cloudflare
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+#       - name: Install pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 24
+#           cache: pnpm
+#           cache-dependency-path: web/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: web
+#       - name: Install dependencies
+#         run: pnpm install
+#         working-directory: web
 
-      - name: Build Next.js
-        run: pnpm next build
-        working-directory: web
+#       - name: Build Next.js
+#         run: pnpm next build
+#         working-directory: web
 
-      - name: Build for Cloudflare
-        run: pnpm opennextjs-cloudflare build
-        working-directory: web
+#       - name: Build for Cloudflare
+#         run: pnpm opennextjs-cloudflare build
+#         working-directory: web
 
-      - name: Deploy with Wrangler
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy
-          workingDirectory: web
+#       - name: Deploy with Wrangler
+#         uses: cloudflare/wrangler-action@v3
+#         with:
+#           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+#           command: deploy
+#           workingDirectory: web
