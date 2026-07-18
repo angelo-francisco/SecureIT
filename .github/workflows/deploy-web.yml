@@ -40,6 +40,12 @@ jobs:
         run: pnpm opennextjs-cloudflare build
         working-directory: web
 
+      - name: Apply database migrations
+        run: pnpm prisma migrate deploy
+        working-directory: web
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
         with:
