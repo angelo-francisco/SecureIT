@@ -5,3 +5,6 @@ allowBuilds:
   prisma: true
   sharp: true
   workerd: true
+  
+packages:
+  - "."
