@@ -4,6 +4,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "lucide-react": "^1.24.0",
     "zustand": "^5.0.14"
   }
 }
