@@ -12,7 +12,7 @@ function getConnectionString(): string {
   return process.env.DATABASE_URL!;
 }
 
-const adapter = new PrismaPg({ connectionString: getConnectionString() });
+const adapter = new PrismaPg({ connectionString: getConnectionString(), maxUses: 1 });
 
 export const prisma =
   globalForPrisma.prisma ??
