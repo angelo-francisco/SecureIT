@@ -6,11 +6,9 @@ const globalForPrisma = globalThis as {
 };
 
 function getConnectionString(): string {
-  // Cloudflare Workers: Hyperdrive binding available globally
   if (typeof globalThis !== "undefined" && "HYPERDRIVE" in globalThis) {
-    return (globalThis as any).HYPERDRIVE.connectionString;
+    return (globalThis as any).HYPERDRIVE.connectionString ?? process.env.HYPERDRIVE;
   }
-  // Local dev (Docker): DATABASE_URL from env
   return process.env.DATABASE_URL!;
 }
 
