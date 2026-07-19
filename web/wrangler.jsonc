@@ -24,6 +24,12 @@
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
 	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "<YOUR_HYPERDRIVE_ID>"
+		}
+	],
 	"observability": {
 		"enabled": false,
 		"head_sampling_rate": 1,
@@ -38,5 +44,11 @@
 			"persist": true,
 			"head_sampling_rate": 1
 		}
-	}
-} 
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "d105583f261d4614a90f80ea16136a90"
+		}
+	]
+}

@@ -45,7 +45,6 @@ jobs:
         working-directory: web
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3

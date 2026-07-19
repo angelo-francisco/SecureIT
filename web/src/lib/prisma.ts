@@ -1,15 +1,20 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
-
-neonConfig.poolQueryViaFetch = true;
 
 const globalForPrisma = globalThis as {
   prisma?: PrismaClient;
 };
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaNeon(pool);
+
+function getConnectionString(): string {
+  // Cloudflare Workers: Hyperdrive binding available globally
+  if (typeof globalThis !== "undefined" && "HYPERDRIVE" in globalThis) {
+    return (globalThis as any).HYPERDRIVE.connectionString;
+  }
+  // Local dev (Docker): DATABASE_URL from env
+  return process.env.DATABASE_URL!;
+}
+
+const adapter = new PrismaPg({ connectionString: getConnectionString() });
 
 export const prisma =
   globalForPrisma.prisma ??
