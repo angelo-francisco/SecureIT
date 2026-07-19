@@ -27,7 +27,7 @@
 	"hyperdrive": [
 		{
 			"binding": "HYPERDRIVE",
-			"id": "<YOUR_HYPERDRIVE_ID>"
+			"id": "d105583f261d4614a90f80ea16136a90"
 		}
 	],
 	"observability": {
@@ -44,11 +44,5 @@
 			"persist": true,
 			"head_sampling_rate": 1
 		}
-	},
-	"hyperdrive": [
-		{
-			"binding": "HYPERDRIVE",
-			"id": "d105583f261d4614a90f80ea16136a90"
-		}
-	]
+	}
 }
