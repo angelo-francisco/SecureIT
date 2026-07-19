@@ -5,6 +5,8 @@ const nextConfig = {
     "**/*": [
       "./node_modules/pg/lib/*.js",
       "./node_modules/pg/node_modules/**/*",
+      "./node_modules/pg-cloudflare/dist/**",
+      "./node_modules/pg-cloudflare/esm/**",
     ],
   },
   images: {
