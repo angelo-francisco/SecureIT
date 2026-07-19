@@ -11,6 +11,8 @@ jobs:
   deploy:
     name: Deploy to Cloudflare
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.DIRECT_URL }}
 
     steps:
       - name: Checkout Repository
@@ -39,8 +41,6 @@ jobs:
       - name: Build for Cloudflare
         run: pnpm opennextjs-cloudflare build
         working-directory: web
-        env:
-          CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.DIRECT_URL }}
 
       - name: Apply database migrations
         run: pnpm prisma migrate deploy
