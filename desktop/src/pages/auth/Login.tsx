@@ -32,7 +32,7 @@ export default function Login() {
 
     try {
       await login(email, password);
-      navigate("/panel");
+      navigate("/profiles");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao fazer login";
       setError(message);

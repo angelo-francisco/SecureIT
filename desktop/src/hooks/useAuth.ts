@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types";
 import type { AccountResponse } from "../api-client/auth";
+import type { ProfileData } from "../api-client/profiles";
 import { authApi } from "../api-client";
 
 interface AuthState {
@@ -10,11 +11,23 @@ interface AuthState {
   accessToken: string | null;
   accounts: AccountResponse[];
   pinVerified: boolean;
+  selectedProfile: ProfileData | null;
   setUser: (user: User | null) => void;
   setAccessToken: (token: string | null) => void;
   setAccounts: (accounts: AccountResponse[]) => void;
   setPinVerified: (verified: boolean) => void;
+  selectProfile: (profile: ProfileData) => void;
+  clearProfile: () => void;
   clearAuth: () => void;
+}
+
+function loadSelectedProfile(): ProfileData | null {
+  try {
+    const raw = localStorage.getItem("selected_profile");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -22,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   accessToken: localStorage.getItem("access_token"),
   accounts: [],
   pinVerified: false,
+  selectedProfile: loadSelectedProfile(),
   setUser: (user) => set({ user }),
   setAccessToken: (token) => {
     if (token) {
@@ -33,10 +47,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   setAccounts: (accounts) => set({ accounts }),
   setPinVerified: (verified) => set({ pinVerified: verified }),
+  selectProfile: (profile) => {
+    localStorage.setItem("selected_profile", JSON.stringify(profile));
+    set({ selectedProfile: profile });
+  },
+  clearProfile: () => {
+    localStorage.removeItem("selected_profile");
+    set({ selectedProfile: null });
+  },
   clearAuth: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("remembered_account");
-    set({ user: null, accessToken: null, pinVerified: false, accounts: [] });
+    localStorage.removeItem("selected_profile");
+    set({ user: null, accessToken: null, pinVerified: false, accounts: [], selectedProfile: null });
   },
 }));
 
@@ -118,6 +141,9 @@ export function useAuth() {
     isAuthenticated: !!store.accessToken,
     pinVerified: store.pinVerified,
     accounts: store.accounts,
+    selectedProfile: store.selectedProfile,
+    selectProfile: store.selectProfile,
+    clearProfile: store.clearProfile,
     login,
     sendEmailCode,
     verifyEmailCode,

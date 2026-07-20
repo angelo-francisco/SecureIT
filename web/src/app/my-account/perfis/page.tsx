@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Plus, Pencil, Trash2, Loader, X } from "lucide-react";
+import { Users, Plus, Pencil, Trash2, Loader, X, Lock } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
 
 interface SubProfile {
   id: string;
   name: string;
   avatarColor: string;
+  isDefault: boolean;
+  hasPin: boolean;
   createdAt: string;
 }
 
@@ -25,6 +27,7 @@ export default function PerfisPage() {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[0]);
+  const [pin, setPin] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchProfiles = async () => {
@@ -53,7 +56,11 @@ export default function PerfisPage() {
       const res = await fetch("/api/profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), avatarColor: color }),
+        body: JSON.stringify({
+          name: name.trim(),
+          avatarColor: color,
+          pin: pin || undefined,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -61,6 +68,7 @@ export default function PerfisPage() {
       }
       toast("Perfil criado com sucesso");
       setName("");
+      setPin("");
       setShowForm(false);
       fetchProfiles();
     } catch (err) {
@@ -77,7 +85,11 @@ export default function PerfisPage() {
       const res = await fetch(`/api/profiles/${editing.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), avatarColor: color }),
+        body: JSON.stringify({
+          name: name.trim(),
+          avatarColor: color,
+          pin: pin || undefined,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -86,6 +98,7 @@ export default function PerfisPage() {
       toast("Perfil atualizado");
       setEditing(null);
       setName("");
+      setPin("");
       setShowForm(false);
       fetchProfiles();
     } catch (err) {
@@ -99,11 +112,14 @@ export default function PerfisPage() {
     if (!confirm("Tem a certeza que deseja eliminar este perfil?")) return;
     try {
       const res = await fetch(`/api/profiles/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Erro ao eliminar perfil");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
       toast("Perfil eliminado");
       fetchProfiles();
-    } catch {
-      toast("Erro ao eliminar perfil");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Erro ao eliminar perfil");
     }
   };
 
@@ -111,17 +127,17 @@ export default function PerfisPage() {
     setEditing(p);
     setName(p.name);
     setColor(p.avatarColor);
+    setPin("");
     setShowForm(true);
   };
 
   const openCreate = () => {
     setEditing(null);
     setName("");
+    setPin("");
     setColor(profiles.length < COLORS.length ? COLORS[profiles.length] : COLORS[0]);
     setShowForm(true);
   };
-
-  const atMaxProfiles = profiles.length >= 5;
 
   return (
     <div className="space-y-8">
@@ -132,9 +148,7 @@ export default function PerfisPage() {
         </div>
         <button
           onClick={openCreate}
-          disabled={atMaxProfiles}
-          className="bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:brightness-110 transition-all flex items-center gap-2 disabled:opacity-50"
-          title={atMaxProfiles ? "Máximo de 5 perfis atingido" : undefined}
+          className="bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:brightness-110 transition-all flex items-center gap-2"
         >
           <Plus size={16} />
           Novo Perfil
@@ -178,6 +192,22 @@ export default function PerfisPage() {
               ))}
             </div>
           </div>
+          <div>
+            <label className="text-sm text-text-muted mb-1 block">PIN (opcional)</label>
+            <input
+              type="password"
+              value={pin}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                setPin(v);
+              }}
+              maxLength={4}
+              className="w-full h-11 px-4 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-primary transition-colors tracking-[0.5em]"
+              placeholder="••••"
+              inputMode="numeric"
+            />
+            <p className="text-xs text-text-muted mt-1">4 dígitos — protege o perfil no seletor</p>
+          </div>
           <div className="flex items-center gap-3 pt-2">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0"
@@ -212,15 +242,27 @@ export default function PerfisPage() {
               className="bg-surface border border-border rounded-xl p-5 flex items-center gap-4"
             >
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0"
+                className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0 relative"
                 style={{ backgroundColor: p.avatarColor }}
               >
                 {(p.name?.[0] || "?").toUpperCase()}
+                {p.isDefault && (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-surface border border-border flex items-center justify-center">
+                    <Lock size={10} className="text-text-muted" />
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-text truncate">{p.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-text truncate">{p.name}</h3>
+                  {p.hasPin && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium shrink-0">
+                      PIN
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-text-muted">
-                  Criado {p.createdAt ? new Date(p.createdAt).toLocaleDateString("pt-PT") : ""}
+                  {p.isDefault ? "Perfil principal" : `Criado ${p.createdAt ? new Date(p.createdAt).toLocaleDateString("pt-PT") : ""}`}
                 </p>
               </div>
               <div className="flex items-center gap-1">
@@ -230,12 +272,14 @@ export default function PerfisPage() {
                 >
                   <Pencil size={16} />
                 </button>
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="p-2 rounded-lg text-text-muted hover:text-error hover:bg-error/10 transition-all"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {!p.isDefault && (
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="p-2 rounded-lg text-text-muted hover:text-error hover:bg-error/10 transition-all"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))}

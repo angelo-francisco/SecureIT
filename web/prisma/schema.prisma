@@ -127,6 +127,8 @@ model SubProfile {
   userId      String
   name        String
   avatarColor String   @default("#2C9ED5")
+  pinHash     String?
+  isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])

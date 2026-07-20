@@ -48,6 +48,13 @@ export async function POST(request: Request) {
         firstName,
         lastName,
         phone: phone || null,
+        profiles: {
+          create: {
+            name: firstName,
+            avatarColor: "#2C9ED5",
+            isDefault: true,
+          },
+        },
       },
     });
 

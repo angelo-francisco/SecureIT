@@ -8,6 +8,7 @@ import {
   Key,
   Shield,
   Plus,
+  Lock,
 } from "lucide-react";
 
 const COLORS = [
@@ -101,11 +102,18 @@ export default async function MyAccountPage() {
               href="/my-account/perfis"
               className="shrink-0 w-28 flex flex-col items-center gap-2 group"
             >
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold group-hover:scale-105 transition-transform"
-                style={{ backgroundColor: p.avatarColor || COLORS[i % COLORS.length] }}
-              >
-                {(p.name?.[0] || "?").toUpperCase()}
+              <div className="relative">
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold group-hover:scale-105 transition-transform"
+                  style={{ backgroundColor: p.avatarColor || COLORS[i % COLORS.length] }}
+                >
+                  {(p.name?.[0] || "?").toUpperCase()}
+                </div>
+                {p.isDefault && (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-surface border border-border flex items-center justify-center">
+                    <Lock size={10} className="text-text-muted" />
+                  </div>
+                )}
               </div>
               <span className="text-xs text-text-muted truncate w-full text-center">
                 {p.name}

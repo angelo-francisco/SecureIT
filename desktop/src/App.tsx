@@ -15,12 +15,12 @@ function App() {
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const isAuthPage = location.pathname === "/login";
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/profiles";
   const accessToken = useAuthStore((s) => s.accessToken);
+  const selectedProfile = useAuthStore((s) => s.selectedProfile);
   const setAccounts = useAuthStore((s) => s.setAccounts);
   const readyRef = useRef(false);
 
-  // Fetch accounts to determine destination
   useEffect(() => {
     async function checkAccounts() {
       try {
@@ -33,31 +33,28 @@ function App() {
     }
     if (!accessToken) {
       checkAccounts();
-    } else {
+    } else if (selectedProfile) {
       setDestination("/panel");
+    } else {
+      setDestination("/profiles");
     }
-  }, [accessToken, setAccounts]);
+  }, [accessToken, selectedProfile, setAccounts]);
 
-  // GIF display timer
   useEffect(() => {
     const timer = setTimeout(() => setGifDone(true), 2800);
     return () => clearTimeout(timer);
   }, []);
 
-  // After GIF ends: if destination ready → fade out, otherwise → show loader
   useEffect(() => {
     if (!gifDone || phase !== "splash") return;
     if (destination) {
-      // Backend already responded, go straight to fading
       readyRef.current = true;
       setPhase("fading");
     } else {
-      // Backend hasn't responded yet, show loader
       setPhase("loader");
     }
   }, [gifDone, destination, phase]);
 
-  // When in loader phase and destination arrives → fade out
   useEffect(() => {
     if (phase === "loader" && destination && !readyRef.current) {
       readyRef.current = true;
@@ -65,7 +62,6 @@ function App() {
     }
   }, [phase, destination]);
 
-  // Transition from fading to app
   useEffect(() => {
     if (phase === "fading") {
       const timer = setTimeout(() => setPhase("app"), 500);
@@ -73,13 +69,18 @@ function App() {
     }
   }, [phase]);
 
-  // Navigate to destination once app is visible
   useEffect(() => {
-    if (!initialRedirectDone && phase === "app" && destination && !accessToken) {
-      setInitialRedirectDone(true);
-      navigate(destination, { replace: true });
+    if (!initialRedirectDone && phase === "app" && destination) {
+      const currentPath = location.pathname;
+      const destPath = destination;
+      if (currentPath !== destPath) {
+        setInitialRedirectDone(true);
+        navigate(destination, { replace: true });
+      } else {
+        setInitialRedirectDone(true);
+      }
     }
-  }, [phase, destination, accessToken, navigate, initialRedirectDone]);
+  }, [phase, destination, navigate, initialRedirectDone, location.pathname]);
 
   return (
     <>
@@ -100,4 +101,3 @@ function App() {
 }
 
 export default App;
-

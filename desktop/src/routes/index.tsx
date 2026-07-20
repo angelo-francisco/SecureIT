@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { PanelNoNavLayout } from "../layouts/PanelNoNavLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Login from "../pages/auth/Login";
+import ProfileSwitcher from "../pages/profiles/ProfileSwitcher";
 import Dashboard from "../pages/panel/Dashboard";
 
 export default function AppRoutes() {
@@ -12,6 +13,16 @@ export default function AppRoutes() {
       <Route
         element={
           <ProtectedRoute>
+            <PanelNoNavLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/profiles" element={<ProfileSwitcher />} />
+      </Route>
+
+      <Route
+        element={
+          <ProtectedRoute requireProfile>
             <PanelNoNavLayout />
           </ProtectedRoute>
         }

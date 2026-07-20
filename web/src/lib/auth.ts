@@ -52,7 +52,16 @@ export async function verifyRefreshToken(token: string): Promise<TokenPayload | 
   }
 }
 
-export async function getSession(): Promise<TokenPayload | null> {
+export async function getSession(request?: Request): Promise<TokenPayload | null> {
+  // Check Authorization header first (desktop/bearer)
+  if (request) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      return verifyAccessToken(token);
+    }
+  }
+  // Fallback to cookie (web)
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) return null;
