@@ -1,3 +1,4 @@
+import * as react from 'react';
 import * as Lucide from "lucide-react";
 import { create } from "zustand";
 
@@ -35,7 +36,7 @@ export const useToastStore = create<ToastState>((set) => ({
     })),
 }));
 
-const iconMap: Record<ToastType, React.ComponentType<{ size?: number; className?: string }>> = {
+const iconMap: Record<ToastType, react.ForwardRefExoticComponent<any>> = {
   success: Lucide.CheckCircle,
   error: Lucide.AlertCircle,
   warning: Lucide.AlertTriangle,
