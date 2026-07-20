@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes } from "react";
 import { cn } from "../../lib/cn";
 
-interface OutlinedInputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface OutlinedInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   id: string;
   error?: boolean;
