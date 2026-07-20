@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createToken } from "@/lib/auth";
+import { createToken, setTokenCookies } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -51,10 +51,11 @@ export async function POST(request: Request) {
       },
     });
 
-    const token = await createToken({ sub: user.id, email: user.email });
+    const accessToken = await createToken({ sub: user.id, email: user.email }, "access");
+    const refreshToken = await createToken({ sub: user.id, email: user.email }, "refresh");
 
-    const response = NextResponse.json({
-      access_token: token,
+    const body = {
+      access_token: accessToken,
       user: {
         id: user.id,
         email: user.email,
@@ -64,15 +65,10 @@ export async function POST(request: Request) {
         totpEnabled: user.totpEnabled,
         createdAt: user.createdAt,
       },
-    });
+    };
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 365 * 24 * 60 * 60,
-      path: "/",
-    });
+    const baseResponse = NextResponse.json(body);
+    const response = setTokenCookies(baseResponse, accessToken, refreshToken);
 
     return response;
   } catch (error) {

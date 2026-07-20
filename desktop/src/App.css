@@ -1,36 +1,43 @@
-/* From Uiverse.io by satyamchaudharydev */
-.LinearLoader {
-  display: block;
-  --height-of-loader: 4px;
-  --loader-color: #2C9ED5;
-  width: 300px;
-  height: var(--height-of-loader);
-  border-radius: 30px;
-  background-color: rgba(0,0,0,0.2);
-  position: relative;
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-.LinearLoader::before {
-  content: "";
-  position: absolute;
-  background: var(--loader-color);
-  top: 0;
-  left: 0;
-  width: 0%;
-  height: 100%;
-  border-radius: 30px;
-  animation: moving 1s ease-in-out infinite;
-  ;
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
-@keyframes moving {
-  50% {
-    width: 100%;
-  }
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/semibold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
-  100% {
-    width: 0;
-    right: 0;
-    left: unset;
-  }
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/heavy.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: "SF Pro Display", sans-serif;
 }

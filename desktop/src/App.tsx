@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppRoutes from "./routes";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { ReAuthModal } from "./components/ReAuthModal";
-import { ToastContainer } from "@/packages/ui";
+import { ToastContainer, FullLoader } from "@/packages/ui";
 import { authApi } from "./api-client";
 import { useAuthStore } from "./hooks";
 
@@ -15,7 +15,7 @@ function App() {
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const isAuthPage = ["/login", "/signup"].includes(location.pathname);
+  const isAuthPage = location.pathname === "/login";
   const accessToken = useAuthStore((s) => s.accessToken);
   const setAccounts = useAuthStore((s) => s.setAccounts);
   const readyRef = useRef(false);
@@ -26,10 +26,10 @@ function App() {
       try {
         const accounts = await authApi.accounts();
         setAccounts(accounts);
-        setDestination(accounts.length === 0 ? "/signup?hasAccounts=false" : "/login");
       } catch {
-        setDestination("/login");
+        // ignore
       }
+      setDestination("/login");
     }
     if (!accessToken) {
       checkAccounts();
@@ -84,22 +84,7 @@ function App() {
   return (
     <>
       {phase !== "app" && (
-        <div
-          className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center text-center bg-bg transition-opacity duration-500 ${phase === "fading" ? "opacity-0" : "opacity-100"
-            }`}
-        >
-          <div className="flex items-center justify-center gap-1 mb-2">
-              <img
-                src={"/logo.png"}
-                alt="Logo"
-                className="relative w-15 h-auto z-10"
-              />
-            <h1 className="text-text font-display text-4xl font-bold">
-              SecureIT
-            </h1>
-          </div>
-          <div className="LinearLoader"></div>
-        </div>
+        <FullLoader show={phase !== "fading"} />
       )}
 
       <div

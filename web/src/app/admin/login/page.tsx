@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { FloatingLabelInput } from "@/components/FloatingLabelInput";
@@ -15,6 +15,11 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const hasToken = document.cookie.includes("admin_token=");
+    if (hasToken) router.replace("/admin");
+  }, [router]);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();

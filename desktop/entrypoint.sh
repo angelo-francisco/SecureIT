@@ -1,3 +1,3 @@
 # /bin/sh
 
-exec pnpm run dev
+exec pnpm run tauri dev

@@ -35,7 +35,7 @@ export const useToastStore = create<ToastState>((set) => ({
     })),
 }));
 
-const iconMap: Record<ToastType, React.ComponentType<{ size?: string | number; className?: string }>> = {
+const iconMap: Record<ToastType, React.ComponentType<{ size?: number; className?: string }>> = {
   success: Lucide.CheckCircle,
   error: Lucide.AlertCircle,
   warning: Lucide.AlertTriangle,

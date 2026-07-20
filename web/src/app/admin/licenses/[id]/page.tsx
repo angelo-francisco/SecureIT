@@ -83,7 +83,7 @@ export default async function AdminLicenseDetailPage({
               {license.batchName || "---"}
             </InfoRow>
             <InfoRow label="Criada em">
-              {new Date(license.createdAt).toLocaleString("pt-BR")}
+              {new Date(license.createdAt).toLocaleString("pt-PT")}
             </InfoRow>
           </div>
         </Card>
@@ -107,18 +107,18 @@ export default async function AdminLicenseDetailPage({
               <InfoRow label="Activada em">
                 {new Date(
                   license.license.activatedAt
-                ).toLocaleString("pt-BR")}
+                ).toLocaleString("pt-PT")}
               </InfoRow>
               <InfoRow label="Expira em">
                 {new Date(
                   license.license.expiresAt
-                ).toLocaleString("pt-BR")}
+                ).toLocaleString("pt-PT")}
               </InfoRow>
               <InfoRow label="Ultima verificacao">
                 {license.license.lastChecked
                   ? new Date(
                       license.license.lastChecked
-                    ).toLocaleString("pt-BR")
+                    ).toLocaleString("pt-PT")
                   : "Nunca"}
               </InfoRow>
               <InfoRow label="Machine Hash">

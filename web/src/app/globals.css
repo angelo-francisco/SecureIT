@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/semibold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/sf/heavy.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --primary: #2C9ED5;
   --primary-hover: #2586B5;
@@ -16,6 +56,28 @@
   --error: #ef4444;
   --warning: #f59e0b;
   --info: #3b82f6;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f3f4f6;
+  --surface-hover: #e5e7eb;
+  --border: #d1d5db;
+  --border-light: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #ffffff;
+    --surface: #f3f4f6;
+    --surface-hover: #e5e7eb;
+    --border: #d1d5db;
+    --border-light: #e5e7eb;
+    --text: #111827;
+    --text-muted: #6b7280;
+  }
 }
 
 body {
@@ -44,4 +106,63 @@ body {
   * {
     @apply border-border;
   }
+}
+
+@keyframes snackbar-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.google-snackbar {
+  animation: snackbar-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phone-input-wrapper .PhoneInput {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0;
+}
+
+.phone-input-wrapper .PhoneInputInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  outline: none;
+  padding: 0 0.75rem 0.25rem;
+  caret-color: var(--primary);
+  min-width: 0;
+}
+
+.phone-input-wrapper .PhoneInputInput::placeholder {
+  color: var(--text-muted);
+}
+
+.phone-input-wrapper .PhoneInputCountrySelect {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }

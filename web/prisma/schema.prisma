@@ -23,7 +23,9 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
 
-  license License?
+  license         License?
+  profiles        SubProfile[]
+  paymentRequests PaymentRequest[]
 }
 
 model LicenseKey {
@@ -41,17 +43,19 @@ model LicenseKey {
 }
 
 model License {
-  id          String    @id @default(cuid())
-  keyId       String    @unique
-  userId      String    @unique
-  activatedAt DateTime
-  expiresAt   DateTime
-  lastChecked DateTime?
-  machineHash String?
-  createdAt   DateTime  @default(now())
+  id               String    @id @default(cuid())
+  keyId            String    @unique
+  userId           String    @unique
+  paymentRequestId String? @unique
+  activatedAt      DateTime
+  expiresAt        DateTime
+  lastChecked      DateTime?
+  machineHash      String?
+  createdAt        DateTime  @default(now())
 
-  key  LicenseKey @relation(fields: [keyId], references: [id])
-  user User      @relation(fields: [userId], references: [id])
+  key            LicenseKey      @relation(fields: [keyId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  paymentRequest PaymentRequest? @relation(fields: [paymentRequestId], references: [id])
 
   @@index([userId])
 }
@@ -72,4 +76,60 @@ model EmailCode {
   createdAt DateTime @default(now())
 
   @@index([email, code])
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("EUR")
+  durationDays Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  paymentRequests PaymentRequest[]
+}
+
+model PaymentInfo {
+  id          String   @id @default(cuid())
+  iban        String
+  accountName String
+  bankName    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  paymentRequests PaymentRequest[]
+}
+
+model PaymentRequest {
+  id            String   @id @default(cuid())
+  userId        String
+  planId        String
+  paymentInfoId String
+  proofPublicId String
+  proofUrl      String
+  status        String   @default("PENDING")
+  adminNote     String?
+  createdAt     DateTime @default(now())
+  reviewedAt    DateTime?
+
+  user        User         @relation(fields: [userId], references: [id])
+  plan        Plan         @relation(fields: [planId], references: [id])
+  paymentInfo PaymentInfo  @relation(fields: [paymentInfoId], references: [id])
+  license     License?
+
+  @@index([userId])
+}
+
+model SubProfile {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  avatarColor String   @default("#2C9ED5")
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }

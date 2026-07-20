@@ -5,29 +5,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { FloatingLabelInput } from "@/components/FloatingLabelInput";
-import { ArrowLeft, ArrowRight, Lock, Loader } from "lucide-react";
-
-type LoginStep = "email" | "password";
+import { ArrowRight, Loader } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useToast } from "@/components/ToastProvider";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState<LoginStep>("email");
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    setStep("password");
-  };
-
-  const handlePasswordLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password) return;
+    if (!email || !password) return;
     setLoading(true);
-    setError("");
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -37,10 +29,9 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao fazer login");
-      router.push("/admin");
+      router.push("/my-account");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login";
-      setError(message);
+      toast(err instanceof Error ? err.message : "Erro ao fazer login");
     } finally {
       setLoading(false);
     }
@@ -48,108 +39,67 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg text-text">
+      <div className="absolute top-5 left-5 right-5 flex items-center justify-between">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text transition-colors"
+        >
+          <div className="flex items-center justify-center gap-1">
+            <Image src="/logo.png" alt="SecureIT" width={25} height={25} loading="eager" fetchPriority="high" className="h-8 w-auto" />
+            <h1 className="text-2xl font-bold leading-10 text-text tracking-tight">
+              SecureIT
+            </h1>
+          </div>
+        </Link>
+        <ThemeToggle />
+      </div>
       <div className="p-10 flex flex-col items-center w-full max-w-[480px]">
         <div className="w-full flex flex-col">
-          <div className="mb-12 text-center">
-            <div className="flex items-center justify-center gap-1">
-              <Image src="/logo.png" alt="SecureIT" width={64} height={64} className="h-16 w-auto" />
-              <h1 className="text-5xl font-display font-bold leading-10 text-text tracking-tight">
-                SecureIT
-              </h1>
-            </div>
-            <p className="text-xl text-text mt-1">
-              A segurança mais próximo de si.
-            </p>
+          <div className="flex flex-col items-center justify-center gap-1 mb-8">
+            <h1 className="text-center text-3xl font-semibold">Iniciar Sessão</h1>
+            <p className="text-text-muted">Insira os seus dados abaixo para continuar</p>
           </div>
 
-          {step === "email" && (
-            <form onSubmit={handleEmailSubmit} className="space-y-6">
-              <p className="text-base text-text-muted mb-2 text-left">
-                Insira o seu email
-              </p>
-              <FloatingLabelInput
-                id="email"
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={!email}
-                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                Continuar <ArrowRight size={20} />
-              </button>
-              <div className="text-center pt-4">
-                <p className="text-base text-text-muted">
-                  Não tem conta?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-primary font-bold hover:underline ml-1"
-                  >
-                    Criar Conta
-                  </Link>
-                </p>
-              </div>
-            </form>
-          )}
-
-          {step === "password" && (
-            <form onSubmit={handlePasswordLogin} className="space-y-6">
-              <button
-                type="button"
-                onClick={() => {
-                  setStep("email");
-                  setPassword("");
-                  setError("");
-                }}
-                className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
-              >
-                <ArrowLeft size={16} />
-                Voltar
-              </button>
-
-              <p className="text-base text-text-muted">
-                Entrar como <span className="text-text font-medium">{email}</span>
-              </p>
-
-              {error && (
-                <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
-                  {error}
-                </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <FloatingLabelInput
+              id="email"
+              label="Endereço de E-mail"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <FloatingLabelInput
+              id="password"
+              label="Palavra-passe"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="submit"
+              disabled={!email || !password || loading}
+              className="w-full bg-primary text-white text-lg font-medium py-3 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? (
+                <Loader size={18} className="animate-spin" />
+              ) : (
+                <>
+                  Entrar <ArrowRight size={18} />
+                </>
               )}
-
-              <div>
-                <label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
-                  <Lock size={14} />
-                  Palavra-passe
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-border rounded-none text-text text-base font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
-                  placeholder="••••••••••••"
-                  autoFocus
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || !password}
-                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {loading ? (
-                  <Loader size={18} className="animate-spin" />
-                ) : (
-                  <>
-                    Entrar <ArrowRight size={18} />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
+            </button>
+            <div className="text-center pt-4">
+              <p className="text-base text-text-muted">
+                Não tem conta?{" "}
+                <Link
+                  href="/signup"
+                  className="text-primary font-bold hover:underline ml-1"
+                >
+                  Criar Conta
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

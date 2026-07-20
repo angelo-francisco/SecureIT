@@ -14,6 +14,9 @@ services:
       - ADMIN_EMAIL=admin@secureit.com
       - ADMIN_PASSWORD_HASH=$2a$12$X/4xJAfbpmJWfnwFwJi4CeeITLjd6ViGDn3CWko3eucU9rUt7OKO6
       - CI=true
+      - NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=rpuyj3qu
+      - NEXT_PUBLIC_CLOUDINARY_API_KEY=768868678858798
+      - CLOUDINARY_API_SECRET=LRhVZsh3rn1X7h0hkK7qOjY0nIY
 
   api:
     build: ./desktop/api
@@ -28,26 +31,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-  desktop:
-    build: ./desktop
-    container_name: secureit-desktop
-    ports:
-      - "1420:1420"
-      - "1421:1421"
-    volumes:
-      - ./desktop:/app
-      - /app/node_modules
-    environment:
-      - TAURI_DEV_HOST=0.0.0.0
-      - CI=TAURI_DEV_HOST
-      - VITE_API_URL=http://localhost:8000
-      # - VITE_WEB_URL=https://secureit-web.ag-fran-dev.workers.dev/
-      - VITE_WEB_URL=http://localhost:3000
-
-    depends_on:
-      - api
-      - web
 
   db:
     image: pgvector/pgvector:pg16

@@ -13,7 +13,27 @@ interface RequestConfig {
   skipReAuth?: boolean;
 }
 
-let globalReAuthPromise: Promise<void> | null = null;
+let globalRefreshPromise: Promise<string | null> | null = null;
+
+async function tryRefresh(): Promise<string | null> {
+  try {
+    const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
+    const res = await fetch(`${WEB_BASE}/api/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const token = data.access_token;
+    if (token) {
+      localStorage.setItem("access_token", token);
+    }
+    return token;
+  } catch {
+    return null;
+  }
+}
 
 class ApiClient {
   private baseUrl: string;
@@ -65,30 +85,49 @@ class ApiClient {
       err(String(res));
 
       if (res.status === 401 && !config.skipReAuth) {
-        log(`401 on ${path} — starting/awaiting re-auth`);
+        log(`401 on ${path} — attempting token refresh`);
+
+        if (!globalRefreshPromise) {
+          globalRefreshPromise = tryRefresh().finally(() => {
+            globalRefreshPromise = null;
+          });
+        } else {
+          log("Refresh already in progress, waiting...");
+        }
+
+        const newToken = await globalRefreshPromise;
+
+        if (newToken) {
+          log("Token refreshed, retrying", path);
+          headers["Authorization"] = `Bearer ${newToken}`;
+          res = await fetch(url.toString(), {
+            method: config.method ?? "GET",
+            headers,
+            body: config.body
+              ? config.body instanceof FormData
+                ? config.body
+                : JSON.stringify(config.body)
+              : undefined,
+          });
+
+          if (res.ok) {
+            if (res.status === 204) return undefined as T;
+            return res.json();
+          }
+        }
+
+        log("Refresh failed, falling back to re-auth modal");
         const { useReAuthStore } = await import("../stores/reauth");
         const store = useReAuthStore.getState();
 
-        if (!globalReAuthPromise) {
-          globalReAuthPromise = store
-            .show()
-            .then(() => {
-              log("Re-auth succeeded, retrying", path);
-            })
-            .catch((err: Error) => {
-              log("Re-auth failed/cancelled:", err.message);
-              throw err;
-            })
-            .finally(() => {
-              globalReAuthPromise = null;
-            });
-        } else {
-          log("Re-auth already in progress, waiting...");
+        try {
+          await store.show();
+          log("Re-auth succeeded, retrying", path);
+          return this.request<T>(path, { ...config, skipReAuth: true });
+        } catch (reAuthErr: unknown) {
+          log("Re-auth failed/cancelled:", reAuthErr);
+          throw reAuthErr;
         }
-
-        await globalReAuthPromise;
-        log("Retrying", path, "with refreshed token");
-        return this.request<T>(path, config);
       }
 
       let message = "Erro inesperado. Tente novamente.";

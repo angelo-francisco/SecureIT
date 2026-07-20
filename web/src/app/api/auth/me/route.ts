@@ -58,3 +58,37 @@ export async function GET() {
     );
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { firstName, lastName, phone } = body;
+
+    if (!firstName?.trim() || !lastName?.trim()) {
+      return NextResponse.json({ error: "Nome e apelido são obrigatórios" }, { status: 400 });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: session.sub },
+      data: {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+        ...(phone !== undefined && { phone }),
+      },
+      select: { firstName: true, lastName: true, email: true, phone: true },
+    });
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("[Me PUT]", error);
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 }
+    );
+  }
+}

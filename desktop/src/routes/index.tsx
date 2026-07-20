@@ -2,14 +2,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { PanelNoNavLayout } from "../layouts/PanelNoNavLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Login from "../pages/auth/Login";
-import Signup from "../pages/auth/Signup";
 import Dashboard from "../pages/panel/Dashboard";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
 
       <Route
         element={

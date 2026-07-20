@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import logoSrc from "../../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 import { FloatingLabelInput } from "../../ui";
 import * as Lucide from "lucide-react";
 import { useAuth } from "../../hooks";
@@ -49,7 +48,7 @@ export default function Login() {
         <div className="w-full flex flex-col">
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center gap-1">
-              <img src={logoSrc} alt="SecureIT" className="h-16" />
+              <img src={"logo.png"} alt="SecureIT" className="h-16" />
               <h1 className="text-5xl font-display font-bold leading-10 text-text tracking-tight">
                 SecureIT
               </h1>
@@ -61,12 +60,9 @@ export default function Login() {
 
           {step === "email" && (
             <form onSubmit={handleEmailSubmit} className="space-y-6">
-              <p className="text-base text-text-muted mb-2 text-left">
-                Insira o seu email
-              </p>
               <FloatingLabelInput
                 id="email"
-                label="Email"
+                label="Endereço de E-mail"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -76,19 +72,8 @@ export default function Login() {
                 disabled={!email}
                 className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Continuar <Lucide.ArrowRight size={20} />
+                Avançar
               </button>
-              <div className="text-center pt-4">
-                <p className="text-base text-text-muted">
-                  Não tem conta?{" "}
-                  <Link
-                    to="/signup"
-                    className="text-primary font-bold hover:underline ml-1"
-                  >
-                    Criar Conta
-                  </Link>
-                </p>
-              </div>
             </form>
           )}
 
@@ -119,7 +104,6 @@ export default function Login() {
 
               <div>
                 <label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
-                  <Lucide.Lock size={14} />
                   Palavra-passe
                 </label>
                 <input

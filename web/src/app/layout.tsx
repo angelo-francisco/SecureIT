@@ -1,23 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { ToastProvider } from "@/components/ToastProvider";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
-  title: "SecureIT - Sistema de Seguranca Inteligente",
+  title: "SecureIT",
   description:
-    "Sistema de monitorizacao e seguranca com reconhecimento facial e deteccao de pessoas.",
+    "Plataforma de Monitoramento Inteligente",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,11 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt" className="dark">
-      <body
-        className={`min-h-screen bg-bg text-text antialiased font-sans ${inter.variable} ${spaceGrotesk.variable}`}
-      >
-        {children}
+    <html lang="pt" className="scroll-smooth" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <body className="min-h-screen bg-bg text-text antialiased font-sans">
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

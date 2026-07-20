@@ -1,7 +1,6 @@
 import type {
   User,
   LoginRequest,
-  SignupRequest,
   EmailCodeData,
   TOTPVerifyData,
   AuthResponse,
@@ -15,6 +14,7 @@ async function webFetch<T>(
 ): Promise<T> {
   const res = await fetch(`${WEB_BASE}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
@@ -40,12 +40,6 @@ export interface AccountResponse {
 export const authApi = {
   login: (data: LoginRequest) =>
     webFetch<AuthResponse>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  signup: (data: SignupRequest) =>
-    webFetch<AuthResponse>("/api/auth/signup", {
       method: "POST",
       body: JSON.stringify(data),
     }),
@@ -84,6 +78,11 @@ export const authApi = {
 
   me: () =>
     webFetch<{ access_token: string; user: User }>("/api/auth/me"),
+
+  refresh: () =>
+    webFetch<{ access_token: string }>("/api/auth/refresh", {
+      method: "POST",
+    }),
 
   check: () => webFetch<{ valid: boolean }>("/api/auth/me"),
 };

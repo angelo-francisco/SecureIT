@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { User, SignupFormData } from "../types";
+import type { User } from "../types";
 import type { AccountResponse } from "../api-client/auth";
 import { authApi } from "../api-client";
 
@@ -47,22 +47,8 @@ export function useAuth() {
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await authApi.login({ email, password });
-      store.setAccessToken("authenticated");
+      store.setAccessToken(res.access_token ?? null);
       store.setUser(res.user);
-      return res;
-    },
-    [store]
-  );
-
-  const signup = useCallback(
-    async (data: SignupFormData) => {
-      const res = await authApi.signup({
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        password: data.password,
-      });
       return res;
     },
     [store]
@@ -75,7 +61,7 @@ export function useAuth() {
   const verifyEmailCode = useCallback(
     async (email: string, code: string) => {
       const res = await authApi.verifyEmailCode({ email, code });
-      store.setAccessToken("authenticated");
+      store.setAccessToken(res.access_token ?? null);
       store.setUser(res.user);
       return res;
     },
@@ -90,10 +76,24 @@ export function useAuth() {
     [store]
   );
 
+  const refreshAuth = useCallback(async () => {
+    try {
+      const res = await authApi.refresh();
+      store.setAccessToken(res.access_token);
+      return res.access_token;
+    } catch {
+      store.clearAuth();
+      return null;
+    }
+  }, [store]);
+
   const fetchMe = useCallback(async () => {
     try {
       const res = await authApi.me();
       store.setUser(res.user);
+      if (res.access_token) {
+        store.setAccessToken(res.access_token);
+      }
       return res.user;
     } catch {
       store.clearAuth();
@@ -119,10 +119,10 @@ export function useAuth() {
     pinVerified: store.pinVerified,
     accounts: store.accounts,
     login,
-    signup,
     sendEmailCode,
     verifyEmailCode,
     verifyTOTP,
+    refreshAuth,
     fetchMe,
     verifyPin,
     logout,

@@ -29,6 +29,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: "Conta desativada" },
+        { status: 403 }
+      );
+    }
+
     const validPin = await bcrypt.compare(pin, user.pinHash);
     if (!validPin) {
       return NextResponse.json(

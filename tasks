@@ -1,16 +1,1 @@
-testar login e signup
-separar e hospedar a pagina do secureit
-melhorar a estética da web
-adicionar auth ao admin com envio de codigo para um email - ics20080729@gmail.com ou console por agora
-organizar projectos
-criar uma biblioteca para compartilhar os designs do desktop
-
-
-
------------------------------
-adicionar botao de mudar tema no float navbar do painel
-mudar o tipo de float navbar do painel
-ajustar a area de configuracoes para ser mais complexa e abrir em formato de modal
-a aba de gestao de pessoa, camaras e todas as outras tmb deve abrir como modal
-testar funcionalidades
-adicionar detecao de comportamentos na api
+Configura no Cloudinary: Upload Preset secureit-payments (modo Signed, pasta secureit/payments)

@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { Shield, LayoutDashboard, Key, Plus } from "lucide-react";
+import { Shield, LayoutDashboard, Key, Plus, CreditCard, FileCheck, Landmark } from "lucide-react";
 import { cn } from "@/packages/ui";
+import { getAdminSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getAdminSession();
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   return (
     <div className="min-h-screen flex">
       <aside className="w-64 bg-surface border-r border-border p-6 flex flex-col">
@@ -20,11 +27,22 @@ export default function AdminLayout({
         </Link>
         <nav className="space-y-1">
           <NavLink href="/admin" icon={LayoutDashboard} label="Dashboard" />
-          <NavLink href="/admin/licenses" icon={Key} label="Licencas" />
+          <NavLink href="/admin/licenses" icon={Key} label="Licenças" />
           <NavLink
             href="/admin/licenses/generate"
             icon={Plus}
-            label="Gerar Licencas"
+            label="Gerar Licenças"
+          />
+          <NavLink href="/admin/plans" icon={CreditCard} label="Planos" />
+          <NavLink
+            href="/admin/payments"
+            icon={FileCheck}
+            label="Pedidos de Pagamento"
+          />
+          <NavLink
+            href="/admin/payment-info"
+            icon={Landmark}
+            label="Dados Bancários"
           />
         </nav>
       </aside>

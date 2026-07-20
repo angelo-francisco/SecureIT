@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { getAdminSession } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
 
 export async function POST(request: Request) {
+  const session = await getAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
   try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-    }
-
     const { type, durationDays, quantity, batchName } = await request.json();
 
     if (!type || !durationDays || !quantity) {
@@ -39,9 +38,7 @@ export async function POST(request: Request) {
       let exists = true;
 
       while (exists) {
-        const existing = await prisma.licenseKey.findUnique({
-          where: { key },
-        });
+        const existing = await prisma.licenseKey.findUnique({ where: { key } });
         if (!existing) {
           exists = false;
         } else {

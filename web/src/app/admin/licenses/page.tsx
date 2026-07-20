@@ -134,7 +134,7 @@ export default async function AdminLicensesPage({
                 {license.license?.user?.email || "---"}
               </TableCell>
               <TableCell className="text-text-muted">
-                {new Date(license.createdAt).toLocaleDateString("pt-BR")}
+                {new Date(license.createdAt).toLocaleDateString("pt-PT")}
               </TableCell>
             </TableRow>
           ))}

@@ -1,4 +1,3 @@
-import logoSrc from "../../assets/logo.png";
 
 export function FullLogo() {
   return (
@@ -6,7 +5,7 @@ export function FullLogo() {
       <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-[#2C9ED5]/70 blur-md"></div>
         <img
-          src={logoSrc}
+          src={"/logo.png"}
           alt="Logo"
           className="relative w-4 h-auto z-10"
         />
