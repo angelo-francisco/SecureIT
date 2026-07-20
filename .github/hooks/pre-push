@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./scripts/sync-pkgs.sh
+./sync-pkgs.sh
 
 git add desktop/src/packages mobile/packages web/src/packages
 
