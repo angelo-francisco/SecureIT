@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes } from "react";
 import { cn } from "../../lib/cn";
 
-export interface FloatingLabelInputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface FloatingLabelInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   id: string;
   error?: boolean;

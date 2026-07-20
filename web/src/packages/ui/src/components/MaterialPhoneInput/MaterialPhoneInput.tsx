@@ -6,7 +6,7 @@ import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 import { cn } from "../../lib/cn";
 
-export interface MaterialPhoneInputProps {
+interface MaterialPhoneInputProps {
   value?: string;
   onChange?: (value?: string) => void;
   error?: boolean;
