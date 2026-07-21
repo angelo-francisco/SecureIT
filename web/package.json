@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@prisma/adapter-d1": "6.19.0",
+    "@prisma/adapter-libsql": "6.19.0",
     "@prisma/client": "6.19.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
