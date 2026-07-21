@@ -2,12 +2,17 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-const ACCESS_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET
-);
-const REFRESH_SECRET = new TextEncoder().encode(
-  process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
-);
+function getAccessSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("Missing JWT_SECRET env variable");
+  return new TextEncoder().encode(secret);
+}
+
+function getRefreshSecret() {
+  const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+  if (!secret) throw new Error("Missing JWT_SECRET env variable");
+  return new TextEncoder().encode(secret);
+}
 
 export interface TokenPayload {
   sub: string;
@@ -22,7 +27,7 @@ export async function createToken(
   payload: Omit<TokenPayload, "type">,
   type: TokenPayload["type"] = "access"
 ): Promise<string> {
-  const secret = type === "refresh" ? REFRESH_SECRET : ACCESS_SECRET;
+  const secret = type === "refresh" ? getRefreshSecret() : getAccessSecret();
   const expiresIn = type === "refresh" ? "90d" : "30d";
 
   return new SignJWT({ ...payload, type })
@@ -34,7 +39,7 @@ export async function createToken(
 
 export async function verifyAccessToken(token: string): Promise<TokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, ACCESS_SECRET);
+    const { payload } = await jwtVerify(token, getAccessSecret());
     if (payload.type !== "access") return null;
     return payload as unknown as TokenPayload;
   } catch {
@@ -44,7 +49,7 @@ export async function verifyAccessToken(token: string): Promise<TokenPayload | n
 
 export async function verifyRefreshToken(token: string): Promise<TokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, REFRESH_SECRET);
+    const { payload } = await jwtVerify(token, getRefreshSecret());
     if (payload.type !== "refresh") return null;
     return payload as unknown as TokenPayload;
   } catch {
