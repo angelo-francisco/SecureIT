@@ -106,7 +106,7 @@ export function PinInput({
           <div
             key={i}
             className={`
-              relative w-12 h-14 flex items-center justify-center
+              relative w-16 h-14 flex items-center justify-center
               transition-all duration-200 ease-out border
               ${isActive
                 ? "bg-surface ring-2 ring-primary/40 scale-105"
