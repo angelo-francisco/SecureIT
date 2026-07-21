@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ToastProvider } from "@/components/ToastProvider";
+import { ToastProvider } from "@/packages/ui";
 import "./globals.css";
 
 

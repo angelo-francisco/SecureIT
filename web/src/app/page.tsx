@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Shield, Eye, Bell, ArrowRight, Phone,
+import {
+  Shield, Eye, Bell, Phone,
   Mail,
-  MessageCircle, ChevronRight } from "lucide-react";
+  MessageCircle, ChevronRight
+} from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import Image from "next/image";
 
 
 export default function HomePage() {
@@ -11,47 +12,35 @@ export default function HomePage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <section className="relative overflow-hidden min-h-screen flex items-center">
+      <section className="relative overflow-hidden min-h-screen flex justify-center items-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,123,255,.15),transparent_60%)]" />
 
         <div className="max-w-7xl mx-auto px-8 py-20 w-full">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h1 className="text-6xl font-bold leading-tight">
-                A segurança mais
-                <span className="text-primary"> próxima de si.</span>
-                <br />
-              </h1>
+          <div>
+            <h1 className="text-7xl font-bold leading-tight">
+              A segurança mais
+              <span className="text-primary"> próxima de si.</span>
+              <br />
+            </h1>
 
-              <p className="mt-6 text-xl text-text-muted max-w-xl">
-                Um sistema de monitorização inteligente multi-plataforma
-              </p>
+            <p className="mt-6 text-xl text-text-muted max-w-xl">
+              Um sistema de monitorização inteligente multi-plataforma
+            </p>
 
-              <div className="mt-10 flex gap-4">
-                <Link
-                  href="/signup"
-                  className="bg-primary px-6 py-4 rounded-xl font-semibold text-white hover:scale-105 transition"
-                >
-                  Começar Agora
-                </Link>
+            <div className="mt-10 flex gap-4">
+              <Link
+                href="/signup"
+                className="bg-primary px-6 py-4 rounded-xl font-semibold text-white hover:scale-105 transition"
+              >
+                Começar Agora
+              </Link>
 
-                <Link
-                  href="/login"
-                  className="border border-border px-6 py-4 rounded-xl"
-                >
-                  Iniciar Sessão
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <Image
-                src="/dashboard-preview.png"
-                width={1200}
-                height={800}
-                alt="Dashboard"
-                className="rounded-3xl border border-border shadow-2xl"
-              />
+              <Link
+                href="/login"
+                className="border border-border px-6 py-4 rounded-xl"
+              >
+                Iniciar Sessão
+              </Link>
             </div>
           </div>
         </div>

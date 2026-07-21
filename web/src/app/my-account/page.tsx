@@ -1,247 +1,118 @@
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
-import Link from "next/link";
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Shield, CreditCard, Receipt, User } from "lucide-react";
+import { AccordionSection } from "./components/AccordionSection";
+import { ProfileSection } from "./components/ProfileSection";
 import {
-  CreditCard,
-  Receipt,
-  Users,
-  Key,
-  Shield,
-  Plus,
-  Lock,
-} from "lucide-react";
+  LicensesSection,
+  type LicensesSectionHandle,
+  type LicenseData,
+} from "./components/LicensesSection";
+import {
+  PlansSection,
+  type PlansSectionHandle,
+  type Plan,
+} from "./components/PlansSection";
+import {
+  PaymentsSection,
+  type PaymentsSectionHandle,
+  type Payment,
+} from "./components/PaymentsSection";
+import {
+  ProfilesSection,
+} from "./components/ProfilesSection";
 
-const COLORS = [
-  "#2C9ED5", "#E04F5D", "#6C5CE7", "#00B894",
-  "#FDCB6E", "#E17055", "#0984E3", "#A29BFE",
-];
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
 
-export default async function MyAccountPage() {
-  const session = await getSession();
-  if (!session) return null;
+export default function MyAccountPage() {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const plansRef = useRef<HTMLDivElement>(null);
 
-  let user, license, profiles, recentPayments, plans;
-  try {
-    [user, license, profiles, recentPayments, plans] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: session.sub },
-        select: {
-          firstName: true,
-          lastName: true,
-          email: true,
-          phone: true,
-          createdAt: true,
-        },
-      }),
-      prisma.license.findUnique({
-        where: { userId: session.sub },
-        include: { key: true },
-      }),
-      prisma.subProfile.findMany({
-        where: { userId: session.sub },
-        orderBy: { createdAt: "asc" },
-      }),
-      prisma.paymentRequest.findMany({
-        where: { userId: session.sub },
-        include: { plan: true },
-        orderBy: { createdAt: "desc" },
-        take: 3,
-      }),
-      prisma.plan.count({ where: { isActive: true } }),
-    ]);
-  } catch (error) {
-    console.error("[MyAccount]", error);
-    return (
-      <div className="text-center py-16 text-text-muted">
-        <p>Erro ao carregar dados. Tente novamente.</p>
-      </div>
-    );
-  }
+  const [licenses, setLicenses] = useState<LicenseData | null>(null);
+  const [plansData, setPlansData] = useState<{
+    plans: Plan[];
+    paymentInfo: { id: string; iban: string; accountName: string; bankName: string | null } | null;
+  }>({ plans: [], paymentInfo: null });
+  const [payments, setPayments] = useState<Payment[]>([]);
 
-  if (!user) return null;
+  const licensesRef = useRef<LicensesSectionHandle>(null);
+  const plansSectionRef = useRef<PlansSectionHandle>(null);
+  const paymentsRef = useRef<PaymentsSectionHandle>(null);
 
-  const initials = (user.firstName?.[0] || "U") + (user.lastName?.[0] || "U");
-  const isLicenseActive = license ? license.expiresAt > new Date() : false;
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          setUser({
+            firstName: data.user.firstName || "",
+            lastName: data.user.lastName || "",
+            email: data.user.email || "",
+            phone: data.user.phone || "",
+          });
+        }
+      })
+      .catch(() => { });
+  }, []);
+
+  const scrollToPlans = useCallback(() => {
+    plansRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, []);
+
+  const openProfile = useCallback(async () => {}, []);
+
+  const openLicenses = useCallback(async () => {
+    const d = await licensesRef.current?.fetchData();
+    if (d) setLicenses(d);
+  }, []);
+
+  const openPlans = useCallback(async () => {
+    const d = await plansSectionRef.current?.fetchData();
+    if (d) setPlansData(d);
+  }, []);
+
+  const openPayments = useCallback(async () => {
+    const d = await paymentsRef.current?.fetchData();
+    if (d) setPayments(d);
+  }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-3xl font-display font-bold text-text">
-          Olá, {user.firstName} 👋
+        <h1 className="text-4xl md:text-5xl font-display font-bold text-text capitalize">
+          Olá, {user?.firstName || "..."}!
         </h1>
-        <p className="text-text-muted mt-1">
-          Gira a sua conta, sub-perfis e assinaturas
+        <p className="text-text-muted mt-1 text-lg md:text-xl">
+          Gerencie os seus dados e assinaturas
         </p>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-display font-semibold text-text">
-            Os seus perfis
-          </h2>
-          <Link
-            href="/my-account/perfis"
-            className="text-sm text-primary hover:underline flex items-center gap-1"
-          >
-            Ver todos
-          </Link>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          <Link
-            href="/my-account/perfis"
-            className="shrink-0 w-28 flex flex-col items-center gap-2 group"
-          >
-            <div className="w-20 h-20 rounded-full bg-surface-hover border-2 border-dashed border-border flex items-center justify-center group-hover:border-primary transition-colors">
-              <Plus size={24} className="text-text-muted group-hover:text-primary transition-colors" />
-            </div>
-            <span className="text-xs text-text-muted">Novo perfil</span>
-          </Link>
-          {profiles.map((p, i) => (
-            <Link
-              key={p.id}
-              href="/my-account/perfis"
-              className="shrink-0 w-28 flex flex-col items-center gap-2 group"
-            >
-              <div className="relative">
-                <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold group-hover:scale-105 transition-transform"
-                  style={{ backgroundColor: p.avatarColor || COLORS[i % COLORS.length] }}
-                >
-                  {(p.name?.[0] || "?").toUpperCase()}
-                </div>
-                {p.isDefault && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-surface border border-border flex items-center justify-center">
-                    <Lock size={10} className="text-text-muted" />
-                  </div>
-                )}
-              </div>
-              <span className="text-xs text-text-muted truncate w-full text-center">
-                {p.name}
-              </span>
-            </Link>
-          ))}
-        </div>
+      <ProfilesSection />
+      
+      <AccordionSection title="Dados Pessoais" icon={User} onOpen={openProfile}>
+        {user && <ProfileSection user={user} />}
+      </AccordionSection>
+
+      <AccordionSection title="Licenças" icon={Shield} onOpen={openLicenses}>
+        <LicensesSection ref={licensesRef} data={licenses} onNavigateToPlans={scrollToPlans} />
+      </AccordionSection>
+
+      <div ref={plansRef}>
+        <AccordionSection title="Planos" icon={CreditCard} onOpen={openPlans}>
+          <PlansSection ref={plansSectionRef} data={plansData} />
+        </AccordionSection>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Link
-          href="/my-account/licencas"
-          className="bg-surface border border-border rounded-xl p-6 hover:border-primary/50 transition-all group"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-              <Shield size={20} className="text-primary" />
-            </div>
-            <h3 className="font-semibold text-text">Licença</h3>
-          </div>
-          {license ? (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Estado</span>
-                <span className={`text-sm font-medium ${isLicenseActive ? "text-success" : "text-error"}`}>
-                  {isLicenseActive ? "Ativa" : "Expirada"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Tipo</span>
-                <span className="text-sm font-medium text-text">
-                  {license.key.type}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Expira</span>
-                <span className="text-sm font-medium text-text">
-                  {new Date(license.expiresAt).toLocaleDateString("pt-PT")}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-text-muted">Sem licença ativa</p>
-              <p className="text-sm text-primary group-hover:underline">
-                Ver planos disponíveis →
-              </p>
-            </div>
-          )}
-        </Link>
-
-        <Link
-          href="/my-account/planos"
-          className="bg-surface border border-border rounded-xl p-6 hover:border-primary/50 transition-all group"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-              <CreditCard size={20} className="text-primary" />
-            </div>
-            <h3 className="font-semibold text-text">Planos</h3>
-          </div>
-          <p className="text-sm text-text-muted mb-2">
-            {plans > 0 ? `${plans} planos disponíveis` : "Nenhum plano disponível"}
-          </p>
-          <p className="text-sm text-primary group-hover:underline">
-            Ver planos →
-          </p>
-        </Link>
-
-        <Link
-          href="/my-account/pagamentos"
-          className="bg-surface border border-border rounded-xl p-6 hover:border-primary/50 transition-all group"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-              <Receipt size={20} className="text-primary" />
-            </div>
-            <h3 className="font-semibold text-text">Pagamentos</h3>
-          </div>
-          {recentPayments.length > 0 ? (
-            <div className="space-y-2">
-              {recentPayments.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <span className="text-text-muted truncate">{p.plan.name}</span>
-                  <span
-                    className={`font-medium ${
-                      p.status === "APPROVED"
-                        ? "text-success"
-                        : p.status === "REJECTED"
-                        ? "text-error"
-                        : "text-warning"
-                    }`}
-                  >
-                    {p.status === "APPROVED"
-                      ? "Aprovado"
-                      : p.status === "REJECTED"
-                      ? "Rejeitado"
-                      : "Pendente"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-text-muted">Sem pagamentos</p>
-          )}
-        </Link>
-
-        <Link
-          href="/my-account/perfis"
-          className="bg-surface border border-border rounded-xl p-6 hover:border-primary/50 transition-all group"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-              <Users size={20} className="text-primary" />
-            </div>
-            <h3 className="font-semibold text-text">Sub-perfis</h3>
-          </div>
-          <p className="text-sm text-text-muted mb-2">
-            {profiles.length} perfis criados
-          </p>
-          <p className="text-sm text-primary group-hover:underline">
-            Gerir perfis →
-          </p>
-        </Link>
-      </div>
+      <AccordionSection title="Pagamentos" icon={Receipt} onOpen={openPayments}>
+        <PaymentsSection ref={paymentsRef} data={payments} />
+      </AccordionSection>
     </div>
+
   );
 }

@@ -3,19 +3,19 @@
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { X } from "lucide-react";
 
-type ToastType = "error" | "success" | "info";
+export type ToastType = "error" | "success" | "info";
 
-interface Toast {
+export interface Toast {
   id: number;
   message: string;
   type: ToastType;
 }
 
-interface ToastContextValue {
+export interface ToastContextValue {
   toast: (message: string, type?: ToastType) => void;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+export const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function useToast() {
   const ctx = useContext(ToastContext);

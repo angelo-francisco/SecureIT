@@ -22,7 +22,7 @@ export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel
     <div className="relative">
       <label
         className={cn(
-          "absolute pointer-events-none transition-all duration-200 select-none z-10 -top-0.5 left-0 text-xs",
+          "absolute pointer-events-none transition-all duration-200 select-none z-10 -top-0.5 left-0 text-base",
           error
             ? "text-error"
             : labelUp
@@ -40,7 +40,7 @@ export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel
       >
         <PhoneInput
           international
-          defaultCountry="PT"
+          defaultCountry="AO"
           value={value}
           onChange={onChange as (value?: string) => void}
           onFocus={() => setFocused(true)}

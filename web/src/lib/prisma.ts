@@ -6,9 +6,6 @@ const globalForPrisma = globalThis as {
 };
 
 function getConnectionString(): string {
-  if (typeof globalThis !== "undefined" && "HYPERDRIVE" in globalThis) {
-    return (globalThis as any).HYPERDRIVE.connectionString ?? process.env.HYPERDRIVE;
-  }
   return process.env.DATABASE_URL!;
 }
 

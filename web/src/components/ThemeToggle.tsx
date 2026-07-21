@@ -39,7 +39,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       className={`text-text-muted hover:text-primary transition-colors ${className ?? ""}`}
       aria-label="Mudar tema"
     >
-      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+      {theme === "dark" ? <Sun size={25} /> : <Moon size={25} />}
     </button>
   );
 }

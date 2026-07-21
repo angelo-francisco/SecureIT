@@ -12,7 +12,7 @@ export function Modal({ open, onClose, children, className = "" }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[1000]"
+      className="fixed inset-0 min-h-screen flex items-center justify-center backdrop-blur-sm z-[1000]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}
