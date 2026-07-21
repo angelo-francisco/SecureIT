@@ -1,22 +1,20 @@
-import { PrismaLibSQL } from "@prisma/adapter-libsql";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { PrismaD1 } from "@prisma/adapter-d1";
 import { PrismaClient } from "@/generated/prisma/client";
 
-const globalForPrisma = globalThis as {
-  prisma?: PrismaClient;
-};
+let _client: PrismaClient | undefined;
 
-function getUrl(): string {
-  return process.env.DATABASE_URL_SQLITE!;
+function getClient(): PrismaClient {
+  if (!_client) {
+    const { env } = getCloudflareContext();
+    const adapter = new PrismaD1(env.DB);
+    _client = new PrismaClient({ adapter });
+  }
+  return _client;
 }
 
-const adapter = new PrismaLibSQL({ url: getUrl() });
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter,
-  });
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_, prop) {
+    return (getClient() as any)[prop];
+  },
+});

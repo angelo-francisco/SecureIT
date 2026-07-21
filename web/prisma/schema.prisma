@@ -3,6 +3,7 @@ generator client {
   output     = "../src/generated/prisma"
   engineType = "client"
   runtime    = "cloudflare"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
