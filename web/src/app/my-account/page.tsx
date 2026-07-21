@@ -22,6 +22,7 @@ import {
 import {
   ProfilesSection,
 } from "./components/ProfilesSection";
+import { NewLicenseModal } from "./components/NewLicenseModal";
 
 interface UserProfile {
   firstName: string;
@@ -44,6 +45,7 @@ export default function MyAccountPage() {
   const licensesRef = useRef<LicensesSectionHandle>(null);
   const plansSectionRef = useRef<PlansSectionHandle>(null);
   const paymentsRef = useRef<PaymentsSectionHandle>(null);
+  const [newLicenseModalOpen, setNewLicenseModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -100,7 +102,7 @@ export default function MyAccountPage() {
       </AccordionSection>
 
       <AccordionSection title="Licenças" icon={Shield} onOpen={openLicenses}>
-        <LicensesSection ref={licensesRef} data={licenses} onNavigateToPlans={scrollToPlans} />
+        <LicensesSection ref={licensesRef} data={licenses} onNavigateToPlans={scrollToPlans} onNewLicense={() => setNewLicenseModalOpen(true)} />
       </AccordionSection>
 
       <div ref={plansRef}>
@@ -112,6 +114,12 @@ export default function MyAccountPage() {
       <AccordionSection title="Pagamentos" icon={Receipt} onOpen={openPayments}>
         <PaymentsSection ref={paymentsRef} data={payments} />
       </AccordionSection>
+
+      <NewLicenseModal
+        open={newLicenseModalOpen}
+        onClose={() => setNewLicenseModalOpen(false)}
+        onComplete={openLicenses}
+      />
     </div>
 
   );

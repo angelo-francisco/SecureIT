@@ -10,6 +10,7 @@ interface AccordionSectionProps {
   onOpen?: () => Promise<void>;
   onRefresh?: () => void;
   loading?: boolean;
+  headerActions?: ReactNode;
   children: ReactNode;
 }
 
@@ -19,6 +20,7 @@ export function AccordionSection({
   onOpen,
   onRefresh,
   loading = false,
+  headerActions,
   children,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(false);
@@ -56,6 +58,7 @@ export function AccordionSection({
         </button>
 
         <div className="flex items-center gap-1">
+          {headerActions}
           {onRefresh && (
             <button
               onClick={(e) => {

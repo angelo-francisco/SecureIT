@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Key, Shield, Clock, Monitor } from "lucide-react";
+import { Key, Shield, Clock, Monitor, Plus } from "lucide-react";
 
 export interface LicenseData {
   id: string;
@@ -18,6 +18,7 @@ export interface LicenseData {
 interface LicensesSectionProps {
   data: LicenseData | null;
   onNavigateToPlans?: () => void;
+  onNewLicense?: () => void;
 }
 
 export interface LicensesSectionHandle {
@@ -25,7 +26,7 @@ export interface LicensesSectionHandle {
 }
 
 export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSectionProps>(
-  ({ data, onNavigateToPlans }, ref) => {
+  ({ data, onNavigateToPlans, onNewLicense }, ref) => {
     const [license, setLicense] = useState<LicenseData | null>(data);
 
     useImperativeHandle(ref, () => ({
@@ -46,13 +47,14 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
       return (
         <div className="text-center py-8 text-text-muted">
           <Key size={40} className="mx-auto mb-3 opacity-50" />
-          <p className="mb-3">Não tem nenhuma licença ativa</p>
-          {onNavigateToPlans && (
+          <p className="mb-4">Não tem nenhuma licença ativa</p>
+          {onNewLicense && (
             <button
-              onClick={onNavigateToPlans}
-              className="text-primary font-bold hover:underline text-sm"
+              onClick={onNewLicense}
+              className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center gap-2"
             >
-              Ver planos disponíveis →
+              <Plus size={16} />
+              Adquirir Licença
             </button>
           )}
         </div>
@@ -72,7 +74,7 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
               className={isActive ? "text-success" : "text-error"}
             />
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="font-semibold text-text">
               Licença {isActive ? "Ativa" : "Expirada"}
             </h3>
@@ -84,6 +86,15 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
               {isActive ? "Ativa" : "Expirada"}
             </p>
           </div>
+          {onNewLicense && (
+            <button
+              onClick={onNewLicense}
+              className="bg-primary/10 text-primary px-3.5 py-2 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all inline-flex items-center gap-1.5 shrink-0"
+            >
+              <Plus size={14} />
+              Nova
+            </button>
+          )}
         </div>
 
         <div className="space-y-0">

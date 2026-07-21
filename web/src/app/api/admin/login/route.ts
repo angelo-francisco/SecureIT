@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { createToken } from "@/lib/auth";
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@secureit.com";
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
@@ -16,22 +14,15 @@ export async function POST(request: Request) {
       );
     }
 
-    if (email !== ADMIN_EMAIL) {
+    const user = await prisma.adminUser.findUnique({ where: { email } });
+    if (!user) {
       return NextResponse.json(
-        { error: "Credenciais inválidas" },
+        { error: "Email ou palavra-passe incorrectos" },
         { status: 401 }
       );
     }
 
-    if (!ADMIN_PASSWORD_HASH) {
-      console.error("[Admin Login] ADMIN_PASSWORD_HASH não configurado");
-      return NextResponse.json(
-        { error: "Configuração de admin em falta" },
-        { status: 500 }
-      );
-    }
-
-    const valid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json(
         { error: "Credenciais inválidas" },
@@ -39,7 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const token = await createToken({ sub: "admin", email: ADMIN_EMAIL });
+    const token = await createToken({ sub: "admin", email: email });
 
     const response = NextResponse.json({ success: true });
     response.cookies.set("admin_token", token, {

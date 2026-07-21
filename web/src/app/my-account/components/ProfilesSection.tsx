@@ -165,7 +165,7 @@ export function ProfilesSection() {
 
   return (
     <>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex gap-4 overflow-x-auto scrollbar-thin">
         <button
           onClick={openCreate}
           className="shrink-0 group animate-tile"

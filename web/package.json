@@ -11,8 +11,7 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "6.19.0",

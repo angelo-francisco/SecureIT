@@ -28,8 +28,8 @@ export default async function MyAccountLayout({
 
   return (
     <div className="min-h-screen bg-bg text-text">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-20">{children}</main>
+      <Navbar inMyAccount={true} />
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6">{children}</main>
     </div>
   );
 }

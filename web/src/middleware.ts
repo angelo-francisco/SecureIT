@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/login", "/signup", "/api/auth", "/api/licenses/validate", "/api/licenses/activate"];
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/api/auth", "/api/admin/login", "/api/licenses/validate", "/api/licenses/activate", "/api/payment-info"];
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
       return new NextResponse(null, { status: 204, headers: corsHeaders });
     }
 
-    if (pathname.startsWith("/api/admin/")) {
+    if (pathname.startsWith("/api/admin/") && !pathname.endsWith("login")) {
       const token = request.cookies.get("admin_token")?.value;
       if (!token) {
         const res = NextResponse.json({ error: "Não autenticado" }, { status: 401 });
@@ -76,16 +76,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const token = request.cookies.get("admin_token")?.value;
-    if (!token) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-    const { verifyAccessToken } = await import("@/lib/auth");
-    const payload = await verifyAccessToken(token);
-    if (!payload) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
+  if (pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
