@@ -189,7 +189,7 @@ export default function SignupPage() {
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      onClick={() => setStep(3)}
+                      onClick={() => setStep(2)}
                       className="cursor-pointer w-14 shrink-0 border border-border  py-3.5 text-text-muted hover:text-text hover:border-text-muted transition-all flex items-center justify-center gap-1.5"
                     >
                       <ArrowLeft />
@@ -199,11 +199,11 @@ export default function SignupPage() {
                       disabled={!password || loading}
                       className="cursor-pointer flex-1 bg-primary text-white text-lg font-medium py-3.5  hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      {loading ? (
+                      {                      loading ? (
                         <Loader size={18} className="animate-spin" />
                       ) : (
                         <>
-                          Avançar
+                          Criar Conta
                         </>
                       )}
                     </button>
