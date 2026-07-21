@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppRoutes from "./routes";
-import { ThemeToggle } from "./components/ThemeToggle";
 import { ReAuthModal } from "./components/ReAuthModal";
-import { ToastContainer, FullLoader } from "@/packages/ui";
+import { FullLoader, ToastProvider } from "@/packages/ui";
 import { authApi } from "./api-client";
 import { useAuthStore } from "./hooks";
 
@@ -15,9 +14,7 @@ function App() {
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/profiles";
   const accessToken = useAuthStore((s) => s.accessToken);
-  const selectedProfile = useAuthStore((s) => s.selectedProfile);
   const setAccounts = useAuthStore((s) => s.setAccounts);
   const readyRef = useRef(false);
 
@@ -33,12 +30,10 @@ function App() {
     }
     if (!accessToken) {
       checkAccounts();
-    } else if (selectedProfile) {
-      setDestination("/panel");
     } else {
       setDestination("/profiles");
     }
-  }, [accessToken, selectedProfile, setAccounts]);
+  }, [accessToken, setAccounts]);
 
   useEffect(() => {
     const timer = setTimeout(() => setGifDone(true), 2800);
@@ -88,14 +83,14 @@ function App() {
         <FullLoader show={phase !== "fading"} />
       )}
 
+      <ToastProvider>
       <div
         className={`transition-opacity cursor-default duration-500 ${phase !== "app" ? "opacity-0" : "opacity-100"}`}
       >
         <AppRoutes />
-        {isAuthPage && <ThemeToggle />}
       </div>
-      <ReAuthModal />
-      <ToastContainer />
+      { /*<ReAuthModal />*/}
+      </ToastProvider>
     </>
   );
 }

@@ -11,11 +11,6 @@ class NotFound(AppException):
         super().__init__(detail=detail, status_code=status.HTTP_404_NOT_FOUND)
 
 
-class Unauthorized(AppException):
-    def __init__(self, detail: str = "Não autorizado"):
-        super().__init__(detail=detail, status_code=status.HTTP_401_UNAUTHORIZED)
-
-
 class Forbidden(AppException):
     def __init__(self, detail: str = "Proibido"):
         super().__init__(detail=detail, status_code=status.HTTP_403_FORBIDDEN)

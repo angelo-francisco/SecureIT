@@ -3,15 +3,15 @@ from apps.notifications.service import get_unread_count
 from apps.panel.models import Configuration
 
 
-async def get_or_create_configuration(user_id: int) -> Configuration:
-    config = await Configuration.get_or_none(user_id=user_id)
+async def get_or_create_configuration(profile_id: str) -> Configuration:
+    config = await Configuration.get_or_none(profile_id=profile_id)
     if not config:
-        config = await Configuration.create(user_id=user_id)
+        config = await Configuration.create(profile_id=profile_id)
     return config
 
 
-async def update_configuration(user_id: int, data: dict) -> Configuration:
-    config = await get_or_create_configuration(user_id)
+async def update_configuration(profile_id: str, data: dict) -> Configuration:
+    config = await get_or_create_configuration(profile_id)
 
     for key, value in data.items():
         if value is not None:
@@ -26,9 +26,9 @@ async def update_configuration(user_id: int, data: dict) -> Configuration:
     return config
 
 
-async def get_dashboard_data(user_id: int) -> dict:
-    cameras = await Camera.filter(user_id=user_id)
-    notif_count = await get_unread_count(user_id)
+async def get_dashboard_data(profile_id: str) -> dict:
+    cameras = await Camera.filter(profile_id=profile_id)
+    notif_count = await get_unread_count(profile_id)
 
     return {
         "cameras": [

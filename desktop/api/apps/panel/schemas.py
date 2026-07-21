@@ -33,7 +33,7 @@ class ConfigurationUpdate(BaseModel):
 
 class ConfigurationResponse(BaseModel):
     id: int
-    user_id: int
+    profile_id: str
     fps: int
     monitoring_start_time: str | None
     monitoring_end_time: str | None

@@ -27,7 +27,6 @@ export type { Column } from "./components/Table/Table";
 export { Modal } from "./components/Modal/Modal";
 export { Loader } from "./components/Loader/Loader";
 export { Pagination } from "./components/Pagination/Pagination";
-export { ToastContainer, useToastStore } from "./components/Toast/Toast";
 export { Toggle } from "./components/Toggle/Toggle";
 export { FullLogo } from "./components/FullLogo/FullLogo";
 export { FullLoader } from "./components/FullLoader/FullLoader";

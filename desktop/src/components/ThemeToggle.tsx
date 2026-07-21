@@ -24,7 +24,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="fixed top-4 right-4 z-[999] text-text hover:text-primary transition-colors"
+      className="cursor-pointer text-text hover:text-primary transition-colors"
     >
       {theme === "dark" ? <Lucide.Sun size={17} /> : <Lucide.Moon size={17} />}
     </button>

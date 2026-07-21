@@ -36,14 +36,13 @@ router = APIRouter(prefix="/people", tags=["people"])
 
 @router.get("/roles", response_model=list[RoleResponse])
 async def list_roles_endpoint(request: Request):
-    roles = await list_roles(request.state.user.id)
+    roles = await list_roles()
     return [RoleResponse.model_validate(r) for r in roles]
 
 
 @router.post("/roles", response_model=RoleResponse, status_code=201)
 async def create_role_endpoint(request: Request, data: RoleCreate):
     role = await create_role(
-        user_id=request.state.user.id,
         name=data.name,
         description=data.description,
         fields=[f.model_dump() for f in data.fields],
@@ -53,7 +52,7 @@ async def create_role_endpoint(request: Request, data: RoleCreate):
 
 @router.get("/roles/{role_id}", response_model=RoleResponse)
 async def get_role_endpoint(request: Request, role_id: int):
-    role = await get_role(role_id, request.state.user.id)
+    role = await get_role(role_id)
     return RoleResponse.model_validate(role)
 
 
@@ -61,7 +60,6 @@ async def get_role_endpoint(request: Request, role_id: int):
 async def update_role_endpoint(request: Request, role_id: int, data: RoleCreate):
     await update_role(
         role_id,
-        request.state.user.id,
         name=data.name,
         description=data.description,
     )
@@ -79,12 +77,12 @@ async def update_role_endpoint(request: Request, role_id: int, data: RoleCreate)
                 )
             )
         await RoleField.bulk_create(roles)
-    return await get_role(role_id, request.state.user.id)
+    return await get_role(role_id)
 
 
 @router.delete("/roles/{role_id}", status_code=204)
 async def delete_role_endpoint(request: Request, role_id: int):
-    await delete_role(role_id, request.state.user.id)
+    await delete_role(role_id)
     return {"message": "deleted"}
 
 

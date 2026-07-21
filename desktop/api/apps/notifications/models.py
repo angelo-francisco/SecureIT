@@ -3,7 +3,7 @@ from tortoise import fields, models
 
 class Notification(models.Model):
     id = fields.IntField(pk=True)
-    user = fields.ForeignKeyField("models.User", related_name="notifications")
+    profile = fields.ForeignKeyField("models.Profile", related_name="notifications")
     title = fields.CharField(max_length=50)
     description = fields.TextField()
     level = fields.CharField(max_length=1)

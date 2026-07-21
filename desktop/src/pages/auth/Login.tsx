@@ -3,136 +3,78 @@ import { useNavigate } from "react-router-dom";
 import { FloatingLabelInput } from "../../ui";
 import * as Lucide from "lucide-react";
 import { useAuth } from "../../hooks";
-import { useToast } from "../../hooks/useToast";
-
-type LoginStep = "email" | "password";
+import { useToast } from "@/packages/ui";
+import { Navbar } from "@/components/Navbar";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
 
-  const [step, setStep] = useState<LoginStep>("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    setStep("password");
-  };
-
-  const handlePasswordLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password) return;
+    if (!email || !password) return;
     setLoading(true);
-    setError("");
 
     try {
       await login(email, password);
       navigate("/profiles");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login";
-      setError(message);
-      toast(message, "error");
+      toast(err instanceof Error ? err.message : "Erro ao fazer login", "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg text-text">
-      <div className="p-10 flex flex-col items-center w-full max-w-[480px]">
-        <div className="w-full flex flex-col">
-          <div className="mb-12 text-center">
-            <div className="flex items-center justify-center gap-1">
-              <img src={"logo.png"} alt="SecureIT" className="h-16" />
-              <h1 className="text-5xl font-display font-bold leading-10 text-text tracking-tight">
-                SecureIT
-              </h1>
+    <div className="min-h-screen">
+      <Navbar/>
+      <section className="select-none bg-bg relative overflow-hidden min-h-screen flex justify-center items-center">
+        <div className="p-5 flex flex-col items-center w-full max-w-[480px]">
+          <div className="w-full flex flex-col">
+            <div className="flex flex-col items-center justify-center gap-1 mb-6">
+              <h1 className="text-center text-5xl font-semibold text-text">Iniciar Sessão</h1>
+              <p className="text-text-muted text-xl text-text">Insira os seus dados abaixo para continuar</p>
             </div>
-            <p className="text-xl text-text mt-1">
-              A segurança mais próximo de si.
-            </p>
-          </div>
 
-          {step === "email" && (
-            <form onSubmit={handleEmailSubmit} className="space-y-6">
-              <FloatingLabelInput
-                id="email"
-                label="Endereço de E-mail"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={!email}
-                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                Avançar
-              </button>
-            </form>
-          )}
-
-          {step === "password" && (
-            <form onSubmit={handlePasswordLogin} className="space-y-6">
-              <button
-                type="button"
-                onClick={() => {
-                  setStep("email");
-                  setPassword("");
-                  setError("");
-                }}
-                className="flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors"
-              >
-                <Lucide.ArrowLeft size={16} />
-                Voltar
-              </button>
-
-              <p className="text-base text-text-muted">
-                Entrar como <span className="text-text font-medium">{email}</span>
-              </p>
-
-              {error && (
-                <div className="p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm text-center">
-                  {error}
-                </div>
-              )}
-
-              <div>
-                <label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
-                  Palavra-passe
-                </label>
-                <input
+            <form onSubmit={handleLogin} className="space-y-8">
+              <div className="space-y-4">
+                <FloatingLabelInput
+                  id="email"
+                  label="Endereço de E-mail"
+                  type="email"
+                  value={email}
+                  className="text-xl"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <FloatingLabelInput
+                  id="password"
+                  label="Palavra-passe"
                   type="password"
                   value={password}
+                  className="text-xl"
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-border rounded-none text-text text-base font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary"
-                  placeholder="••••••••••••"
-                  autoFocus
                 />
               </div>
-
               <button
                 type="submit"
-                disabled={loading || !password}
-                className="w-full bg-primary text-white text-lg font-semibold py-4 rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                disabled={!email || !password || loading}
+                className="cursor-pointer mt-5 w-full bg-primary text-white text-lg font-medium py-3 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   <Lucide.Loader size={18} className="animate-spin" />
                 ) : (
-                  <>
-                    Entrar <Lucide.ArrowRight size={18} />
-                  </>
+                  <>Avançar</>
                 )}
               </button>
             </form>
-          )}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

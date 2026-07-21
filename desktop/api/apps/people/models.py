@@ -6,7 +6,6 @@ class Role(models.Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=60)
     description = fields.TextField(null=True)
-    user = fields.ForeignKeyField("models.User", related_name="roles")
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:

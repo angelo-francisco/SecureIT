@@ -1,9 +1,9 @@
 from tortoise import Tortoise
 
-from .config import settings
+from core.config import settings
 
 TORTOISE_MODELS = [
-    "apps.auth.models",
+    "apps.control.models",
     "apps.cameras.models",
     "apps.face_detection.models",
     "apps.notifications.models",
@@ -37,8 +37,6 @@ async def init_db():
 
     await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
 
-    # HNSW index for fast cosine similarity search on embeddings
-    # Tortoise generates the person_embeddings table schema from the model
     await conn.execute_query("""
         CREATE INDEX IF NOT EXISTS idx_person_embeddings_vector
         ON person_embeddings USING hnsw (embedding vector_cosine_ops)

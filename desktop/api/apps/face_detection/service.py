@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 async def list_face_detections(
-    user_id: int,
+    profile_id: str,
     page: int = 1,
     per_page: int = 20,
     known_only: bool = False,
 ):
-    qs = FaceDetection.filter(user_id=user_id).order_by("-created_at")
+    qs = FaceDetection.filter(profile_id=profile_id).order_by("-created_at")
     if known_only:
         qs = qs.filter(unknown=False)
     total = await qs.count()
@@ -23,7 +23,7 @@ async def list_face_detections(
 
 
 async def save_face_detection(
-    user_id: int,
+    profile_id: str,
     person_id: int | None,
     name: str | None,
     unknown: bool,
@@ -41,7 +41,7 @@ async def save_face_detection(
         photo_path = f"face_detections/{filename}"
 
     await FaceDetection.create(
-        user_id=user_id,
+        profile_id=profile_id,
         person_id=person_id,
         name=name,
         unknown=unknown,

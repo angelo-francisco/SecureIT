@@ -13,14 +13,14 @@ router = APIRouter(tags=["panel"])
 async def dashboard(
     request: Request,
 ):
-    return await get_dashboard_data(request.state.user.id)
+    return await get_dashboard_data(request.state.profile.profile_id)
 
 
 @router.get("/settings", response_model=ConfigurationResponse)
 async def get_settings(
     request: Request,
 ):
-    config = await get_or_create_configuration(request.state.user.id)
+    config = await get_or_create_configuration(request.state.profile.profile_id)
     return ConfigurationResponse.model_validate(config)
 
 
@@ -29,5 +29,5 @@ async def update_settings(
     request: Request,
     data: ConfigurationUpdate,
 ):
-    config = await update_configuration(request.state.user.id, data.model_dump(exclude_unset=True))
+    config = await update_configuration(request.state.profile.profile_id, data.model_dump(exclude_unset=True))
     return ConfigurationResponse.model_validate(config)

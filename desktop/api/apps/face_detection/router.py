@@ -14,7 +14,7 @@ async def list_face_detections_endpoint(
     known_only: bool = Query(False),
 ):
     detections, total = await list_face_detections(
-        request.state.user.id, page, per_page, known_only
+        request.state.profile.profile_id, page, per_page, known_only
     )
     return {
         "results": [FaceDetectionResponse.model_validate(d) for d in detections],

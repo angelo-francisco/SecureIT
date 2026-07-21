@@ -48,7 +48,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             className="google-snackbar pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg bg-[#323232] text-white text-sm font-medium shadow-lg min-w-[300px] max-w-[560px]"
           >
-            <span className="flex-1">{t.message}</span>
+            <span className="flex-1 text-lg">{t.message}</span>
             <button
               onClick={() => dismiss(t.id)}
               className="text-white/70 hover:text-white transition-colors shrink-0"

@@ -6,30 +6,30 @@ from core.exceptions import NotFound, ValidationError_
 
 
 async def list_cameras(
-    user_id: int, search_query: str = "", page: int = 1, per_page: int = 10
+    profile_id: str, search_query: str = "", page: int = 1, per_page: int = 10
 ) -> list[Camera]:
-    query = Camera.filter(user_id=user_id)
+    query = Camera.filter(profile_id=profile_id)
     if search_query:
         query = query.filter(Q(location__icontains=search_query))
     offset = (page - 1) * per_page
     return await query.offset(offset).limit(per_page)
 
 
-async def get_camera(camera_id: int, user_id: int) -> Camera:
-    camera = await Camera.get_or_none(id=camera_id, user_id=user_id)
+async def get_camera(camera_id: int, profile_id: str) -> Camera:
+    camera = await Camera.get_or_none(id=camera_id, profile_id=profile_id)
     if not camera:
         raise NotFound("Câmara não encontrada")
     return camera
 
 
-async def create_camera(user_id: int, data: CameraCreate) -> Camera:
+async def create_camera(profile_id: str, data: CameraCreate) -> Camera:
     if data.connection_type == "L" and not data.connection_info:
         raise ValidationError_("Informações da câmara local são necessárias")
     if data.connection_type == "W" and not data.connection_info.get("stream_url"):
         raise ValidationError_("URL de stream é necessária para câmara Wi-Fi")
 
     camera = await Camera.create(
-        user_id=user_id,
+        profile_id=profile_id,
         name=data.name,
         location=data.location,
         connection_type=data.connection_type,
@@ -39,8 +39,8 @@ async def create_camera(user_id: int, data: CameraCreate) -> Camera:
     return camera
 
 
-async def update_camera(camera_id: int, user_id: int, data: dict) -> Camera:
-    camera = await get_camera(camera_id, user_id)
+async def update_camera(camera_id: int, profile_id: str, data: dict) -> Camera:
+    camera = await get_camera(camera_id, profile_id)
 
     if "name" in data:
         camera.name = data["name"]
@@ -57,8 +57,8 @@ async def update_camera(camera_id: int, user_id: int, data: dict) -> Camera:
     return camera
 
 
-async def delete_camera(camera_id: int, user_id: int):
-    camera = await Camera.get_or_none(id=camera_id, user_id=user_id)
+async def delete_camera(camera_id: int, profile_id: str):
+    camera = await Camera.get_or_none(id=camera_id, profile_id=profile_id)
     if not camera:
         raise NotFound("Câmara não encontrada")
     await camera.delete()

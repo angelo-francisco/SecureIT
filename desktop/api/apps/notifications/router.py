@@ -17,7 +17,7 @@ async def list_notifications_endpoint(
     page: int = Query(1, ge=1),
     per_page: int = Query(5, ge=1, le=100),
 ):
-    notifications, total = await list_notifications(request.state.user.id, filter, page, per_page)
+    notifications, total = await list_notifications(request.state.profile.profile_id, filter, page, per_page)
     return {
         "results": [NotificationResponse.model_validate(n) for n in notifications],
         "has_next": total > page * per_page,
@@ -32,12 +32,12 @@ async def delete_notification_endpoint(
     request: Request,
     notification_id: int,
 ):
-    await delete_notification(notification_id, request.state.user.id)
+    await delete_notification(notification_id, request.state.profile.profile_id)
 
 
 @router.get("/unread-count")
 async def unread_count(
     request: Request,
 ):
-    count = await get_unread_count(request.state.user.id)
+    count = await get_unread_count(request.state.profile.profile_id)
     return {"count": count}

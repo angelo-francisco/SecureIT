@@ -5,12 +5,12 @@ from core.exceptions import NotFound
 
 
 async def list_notifications(
-    user_id: int,
+    profile_id: str,
     filter_type: str = "A",
     page: int = 1,
     per_page: int = 5,
 ) -> tuple[list[Notification], int]:
-    query = Notification.filter(user_id=user_id, deleted=False)
+    query = Notification.filter(profile_id=profile_id, deleted=False)
 
     match filter_type:
         case "NR":
@@ -24,13 +24,13 @@ async def list_notifications(
     return notifications, total
 
 
-async def delete_notification(notification_id: int, user_id: int):
-    notification = await Notification.get_or_none(id=notification_id, user_id=user_id)
+async def delete_notification(notification_id: int, profile_id: str):
+    notification = await Notification.get_or_none(id=notification_id, profile_id=profile_id)
     if not notification:
         raise NotFound("Notificação não encontrada")
     notification.deleted = True
     await notification.save()
 
 
-async def get_unread_count(user_id: int) -> int:
-    return await Notification.filter(user_id=user_id, readed=False, deleted=False).count()
+async def get_unread_count(profile_id: str) -> int:
+    return await Notification.filter(profile_id=profile_id, readed=False, deleted=False).count()

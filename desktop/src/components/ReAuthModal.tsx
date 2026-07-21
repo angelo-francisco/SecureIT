@@ -5,10 +5,12 @@ import { useReAuthStore } from "../stores/reauth";
 import { authApi } from "../api-client";
 import { useAuthStore } from "../hooks";
 import * as Lucide from "lucide-react";
+import { useToast } from "@/packages/ui";
 
 export function ReAuthModal() {
   const { pending, attempts, cooldownUntil, fail, succeed, dismiss } = useReAuthStore();
   const [error, setError] = useState("");
+  const { toast } = useToast()
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const navigate = useNavigate();

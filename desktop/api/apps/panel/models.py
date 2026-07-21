@@ -3,7 +3,7 @@ from tortoise import fields, models
 
 class Configuration(models.Model):
     id = fields.IntField(pk=True)
-    user = fields.OneToOneField("models.User", related_name="settings")
+    profile = fields.OneToOneField("models.Profile", related_name="settings")
     fps = fields.IntField(default=15)
     monitoring_start_time = fields.CharField(max_length=8, null=True)
     monitoring_end_time = fields.CharField(max_length=8, null=True)

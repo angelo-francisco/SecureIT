@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class NotificationResponse(BaseModel):
     id: int
-    user_id: int
+    profile_id: str
     title: str
     description: str
     level: str

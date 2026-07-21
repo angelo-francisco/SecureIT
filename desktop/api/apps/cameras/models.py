@@ -18,7 +18,7 @@ class CameraType(StrEnum):
 
 class Camera(models.Model):
     id = fields.IntField(pk=True)
-    user = fields.ForeignKeyField("models.User", related_name="cameras")
+    profile = fields.ForeignKeyField("models.Profile", related_name="cameras")
     name = fields.CharField(max_length=30, null=True)
     location = fields.CharField(max_length=150, null=True)
     status = fields.BooleanField(default=True, null=True)

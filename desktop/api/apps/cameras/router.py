@@ -25,7 +25,7 @@ async def list_cameras_endpoint(
     search_query: str = Query(""),
     page: int = Query(1, ge=1),
 ):
-    return await list_cameras(request.state.user.id, search_query, page)
+    return await list_cameras(request.state.profile.profile_id, search_query, page)
 
 
 @router.post("", response_model={}, status_code=201)
@@ -33,7 +33,7 @@ async def create_camera_endpoint(
     request: Request,
     data: CameraCreate,
 ):
-    await create_camera_service(request.state.user.id, data)
+    await create_camera_service(request.state.profile.profile_id, data)
     return {}
 
 
@@ -47,7 +47,7 @@ async def get_camera_endpoint(
     request: Request,
     camera_id: int,
 ):
-    return await get_camera(camera_id, request.state.user.id)
+    return await get_camera(camera_id, request.state.profile.profile_id)
 
 
 @router.put("/{camera_id}", response_model=CameraDetail)
@@ -57,7 +57,7 @@ async def update_camera_endpoint(
     data: CameraUpdate,
 ):
     return await update_camera_service(
-        camera_id, request.state.user.id, data.model_dump(exclude_unset=True)
+        camera_id, request.state.profile.profile_id, data.model_dump(exclude_unset=True)
     )
 
 
@@ -66,5 +66,5 @@ async def delete_camera_endpoint(
     request: Request,
     camera_id: int,
 ):
-    await delete_camera_service(camera_id, request.state.user.id)
+    await delete_camera_service(camera_id, request.state.profile.profile_id)
     return {"message": "deleted"}

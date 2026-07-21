@@ -24,7 +24,7 @@ class AreaDetectionManager:
         self.camera_service = None
         self.camera = None
         self.task = None
-        self.user_id = None
+        self.profile_id = None
         self.camera_id = None
         self.frame_index = 0
         self.last_alert = 0.0
@@ -37,7 +37,6 @@ class AreaDetectionManager:
         self.met = None
 
     async def _cleanup(self, reason: str = ""):
-        logger.info("[area] cleanup reason=%s user=%s camera=%s", reason, self.user_id, self.camera_id)
         self.running = False
         if self.camera_service:
             self.camera_service.stop()
@@ -72,13 +71,12 @@ class AreaDetectionManager:
                 try:
                     frame, people = self.camera_service.get_frame(detect)
                 except Exception as e:
-                    logger.warning("[area] get_frame failed user=%s camera=%s err=%s", self.user_id, self.camera_id, e)
                     break
 
                 if detect and people and self._is_monitoring_time() and self._check_cooldown() and people != self.last_people_count:
                     create_task(
                         create_notification(
-                            user_id=self.user_id,
+                            profile_id=self.profile_id,
                             camera_id=self.camera_id,
                             title=f"Detectadas {people} pessoa(s)",
                             description="Possíveis suspeitos em horário de monitoramento",
@@ -95,31 +93,27 @@ class AreaDetectionManager:
                 await self.ws.send_bytes(frame)
                 await async_sleep(1 / self.fps)
         except CancelledError:
-            logger.info("[area] cancelled user=%s camera=%s", self.user_id, self.camera_id)
+            pass
         except WebSocketDisconnect:
-            logger.info("[area] disconnect user=%s camera=%s", self.user_id, self.camera_id)
             await self._cleanup(reason="ws_disconnect")
         finally:
             self.running = False
 
     async def handle(self):
         params = self.ws.query_params
-        token = params.get("token")
+        profile_id = params.get("pid")
         camera_id = params.get("camera_id")
         video_source = params.get("vs")
 
-        logger.info("[area] new connection camera_id=%s vs=%s", camera_id, video_source)
-
-        user_id = await authenticate(token)
-        if not user_id:
+        pid = await authenticate(profile_id)
+        if not pid:
             await self.ws.close(code=4001)
             return
-        self.user_id = user_id
+        self.profile_id = pid
 
         await self.ws.accept()
-        logger.info("[area] accepted user=%s", self.user_id)
 
-        config = await load_user_config(self.user_id)
+        config = await load_user_config(self.profile_id)
         self.fps = config.get("fps", self.fps)
         self.alert_cooldown = config.get("alert_cooldown", self.alert_cooldown)
         self.detect_every = config.get("detect_every", self.detect_every)
@@ -130,29 +124,23 @@ class AreaDetectionManager:
         try:
             if camera_id:
                 self.camera_id = int(camera_id)
-                self.camera = await get_user_camera(self.camera_id, self.user_id)
+                self.camera = await get_user_camera(self.camera_id, self.profile_id)
                 if not self.camera:
-                    logger.warning("[area] camera not found id=%s", self.camera_id)
+                    pass
 
-            logger.info("[area] opening camera vs=%s fps=%s", video_source, self.fps)
             self.camera_service = create_camera_service(video_source, fps=self.fps, allow_draw=self.allow_draw)
             await set_camera_status(self.camera, True)
-            logger.info("[area] camera opened successfully")
         except Exception as e:
-            logger.error("[area] failed to open camera: %s", e)
             await set_camera_status(self.camera, False)
             await self.ws.close(code=4001)
             return
 
         self.running = True
         self.task = create_task(self.stream())
-        logger.info("[area] stream started user=%s camera=%s", self.user_id, self.camera_id)
 
         try:
             await self.task
-            logger.info("[area] stream finished user=%s camera=%s", self.user_id, self.camera_id)
         except (CancelledError, WebSocketDisconnect):
-            logger.info("[area] handle interrupted user=%s camera=%s", self.user_id, self.camera_id)
+            pass
         finally:
             await self._cleanup(reason="handle_end")
-            logger.info("[area] closed user=%s camera=%s", self.user_id, self.camera_id)
