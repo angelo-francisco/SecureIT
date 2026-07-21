@@ -6,9 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL_SQLITE")
 }
 
 model User {
@@ -83,7 +82,7 @@ model Plan {
   id          String   @id @default(cuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
+  price       Float
   currency    String   @default("EUR")
   durationDays Int
   isActive    Boolean  @default(true)
