@@ -115,7 +115,7 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao fazer login");
+      if (!res.ok) throw new Error((data as any).error || "Erro ao fazer login");
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
