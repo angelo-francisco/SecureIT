@@ -7,7 +7,8 @@ let _client: PrismaClient | undefined;
 function getClient(): PrismaClient {
   if (!_client) {
     const { env } = getCloudflareContext();
-    const adapter = new PrismaD1(env.DB);
+    // @ts-expect-error DATABASE_URL_SQLITE D1 binding from wrangler
+    const adapter = new PrismaD1(env.DATABASE_URL_SQLITE);
     _client = new PrismaClient({ adapter });
   }
   return _client;

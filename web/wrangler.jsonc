@@ -41,7 +41,7 @@
 	},
 	"d1_databases": [
 		{
-			"binding": "DB",
+			"binding": "DATABASE_URL_SQLITE",
 			"database_name": "secureit",
 			"database_id": "209ed914-21b8-4bba-bab3-b22a1f1ad2b6",
 		"migrations_dir": "prisma/migrations_sqlite",
