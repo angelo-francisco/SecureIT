@@ -38,5 +38,15 @@
 			"persist": true,
 			"head_sampling_rate": 1
 		}
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "secureit",
+			"database_id": "209ed914-21b8-4bba-bab3-b22a1f1ad2b6",
+		"migrations_dir": "prisma/migrations_sqlite",
+		"migrations_table": "d1_migrations",
+		"migrations_pattern": "prisma/migrations_sqlite/*/migration.sql"
+		}
+	]
 }
