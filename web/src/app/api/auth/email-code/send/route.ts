@@ -4,7 +4,7 @@ import { createEmailCode, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email } = (await request.json()) as any;
 
     if (!email) {
       return NextResponse.json(

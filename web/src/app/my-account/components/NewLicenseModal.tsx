@@ -55,8 +55,8 @@ export function NewLicenseModal({
       setUploadedProof(null);
       setLoading(true);
       Promise.all([
-        fetch("/api/plans").then((r) => (r.ok ? r.json() : [])),
-        fetch("/api/payment-info").then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/plans").then((r) => (r.ok ? r.json() : []) as any),
+        fetch("/api/payment-info").then((r) => (r.ok ? r.json() : null) as any),
       ])
         .then(([p, info]) => {
           setPlans(Array.isArray(p) ? p : []);
@@ -86,7 +86,7 @@ export function NewLicenseModal({
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as any;
         throw new Error(data.error);
       }
       toast("Pagamento submetido com sucesso! Será validado em instantes.");

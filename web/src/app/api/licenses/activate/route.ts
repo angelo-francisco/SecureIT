@@ -5,7 +5,7 @@ import { isValidLicenseKeyFormat } from "@/lib/license-key";
 
 export async function POST(request: Request) {
   try {
-    const { key, email, machineHash } = await request.json();
+    const { key, email, machineHash } = (await request.json()) as any;
 
     if (!key || !email) {
       return NextResponse.json(

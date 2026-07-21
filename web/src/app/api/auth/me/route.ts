@@ -66,7 +66,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { firstName, lastName, phone } = body;
 
     if (!firstName?.trim() || !lastName?.trim()) {

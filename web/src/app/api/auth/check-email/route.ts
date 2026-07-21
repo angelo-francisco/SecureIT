@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email } = (await request.json()) as any;
 
     if (!email) {
       return NextResponse.json({ error: "Email obrigatório" }, { status: 400 });

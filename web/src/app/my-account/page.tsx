@@ -49,7 +49,7 @@ export default function MyAccountPage() {
 
   useEffect(() => {
     fetch("/api/auth/me")
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => (r.ok ? r.json() : null) as any)
       .then((data) => {
         if (data?.user) {
           setUser({

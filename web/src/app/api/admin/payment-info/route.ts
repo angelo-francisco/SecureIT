@@ -22,7 +22,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { iban, accountName, bankName } = body;
 
     if (!iban || !accountName) {

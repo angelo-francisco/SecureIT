@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { name, avatarColor, pin } = body;
 
     if (!name?.trim()) {

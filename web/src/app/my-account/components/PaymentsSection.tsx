@@ -31,7 +31,7 @@ export const PaymentsSection = forwardRef<PaymentsSectionHandle, PaymentsSection
       fetchData: async () => {
         const res = await fetch("/api/payments");
         if (res.ok) {
-          const d = await res.json();
+          const d = (await res.json()) as any;
           const arr = Array.isArray(d) ? d : [];
           setPayments(arr);
           return arr;

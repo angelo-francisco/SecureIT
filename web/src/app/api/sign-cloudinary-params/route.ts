@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { paramsToSign } = body;
 
     const signature = cloudinary.utils.api_sign_request(

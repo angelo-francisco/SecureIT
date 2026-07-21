@@ -60,7 +60,7 @@ export default function SignupPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao criar conta");
+      if (!res.ok) throw new Error((data as any).error || "Erro ao criar conta");
       router.push("/my-account");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Erro ao criar conta");

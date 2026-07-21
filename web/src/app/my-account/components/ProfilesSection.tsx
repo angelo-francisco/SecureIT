@@ -50,7 +50,7 @@ export function ProfilesSection() {
     try {
       const res = await fetch("/api/profiles");
       if (res.ok) {
-        const d = await res.json();
+        const d = (await res.json()) as any;
         if (Array.isArray(d)) setProfiles(d);
       }
     } catch {
@@ -102,7 +102,7 @@ export function ProfilesSection() {
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as any;
         throw new Error(data.error);
       }
       toast("Perfil criado com sucesso");
@@ -129,7 +129,7 @@ export function ProfilesSection() {
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as any;
         throw new Error(data.error || "Erro ao atualizar perfil");
       }
       toast("Perfil atualizado");
@@ -151,7 +151,7 @@ export function ProfilesSection() {
         method: "DELETE",
       });
       if (!res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as any;
         throw new Error(data.error);
       }
       toast("Perfil eliminado");

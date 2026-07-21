@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const { type, durationDays, quantity, batchName } = await request.json();
+    const { type, durationDays, quantity, batchName } = (await request.json()) as any;
 
     if (!type || !durationDays || !quantity) {
       return NextResponse.json(

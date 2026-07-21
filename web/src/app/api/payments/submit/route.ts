@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { planId, proofPublicId, proofUrl } = body;
 
     if (!planId || !proofPublicId || !proofUrl) {

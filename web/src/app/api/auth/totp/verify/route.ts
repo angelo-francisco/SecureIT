@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { code, email } = await request.json();
+    const { code, email } = (await request.json()) as any;
 
     if (!code) {
       return NextResponse.json(

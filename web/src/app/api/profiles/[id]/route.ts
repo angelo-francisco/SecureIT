@@ -13,7 +13,7 @@ export async function PUT(
   }
   try {
     const { id } = await params;
-    const body = await request.json();
+    const body = (await request.json()) as any;
 
     const profile = await prisma.subProfile.findUnique({ where: { id } });
     if (!profile || profile.userId !== session.sub) {

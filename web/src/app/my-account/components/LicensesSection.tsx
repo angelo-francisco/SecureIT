@@ -33,7 +33,7 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
       fetchData: async () => {
         const res = await fetch("/api/my-account/license");
         if (res.ok) {
-          const d = await res.json();
+          const d = (await res.json()) as any;
           setLicense(d);
           return d;
         }

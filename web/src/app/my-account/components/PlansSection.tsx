@@ -52,8 +52,8 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
           fetch("/api/plans"),
           fetch("/api/admin/payment-info"),
         ]);
-        const p = plansRes.ok ? await plansRes.json() : [];
-        const info = infoRes.ok ? await infoRes.json() : null;
+        const p = (plansRes.ok ? await plansRes.json() : []) as any;
+        const info = (infoRes.ok ? await infoRes.json() : null) as any;
         setPlans(p);
         setPaymentInfo(info);
         return { plans: p, paymentInfo: info };
@@ -74,7 +74,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
           }),
         });
         if (!res.ok) {
-          const data = await res.json();
+          const data = (await res.json()) as any;
           throw new Error(data.error);
         }
         toast(

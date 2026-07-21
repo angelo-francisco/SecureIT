@@ -5,7 +5,7 @@ import { createToken, setTokenCookies } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const { email, code } = await request.json();
+    const { email, code } = (await request.json()) as any;
 
     if (!email || !code) {
       return NextResponse.json(

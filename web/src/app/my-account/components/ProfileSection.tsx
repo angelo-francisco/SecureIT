@@ -44,7 +44,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as any;
         throw new Error(data.error || "Erro ao guardar");
       }
       toast("Definições guardadas com sucesso");

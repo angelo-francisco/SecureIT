@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { name, description, price, currency, durationDays } = body;
 
     if (!name || !price || !durationDays) {
@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { id, name, description, price, currency, durationDays, isActive } = body;
 
     if (!id) {

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const { licenseId, machineHash } = await request.json();
+    const { licenseId, machineHash } = (await request.json()) as any;
 
     if (!licenseId) {
       return NextResponse.json(

@@ -114,8 +114,8 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error((data as any).error || "Erro ao fazer login");
+      const data = (await res.json()) as any;
+      if (!res.ok) throw new Error(data.error || "Erro ao fazer login");
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
@@ -236,7 +236,7 @@ function LicensesTab({ onGenerate }: { onGenerate: () => void }) {
     try {
       const res = await fetch("/api/admin/licenses");
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as any;
         if (Array.isArray(data)) setLicenses(data);
       }
     } catch {} finally { setLoading(false); }
@@ -324,7 +324,7 @@ function GenerateTab() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, durationDays, quantity, batchName }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (!res.ok) throw new Error(data.error);
       setGenerated(data.licenses.map((l: { key: string }) => l.key));
     } catch (err) { setError(err instanceof Error ? err.message : "Erro"); } finally { setLoading(false); }
@@ -413,7 +413,7 @@ function PlansTab() {
   const [saving, setSaving] = useState(false);
 
   const fetchPlans = useCallback(async () => {
-    try { const r = await fetch("/api/admin/plans"); if (r.ok) { const d = await r.json(); if (Array.isArray(d)) setPlans(d); } } catch {} finally { setLoading(false); }
+    try { const r = await fetch("/api/admin/plans"); if (r.ok) { const d = await r.json(); if (Array.isArray(d)) setPlans(d as any); } } catch {} finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchPlans(); }, [fetchPlans]);
@@ -521,7 +521,7 @@ function PaymentsTab() {
   const [processing, setProcessing] = useState<string | null>(null);
 
   const fetchPayments = useCallback(async () => {
-    try { const r = await fetch("/api/admin/payments"); if (r.ok) { const d = await r.json(); if (Array.isArray(d)) setPayments(d); } } catch {} finally { setLoading(false); }
+    try { const r = await fetch("/api/admin/payments"); if (r.ok) { const d = await r.json(); if (Array.isArray(d)) setPayments(d as any); } } catch {} finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchPayments(); }, [fetchPayments]);
@@ -632,7 +632,7 @@ function PaymentInfoTab() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/payment-info").then((r) => r.json()).then((data) => {
+    fetch("/api/admin/payment-info").then((r) => r.json()).then((data: any) => {
       if (data) { setInfo(data); setIban(data.iban); setAccountName(data.accountName); setBankName(data.bankName || ""); }
     }).finally(() => setLoading(false));
   }, []);
@@ -642,7 +642,7 @@ function PaymentInfoTab() {
     setSaving(true); setSaved(false);
     try {
       const r = await fetch("/api/admin/payment-info", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ iban, accountName, bankName }) });
-      if (r.ok) { const d = await r.json(); setInfo(d); setSaved(true); setTimeout(() => setSaved(false), 3000); }
+      if (r.ok) { const d = await r.json(); setInfo(d as any); setSaved(true); setTimeout(() => setSaved(false), 3000); }
     } finally { setSaving(false); }
   };
 
