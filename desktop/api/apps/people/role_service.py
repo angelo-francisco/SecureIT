@@ -1,5 +1,6 @@
 from core.exceptions import NotFound, ValidationError_
 from apps.people.models import PersonRole, Role, RoleField
+from apps.audit.service import log_action
 
 
 async def list_roles() -> list[Role]:
@@ -36,6 +37,7 @@ async def create_role(
                 sort_order=f.get("sort_order", i),
             )
 
+    await log_action("create", "role", role.id)
     return await get_role(role.id)
 
 
@@ -48,6 +50,7 @@ async def update_role(
     if description is not None:
         role.description = description
     await role.save()
+    await log_action("update", "role", role_id)
     return await get_role(role_id)
 
 
@@ -57,3 +60,4 @@ async def delete_role(role_id: int) -> None:
     if is_any_role_associated:
         raise ValidationError_("Cargo em uso. Remova o cargo das pessoas primeiro.")
     await role.delete()
+    await log_action("delete", "role", role_id)

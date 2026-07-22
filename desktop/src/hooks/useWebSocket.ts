@@ -21,7 +21,22 @@ export function useWebSocket(
   const connect = useCallback(() => {
     if (!enabled || !cameraId || !videoSource) return;
 
-    const url = `${getWsBaseUrl()}/ws/${consumerName}/${cameraId}/?vs=${videoSource}`;
+    let pid = "";
+    let uid = "";
+    try {
+      const profileRaw = localStorage.getItem("selected_profile");
+      if (profileRaw) {
+        const profile = JSON.parse(profileRaw);
+        if (profile?.id) pid = profile.id;
+      }
+      const userRaw = localStorage.getItem("user");
+      if (userRaw) {
+        const user = JSON.parse(userRaw);
+        if (user?.id) uid = user.id;
+      }
+    } catch {}
+
+    const url = `${getWsBaseUrl()}/ws/${consumerName}/${cameraId}/?vs=${videoSource}&pid=${encodeURIComponent(pid)}&uid=${encodeURIComponent(uid)}`;
 
     try {
       const ws = new WebSocket(url);

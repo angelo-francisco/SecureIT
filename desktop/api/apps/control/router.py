@@ -8,4 +8,4 @@ router = APIRouter(prefix="/control", tags=["control"])
 
 @router.post("/add-profile", status_code=201)
 async def add_profile(data: ProfileSchema):
-    return await ProfileModel.get_or_create(user_id=p.user_id, profile_id=p.profile_id)
+    return await ProfileModel.get_or_create(user_id=data.user_id, profile_id=data.profile_id)

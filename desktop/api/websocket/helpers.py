@@ -1,5 +1,6 @@
 import logging
 
+from apps.control.models import Profile
 from apps.cameras.models import Camera
 from apps.notifications.models import Notification
 from apps.panel.models import Configuration

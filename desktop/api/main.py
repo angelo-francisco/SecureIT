@@ -7,6 +7,7 @@ from apps.face_detection.router import router as face_detection_router
 from apps.notifications.router import router as notifications_router
 from apps.panel.router import router as panel_router
 from apps.people.router import router as people_router
+from apps.audit.router import router as audit_router
 from core.config import settings
 from core.database import close_db, init_db
 from core.middleware import ControlMiddleware
@@ -46,6 +47,7 @@ app.include_router(face_detection_router, prefix="/api")
 app.include_router(notifications_router, prefix="/api")
 app.include_router(panel_router, prefix="/api")
 app.include_router(people_router, prefix="/api")
+app.include_router(audit_router, prefix="/api")
 
 settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 app.mount("/media", StaticFiles(directory=str(settings.MEDIA_ROOT), html=False), name="media")

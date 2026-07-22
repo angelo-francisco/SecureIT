@@ -1,6 +1,7 @@
 from apps.cameras.models import Camera
 from apps.notifications.service import get_unread_count
 from apps.panel.models import Configuration
+from apps.audit.service import log_action
 
 
 async def get_or_create_configuration(profile_id: str) -> Configuration:
@@ -23,6 +24,7 @@ async def update_configuration(profile_id: str, data: dict) -> Configuration:
                 setattr(config, key, value)
 
     await config.save()
+    await log_action("update", "configuration", config.id)
     return config
 
 

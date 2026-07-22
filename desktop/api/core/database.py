@@ -9,6 +9,7 @@ TORTOISE_MODELS = [
     "apps.notifications.models",
     "apps.panel.models",
     "apps.people.models",
+    "apps.audit.models",
     "aerich.models",
 ]
 

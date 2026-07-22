@@ -16,6 +16,7 @@ from apps.people.models import Person, PersonEmbedding, PersonRole, Role
 from apps.people.schemas import (
     PersonRoleCreate,
 )
+from apps.audit.service import log_action
 
 _mtcnn = None
 _resnet = None
@@ -194,6 +195,7 @@ async def create_person(
         await PersonRole.bulk_create(
             create_person_role_list(person, roles_data, roles_fetched)
         )
+    await log_action("create", "person", person.id)
     return person
 
 
@@ -235,6 +237,7 @@ async def update_person(
         )
 
     await person.fetch_related("person_roles__role")
+    await log_action("update", "person", person.id)
     return person
 
 
@@ -243,6 +246,7 @@ async def delete_person(person_id: int):
     if not person:
         raise NotFound("Pessoa não encontrada")
     await person.delete()
+    await log_action("delete", "person", person_id)
 
 
 async def search_by_embedding(emb_list: list[float]) -> Person | None:

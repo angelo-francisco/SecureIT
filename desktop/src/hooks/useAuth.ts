@@ -30,13 +30,29 @@ function loadSelectedProfile(): ProfileData | null {
   }
 }
 
+function loadUser(): User | null {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: loadUser(),
   accessToken: localStorage.getItem("access_token"),
   accounts: [],
   pinVerified: false,
   selectedProfile: loadSelectedProfile(),
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+    set({ user });
+  },
   setAccessToken: (token) => {
     if (token) {
       localStorage.setItem("access_token", token);
@@ -59,6 +75,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem("access_token");
     localStorage.removeItem("remembered_account");
     localStorage.removeItem("selected_profile");
+    localStorage.removeItem("user");
     set({ user: null, accessToken: null, pinVerified: false, accounts: [], selectedProfile: null });
   },
 }));

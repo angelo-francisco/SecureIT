@@ -59,6 +59,19 @@ class ApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+    try {
+      const userRaw = localStorage.getItem("user");
+      if (userRaw) {
+        const user = JSON.parse(userRaw);
+        if (user?.id) headers["UID"] = user.id;
+      }
+      const profileRaw = localStorage.getItem("selected_profile");
+      if (profileRaw) {
+        const profile = JSON.parse(profileRaw);
+        if (profile?.id) headers["PID"] = profile.id;
+      }
+    } catch {}
+
     if (config.body && !(config.body instanceof FormData)) {
       headers["Content-Type"] = "application/json";
     }

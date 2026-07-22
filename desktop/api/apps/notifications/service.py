@@ -1,6 +1,7 @@
 from tortoise.expressions import Q
 
 from apps.notifications.models import Notification
+from apps.audit.service import log_action
 from core.exceptions import NotFound
 
 
@@ -30,6 +31,7 @@ async def delete_notification(notification_id: int, profile_id: str):
         raise NotFound("Notificação não encontrada")
     notification.deleted = True
     await notification.save()
+    await log_action("delete", "notification", notification_id, profile_id)
 
 
 async def get_unread_count(profile_id: str) -> int:

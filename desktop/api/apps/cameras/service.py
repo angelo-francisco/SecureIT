@@ -2,6 +2,7 @@ from tortoise.expressions import Q
 
 from apps.cameras.models import Camera
 from apps.cameras.schemas import CameraCreate
+from apps.audit.service import log_action
 from core.exceptions import NotFound, ValidationError_
 
 
@@ -36,6 +37,7 @@ async def create_camera(profile_id: str, data: CameraCreate) -> Camera:
         connection_info=data.connection_info,
         face_recognition=data.face_recognition,
     )
+    await log_action("create", "camera", camera.id)
     return camera
 
 
@@ -54,6 +56,7 @@ async def update_camera(camera_id: int, profile_id: str, data: dict) -> Camera:
         camera.face_recognition = data["face_recognition"]
 
     await camera.save()
+    await log_action("update", "camera", camera.id)
     return camera
 
 
@@ -62,6 +65,7 @@ async def delete_camera(camera_id: int, profile_id: str):
     if not camera:
         raise NotFound("Câmara não encontrada")
     await camera.delete()
+    await log_action("delete", "camera", camera_id)
 
 
 async def get_available_cameras():

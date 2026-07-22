@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks";
 import { useToast } from "@/packages/ui";
 import { Navbar } from "@/components/Navbar";
 import { profilesApi, type ProfileData } from "../../api-client/profiles";
+import { apiClient } from "../../api-client";
 import { Loader } from "@/packages/ui";
 
 export default function ProfileSwitcher() {
@@ -37,6 +38,12 @@ export default function ProfileSwitcher() {
 
     try {
       const result = await profilesApi.select(profile.id);
+      if (user?.id) {
+        await apiClient.post("/api/control/add-profile", {
+          user_id: user.id,
+          profile_id: profile.id,
+        });
+      }
       navigate("/panel", { replace: true });
     } catch (err) {
       toast(err instanceof Error ? err.message : "Erro ao selecionar perfil", "error");
@@ -46,7 +53,14 @@ export default function ProfileSwitcher() {
   const handlePinComplete = async (pin: string) => {
     if (!pinModal) return;
     try {
-      const result = await profilesApi.select(pinModal.id, pin);      setPinModal(null);
+      const result = await profilesApi.select(pinModal.id, pin);
+      if (user?.id) {
+        await apiClient.post("/api/control/add-profile", {
+          user_id: user.id,
+          profile_id: pinModal.id,
+        });
+      }
+      setPinModal(null);
       navigate("/panel", { replace: true });
     } catch (err) {
       toast(err instanceof Error ? err.message : "PIN incorrecto", "error");

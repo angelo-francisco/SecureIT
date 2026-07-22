@@ -23,8 +23,24 @@ export function connectCamera(
   }
 
   const token = localStorage.getItem("access_token") || "";
+
+  let pid = "";
+  let uid = "";
+  try {
+    const profileRaw = localStorage.getItem("selected_profile");
+    if (profileRaw) {
+      const profile = JSON.parse(profileRaw);
+      if (profile?.id) pid = profile.id;
+    }
+    const userRaw = localStorage.getItem("user");
+    if (userRaw) {
+      const user = JSON.parse(userRaw);
+      if (user?.id) uid = user.id;
+    }
+  } catch {}
+
   const ws = new WebSocket(
-    `${getWsBaseUrl()}/ws/${consumerName}?token=${encodeURIComponent(token)}&camera_id=${cameraId}&vs=${videoSource}`
+    `${getWsBaseUrl()}/ws/${consumerName}?token=${encodeURIComponent(token)}&camera_id=${cameraId}&vs=${videoSource}&pid=${encodeURIComponent(pid)}&uid=${encodeURIComponent(uid)}`
   );
   ws.binaryType = "arraybuffer";
 
