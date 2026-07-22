@@ -10,7 +10,7 @@ import { Loader } from "@/packages/ui";
 
 export default function ProfileSwitcher() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, selectProfile } = useAuth();
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +38,7 @@ export default function ProfileSwitcher() {
 
     try {
       const result = await profilesApi.select(profile.id);
+      selectProfile(result);
       if (user?.id) {
         await apiClient.post("/api/control/add-profile", {
           user_id: user.id,
@@ -54,6 +55,7 @@ export default function ProfileSwitcher() {
     if (!pinModal) return;
     try {
       const result = await profilesApi.select(pinModal.id, pin);
+      selectProfile(result);
       if (user?.id) {
         await apiClient.post("/api/control/add-profile", {
           user_id: user.id,
