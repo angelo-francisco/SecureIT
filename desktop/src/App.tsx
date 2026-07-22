@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppRoutes from "./routes";
-import { ReAuthModal } from "./components/ReAuthModal";
 import { FullLoader, ToastProvider } from "@/packages/ui";
 import { authApi } from "./api-client";
-import { useAuthStore } from "./hooks";
+import { useAuthStore, loadRememberedCredentials } from "./hooks";
 
 
 function App() {
@@ -14,26 +13,53 @@ function App() {
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const accessToken = useAuthStore((s) => s.accessToken);
   const setAccounts = useAuthStore((s) => s.setAccounts);
   const readyRef = useRef(false);
 
   useEffect(() => {
-    async function checkAccounts() {
+    let cancelled = false;
+
+    async function resolveDestination() {
+      const store = useAuthStore.getState();
+
+      if (store.accessToken) {
+        try {
+          const res = await authApi.refresh();
+          if (cancelled) return;
+          store.setAccessToken(res.access_token);
+          setDestination("/profiles");
+          return;
+        } catch {
+          // refresh failed, try auto-login
+        }
+      }
+
+      const creds = loadRememberedCredentials();
+      if (creds) {
+        try {
+          const res = await authApi.login({ email: creds.email, password: creds.password });
+          if (cancelled) return;
+          store.setAccessToken(res.access_token ?? null);
+          store.setUser(res.user);
+          setDestination("/profiles");
+          return;
+        } catch {
+          // auto-login failed
+        }
+      }
+
+      if (cancelled) return;
+
       try {
         const accounts = await authApi.accounts();
         setAccounts(accounts);
-      } catch {
-        // ignore
-      }
+      } catch { /* ignore */ }
       setDestination("/login");
     }
-    if (!accessToken) {
-      checkAccounts();
-    } else {
-      setDestination("/profiles");
-    }
-  }, [accessToken, setAccounts]);
+
+    resolveDestination();
+    return () => { cancelled = true; };
+  }, [setAccounts]);
 
   useEffect(() => {
     const timer = setTimeout(() => setGifDone(true), 2800);
@@ -89,7 +115,6 @@ function App() {
       >
         <AppRoutes />
       </div>
-      { /*<ReAuthModal />*/}
       </ToastProvider>
     </>
   );

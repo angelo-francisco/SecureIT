@@ -1,4 +1,4 @@
-export { useAuthStore, useAuth } from "./useAuth";
+export { useAuthStore, useAuth, loadRememberedCredentials } from "./useAuth";
 export { useCameras, useCamera, useCreateCamera, useUpdateCamera, useDeleteCamera, useLocalDevices } from "./useCameras";
 export { usePeople, useCreatePerson, usePerson, useUpdatePerson, useDeletePerson, useRoles, useCreateRole, useUpdateRole, useDeleteRole } from "./usePeople";
 export { useNotifications, useDeleteNotification } from "./useNotifications";

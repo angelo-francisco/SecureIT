@@ -39,6 +39,23 @@ function loadUser(): User | null {
   }
 }
 
+export function loadRememberedCredentials(): { email: string; password: string } | null {
+  try {
+    const raw = localStorage.getItem("remembered_credentials");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveRememberedCredentials(email: string, password: string) {
+  localStorage.setItem("remembered_credentials", JSON.stringify({ email, password }));
+}
+
+function clearRememberedCredentials() {
+  localStorage.removeItem("remembered_credentials");
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: loadUser(),
   accessToken: localStorage.getItem("access_token"),
@@ -73,9 +90,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   clearAuth: () => {
     localStorage.removeItem("access_token");
-    localStorage.removeItem("remembered_account");
     localStorage.removeItem("selected_profile");
     localStorage.removeItem("user");
+    clearRememberedCredentials();
     set({ user: null, accessToken: null, pinVerified: false, accounts: [], selectedProfile: null });
   },
 }));
@@ -89,6 +106,7 @@ export function useAuth() {
       const res = await authApi.login({ email, password });
       store.setAccessToken(res.access_token ?? null);
       store.setUser(res.user);
+      saveRememberedCredentials(email, password);
       return res;
     },
     [store]
@@ -99,10 +117,13 @@ export function useAuth() {
   }, []);
 
   const verifyEmailCode = useCallback(
-    async (email: string, code: string) => {
+    async (email: string, code: string, password?: string) => {
       const res = await authApi.verifyEmailCode({ email, code });
       store.setAccessToken(res.access_token ?? null);
       store.setUser(res.user);
+      if (password) {
+        saveRememberedCredentials(email, password);
+      }
       return res;
     },
     [store]
@@ -122,7 +143,6 @@ export function useAuth() {
       store.setAccessToken(res.access_token);
       return res.access_token;
     } catch {
-      store.clearAuth();
       return null;
     }
   }, [store]);
@@ -136,7 +156,6 @@ export function useAuth() {
       }
       return res.user;
     } catch {
-      store.clearAuth();
       return null;
     }
   }, [store]);
