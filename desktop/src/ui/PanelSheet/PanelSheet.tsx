@@ -31,7 +31,7 @@ export function PanelSheet({ open, onClose, children }: PanelSheetProps) {
               damping: 40,
               mass: 0.8,
             }}
-            className="fixed bottom-0 left-0 right-0 z-[999] max-h-[85vh] rounded-t-3xl bg-[#0B0E14]/95 backdrop-blur-2xl backdrop-saturate-150 border-t border-white/[0.08] shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-[999] max-h-[85vh] bg-bg/60 backdrop-blur-2xl backdrop-saturate-150 border-t border-white/[0.08] shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col"
           >
             <div className="flex-1 min-h-0 overflow-y-auto">
               <div className="p-6">

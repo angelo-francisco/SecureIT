@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Lucide from "lucide-react";
 import { useAuth } from "../../hooks";
-import { useToast } from "@/packages/ui";
+import { useToast, PinInput, Loader } from "@/packages/ui";
 import { Navbar } from "@/components/Navbar";
 import { profilesApi, type ProfileData } from "../../api-client/profiles";
 import { apiClient } from "../../api-client";
-import { Loader } from "@/packages/ui";
 
 export default function ProfileSwitcher() {
   const navigate = useNavigate();
@@ -14,9 +13,8 @@ export default function ProfileSwitcher() {
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
   const [pinModal, setPinModal] = useState<ProfileData | null>(null);
-  
+
   const getProfiles = () => {
     profilesApi
       .list()
@@ -85,7 +83,7 @@ export default function ProfileSwitcher() {
     <div className="min-h-screen">
       <Navbar/>
       <div className="min-h-screen w-full flex items-center justify-center flex-col">
-        
+
       <h1 className="text-text text-4xl font-semibold mb-1">
         Seja bem-vindo, <span className="capitalize">{user?.firstName}!</span>
       </h1>
@@ -156,19 +154,11 @@ function PinEntryModal({
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
 
-  const handleChange = (i: number, val: string) => {
-    const v = val.replace(/\D/g, "");
-    const newPin = pin.slice(0, i) + v + pin.slice(i + 1);
-    setPin(newPin);
-    setError(false);
-    if (v && i < 3) {
-      const next = document.getElementById(`pin-entry-${i + 1}`);
-      next?.focus();
+  useEffect(() => {
+    if (pin.length === 4) {
+      onComplete(pin);
     }
-    if (newPin.length === 4) {
-      setTimeout(() => onComplete(newPin), 100);
-    }
-  };
+  }, [pin, onComplete]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
@@ -178,36 +168,18 @@ function PinEntryModal({
       >
         <div className="flex flex-col items-center">
           <h3 className="text-2xl font-semibold text-text mb-5 uppercase">insira o código de acesso</h3>
-          <div className="flex gap-3 mb-4">
-            {[0, 1, 2, 3].map((i) => (
-              <input
-                key={i}
-                id={`pin-entry-${i}`}
-                maxLength={1}
-                type="password"
-                inputMode="numeric"
-                placeholder="•"
-                value={pin[i] || ""}
-                onChange={(e) => handleChange(i, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Backspace" && !pin[i] && i > 0) {
-                    document.getElementById(`pin-entry-${i - 1}`)?.focus();
-                  }
-                }}
-                className={`h-16 w-20 bg-bg border-2 text-center text-text text-lg font-bold focus:outline-none transition-colors caret-primary ${
-                  error ? "border-error" : "border-border focus:border-primary"
-                }`}
-                autoFocus={i === 0}
-              />
-            ))}
-          </div>
+          <PinInput
+            value={pin}
+            onChange={(v) => { setPin(v); setError(false); }}
+            autoFocus
+          />
           {error && (
-            <p className="text-sm text-error">PIN incorrecto</p>
+            <p className="text-sm text-error mt-3">PIN incorrecto</p>
           )}
         </div>
         <button
           onClick={onClose}
-          className="cursor-pointer w-full bg-red-500 mt-4 h-12 text-lg text-white font-semibold transition-colors"
+          className="cursor-pointer w-full bg-red-500 mt-6 h-12 text-lg text-white font-semibold transition-colors"
         >
           Cancelar
         </button>

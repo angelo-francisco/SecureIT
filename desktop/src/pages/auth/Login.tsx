@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FloatingLabelInput } from "../../ui";
+import { FloatingLabelInput } from "@/packages/ui";
 import * as Lucide from "lucide-react";
 import { useAuth } from "../../hooks";
 import { useToast } from "@/packages/ui";
@@ -48,7 +48,6 @@ export default function Login() {
                   label="Endereço de E-mail"
                   type="email"
                   value={email}
-                  className="text-xl"
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <FloatingLabelInput
@@ -56,7 +55,6 @@ export default function Login() {
                   label="Palavra-passe"
                   type="password"
                   value={password}
-                  className="text-xl"
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>

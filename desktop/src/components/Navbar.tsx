@@ -6,7 +6,7 @@ export function Navbar() {
     <nav className="relative z-50 select-none">
       <div className="absolute top-5 left-5 right-5 px-5 py-3 flex items-center justify-between">
         <Link
-          href="/"
+          to="/"
           className="flex items-center justify-center items-center gap-1.5 text-sm text-text-muted hover:text-text transition-colors"
         >
           <img

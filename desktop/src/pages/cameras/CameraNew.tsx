@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useCreateCamera, useLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
-import { Input, Button, Toggle } from "@/packages/ui";
+import { Input, Button, Toggle, OutlinedInput  } from "@/packages/ui";
 import { LucideInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
 import * as Lucide from "lucide-react";
 
@@ -93,46 +93,44 @@ export default function CameraNew({ onClose }: CameraNewProps) {
     <form onSubmit={handleSubmit} className="flex-1 h-full flex flex-col relative overflow-hidden">
       <header className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <Lucide.Plus size={22} className="text-primary" />
-          <h2 className="text-xl font-bold text-text">Nova Câmera</h2>
+          <Lucide.Plus size={30} className="text-primary" />
+          <h2 className="text-2xl font-bold text-text">Nova Câmera</h2>
         </div>
         {onClose && (
           <button
-            onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
-          >
-            <Lucide.X size={16} strokeWidth={2} />
+              onClick={onClose}
+              className="cursor-pointer flex items-center justify-center w-13 h-12 border border-gray-400 transition-all duration-150"
+            >
+            <Lucide.X size={20} strokeWidth={2} />
           </button>
         )}
       </header>
 
       <div className="flex-1 overflow-y-auto mt-6 flex justify-center">
         <div className="w-full max-w-xl space-y-5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text">Nome da câmara</label>
-            <Input
-              placeholder="Nome da câmara"
+          <div className="flex gap-2 items-center justify-between">
+          <div className="space-y-2 w-full">
+            <label className="text-base font-medium text-text">Nome</label>
+            <OutlinedInput
               value={name}
               onChange={(e) => { setName(e.target.value); setErrors((prev) => ({ ...prev, name: undefined })); }}
-              className={errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
+              className={(errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
             />
-            {errors.name && <p className="text-xs text-red-400">{errors.name}</p>}
+            {errors.name && <p className="text-base text-red-400">{errors.name}</p>}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text">Localização</label>
-            <LucideInput
-              placeholder="Localização da câmara"
-              icon="MapPin"
+          <div className="space-y-2 w-full">
+            <label className="text-base font-medium text-text">Localização</label>
+            <OutlinedInput
               value={location}
               onChange={(e) => { setLocation(e.target.value); setErrors((prev) => ({ ...prev, location: undefined })); }}
-              className={errors.location ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
+              className={(errors.location ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
             />
-            {errors.location && <p className="text-xs text-red-400">{errors.location}</p>}
+            {errors.location && <p className="text-base text-red-400">{errors.location}</p>}
           </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-text">Tipo de Conexão</label>
+          </div>
+          <div className="space-y-3">
+            <label className="text-base font-medium text-text">Tipo de Conexão</label>
             <Select value={connectionType} onValueChange={(v) => { setConnectionType(v); setErrors({}); }}>
               <SelectTrigger>
                 <SelectValue />
@@ -146,23 +144,23 @@ export default function CameraNew({ onClose }: CameraNewProps) {
 
           {connectionType === "W" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-text">URL da Câmera</label>
+              <label className="text-base font-medium text-text">URL da Câmera</label>
               <LucideInput
                 placeholder="http://192.168.100.181:5555/stream"
                 icon="Wifi"
                 value={streamUrl}
                 onChange={(e) => { setStreamUrl(e.target.value); setErrors((prev) => ({ ...prev, streamUrl: undefined })); }}
-                className={errors.streamUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
+                className={(errors.streamUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
               />
-              {errors.streamUrl && <p className="text-xs text-red-400">{errors.streamUrl}</p>}
-              <p className="text-xs text-text-muted">URL de streaming da câmera Wi-Fi</p>
+              {errors.streamUrl && <p className="text-base text-red-400">{errors.streamUrl}</p>}
+              <p className="text-lg text-text-muted">URL de streaming da câmera Wi-Fi</p>
             </div>
           )}
 
           {connectionType === "L" && (
             <>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-text">Modo de Captura</label>
+                <label className="text-base font-medium text-text">Modo de Captura</label>
                 <Select value={isDemo ? "demo" : "camera"} onValueChange={(v) => { setIsDemo(v === "demo"); setErrors({}); }}>
                   <SelectTrigger>
                     <SelectValue />
@@ -176,19 +174,19 @@ export default function CameraNew({ onClose }: CameraNewProps) {
 
               {isDemo ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text">Caminho do Ficheiro</label>
+                  <label className="text-base font-medium text-text">Caminho do Ficheiro</label>
                   <Input
                     placeholder="/home/user/videos/demo.mp4"
                     value={demoPath}
                     onChange={(e) => { setDemoPath(e.target.value); setErrors((prev) => ({ ...prev, demoPath: undefined })); }}
-                    className={errors.demoPath ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : ""}
+                    className={(errors.demoPath ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
                   />
-                  {errors.demoPath && <p className="text-xs text-red-400">{errors.demoPath}</p>}
-                  <p className="text-xs text-text-muted">Caminho absoluto no servidor para o ficheiro de vídeo (.mp4, .avi, .mov)</p>
+                  {errors.demoPath && <p className="text-base text-red-400">{errors.demoPath}</p>}
+                  <p className="text-lg text-text-muted">Caminho absoluto no servidor para o ficheiro de vídeo (.mp4, .avi, .mov)</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text">Dispositivo Local</label>
+                  <label className="text-base font-medium text-text">Dispositivo Local</label>
                   <Select value={localCamera} onValueChange={(v) => { setLocalCamera(v); setErrors((prev) => ({ ...prev, localCamera: undefined })); }}>
                     <SelectTrigger className={errors.localCamera ? "border-red-400" : ""}>
                       <SelectValue placeholder={localDevices ? "Selecione uma câmara" : "Carregando..."} />
@@ -201,8 +199,8 @@ export default function CameraNew({ onClose }: CameraNewProps) {
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.localCamera && <p className="text-xs text-red-400">{errors.localCamera}</p>}
-                  <p className="text-xs text-text-muted">Dispositivo conectado fisicamente ao servidor</p>
+                  {errors.localCamera && <p className="text-base text-red-400">{errors.localCamera}</p>}
+                  <p className="text-base text-text-muted">Dispositivo conectado fisicamente ao servidor</p>
                 </div>
               )}
             </>
@@ -214,17 +212,16 @@ export default function CameraNew({ onClose }: CameraNewProps) {
               checked={faceRecognition}
               onChange={(e) => setFaceRecognition(e.target.checked)}
             />
-            <p className="text-xs text-text-muted mt-1">
+            <p className="text-lg text-text-muted mt-1">
               Detetar e reconhecer rostos automaticamente nesta câmara
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" onClick={() => panelNavigate?.("cameras")}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="secondary" onClick={() => panelNavigate?.("cameras")} className="rounded-none border bg-transparent cursor-pointer">
               <Lucide.ArrowLeft size={16} />
-              Voltar
             </Button>
-            <Button type="submit">Adicionar</Button>
+            <Button type="submit" className="w-full text-lg rounded-none">Adicionar</Button>
           </div>
         </div>
       </div>

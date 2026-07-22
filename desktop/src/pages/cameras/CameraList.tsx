@@ -63,8 +63,8 @@ export default function CameraList({ onClose }: CameraListProps) {
     <div className="flex-1 h-full flex flex-col relative overflow-hidden">
       <header className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <Lucide.Video size={22} className="text-primary" />
-          <h2 className="text-xl font-bold text-text">Câmaras</h2>
+          <Lucide.Video size={30} className="text-primary" />
+          <h2 className="text-2xl font-bold text-text">Câmaras</h2>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative w-64">
@@ -73,22 +73,23 @@ export default function CameraList({ onClose }: CameraListProps) {
               placeholder="Buscar por localização..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-sm"
+              className="pl-9 h-12 text-lg rounded-none"
             />
           </div>
           <Button
-            size="sm"
-            icon={<Lucide.Plus size={14} />}
+            size="lg"
+            icon={<Lucide.Plus size={18} />}
             onClick={() => panelNavigate?.("camera-new")}
+            className="rounded-none cursor-pointer"
           >
             Nova Câmera
           </Button>
           {onClose && (
             <button
               onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+              className="cursor-pointer flex items-center justify-center w-13 h-12 border border-gray-400 transition-all duration-150"
             >
-              <Lucide.X size={16} strokeWidth={2} />
+              <Lucide.X size={20} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -109,11 +110,11 @@ export default function CameraList({ onClose }: CameraListProps) {
             <div className="w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center">
               <Lucide.VideoOff size={28} className="text-text-muted" />
             </div>
-            <div className="flex flex-col gap-1 max-w-md">
-              <h3 className="text-text font-semibold text-base">
+            <div className="flex flex-col gap-1/2 max-w-md">
+              <h3 className="text-text font-semibold text-xl">
                 Sem câmaras registadas
               </h3>
-              <p className="text-text-muted text-sm leading-relaxed">
+              <p className="text-text-muted text-lg leading-relaxed">
                 Adicione alguma câmera para começar a monitorar
               </p>
             </div>
