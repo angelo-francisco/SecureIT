@@ -44,8 +44,8 @@ export default function LoginPage() {
         <div className="p-5 flex flex-col items-center w-full max-w-[480px]">
           <div className="w-full flex flex-col">
             <div className="flex flex-col items-center justify-center gap-1 mb-6">
-              <h1 className="text-center text-5xl font-semibold">Iniciar Sessão</h1>
-              <p className="text-text-muted text-xl">Insira os seus dados abaixo para continuar</p>
+              <h1 className="text-center text-4xl md:text-5xl font-semibold">Iniciar Sessão</h1>
+              <p className="text-text-muted text-lg md:text-xl ">Insira os seus dados abaixo para continuar</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-8">

@@ -16,8 +16,8 @@ export function FullLoader({
       }`}
     >
       <div className="flex items-center gap-3 mb-4">
-        <img src={imageSrc} alt={text} className="w-14 h-auto" />
-        <h1 className="text-text font-display text-4xl font-bold">{text}</h1>
+        <img src={imageSrc} alt={text} className="w-8 h-auto" />
+        <h1 className="text-text text-3xl font-bold">{text}</h1>
       </div>
       <div className="fl-loader" />
       <style>{`
