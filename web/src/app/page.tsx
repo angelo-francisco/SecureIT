@@ -2,9 +2,10 @@ import Link from "next/link";
 import {
   Shield, Eye, Bell, Phone,
   Mail,
-  MessageCircle, ChevronRight
+  MessageCircle,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { PricingSection } from "./components/PricingSection";
 
 
 export default function HomePage() {
@@ -96,81 +97,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="pricing" className="min-h-screen flex items-center justify-center px-8">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold text-text mb-4">
-              Planos
-            </h3>
-            <p className="text-text-muted max-w-lg mx-auto">
-              Escolha o plano ideal para as suas necessidades
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div className="p-8 rounded-2xl bg-surface border border-border hover:border-border-light transition-all">
-              <div className="flex items-center gap-2 mb-2">
-                <h4 className="text-xl font-semibold text-text">Trial</h4>
-              </div>
-              <p className="text-text-muted mb-6">
-                Experimente gratuitamente durante 14 dias.
-              </p>
-              <div className="text-4xl font-bold text-text mb-6">Gratis</div>
-              <ul className="space-y-3 text-sm text-text-muted mb-8">
-                {[
-                  "1 camera",
-                  "10 pessoas registadas",
-                  "Deteccao de pessoas",
-                  "Sem reconhecimento facial",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2">
-                    <ChevronRight className="w-4 h-4 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className="block text-center border border-border text-text-muted py-3 rounded-lg font-bold hover:bg-surface-hover hover:text-text transition-all"
-              >
-                Comecar Trial
-              </Link>
-            </div>
-            <div className="p-8 rounded-2xl bg-primary/10 border border-primary/25 hover:border-primary/40 transition-all">
-              <div className="flex items-center gap-2 mb-2">
-                <h4 className="text-xl font-semibold text-text">Standard</h4>
-                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-semibold">
-                  Popular
-                </span>
-              </div>
-              <p className="text-text-muted mb-6">
-                Acesso completo a todas as funcionalidades.
-              </p>
-              <div className="text-4xl font-bold text-text mb-6">
-                Sob consulta
-              </div>
-              <ul className="space-y-3 text-sm text-text-muted mb-8">
-                {[
-                  "Cameras ilimitadas",
-                  "Pessoas ilimitadas",
-                  "Deteccao de pessoas",
-                  "Reconhecimento facial",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2">
-                    <ChevronRight className="w-4 h-4 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className="block text-center bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all"
-              >
-                Contactar
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PricingSection />
       <section className="py-32 text-center">
         <h2 className="text-5xl font-bold">
           Pronto para modernizar a sua segurança?

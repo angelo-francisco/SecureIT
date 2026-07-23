@@ -18,7 +18,7 @@ export interface OutlinedInputProps extends InputHTMLAttributes<HTMLInputElement
   labelSize?: LabelSize;
 }
 
-export function OutlinedInput({ label, id, className, error, icon, labelSize = "md", ...props }: OutlinedInputProps) {
+export function OutlinedInput({ label, id, className, error, icon, labelSize = "md", placeholder, ...props }: OutlinedInputProps) {
   const size = outlinedSizes[labelSize];
 
   return (
@@ -34,7 +34,7 @@ export function OutlinedInput({ label, id, className, error, icon, labelSize = "
             : "border border-border focus:border-primary",
           className
         )}
-        placeholder=" "
+        placeholder={placeholder ? placeholder : " "}
         {...props}
       />
       <label

@@ -31,9 +31,10 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
 
-  license         License?
-  profiles        SubProfile[]
-  paymentRequests PaymentRequest[]
+  license              License?
+  profiles             SubProfile[]
+  paymentRequests      PaymentRequest[]
+  maintenanceRequests  MaintenanceRequest[]
 }
 
 model LicenseKey {
@@ -91,16 +92,20 @@ model EmailCode {
 }
 
 model Plan {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  price       Float
-  currency    String   @default("EUR")
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  basePrice    Float
+  currency     String   @default("USD")
   durationDays Int
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  isActive     Boolean  @default(true)
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   paymentRequests PaymentRequest[]
+  features        PlanFeature[]
+  services        PlanService[]
 }
 
 model PaymentInfo {
@@ -115,16 +120,19 @@ model PaymentInfo {
 }
 
 model PaymentRequest {
-  id            String   @id @default(cuid())
-  userId        String
-  planId        String
-  paymentInfoId String
-  proofPublicId String
-  proofUrl      String
-  status        String   @default("PENDING")
-  adminNote     String?
-  createdAt     DateTime @default(now())
-  reviewedAt    DateTime?
+  id              String   @id @default(cuid())
+  userId          String
+  planId          String
+  paymentInfoId   String
+  proofPublicId   String
+  proofUrl        String
+  status          String   @default("PENDING")
+  adminNote       String?
+  selectedFeatures String?
+  selectedServices String?
+  totalPrice      Float?
+  createdAt       DateTime @default(now())
+  reviewedAt      DateTime?
 
   user        User         @relation(fields: [userId], references: [id])
   plan        Plan         @relation(fields: [planId], references: [id])
@@ -146,4 +154,45 @@ model SubProfile {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+model PlanFeature {
+  id          String   @id @default(uuid())
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@unique([planId, name])
+}
+
+model PlanService {
+  id          String   @id @default(uuid())
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@unique([planId, name])
+}
+
+model MaintenanceRequest {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  description    String
+  status         String   @default("PENDING")
+  proofPublicId  String?
+  proofUrl       String?
+  adminNote      String?
+  hasPaidLicense Boolean  @default(false)
+  totalPrice     Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

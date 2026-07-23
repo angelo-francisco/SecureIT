@@ -25,6 +25,7 @@ import {
   ProfilesSection,
 } from "./components/ProfilesSection";
 import { NewLicenseModal } from "./components/NewLicenseModal";
+import { MaintenanceModal } from "./components/MaintenanceModal";
 
 interface UserProfile {
   firstName: string;
@@ -51,10 +52,24 @@ export default function MyAccountPage() {
   const plansSectionRef = useRef<PlansSectionHandle>(null);
   const paymentsRef = useRef<PaymentsSectionHandle>(null);
   const [newLicenseModalOpen, setNewLicenseModalOpen] = useState(false);
+  const [maintenanceModalOpen, setMaintenanceModalOpen] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState<{ id: string; iban: string; accountName: string; bankName: string | null } | null>(null);
+  const [hasPaidLicense, setHasPaidLicense] = useState(false);
 
   useEffect(() => {
     fetchUser();
+    fetchPaymentInfo();
   }, []);
+
+  const fetchPaymentInfo = async () => {
+    try {
+      const res = await fetch("/api/payment-info");
+      if (res.ok) {
+        const data = await res.json();
+        setPaymentInfo(data);
+      }
+    } catch {}
+  };
 
   const fetchUser = () => {
     fetch("/api/auth/me")
@@ -140,7 +155,20 @@ export default function MyAccountPage() {
         onComplete={openLicenses}
       />
 
-      <div className="flex justify-end mt-5">
+      <MaintenanceModal
+        open={maintenanceModalOpen}
+        onClose={() => setMaintenanceModalOpen(false)}
+        paymentInfo={paymentInfo}
+        hasPaidLicense={hasPaidLicense}
+      />
+
+      <div className="flex justify-end gap-3 mt-5">
+        <button
+          onClick={() => setMaintenanceModalOpen(true)}
+          className="font-semibold bg-primary text-lg md:text-xl px-3 py-1 border cursor-pointer hover:brightness-110 transition-all"
+        >
+          Solicitar Manutenção
+        </button>
         <button
           onClick={async () => {
             setLoggingOut(true);

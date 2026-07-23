@@ -8,10 +8,11 @@ export interface Payment {
   status: string;
   proofUrl: string | null;
   adminNote: string | null;
+  totalPrice: number | null;
   createdAt: string;
   plan: {
     name: string;
-    price: string;
+    basePrice: number;
   };
 }
 
@@ -73,8 +74,8 @@ export const PaymentsSection = forwardRef<PaymentsSectionHandle, PaymentsSection
             <div className="flex-1 min-w-0">
               <h4 className="font-semibold text-text text-sm">{p.plan.name}</h4>
               <p className="text-xs text-text-muted">
-                {new Date(p.createdAt).toLocaleDateString("pt-PT")} — €
-                {Number(p.plan.price).toFixed(2)}
+                {new Date(p.createdAt).toLocaleDateString("pt-PT")} — $
+                {(p.totalPrice || p.plan.basePrice).toFixed(2)}
               </p>
               {p.adminNote && (
                 <p className="text-xs text-text-muted mt-1 italic">

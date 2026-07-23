@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
   try {
     const body = (await request.json()) as any;
-    const { planId, proofPublicId, proofUrl } = body;
+    const { planId, proofPublicId, proofUrl, selectedFeatures, selectedServices, totalPrice } = body;
 
     if (!planId || !proofPublicId || !proofUrl) {
       return NextResponse.json({ error: "Dados em falta" }, { status: 400 });
@@ -34,6 +34,9 @@ export async function POST(request: Request) {
         paymentInfoId: paymentInfo.id,
         proofPublicId,
         proofUrl,
+        ...(selectedFeatures && { selectedFeatures: JSON.stringify(selectedFeatures) }),
+        ...(selectedServices && { selectedServices: JSON.stringify(selectedServices) }),
+        ...(totalPrice !== undefined && { totalPrice }),
       },
       include: { plan: true },
     });

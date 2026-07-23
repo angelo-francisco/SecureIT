@@ -5,7 +5,8 @@ export async function GET() {
   try {
     const plans = await prisma.plan.findMany({
       where: { isActive: true },
-      orderBy: { price: "asc" },
+      include: { features: { where: { isActive: true } }, services: { where: { isActive: true } } },
+      orderBy: { basePrice: "asc" },
     });
     return NextResponse.json(plans);
   } catch (error) {

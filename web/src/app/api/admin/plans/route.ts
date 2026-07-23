@@ -8,7 +8,10 @@ export async function GET() {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const plans = await prisma.plan.findMany({ orderBy: { createdAt: "desc" } });
+    const plans = await prisma.plan.findMany({
+      include: { features: true, services: true },
+      orderBy: { createdAt: "desc" },
+    });
     return NextResponse.json(plans);
   } catch (error) {
     console.error("[Admin Plans GET]", error);
@@ -23,14 +26,14 @@ export async function POST(request: Request) {
   }
   try {
     const body = (await request.json()) as any;
-    const { name, description, price, currency, durationDays } = body;
+    const { name, description, basePrice, currency, durationDays } = body;
 
-    if (!name || !price || !durationDays) {
+    if (!name || basePrice === undefined || !durationDays) {
       return NextResponse.json({ error: "Dados em falta" }, { status: 400 });
     }
 
     const plan = await prisma.plan.create({
-      data: { name, description, price, currency: currency || "EUR", durationDays },
+      data: { name, description, basePrice, currency: currency || "USD", durationDays },
     });
 
     return NextResponse.json(plan);
@@ -47,7 +50,7 @@ export async function PUT(request: Request) {
   }
   try {
     const body = (await request.json()) as any;
-    const { id, name, description, price, currency, durationDays, isActive } = body;
+    const { id, name, description, basePrice, currency, durationDays, isActive, isDefault } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID em falta" }, { status: 400 });
@@ -58,10 +61,11 @@ export async function PUT(request: Request) {
       data: {
         ...(name !== undefined && { name }),
         ...(description !== undefined && { description }),
-        ...(price !== undefined && { price }),
+        ...(basePrice !== undefined && { basePrice }),
         ...(currency !== undefined && { currency }),
         ...(durationDays !== undefined && { durationDays }),
         ...(isActive !== undefined && { isActive }),
+        ...(isDefault !== undefined && { isDefault }),
       },
     });
     return NextResponse.json(plan);
