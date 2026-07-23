@@ -5,10 +5,10 @@ import { ThemeToggle } from "./ThemeToggle"
 
 export function Navbar({ inMyAccount = false }: { inMyAccount?: boolean }) {
   if (inMyAccount) return (
-    <nav className={inMyAccount ? `relative top-0 z-50 border-b` : `relative z-50`}>
+    <nav className="relative top-0 z-50 py-5">
       <div className={
-        (!inMyAccount ? `absolute top-5 left-1/2 md:left-5 -translate-x-1/2 md:-translate-x-0` : "px-4 md:px-8") + 
-        " flex items-center justify-between"
+        ("px-4 md:px-8") + 
+        " flex items-center justify-center md:justify-between"
       }>
       <div className="flex gap-2 justify-center items-center">
         <Link
@@ -21,20 +21,14 @@ export function Navbar({ inMyAccount = false }: { inMyAccount?: boolean }) {
             width={40}
             height={40}
             className="h-6 md:h-8 w-auto" />
-          <h1 className="hidden md:block text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">
             SecureIT
           </h1>
         </Link>
         <div className="min-h-8 w-[1px] bg-gray-300"></div>
         <h1 className="font-bold text-2xl md:text-3xl">Minha Conta</h1>
-          
-      </div>
-        {
-          inMyAccount && <div className="py-4"> 
-        <ThemeToggle />
-          </div>
-        }
-      </div>
+      </div>  
+      </div>  
     </nav>)
 
   return (

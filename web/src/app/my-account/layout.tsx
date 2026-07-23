@@ -29,7 +29,7 @@ export default async function MyAccountLayout({
   return (
     <div className="min-h-screen bg-bg text-text">
       <Navbar inMyAccount={true}/>
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-6">{children}</main>
     </div>
   );
 }

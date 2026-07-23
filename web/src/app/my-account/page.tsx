@@ -120,15 +120,16 @@ export default function MyAccountPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-4">
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-text capitalize">
+        <h1 className="text-4xl md:text-5xl font-display font-bold text-text text-center md:text-left capitalize">
           Olá, {user?.firstName + " " + user?.lastName}!
         </h1>
-        <p className="text-text-muted mt-1 text-xl md:text-2xl">
+        <p className="text-text-muted mt-1 text-xl md:text-2xl text-center md:text-left">
           Gerencie os seus dados e assinaturas
         </p>
       </div>
-
+      <div className="flex justify-center md:justify-start">
       <ProfilesSection />
+    </div>
       <div className="mt-4">
       <AccordionSection title="Dados Pessoais" icon={User} onOpen={openProfile}>
         {user && <ProfileSection user={user} onSaved={fetchUser} />}
