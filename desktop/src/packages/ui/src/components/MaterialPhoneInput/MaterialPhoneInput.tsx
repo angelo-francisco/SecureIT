@@ -16,26 +16,18 @@ export interface MaterialPhoneInputProps {
 export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel" }: MaterialPhoneInputProps) {
   const [focused, setFocused] = useState(false);
   const hasValue = !!value;
-  const labelUp = focused || hasValue;
+  const labelUp = true;
 
   return (
     <div className="relative">
-      <label
-        className={cn(
-          "absolute pointer-events-none transition-all duration-200 select-none z-10 -top-0.5 left-0 text-base",
-          error
-            ? "text-error"
-            : labelUp
-              ? "text-primary"
-              : "text-text-muted"
-        )}
-      >
-        {label}
-      </label>
       <div
         className={cn(
-          "phone-input-wrapper flex items-end h-14 border-b-2 transition-colors pt-4",
-          error ? "border-error" : focused ? "border-primary" : "border-border"
+          "phone-input-wrapper w-full h-14 flex items-center px-4 pt-2.5 pb-1.5 bg-transparent text-text text-lg transition-colors",
+          error
+            ? "border-2 border-error focus-within:border-error"
+            : focused
+              ? "border-2 border-primary"
+              : "border border-border"
         )}
       >
         <PhoneInput
@@ -46,8 +38,24 @@ export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           countrySelectComponent={CountrySelect}
+          className="w-full"
         />
       </div>
+      <label
+        className={cn(
+          "absolute left-3 px-1 bg-bg cursor-text select-none truncate transition-all duration-200 pointer-events-none z-10",
+          labelUp
+            ? "top-0 -translate-y-1/2 text-sm"
+            : "top-1/2 -translate-y-1/2 text-base",
+          error
+            ? "text-error"
+            : labelUp
+              ? "text-primary"
+              : "text-text-muted"
+        )}
+      >
+        {label}
+      </label>
     </div>
   );
 }
@@ -94,20 +102,20 @@ function CountrySelect({ value, onChange }: { value?: string; onChange: (v: stri
   const Flag = flags[value as keyof typeof flags];
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-1 pb-1 h-full text-text hover:bg-surface-hover transition-colors rounded-l"
+        className="flex items-center gap-1.5 px-1 h-8 text-text hover:bg-surface-hover transition-colors rounded"
       >
-        {Flag && <span className="inline-flex w-5 h-4 shrink-0 overflow-hidden"><Flag title={country.label} /></span>}
+        {Flag && <span className="inline-flex w-5 h-4 shrink-0 overflow-hidden rounded-sm"><Flag title={country.label} /></span>}
         <svg className={cn("w-3 h-3 text-text-muted transition-transform shrink-0", open && "rotate-180")} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M2 4.5L6 8.5L10 4.5" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 mb-1 w-64 max-h-64 overflow-y-auto bg-surface border border-border rounded-lg shadow-xl z-50 scrollbar-thin">
+        <div className="absolute top-full left-0 mt-1 w-64 max-h-64 overflow-y-auto bg-surface border border-border rounded-lg shadow-xl z-50 scrollbar-thin">
           {COUNTRIES.map((c) => {
             const F = flags[c.code as keyof typeof flags];
             return (

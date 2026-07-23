@@ -3,13 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FloatingLabelInput } from "@/components/FloatingLabelInput";
-import { OutlinedInput } from "@/components/OutlinedInput";
-import { MaterialPhoneInput } from "@/components/MaterialPhoneInput";
-import { ArrowLeft, Eye, EyeOff, Loader } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader, Mail } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 
-import { useToast } from "@/packages/ui";
+import { useToast, OutlinedInput, MaterialPhoneInput } from "@/packages/ui";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -76,8 +73,8 @@ export default function SignupPage() {
         <div className="p-8 md:p-4 flex flex-col items-center w-full max-w-[500px]">
           <div className="w-full flex flex-col items-center">
             <div className="flex flex-col items-center justify-center gap-1 mb-8">
-              <h1 className="text-center text-5xl font-semibold">Criar Conta</h1>
-              <p className="text-text-muted text-xl">Insira os seus dados abaixo para continuar</p>
+              <h1 className="text-center text-4xl md:text-5xl font-semibold">Criar Conta</h1>
+              <p className="text-text-muted text-lg md:text-xl">Insira os seus dados abaixo para continuar</p>
             </div>
 
             <form
@@ -90,12 +87,14 @@ export default function SignupPage() {
               {step === 1 && (
                 <>
                   <div className="space-y-5">
-                    <FloatingLabelInput
+                    <OutlinedInput
                       id="email"
                       label="Endereço de e-mail"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      labelSize="xl"
+                      icon={<Mail />}
                     />
                   </div>
                   <button
@@ -129,17 +128,20 @@ export default function SignupPage() {
                           label="Primeiro Nome"
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
+                          labelSize="xl"
                         />
                         <OutlinedInput
                           id="lastName"
                           label="Último Nome"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
+                          labelSize="xl"
                         />
                       </div>
                       <MaterialPhoneInput
                         value={phone}
                         onChange={(v) => setPhone(v ?? "")}
+                        outlined={true}
                       />
                     </div>
                   </div>
@@ -166,25 +168,29 @@ export default function SignupPage() {
                 <>
                   <div className="space-y-5">
                     <div className="relative">
-                      <FloatingLabelInput
+                      <OutlinedInput
                         id="password"
                         label="Palavra-passe"
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => { setPassword(e.target.value); setPasswordsError(false); }}
                         error={passwordsError}
+                        labelSize="xl"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
+                        
+                      
                     </div>
-                    <p className="text-xs text-text-muted">
+                    <div className="w-full flex justify-between">
+                    <p className="text-base md:text-lg text-text-muted">
                       Use palavras-passe com no mínimo de 12 caracteres
                     </p>
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="cursor-pointer z-[999] text-text-muted hover:text-primary transition-colors">
+                        {showPassword ? "Esconder" : "Ver"}
+                      </button>
+                    </div>
                   </div>
                   <div className="flex gap-3">
                     <button

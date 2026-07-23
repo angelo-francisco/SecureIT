@@ -134,11 +134,11 @@ body {
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 400;
   color: var(--text);
   outline: none;
-  padding: 0 0.75rem 0.25rem;
+  padding: 0;
   caret-color: var(--primary);
   min-width: 0;
 }
