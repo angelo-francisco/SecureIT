@@ -13,9 +13,10 @@ interface ProfileSectionProps {
     email: string;
     phone: string;
   };
+  onSaved?: () => void;
 }
 
-export function ProfileSection({ user }: ProfileSectionProps) {
+export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
   const { toast } = useToast();
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
@@ -48,6 +49,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
         throw new Error(data.error || "Erro ao guardar");
       }
       toast("Definições guardadas com sucesso");
+      onSaved?.();
     } catch (err) {
       toast(err instanceof Error ? err.message : "Erro ao guardar");
     } finally {

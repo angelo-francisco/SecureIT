@@ -51,7 +51,7 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
           {onNewLicense && (
             <button
               onClick={onNewLicense}
-              className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center gap-2"
+              className="bg-primary text-white px-5 py-2.5 text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center gap-2"
             >
               <Plus size={16} />
               Adquirir Licença

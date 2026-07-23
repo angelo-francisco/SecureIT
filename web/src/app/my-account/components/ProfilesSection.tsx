@@ -211,7 +211,7 @@ export function ProfilesSection() {
       <Modal open={modalOpen} onClose={closeModal}>
         <div className="bg-surface backdrop-blur-sm p-8 w-full max-w-md space-y-4 border">
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-semibold text-text">
+            <h3 className="text-lg md:text-xl font-semibold text-text">
               {editing ? "Editar Perfil" : "Novo Perfil"}
             </h3>
             {editing && !editing.isDefault && (
@@ -236,6 +236,7 @@ export function ProfilesSection() {
               className=""
               value={name}
               onChange={(e) => setName(e.target.value)}
+              labelSize="lg"
             />
           </div>
 

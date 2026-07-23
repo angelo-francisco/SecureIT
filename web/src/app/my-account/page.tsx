@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Shield, CreditCard, Receipt, User } from "lucide-react";
+import { Loader } from "@/packages/ui";
 import { AccordionSection } from "./components/AccordionSection";
 import { ProfileSection } from "./components/ProfileSection";
 import {
@@ -32,7 +34,10 @@ interface UserProfile {
 }
 
 export default function MyAccountPage() {
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
   const plansRef = useRef<HTMLDivElement>(null);
 
   const [licenses, setLicenses] = useState<LicenseData | null>(null);
@@ -48,6 +53,10 @@ export default function MyAccountPage() {
   const [newLicenseModalOpen, setNewLicenseModalOpen] = useState(false);
 
   useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = () => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null) as any)
       .then((data) => {
@@ -60,8 +69,9 @@ export default function MyAccountPage() {
           });
         }
       })
-      .catch(() => { });
-  }, []);
+      .catch(() => { })
+      .finally(() => setLoading(false));
+  };
 
   const scrollToPlans = useCallback(() => {
     plansRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -84,13 +94,21 @@ export default function MyAccountPage() {
     if (d) setPayments(d);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <Loader w={40} />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-4">
-        <h1 className="text-3xl md:text-5xl font-display font-bold text-text capitalize">
-          Olá, {user?.firstName || "..."}!
+        <h1 className="text-4xl md:text-5xl font-display font-bold text-text capitalize">
+          Olá, {user?.firstName + " " + user?.lastName}!
         </h1>
-        <p className="text-text-muted mt-1 text-lg md:text-xl">
+        <p className="text-text-muted mt-1 text-xl md:text-2xl">
           Gerencie os seus dados e assinaturas
         </p>
       </div>
@@ -98,7 +116,7 @@ export default function MyAccountPage() {
       <ProfilesSection />
       <div className="mt-4">
       <AccordionSection title="Dados Pessoais" icon={User} onOpen={openProfile}>
-        {user && <ProfileSection user={user} />}
+        {user && <ProfileSection user={user} onSaved={fetchUser} />}
       </AccordionSection>
 
       <AccordionSection title="Licenças" icon={Shield} onOpen={openLicenses}>
@@ -123,7 +141,18 @@ export default function MyAccountPage() {
       />
 
       <div className="flex justify-end mt-5">
-        <p className="font-semibold bg-red-500 text-lg md:text-xl px-3 py-1 border cursor-pointer">Fechar Sessão</p>
+        <button
+          onClick={async () => {
+            setLoggingOut(true);
+            await fetch("/api/auth/logout", { method: "POST" });
+            router.push("/login");
+          }}
+          disabled={loggingOut}
+          className="font-semibold bg-red-500 text-lg md:text-xl px-3 py-1 border cursor-pointer hover:brightness-110 transition-all flex items-center gap-2 disabled:opacity-50"
+        >
+          {loggingOut && <Loader w={16} />}
+          Fechar Sessão
+        </button>
       </div>
     </div>
 

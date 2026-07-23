@@ -103,10 +103,22 @@ export function NewLicenseModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="bg-surface/95 backdrop-blur-xl w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto scrollbar-thin">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border">
+      <div className="bg-surface backdrop-blur-sm p-8 w-full max-w-md space-y-4 border">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-text">
+                {step === 1 ? "Escolher Plano" : "Dados para Pagamento"}
+              </h3>
+              <p className="text-base md:text-lg text-text-muted">
+                {step === 1
+                  ? "Selecione o plano desejado"
+                  : selectedPlan?.name}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 items-center justify-center">
             {step === 2 && (
               <button
                 onClick={() => setStep(1)}
@@ -115,23 +127,13 @@ export function NewLicenseModal({
                 <ArrowLeft size={18} />
               </button>
             )}
-            <div>
-              <h3 className="text-lg font-semibold text-text">
-                {step === 1 ? "Escolher Plano" : "Dados para Pagamento"}
-              </h3>
-              <p className="text-xs text-text-muted mt-0.5">
-                {step === 1
-                  ? "Selecione o plano desejado"
-                  : selectedPlan?.name}
-              </p>
+           <button
+                onClick={onClose}
+                className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+              >
+                <X />
+              </button>
             </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-all"
-          >
-            <X size={18} />
-          </button>
         </div>
 
         {/* Content */}
@@ -150,7 +152,7 @@ export function NewLicenseModal({
                     size={40}
                     className="mx-auto mb-3 opacity-50"
                   />
-                  <p>Nenhum plano disponível de momento</p>
+                  <p className="text-base md:text-lg">Nenhum plano disponível de momento</p>
                 </div>
               ) : (
                 plans.map((plan) => (
