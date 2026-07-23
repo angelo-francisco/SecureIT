@@ -6,15 +6,6 @@ import { useToastStore } from "../stores/toast";
 const VALIDATION_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
 const ALERT_THRESHOLD_DAYS = 3;
 
-function getMachineHash(): string {
-  let hash = localStorage.getItem("machine_hash");
-  if (!hash) {
-    hash = crypto.randomUUID();
-    localStorage.setItem("machine_hash", hash);
-  }
-  return hash;
-}
-
 function wasAlertSentToday(): boolean {
   const lastAlert = localStorage.getItem("license_alert_last");
   if (!lastAlert) return false;
@@ -32,30 +23,50 @@ function markAlertSent() {
 }
 
 export function useLicenseValidation() {
-  const { licenseId, expiresAt, isActive, setLicense, updateLastChecked, clearLicense } =
-    useLicenseStore();
+  const {
+    licenseId,
+    expiresAt,
+    updateLastChecked,
+    updateLastValidated,
+    clearLicense,
+  } = useLicenseStore();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const validate = async () => {
     if (!licenseId) return;
 
     try {
-      const result = await licenseApi.validate({
+      const { fingerprint } = await licenseApi.getFingerprint();
+
+      const result = await licenseApi.heartbeat({
         licenseId,
-        machineHash: getMachineHash(),
+        hardwareFp: fingerprint,
       });
 
       updateLastChecked();
+
+      if (result.revoked) {
+        clearLicense();
+        useToastStore
+          .getState()
+          .addToast("Licença revogada. Contacte o suporte.", "error");
+        return;
+      }
 
       if (!result.valid) {
         clearLicense();
         useToastStore
           .getState()
-          .addToast("Licença inválida ou revogada.", "error");
+          .addToast("Licença inválida ou expirada.", "error");
         return;
       }
 
-      if (result.daysRemaining <= ALERT_THRESHOLD_DAYS && result.daysRemaining > 0) {
+      updateLastValidated();
+
+      if (
+        result.daysRemaining <= ALERT_THRESHOLD_DAYS &&
+        result.daysRemaining > 0
+      ) {
         if (!wasAlertSentToday()) {
           useToastStore.getState().addToast(
             `Faltam ${result.daysRemaining} dia(s) para a licença expirar.`,

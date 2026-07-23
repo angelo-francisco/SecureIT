@@ -6,8 +6,8 @@ services:
       - "3000:3000"
     volumes:
       - ./web:/app
-      - pnpm_node_modules:/app/node_modules
-      - pnpm_store:/app/.next
+      # - pnpm_node_modules:/app/node_modules
+      # - pnpm_store:/app/.next
     environment:
       # - DATABASE_URL=postgresql://neondb_owner:npg_6tx7OljCsDpA@ep-young-union-asboe64e.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - DATABASE_URL=postgresql://postgres.mssenmvmvtiorabwguxi:SECUREITDB123SECUREITDB123@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true
@@ -16,6 +16,8 @@ services:
       - ADMIN_EMAIL=admin@secureit.com
       - ADMIN_PASSWORD_HASH=$2a$12$X/4xJAfbpmJWfnwFwJi4CeeITLjd6ViGDn3CWko3eucU9rUt7OKO6
       - CI=true
+      - ED25519_PRIVATE_KEY_PATH=/app/ed25519_private.pem
+      - ED25519_PUBLIC_KEY_PATH=/app/ed25519_public.pem
       - NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=rpuyj3qu
       - NEXT_PUBLIC_CLOUDINARY_API_KEY=768868678858798
       - CLOUDINARY_API_SECRET=LRhVZsh3rn1X7h0hkK7qOjY0nIY
@@ -30,6 +32,7 @@ services:
     privileged: true
     environment:
       - DEBUG=1
+      - ED25519_PUBLIC_KEY_PATH=/app/ed25519_public.pem
     depends_on:
       db:
         condition: service_healthy
@@ -53,5 +56,3 @@ services:
 
 volumes:
   pgdata:
-  pnpm_node_modules:
-  pnpm_store:

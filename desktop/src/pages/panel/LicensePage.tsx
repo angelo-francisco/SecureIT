@@ -5,22 +5,20 @@ import { licenseApi } from "../../api-client/license";
 import { useAuthStore } from "../../hooks";
 import { useToast } from "../../hooks/useToast";
 
-function getMachineHash(): string {
-  let hash = localStorage.getItem("machine_hash");
-  if (!hash) {
-    hash = crypto.randomUUID();
-    localStorage.setItem("machine_hash", hash);
-  }
-  return hash;
-}
-
 interface LicensePageProps {
   onClose?: () => void;
 }
 
 export default function LicensePage({ onClose }: LicensePageProps) {
-  const { hasLicense, type, activatedAt, expiresAt, daysRemaining, isActive, setLicense } =
-    useLicense();
+  const {
+    hasLicense,
+    type,
+    activatedAt,
+    expiresAt,
+    daysRemaining,
+    isActive,
+    setLicense,
+  } = useLicense();
   const user = useAuthStore((s) => s.user);
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,28 +26,57 @@ export default function LicensePage({ onClose }: LicensePageProps) {
   const { toast } = useToast();
 
   const handleActivate = async () => {
-    if (!key || !user?.email) return;
+    if (!key || !user?.email || !user?.id) return;
     setLoading(true);
     setError("");
 
     try {
-      const result = await licenseApi.activate({
+      const { fingerprint } = await licenseApi.getFingerprint();
+
+      const activateResult = await licenseApi.activate({
         key: key.toUpperCase(),
         email: user.email,
-        machineHash: getMachineHash(),
+        hardwareFp: fingerprint,
       });
 
-      if (!result.valid) {
-        throw new Error(result.error || "Licença inválida");
+      if (!activateResult.valid) {
+        throw new Error(activateResult.error || "Licença inválida");
+      }
+
+      const storeResult = await licenseApi.storeLocal({
+        license_id: activateResult.licenseId,
+        user_id: user.id,
+        license_key: key.toUpperCase(),
+        license_type: activateResult.type,
+        activated_at: activateResult.activatedAt,
+        expires_at: activateResult.expiresAt,
+        hardware_fingerprint: fingerprint,
+        signed_payload: activateResult.signedPayload,
+        public_key: activateResult.publicKey,
+        signature: "web-signed",
+        max_cameras: activateResult.maxCameras,
+        max_people: activateResult.maxPeople,
+        features: activateResult.features,
+        status: "ACTIVE",
+      });
+
+      if (!storeResult.success) {
+        throw new Error("Erro ao guardar licença localmente");
       }
 
       setLicense({
-        licenseId: result.licenseId,
+        licenseId: storeResult.license_id,
         key: key.toUpperCase(),
-        type: result.type,
-        activatedAt: result.activatedAt,
-        expiresAt: result.expiresAt,
+        type: activateResult.type,
+        activatedAt: activateResult.activatedAt,
+        expiresAt: activateResult.expiresAt,
         lastChecked: new Date().toISOString(),
+        lastValidatedAt: new Date().toISOString(),
+        maxCameras: activateResult.maxCameras,
+        maxPeople: activateResult.maxPeople,
+        features: activateResult.features,
+        signedPayload: activateResult.signedPayload,
+        publicKey: activateResult.publicKey,
       });
 
       toast("Licença activada com sucesso!", "success");

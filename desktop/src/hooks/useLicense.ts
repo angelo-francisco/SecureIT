@@ -7,9 +7,9 @@ export function useLicense() {
   const isTrial = store.type === "TRIAL";
   const isStandard = store.type === "STANDARD";
 
-  const maxCameras = isTrial ? 1 : Infinity;
-  const maxPeople = isTrial ? 10 : Infinity;
-  const faceRecognition = isStandard;
+  const maxCameras = store.maxCameras === -1 ? Infinity : store.maxCameras;
+  const maxPeople = store.maxPeople === -1 ? Infinity : store.maxPeople;
+  const faceRecognition = store.features.includes("face_recognition");
 
   return {
     ...store,

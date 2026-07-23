@@ -3,18 +3,13 @@ from tortoise import BaseDBAsyncClient
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "users" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "email" VARCHAR(255) NOT NULL UNIQUE,
-    "hashed_password" VARCHAR(255) NOT NULL,
-    "first_name" VARCHAR(30) NOT NULL,
-    "last_name" VARCHAR(30) NOT NULL,
-    "phone" VARCHAR(30),
-    "pin" VARCHAR(128),
-    "is_active" BOOL NOT NULL,
+        CREATE TABLE IF NOT EXISTS "profiles" (
+    "profile_id" VARCHAR(255) NOT NULL PRIMARY KEY,
+    "user_id" VARCHAR(255) NOT NULL,
+    "isAdmin" BOOL NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL
 );
-CREATE INDEX IF NOT EXISTS "idx_users_email_133a6f" ON "users" ("email");
+CREATE INDEX IF NOT EXISTS "idx_profiles_user_id_a414dd" ON "profiles" ("user_id");
 CREATE TABLE IF NOT EXISTS "cameras" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "name" VARCHAR(30),
@@ -25,9 +20,21 @@ CREATE TABLE IF NOT EXISTS "cameras" (
     "face_recognition" BOOL NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ NOT NULL,
-    "user_id" INT NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE
+    "profile_id" VARCHAR(255) NOT NULL REFERENCES "profiles" ("profile_id") ON DELETE CASCADE
 );
 COMMENT ON COLUMN "cameras"."connection_type" IS 'LOCAL: L\nWIFI: W';
+CREATE TABLE IF NOT EXISTS "face_detections" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "person_id" INT,
+    "name" VARCHAR(255),
+    "unknown" BOOL NOT NULL,
+    "confidence" DOUBLE PRECISION NOT NULL,
+    "camera_name" VARCHAR(255),
+    "photo" VARCHAR(255),
+    "created_at" TIMESTAMPTZ NOT NULL,
+    "camera_id" INT REFERENCES "cameras" ("id") ON DELETE CASCADE,
+    "profile_id" VARCHAR(255) NOT NULL REFERENCES "profiles" ("profile_id") ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS "notifications" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "title" VARCHAR(50) NOT NULL,
@@ -38,7 +45,7 @@ CREATE TABLE IF NOT EXISTS "notifications" (
     "photo" VARCHAR(255),
     "created_at" TIMESTAMPTZ NOT NULL,
     "camera_id" INT REFERENCES "cameras" ("id") ON DELETE CASCADE,
-    "user_id" INT NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE
+    "profile_id" VARCHAR(255) NOT NULL REFERENCES "profiles" ("profile_id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "configurations" (
     "id" SERIAL NOT NULL PRIMARY KEY,
@@ -48,13 +55,12 @@ CREATE TABLE IF NOT EXISTS "configurations" (
     "alert_cooldown" INT NOT NULL,
     "detect_every" INT NOT NULL,
     "allow_draw" BOOL NOT NULL,
-    "user_id" INT NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE
+    "profile_id" VARCHAR(255) NOT NULL UNIQUE REFERENCES "profiles" ("profile_id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "people" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "first_name" VARCHAR(30) NOT NULL,
     "last_name" VARCHAR(30) NOT NULL,
-    "type" VARCHAR(1) NOT NULL,
     "photo" VARCHAR(255),
     "added_at" TIMESTAMPTZ NOT NULL,
     "updated_at" TIMESTAMPTZ NOT NULL,
@@ -69,8 +75,7 @@ CREATE TABLE IF NOT EXISTS "roles" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "name" VARCHAR(60) NOT NULL,
     "description" TEXT,
-    "created_at" TIMESTAMPTZ NOT NULL,
-    "user_id" INT NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE
+    "created_at" TIMESTAMPTZ NOT NULL
 );
 CREATE TABLE IF NOT EXISTS "person_roles" (
     "id" SERIAL NOT NULL PRIMARY KEY,
@@ -87,6 +92,37 @@ CREATE TABLE IF NOT EXISTS "role_fields" (
     "sort_order" INT NOT NULL,
     "role_id" INT NOT NULL REFERENCES "roles" ("id") ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS "audit_logs" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "profile_id" VARCHAR(255),
+    "action" VARCHAR(10) NOT NULL,
+    "entity_type" VARCHAR(30) NOT NULL,
+    "entity_id" VARCHAR(255) NOT NULL,
+    "synced" BOOL NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "idx_audit_logs_profile_eb1b3f" ON "audit_logs" ("profile_id");
+CREATE INDEX IF NOT EXISTS "idx_audit_logs_entity__893447" ON "audit_logs" ("entity_type");
+CREATE TABLE IF NOT EXISTS "licenses" (
+    "id" UUID NOT NULL PRIMARY KEY,
+    "license_id" VARCHAR(255) NOT NULL UNIQUE,
+    "user_id" VARCHAR(255) NOT NULL,
+    "license_key" VARCHAR(30) NOT NULL,
+    "license_type" VARCHAR(20) NOT NULL,
+    "activated_at" TIMESTAMPTZ NOT NULL,
+    "expires_at" TIMESTAMPTZ NOT NULL,
+    "last_validated_at" TIMESTAMPTZ,
+    "hardware_fingerprint" VARCHAR(255) NOT NULL,
+    "signed_payload" TEXT NOT NULL,
+    "public_key" TEXT NOT NULL,
+    "signature" TEXT NOT NULL,
+    "max_cameras" INT NOT NULL,
+    "max_people" INT NOT NULL,
+    "features" JSONB NOT NULL,
+    "status" VARCHAR(20) NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "idx_licenses_user_id_0b4512" ON "licenses" ("user_id");
 CREATE TABLE IF NOT EXISTS "aerich" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "version" VARCHAR(255) NOT NULL,

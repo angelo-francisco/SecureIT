@@ -6,6 +6,13 @@ generator client {
   previewFeatures = ["driverAdapters"]
 }
 
+generator client_node {
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma-node"
+  engineType = "library"
+  previewFeatures = ["driverAdapters"]
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL_SQLITE")
@@ -34,6 +41,8 @@ model LicenseKey {
   key          String   @unique
   type         String
   durationDays Int
+  maxCameras   Int      @default(-1)
+  maxPeople    Int      @default(-1)
   status       String   @default("PENDING")
   batchName    String?
   createdAt    DateTime @default(now())
@@ -47,11 +56,13 @@ model License {
   id               String    @id @default(cuid())
   keyId            String    @unique
   userId           String    @unique
-  paymentRequestId String? @unique
+  paymentRequestId String?   @unique
   activatedAt      DateTime
   expiresAt        DateTime
   lastChecked      DateTime?
-  machineHash      String?
+  hardwareFp       String?
+  signedPayload    String?
+  status           String    @default("ACTIVE")
   createdAt        DateTime  @default(now())
 
   key            LicenseKey      @relation(fields: [keyId], references: [id])

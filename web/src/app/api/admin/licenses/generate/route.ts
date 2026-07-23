@@ -3,13 +3,25 @@ import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
 
+const TYPE_DEFAULTS: Record<string, { maxCameras: number; maxPeople: number }> = {
+  TRIAL: { maxCameras: 1, maxPeople: 10 },
+  STANDARD: { maxCameras: -1, maxPeople: -1 },
+};
+
 export async function POST(request: Request) {
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const { type, durationDays, quantity, batchName } = (await request.json()) as any;
+    const {
+      type,
+      durationDays,
+      quantity,
+      batchName,
+      maxCameras,
+      maxPeople,
+    } = (await request.json()) as any;
 
     if (!type || !durationDays || !quantity) {
       return NextResponse.json(
@@ -32,6 +44,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const defaults = TYPE_DEFAULTS[type] || { maxCameras: -1, maxPeople: -1 };
+    const finalMaxCameras = maxCameras ?? defaults.maxCameras;
+    const finalMaxPeople = maxPeople ?? defaults.maxPeople;
+
     const licenses = [];
     for (let i = 0; i < quantity; i++) {
       let key = generateLicenseKey();
@@ -51,6 +67,8 @@ export async function POST(request: Request) {
           key,
           type,
           durationDays,
+          maxCameras: finalMaxCameras,
+          maxPeople: finalMaxPeople,
           batchName: batchName || null,
         },
       });
@@ -60,6 +78,8 @@ export async function POST(request: Request) {
         key: license.key,
         type: license.type,
         durationDays: license.durationDays,
+        maxCameras: license.maxCameras,
+        maxPeople: license.maxPeople,
         batchName: license.batchName,
         createdAt: license.createdAt,
       });

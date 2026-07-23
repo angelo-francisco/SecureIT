@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { isValidLicenseKeyFormat } from "@/lib/license-key";
+import {
+  signLicensePayload,
+  getPublicKeyPemString,
+} from "@/lib/keys/ed25519";
 
 export async function POST(request: Request) {
   try {
-    const { key, email, machineHash } = (await request.json()) as any;
+    const { key, email, hardwareFp } = (await request.json()) as any;
 
     if (!key || !email) {
       return NextResponse.json(
@@ -46,12 +50,20 @@ export async function POST(request: Request) {
 
       if (existingLicense) {
         if (existingLicense.expiresAt > new Date()) {
+          const features: string[] =
+            licenseKey.type === "STANDARD" ? ["face_recognition"] : [];
+          const publicKey = await getPublicKeyPemString();
           return NextResponse.json({
             valid: true,
             licenseId: existingLicense.id,
             expiresAt: existingLicense.expiresAt,
             activatedAt: existingLicense.activatedAt,
             type: licenseKey.type,
+            signedPayload: existingLicense.signedPayload,
+            publicKey,
+            maxCameras: licenseKey.maxCameras,
+            maxPeople: licenseKey.maxPeople,
+            features,
             daysRemaining: Math.ceil(
               (existingLicense.expiresAt.getTime() - Date.now()) /
                 (1000 * 60 * 60 * 24)
@@ -90,24 +102,47 @@ export async function POST(request: Request) {
       now.getTime() + licenseKey.durationDays * 24 * 60 * 60 * 1000
     );
 
-    const license = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const lic = await tx.license.create({
-        data: {
-          keyId: licenseKey.id,
-          userId: user.id,
-          activatedAt: now,
-          expiresAt,
-          machineHash: machineHash || null,
-        },
-      });
+    const maxCameras = licenseKey.maxCameras;
+    const maxPeople = licenseKey.maxPeople;
+    const features: string[] =
+      licenseKey.type === "STANDARD" ? ["face_recognition"] : [];
 
-      await tx.licenseKey.update({
-        where: { id: licenseKey.id },
-        data: { status: "ACTIVE" },
-      });
+    const licensePayload = {
+      key: licenseKey.key,
+      type: licenseKey.type,
+      userId: user.id,
+      email: user.email,
+      maxCameras,
+      maxPeople,
+      features,
+      activatedAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+    };
 
-      return lic;
-    });
+    const signedPayload = await signLicensePayload(licensePayload);
+    const publicKey = await getPublicKeyPemString();
+
+    const license = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const lic = await tx.license.create({
+          data: {
+            keyId: licenseKey.id,
+            userId: user.id,
+            activatedAt: now,
+            expiresAt,
+            hardwareFp: hardwareFp || null,
+            signedPayload,
+          },
+        });
+
+        await tx.licenseKey.update({
+          where: { id: licenseKey.id },
+          data: { status: "ACTIVE" },
+        });
+
+        return lic;
+      }
+    );
 
     return NextResponse.json({
       valid: true,
@@ -115,6 +150,11 @@ export async function POST(request: Request) {
       expiresAt: license.expiresAt,
       activatedAt: license.activatedAt,
       type: licenseKey.type,
+      signedPayload,
+      publicKey,
+      maxCameras,
+      maxPeople,
+      features,
       daysRemaining: licenseKey.durationDays,
     });
   } catch (error) {

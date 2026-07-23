@@ -13,7 +13,18 @@ class Settings(BaseSettings):
 
     TIME_ZONE: str = "Africa/Luanda"
 
+    ED25519_PUBLIC_KEY_PATH: str = str(BASE_DIR / "ed25519_public.pem")
+
     model_config = {"env_file": ".env", "extra": "ignore"}
+
+    def get_ed25519_public_key(self) -> str:
+        path = Path(self.ED25519_PUBLIC_KEY_PATH)
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Ed25519 public key not found at {path}. "
+                "Generate with: python scripts/generate_keys.py"
+            )
+        return path.read_text().strip()
 
 
 settings = Settings()

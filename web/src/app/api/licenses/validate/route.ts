@@ -3,28 +3,34 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const { licenseId, machineHash } = (await request.json()) as any;
+    const { licenseId, email, hardwareFp } = (await request.json()) as any;
 
-    if (!licenseId) {
-      return NextResponse.json(
-        { error: "ID da licença é obrigatório" },
-        { status: 400 }
-      );
+    let license = null;
+
+    if (licenseId) {
+      license = await prisma.license.findUnique({
+        where: { id: licenseId },
+        include: { key: true, user: true },
+      });
+    } else if (email) {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (user) {
+        license = await prisma.license.findUnique({
+          where: { userId: user.id },
+          include: { key: true, user: true },
+        });
+      }
     }
-
-    const license = await prisma.license.findUnique({
-      where: { id: licenseId },
-      include: { key: true, user: true },
-    });
 
     if (!license) {
-      return NextResponse.json(
-        { error: "Licença não encontrada" },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        valid: false,
+        error: "Licença não encontrada",
+        isActive: false,
+      });
     }
 
-    if (license.key.status === "REVOKED") {
+    if (license.key.status === "REVOKED" || license.status === "REVOKED") {
       return NextResponse.json({
         valid: false,
         error: "Licença revogada",
@@ -32,10 +38,18 @@ export async function POST(request: Request) {
       });
     }
 
+    if (hardwareFp && license.hardwareFp && license.hardwareFp !== hardwareFp) {
+      return NextResponse.json({
+        valid: false,
+        error: "Fingerprint não corresponde",
+        isActive: false,
+      });
+    }
+
     const isActive = license.expiresAt > new Date();
 
     await prisma.license.update({
-      where: { id: licenseId },
+      where: { id: license.id },
       data: { lastChecked: new Date() },
     });
 
@@ -45,6 +59,7 @@ export async function POST(request: Request) {
       activatedAt: license.activatedAt,
       type: license.key.type,
       isActive,
+      signedPayload: license.signedPayload,
       daysRemaining: Math.max(
         0,
         Math.ceil(

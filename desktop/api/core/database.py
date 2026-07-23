@@ -10,6 +10,7 @@ TORTOISE_MODELS = [
     "apps.panel.models",
     "apps.people.models",
     "apps.audit.models",
+    "apps.license.models",
     "aerich.models",
 ]
 
@@ -38,10 +39,13 @@ async def init_db():
 
     await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
 
-    await conn.execute_query("""
-        CREATE INDEX IF NOT EXISTS idx_person_embeddings_vector
-        ON person_embeddings USING hnsw (embedding vector_cosine_ops)
-    """)
+    try:
+        await conn.execute_query("""
+            CREATE INDEX IF NOT EXISTS idx_person_embeddings_vector
+            ON person_embeddings USING hnsw (embedding vector_cosine_ops)
+        """)
+    except Exception:
+        pass
 
     if settings.DEBUG:
         await Tortoise.generate_schemas()

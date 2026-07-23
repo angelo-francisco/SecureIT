@@ -7,6 +7,12 @@ interface LicenseData {
   activatedAt: string | null;
   expiresAt: string | null;
   lastChecked: string | null;
+  lastValidatedAt: string | null;
+  maxCameras: number;
+  maxPeople: number;
+  features: string[];
+  signedPayload: string | null;
+  publicKey: string | null;
 }
 
 interface LicenseState extends LicenseData {
@@ -15,6 +21,7 @@ interface LicenseState extends LicenseData {
   setLicense: (data: LicenseData) => void;
   clearLicense: () => void;
   updateLastChecked: () => void;
+  updateLastValidated: () => void;
 }
 
 function loadFromStorage(): LicenseData {
@@ -33,6 +40,12 @@ function loadFromStorage(): LicenseData {
     activatedAt: null,
     expiresAt: null,
     lastChecked: null,
+    lastValidatedAt: null,
+    maxCameras: -1,
+    maxPeople: -1,
+    features: [],
+    signedPayload: null,
+    publicKey: null,
   };
 }
 
@@ -76,6 +89,12 @@ export const useLicenseStore = create<LicenseState>((set, get) => {
         activatedAt: null,
         expiresAt: null,
         lastChecked: null,
+        lastValidatedAt: null,
+        maxCameras: -1,
+        maxPeople: -1,
+        features: [],
+        signedPayload: null,
+        publicKey: null,
       };
       saveToStorage(empty);
       set({ ...empty, isActive: false, daysRemaining: 0 });
@@ -86,6 +105,13 @@ export const useLicenseStore = create<LicenseState>((set, get) => {
       const updated = { ...current, lastChecked: now };
       saveToStorage(updated);
       set({ lastChecked: now });
+    },
+    updateLastValidated: () => {
+      const now = new Date().toISOString();
+      const current = get();
+      const updated = { ...current, lastValidatedAt: now };
+      saveToStorage(updated);
+      set({ lastValidatedAt: now });
     },
   };
 });
