@@ -44,7 +44,7 @@ export function AccordionSection({
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl overflow-hidden">
+    <div className="bg-surface border border-border overflow-hidden">
       <div className="flex items-center justify-between p-5">
         <button
           onClick={handleToggle}

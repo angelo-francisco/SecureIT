@@ -170,7 +170,7 @@ export function ProfilesSection() {
           onClick={openCreate}
           className="shrink-0 group animate-tile"
         >
-          <div className="w-24 h-24 bg-surface-hover border-2 border-dashed border-border flex items-center justify-center group-hover:border-primary group-hover:bg-primary/5 transition-all">
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-surface-hover border-2 border-dashed border-border flex items-center justify-center group-hover:border-primary group-hover:bg-primary/5 transition-all">
             <Plus size={28} className="text-text-muted group-hover:text-primary transition-colors" />
           </div>
           <span className="block text-center text-lg text-text-muted mt-2 group-hover:text-primary transition-colors">
@@ -186,12 +186,12 @@ export function ProfilesSection() {
             style={{ animationDelay: `${(i + 1) * 60}ms` }}
           >
             <div
-              className="w-24 h-24 flex items-center justify-center text-white text-2xl font-bold transition-transform group-hover:scale-105"
+              className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center text-white text-2xl font-bold transition-transform"
               style={{ backgroundColor: p.avatarColor }}
             >
               {(p.name?.[0] || "?").toUpperCase()}
             </div>
-            <span className="flex capitalize items-center gap-1 justify-center text-center text-lg text-text-muted mt-2 truncate w-24">
+            <span className="flex capitalize items-center gap-1 justify-center text-center text-lg text-text-muted mt-2 truncate w-20   md:w-24">
               {p.name} {p.isDefault && <Lock size={14} className="text-text-muted" />}
             </span>
           </button>

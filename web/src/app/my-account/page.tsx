@@ -85,9 +85,9 @@ export default function MyAccountPage() {
   }, []);
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-text capitalize">
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-4">
+        <h1 className="text-3xl md:text-5xl font-display font-bold text-text capitalize">
           Olá, {user?.firstName || "..."}!
         </h1>
         <p className="text-text-muted mt-1 text-lg md:text-xl">
@@ -96,7 +96,7 @@ export default function MyAccountPage() {
       </div>
 
       <ProfilesSection />
-      
+      <div className="mt-4">
       <AccordionSection title="Dados Pessoais" icon={User} onOpen={openProfile}>
         {user && <ProfileSection user={user} />}
       </AccordionSection>
@@ -114,12 +114,17 @@ export default function MyAccountPage() {
       <AccordionSection title="Pagamentos" icon={Receipt} onOpen={openPayments}>
         <PaymentsSection ref={paymentsRef} data={payments} />
       </AccordionSection>
+    </div>
 
       <NewLicenseModal
         open={newLicenseModalOpen}
         onClose={() => setNewLicenseModalOpen(false)}
         onComplete={openLicenses}
       />
+
+      <div className="flex justify-end mt-5">
+        <p className="font-semibold bg-red-500 text-lg md:text-xl px-3 py-1 border cursor-pointer">Fechar Sessão</p>
+      </div>
     </div>
 
   );
