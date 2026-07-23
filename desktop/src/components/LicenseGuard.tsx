@@ -61,7 +61,7 @@ export function LicenseGuard({ children }: LicenseGuardProps) {
 
   if (status === "loading") {
     return (
-      <div className="flex-1 h-full flex items-center justify-center">
+      <div className="min-h-screen bg-bg flex items-center justify-center">
         <Lucide.Loader size={24} className="animate-spin text-primary" />
       </div>
     );

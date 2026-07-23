@@ -90,7 +90,7 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
         <button
           onClick={handleSave}
           disabled={loading || !firstName.trim() || !lastName.trim() || !isDirty}
-          className="cursor-pointer w-full text-center bg-primary px-4 py-2 text-white text-lg font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
+          className="cursor-poi.nc w-full text-center bg-primary px-4 py-2 text-white text-lg font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
         >
           {loading ? (
             <Loader size={20} className="animate-spin" />
