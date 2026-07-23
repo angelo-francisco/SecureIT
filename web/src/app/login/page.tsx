@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FloatingLabelInput } from "@/components/FloatingLabelInput";
-import { Loader } from "lucide-react";
+import { Loader, Lock, Mail } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { useToast } from "@/packages/ui";
+import { useToast, OutlinedInput } from "@/packages/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,19 +49,23 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-8">
               <div className="space-y-4">
-                <FloatingLabelInput
+                <OutlinedInput
                   id="email"
                   label="Endereço de E-mail"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  icon={<Mail />}
+                  labelSize="xl"
                 />
-                <FloatingLabelInput
+                <OutlinedInput
                   id="password"
                   label="Palavra-passe"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  icon={<Lock />}
+                  labelSize="xl"
                 />
               </div>
               <button

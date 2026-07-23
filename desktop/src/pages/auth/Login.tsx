@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FloatingLabelInput } from "@/packages/ui";
+import { OutlinedInput } from "@/packages/ui";
 import * as Lucide from "lucide-react";
 import { useAuth } from "../../hooks";
 import { useToast } from "@/packages/ui";
@@ -43,19 +43,23 @@ export default function Login() {
 
             <form onSubmit={handleLogin} className="space-y-8">
               <div className="space-y-4">
-                <FloatingLabelInput
+                <OutlinedInput
                   id="email"
                   label="Endereço de E-mail"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  icon={<Lucide.Mail />}
+                  labelSize="xl"
                 />
-                <FloatingLabelInput
+                <OutlinedInput
                   id="password"
                   label="Palavra-passe"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  icon={<Lucide.Lock />}
+                  labelSize="xl"
                 />
               </div>
               <button
