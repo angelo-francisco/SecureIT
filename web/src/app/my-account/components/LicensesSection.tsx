@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Key, Shield, Clock, Monitor, Plus } from "lucide-react";
+import { Key, Shield, Clock, Monitor } from "lucide-react";
 
 export interface LicenseData {
   id: string;
@@ -18,7 +18,6 @@ export interface LicenseData {
 interface LicensesSectionProps {
   data: LicenseData | null;
   onNavigateToPlans?: () => void;
-  onNewLicense?: () => void;
 }
 
 export interface LicensesSectionHandle {
@@ -26,7 +25,7 @@ export interface LicensesSectionHandle {
 }
 
 export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSectionProps>(
-  ({ data, onNavigateToPlans, onNewLicense }, ref) => {
+  ({ data, onNavigateToPlans }, ref) => {
     const [license, setLicense] = useState<LicenseData | null>(data);
 
     useImperativeHandle(ref, () => ({
@@ -46,17 +45,8 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
     if (!license) {
       return (
         <div className="text-center py-8 text-text-muted">
-          <Key size={40} className="mx-auto mb-3 opacity-50" />
-          <p className="mb-4">Não tem nenhuma licença ativa</p>
-          {onNewLicense && (
-            <button
-              onClick={onNewLicense}
-              className="bg-primary text-white px-5 py-2.5 text-sm font-bold hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center gap-2"
-            >
-              <Plus size={16} />
-              Adquirir Licença
-            </button>
-          )}
+          <Key size={40} className="text-primary mx-auto mb-3" />
+          <p className="mb-4 text-base md:text-lg">Não tem nenhuma licença ativa</p>
         </div>
       );
     }
@@ -86,15 +76,6 @@ export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSection
               {isActive ? "Ativa" : "Expirada"}
             </p>
           </div>
-          {onNewLicense && (
-            <button
-              onClick={onNewLicense}
-              className="bg-primary/10 text-primary px-3.5 py-2 rounded-lg text-xs font-bold hover:bg-primary/20 transition-all inline-flex items-center gap-1.5 shrink-0"
-            >
-              <Plus size={14} />
-              Nova
-            </button>
-          )}
         </div>
 
         <div className="space-y-0">

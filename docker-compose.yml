@@ -18,6 +18,7 @@ services:
       - CI=true
       - ED25519_PRIVATE_KEY_PATH=/app/ed25519_private.pem
       - ED25519_PUBLIC_KEY_PATH=/app/ed25519_public.pem
+      - DATABASE_URL_SQLITE=file:/app/prisma/dev.db
       - NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=rpuyj3qu
       - NEXT_PUBLIC_CLOUDINARY_API_KEY=768868678858798
       - CLOUDINARY_API_SECRET=LRhVZsh3rn1X7h0hkK7qOjY0nIY

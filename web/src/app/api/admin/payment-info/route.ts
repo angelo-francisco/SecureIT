@@ -23,7 +23,7 @@ export async function PUT(request: Request) {
   }
   try {
     const body = (await request.json()) as any;
-    const { iban, accountName, bankName } = body;
+    const { iban, accountName, bankName, reference } = body;
 
     if (!iban || !accountName) {
       return NextResponse.json({ error: "IBAN e nome da conta são obrigatórios" }, { status: 400 });
@@ -34,13 +34,13 @@ export async function PUT(request: Request) {
     if (existing) {
       const updated = await prisma.paymentInfo.update({
         where: { id: existing.id },
-        data: { iban, accountName, bankName },
+        data: { iban, accountName, bankName, reference },
       });
       return NextResponse.json(updated);
     }
 
     const created = await prisma.paymentInfo.create({
-      data: { iban, accountName, bankName },
+      data: { iban, accountName, bankName, reference },
     });
     return NextResponse.json(created);
   } catch (error) {

@@ -69,8 +69,13 @@ export async function middleware(request: NextRequest) {
         const { verifyAccessToken } = await import("@/lib/auth");
         const payload = await verifyAccessToken(token);
         if (payload) {
-          return NextResponse.redirect(new URL("/my-account", request.url));
+          const res = NextResponse.redirect(new URL("/my-account", request.url));
+          return res;
         }
+        const res = NextResponse.next();
+        res.cookies.delete("token");
+        res.cookies.delete("refresh_token");
+        return res;
       }
     }
     return NextResponse.next();
@@ -82,13 +87,19 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get("token")?.value;
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const res = NextResponse.redirect(new URL("/login", request.url));
+    res.cookies.delete("token");
+    res.cookies.delete("refresh_token");
+    return res;
   }
 
   const { verifyAccessToken } = await import("@/lib/auth");
   const payload = await verifyAccessToken(token);
   if (!payload) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const res = NextResponse.redirect(new URL("/login", request.url));
+    res.cookies.delete("token");
+    res.cookies.delete("refresh_token");
+    return res;
   }
 
   return NextResponse.next();

@@ -15,7 +15,10 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Utilizador não encontrado" }, { status: 404 });
+      const res = NextResponse.json({ error: "Utilizador não encontrado" }, { status: 404 });
+      res.cookies.delete("token");
+      res.cookies.delete("refresh_token");
+      return res;
     }
 
     const token = await createToken({ sub: user.id, email: user.email });

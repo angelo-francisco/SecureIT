@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   Shield, LayoutDashboard, Key, Plus, CreditCard, FileCheck, Landmark,
   Loader, Loader2, Copy, Check, X, Pencil, Save, ExternalLink, ArrowRight,
-  ArrowLeft, Lock, CheckCircle2, Clock, XCircle, TrendingUp, Wrench,
+  ArrowLeft, Lock, CheckCircle2, Clock, XCircle, TrendingUp, Wrench, ChevronRight
 } from "lucide-react";
 
 type Tab = "dashboard" | "licenses" | "generate" | "plans" | "payments" | "payment-info" | "maintenance";
@@ -833,17 +833,18 @@ function PaymentsTab() {
 /* ─── Payment Info ─── */
 
 function PaymentInfoTab() {
-  const [info, setInfo] = useState<{ id: string; iban: string; accountName: string; bankName: string | null } | null>(null);
+  const [info, setInfo] = useState<{ id: string; iban: string; accountName: string; bankName: string | null; reference: string | null } | null>(null);
   const [iban, setIban] = useState("");
   const [accountName, setAccountName] = useState("");
   const [bankName, setBankName] = useState("");
+  const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/payment-info").then((r) => r.json()).then((data: any) => {
-      if (data) { setInfo(data); setIban(data.iban); setAccountName(data.accountName); setBankName(data.bankName || ""); }
+      if (data) { setInfo(data); setIban(data.iban); setAccountName(data.accountName); setBankName(data.bankName || ""); setReference(data.reference || ""); }
     }).finally(() => setLoading(false));
   }, []);
 
@@ -851,7 +852,7 @@ function PaymentInfoTab() {
     if (!iban || !accountName) return;
     setSaving(true); setSaved(false);
     try {
-      const r = await fetch("/api/admin/payment-info", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ iban, accountName, bankName }) });
+      const r = await fetch("/api/admin/payment-info", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ iban, accountName, bankName, reference }) });
       if (r.ok) { const d = await r.json(); setInfo(d as any); setSaved(true); setTimeout(() => setSaved(false), 3000); }
     } finally { setSaving(false); }
   };
@@ -878,6 +879,10 @@ function PaymentInfoTab() {
           <div>
             <label className="text-xs text-text-muted mb-1 block">Banco (opcional)</label>
             <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="Millennium BCP" className="h-10 w-full px-3 bg-bg border border-border rounded-lg text-sm text-text focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="text-xs text-text-muted mb-1 block">Referência (opcional)</label>
+            <input type="text" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="926422462" className="h-10 w-full px-3 bg-bg border border-border rounded-lg text-sm font-mono text-text focus:outline-none focus:border-primary" />
           </div>
         </div>
         <button onClick={handleSave} disabled={!iban || !accountName || saving} className="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold hover:brightness-110 flex items-center gap-2 disabled:opacity-50">

@@ -14,6 +14,7 @@ export default function ProfileSwitcher() {
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [loading, setLoading] = useState(true);
   const [pinModal, setPinModal] = useState<ProfileData | null>(null);
+  const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const getProfiles = () => {
     profilesApi
@@ -34,6 +35,7 @@ export default function ProfileSwitcher() {
       return;
     }
 
+    setSelectingId(profile.id);
     try {
       const result = await profilesApi.select(profile.id);
       selectProfile(result);
@@ -45,12 +47,14 @@ export default function ProfileSwitcher() {
       }
       navigate("/panel", { replace: true });
     } catch (err) {
+      setSelectingId(null);
       toast(err instanceof Error ? err.message : "Erro ao selecionar perfil", "error");
     }
   };
 
   const handlePinComplete = async (pin: string) => {
     if (!pinModal) return;
+    setSelectingId(pinModal.id);
     try {
       const result = await profilesApi.select(pinModal.id, pin);
       selectProfile(result);
@@ -63,6 +67,7 @@ export default function ProfileSwitcher() {
       setPinModal(null);
       navigate("/panel", { replace: true });
     } catch (err) {
+      setSelectingId(null);
       toast(err instanceof Error ? err.message : "PIN incorrecto", "error");
     }
   };
@@ -93,31 +98,40 @@ export default function ProfileSwitcher() {
       </p>
 
       <div className="flex flex-wrap justify-center gap-6 max-w-3xl">
-        {profiles.map((profile) => (
-          <button
-            key={profile.id}
-            onClick={() => handleSelect(profile)}
-            className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105"
-          >
-            <div className="relative">
-              <div
-                className="w-32 h-32 flex items-center justify-center text-white text-5xl font-bold transition-all group-hover:ring-4 group-hover:ring-primary/50 group-hover:brightness-110"
-                style={{ backgroundColor: profile.avatarColor }}
-              >
-                {profile.name[0].toUpperCase()}
+        {profiles.map((profile) => {
+          const isSelecting = selectingId === profile.id;
+          return (
+            <button
+              key={profile.id}
+              onClick={() => handleSelect(profile)}
+              disabled={!!selectingId}
+              className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
+            >
+              <div className="relative">
+                <div
+                  className="w-32 h-32 flex items-center justify-center text-white text-5xl font-bold transition-all group-hover:ring-4 group-hover:ring-primary/50 group-hover:brightness-110"
+                  style={{ backgroundColor: profile.avatarColor }}
+                >
+                  {isSelecting ? (
+                    <Loader w={40} />
+                  ) : (
+                    profile.name[0].toUpperCase()
+                  )}
+                </div>
               </div>
-            </div>
-            <span className="flex items-center gap-2 text-center text-lg capitalize font-medium text-text-muted group-hover:text-text transition-colors truncate max-w-[128px]">
-              {profile.name} {profile.hasPin && (
-                  <Lucide.Lock size={16} className="text-text-muted" />
-              )}
-            </span>
-          </button>
-        ))}
+              <span className="flex items-center gap-2 text-center text-lg capitalize font-medium text-text-muted group-hover:text-text transition-colors truncate max-w-[128px]">
+                {profile.name} {profile.hasPin && (
+                    <Lucide.Lock size={16} className="text-text-muted" />
+                )}
+              </span>
+            </button>
+          );
+        })}
 
         <button
           onClick={() => handleCreating()}
-          className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105"
+          disabled={!!selectingId}
+          className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
         >
           <div className="w-32 h-32 border-2 border-dashed border-border flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-primary/5">
             <Lucide.Plus size={40} className="text-text-muted group-hover:text-primary transition-colors" />

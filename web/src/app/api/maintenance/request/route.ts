@@ -9,10 +9,27 @@ export async function POST(request: Request) {
   }
   try {
     const body = (await request.json()) as any;
-    const { description, proofPublicId, proofUrl } = body;
+    const { licenseId, description, proofPublicId, proofUrl } = body;
+
+    if (!licenseId) {
+      return NextResponse.json({ error: "Licença em falta" }, { status: 400 });
+    }
 
     if (!description) {
       return NextResponse.json({ error: "Descrição em falta" }, { status: 400 });
+    }
+
+    const license = await prisma.license.findFirst({
+      where: {
+        id: licenseId,
+        userId: session.sub,
+        status: "ACTIVE",
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!license) {
+      return NextResponse.json({ error: "Licença inválida ou inativa" }, { status: 400 });
     }
 
     const hasPaidLicense = await prisma.paymentRequest.findFirst({
@@ -25,6 +42,7 @@ export async function POST(request: Request) {
     const maintenance = await prisma.maintenanceRequest.create({
       data: {
         userId: session.sub,
+        licenseId,
         description,
         hasPaidLicense: !!hasPaidLicense,
         ...(proofPublicId && { proofPublicId }),

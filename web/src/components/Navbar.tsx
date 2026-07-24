@@ -7,7 +7,7 @@ export function Navbar({ inMyAccount = false }: { inMyAccount?: boolean }) {
   if (inMyAccount) return (
     <nav className="relative top-0 z-50 py-5">
       <div className={
-        ("px-4 md:px-8") + 
+        ("px-4 md:px-4") + 
         " flex items-center justify-center md:justify-between"
       }>
       <div className="flex gap-2 justify-center items-center">

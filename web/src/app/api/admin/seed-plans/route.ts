@@ -15,7 +15,7 @@ export async function POST() {
     const b2c = await prisma.plan.create({
       data: {
         name: "B2C",
-        description: "Plano para utilizadores individuais",
+        description: "Para residências ou utilizadores individuas",
         basePrice: 75.25,
         currency: "USD",
         durationDays: 30,
@@ -39,7 +39,7 @@ export async function POST() {
     const b2b = await prisma.plan.create({
       data: {
         name: "B2B",
-        description: "Plano para empresas e negócios",
+        description: "Para para empresas e negócios",
         basePrice: 81.27,
         currency: "USD",
         durationDays: 30,

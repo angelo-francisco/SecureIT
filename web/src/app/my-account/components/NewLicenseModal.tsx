@@ -11,6 +11,7 @@ import {
   CreditCard,
   ChevronRight,
   ArrowLeft,
+  Copy,
 } from "lucide-react";
 import { CldUploadWidget } from "next-cloudinary";
 import type { Plan } from "./PlansSection";
@@ -20,6 +21,7 @@ interface PaymentInfo {
   iban: string;
   accountName: string;
   bankName: string | null;
+  reference: string | null;
 }
 
 interface CloudinaryResult {
@@ -47,6 +49,14 @@ export function NewLicenseModal({
     useState<CloudinaryResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    });
+  };
 
   useEffect(() => {
     if (open) {
@@ -202,9 +212,19 @@ export function NewLicenseModal({
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-text-muted">IBAN</span>
-                      <span className="text-sm font-mono font-medium text-text">
-                        {paymentInfo.iban}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-mono font-medium text-text">
+                          {paymentInfo.iban}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(paymentInfo.iban, "iban")}
+                          className="cursor-pointer text-text-muted hover:text-primary transition-colors"
+                          title="Copiar IBAN"
+                        >
+                          {copiedField === "iban" ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-text-muted">Titular</span>
@@ -218,6 +238,24 @@ export function NewLicenseModal({
                         <span className="text-sm font-medium text-text">
                           {paymentInfo.bankName}
                         </span>
+                      </div>
+                    )}
+                    {paymentInfo.reference && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-text-muted">Referência</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-mono font-medium text-text">
+                            {paymentInfo.reference}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(paymentInfo.reference!, "reference")}
+                            className="cursor-pointer text-text-muted hover:text-primary transition-colors"
+                            title="Copiar Referência"
+                          >
+                            {copiedField === "reference" ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+                          </button>
+                        </div>
                       </div>
                     )}
                     <div className="flex items-center justify-between pt-2 border-t border-border">

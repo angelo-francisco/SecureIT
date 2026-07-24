@@ -66,9 +66,10 @@ model License {
   status           String    @default("ACTIVE")
   createdAt        DateTime  @default(now())
 
-  key            LicenseKey      @relation(fields: [keyId], references: [id])
-  user           User            @relation(fields: [userId], references: [id])
-  paymentRequest PaymentRequest? @relation(fields: [paymentRequestId], references: [id])
+  key            LicenseKey             @relation(fields: [keyId], references: [id])
+  user           User                   @relation(fields: [userId], references: [id])
+  paymentRequest PaymentRequest?        @relation(fields: [paymentRequestId], references: [id])
+  maintenance    MaintenanceRequest[]
 
   @@index([userId])
 }
@@ -113,6 +114,7 @@ model PaymentInfo {
   iban        String
   accountName String
   bankName    String?
+  reference   String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
@@ -183,16 +185,18 @@ model PlanService {
 }
 
 model MaintenanceRequest {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id])
+  user           User      @relation(fields: [userId], references: [id])
+  licenseId      String?
+  license        License?  @relation(fields: [licenseId], references: [id])
   description    String
-  status         String   @default("PENDING")
+  status         String    @default("PENDING")
   proofPublicId  String?
   proofUrl       String?
   adminNote      String?
-  hasPaidLicense Boolean  @default(false)
+  hasPaidLicense Boolean   @default(false)
   totalPrice     Float?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
