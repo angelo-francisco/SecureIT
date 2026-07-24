@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, CreditCard, Receipt, User, LogOut, MoreVertical, Wrench } from "lucide-react";
+import { Shield, CreditCard, Receipt, User, LogOut, MoreVertical, Wrench, Bell } from "lucide-react";
 import { Loader } from "@/packages/ui";
 import { AccordionSection } from "./components/AccordionSection";
 import { ProfileSection } from "./components/ProfileSection";
 import {
   LicensesSection,
   type LicensesSectionHandle,
-  type LicenseData,
 } from "./components/LicensesSection";
 import {
   PlansSection,
@@ -21,6 +20,10 @@ import {
   type PaymentsSectionHandle,
   type Payment,
 } from "./components/PaymentsSection";
+import {
+  NotificationsSection,
+  type NotificationsSectionHandle,
+} from "./components/NotificationsSection";
 import {
   ProfilesSection,
 } from "./components/ProfilesSection";
@@ -40,7 +43,6 @@ export default function MyAccountPage() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const [licenses, setLicenses] = useState<LicenseData | null>(null);
   const [plansData, setPlansData] = useState<{
     plans: Plan[];
     paymentInfo: { id: string; iban: string; accountName: string; bankName: string | null; reference: string | null } | null;
@@ -50,12 +52,12 @@ export default function MyAccountPage() {
   const licensesRef = useRef<LicensesSectionHandle>(null);
   const plansSectionRef = useRef<PlansSectionHandle>(null);
   const paymentsRef = useRef<PaymentsSectionHandle>(null);
+  const notificationsRef = useRef<NotificationsSectionHandle>(null);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [maintenanceModalOpen, setMaintenanceModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [paymentInfo, setPaymentInfo] = useState<{ id: string; iban: string; accountName: string; bankName: string | null; reference: string | null } | null>(null);
-  const [hasPaidLicense, setHasPaidLicense] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -114,8 +116,7 @@ export default function MyAccountPage() {
   const openProfile = useCallback(async () => {}, []);
 
   const openLicenses = useCallback(async () => {
-    const d = await licensesRef.current?.fetchData();
-    if (d) setLicenses(d);
+    await licensesRef.current?.fetchData();
   }, []);
 
   const openPlansModal = useCallback(async () => {
@@ -132,6 +133,10 @@ export default function MyAccountPage() {
   const openPayments = useCallback(async () => {
     const d = await paymentsRef.current?.fetchData();
     if (d) setPayments(d);
+  }, []);
+
+  const openNotifications = useCallback(async () => {
+    await notificationsRef.current?.fetchData();
   }, []);
 
   if (loading) {
@@ -161,19 +166,21 @@ export default function MyAccountPage() {
       </AccordionSection>
 
       <AccordionSection title="Licenças" icon={Shield} onOpen={openLicenses}>
-        <LicensesSection ref={licensesRef} data={licenses} onNavigateToPlans={scrollToPlans} />
+        <LicensesSection ref={licensesRef} data={null} onNavigateToPlans={scrollToPlans} />
       </AccordionSection>
 
       <AccordionSection title="Pagamentos" icon={Receipt} onOpen={openPayments}>
         <PaymentsSection ref={paymentsRef} data={payments} />
+      </AccordionSection>
+
+      <AccordionSection title="Notificações" icon={Bell} onOpen={openNotifications}>
+        <NotificationsSection ref={notificationsRef} data={null} />
       </AccordionSection>
     </div>
 
       <MaintenanceModal
         open={maintenanceModalOpen}
         onClose={() => setMaintenanceModalOpen(false)}
-        paymentInfo={paymentInfo}
-        hasPaidLicense={hasPaidLicense}
       />
 
       <Modal open={plansModalOpen} disableBackdropClose className="w-full max-w-5xl mx-4">

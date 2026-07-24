@@ -141,7 +141,6 @@ export default function SignupPage() {
                       <MaterialPhoneInput
                         value={phone}
                         onChange={(v) => setPhone(v ?? "")}
-                        outlined={true}
                       />
                     </div>
                   </div>

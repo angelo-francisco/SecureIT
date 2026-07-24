@@ -8,20 +8,19 @@ export async function GET() {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const license = await prisma.license.findUnique({
+    const notifications = await prisma.notification.findMany({
       where: { userId: session.sub },
-      include: { key: true },
-    });
-
-    const payments = await prisma.paymentRequest.findMany({
-      where: { userId: session.sub },
-      include: { plan: true },
       orderBy: { createdAt: "desc" },
+      take: 50,
     });
 
-    return NextResponse.json({ license, payments });
+    const unreadCount = await prisma.notification.count({
+      where: { userId: session.sub, read: false },
+    });
+
+    return NextResponse.json({ notifications, unreadCount });
   } catch (error) {
-    console.error("[License GET]", error);
+    console.error("[Notifications GET]", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

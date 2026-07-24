@@ -87,6 +87,24 @@ export async function PUT(
           data: { expiresAt: newExpiresAt },
         });
       }
+
+      await prisma.notification.create({
+        data: {
+          userId: payment.userId,
+          type: "LICENSE_APPROVED",
+          title: "Licença Aprovada",
+          message: `O seu pagamento para o plano "${payment.plan.name}" foi aprovado. A sua licença está agora ativa.`,
+        },
+      });
+    } else if (status === "REJECTED") {
+      await prisma.notification.create({
+        data: {
+          userId: payment.userId,
+          type: "LICENSE_REJECTED",
+          title: "Pagamento Rejeitado",
+          message: `O seu pagamento para o plano "${payment.plan.name}" foi rejeitado.${adminNote ? ` Motivo: ${adminNote}` : ""}`,
+        },
+      });
     }
 
     return NextResponse.json(updated);

@@ -52,12 +52,12 @@ export default function LicensePage({ onClose }: LicensePageProps) {
         activated_at: activateResult.activatedAt,
         expires_at: activateResult.expiresAt,
         hardware_fingerprint: fingerprint,
-        signed_payload: activateResult.signedPayload,
-        public_key: activateResult.publicKey,
+        signed_payload: activateResult.signedPayload || "",
+        public_key: activateResult.publicKey || "",
         signature: "web-signed",
-        max_cameras: activateResult.maxCameras,
-        max_people: activateResult.maxPeople,
-        features: activateResult.features,
+        max_cameras: activateResult.maxCameras ?? -1,
+        max_people: activateResult.maxPeople ?? -1,
+        features: activateResult.features ?? [],
         status: "ACTIVE",
       });
 
@@ -85,7 +85,7 @@ export default function LicensePage({ onClose }: LicensePageProps) {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Erro ao activar licença";
-      toast(message, "error");
+      toast(err instanceof Error ? err.message : "Erro ao activar licença", "error");
     } finally {
       setLoading(false);
     }
@@ -191,6 +191,11 @@ export default function LicensePage({ onClose }: LicensePageProps) {
                   type="text"
                   value={key}
                   onChange={(e) => setKey(formatKeyInput(e.target.value))}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pasted = e.clipboardData.getData("text");
+                    setKey(formatKeyInput(pasted));
+                  }}
                   placeholder="SEC-XXXX-XXXX-XXXX"
                   maxLength={19}
                   className="w-full h-14 px-4 bg-transparent border-0 border-b-2 border-white/[0.08] rounded-none text-center text-white text-lg font-bold focus:border-primary focus:ring-0 focus:outline-none transition-colors caret-primary tracking-widest"

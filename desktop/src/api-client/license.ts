@@ -99,7 +99,7 @@ export interface LocalLicenseResponse {
   days_remaining?: number;
 }
 
-export const licenseApi = {
+export const  licenseApi = {
   activate: (data: {
     key: string;
     email: string;

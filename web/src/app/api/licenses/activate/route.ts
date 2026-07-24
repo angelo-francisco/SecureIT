@@ -59,7 +59,7 @@ export async function POST(request: Request) {
             expiresAt: existingLicense.expiresAt,
             activatedAt: existingLicense.activatedAt,
             type: licenseKey.type,
-            signedPayload: existingLicense.signedPayload,
+            signedPayload: existingLicense.signedPayload || "",
             publicKey,
             maxCameras: licenseKey.maxCameras,
             maxPeople: licenseKey.maxPeople,
