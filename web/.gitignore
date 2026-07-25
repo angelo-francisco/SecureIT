@@ -2,6 +2,8 @@
 .open-next
 .wrangler
 src/generated
+dev.db
+.env.local
 
 # Logs
 logs

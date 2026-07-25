@@ -1,6 +1,4 @@
 import { SignJWT, jwtVerify, importPKCS8, importSPKI } from "jose";
-import { readFileSync } from "fs";
-import { join } from "path";
 
 const ALG = "EdDSA";
 const CURVE = "Ed25519";
@@ -9,29 +7,19 @@ let cachedPrivateKey: CryptoKey | null = null;
 let cachedPublicKey: CryptoKey | null = null;
 
 function getPrivateKeyPem(): string {
-  const keyPath = process.env.ED25519_PRIVATE_KEY_PATH;
-  if (!keyPath) {
-    throw new Error("ED25519_PRIVATE_KEY_PATH env variable is not set");
+  const pem = process.env.ED25519_PRIVATE_KEY;
+  if (!pem) {
+    throw new Error("ED25519_PRIVATE_KEY env variable is not set");
   }
-
-  const resolved = keyPath.startsWith("/")
-    ? keyPath
-    : join(process.cwd(), keyPath);
-
-  return readFileSync(resolved, "utf-8").trim();
+  return pem.trim();
 }
 
 function getPublicKeyPem(): string {
-  const keyPath = process.env.ED25519_PUBLIC_KEY_PATH;
-  if (!keyPath) {
-    throw new Error("ED25519_PUBLIC_KEY_PATH env variable is not set");
+  const pem = process.env.ED25519_PUBLIC_KEY;
+  if (!pem) {
+    throw new Error("ED25519_PUBLIC_KEY env variable is not set");
   }
-
-  const resolved = keyPath.startsWith("/")
-    ? keyPath
-    : join(process.cwd(), keyPath);
-
-  return readFileSync(resolved, "utf-8").trim();
+  return pem.trim();
 }
 
 export async function getSigningKey(): Promise<CryptoKey> {

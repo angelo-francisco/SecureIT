@@ -7,19 +7,8 @@ services:
     volumes:
       - ./web:/app
       - /app/node_modules
-    environment:
-      - DATABASE_URL=postgresql://postgres.mssenmvmvtiorabwguxi:SECUREITDB123SECUREITDB123@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-      - DIRECT_URL=postgresql://postgres.mssenmvmvtiorabwguxi:SECUREITDB123SECUREITDB123@aws-0-eu-west-1.pooler.supabase.com:5432/postgres
-      - JWT_SECRET=x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-
-      - ADMIN_EMAIL=admin@secureit.com
-      - ADMIN_PASSWORD_HASH=$2a$12$X/4xJAfbpmJWfnwFwJi4CeeITLjd6ViGDn3CWko3eucU9rUt7OKO6
-      - CI=true
-      - ED25519_PRIVATE_KEY_PATH=/app/ed25519_private.pem
-      - ED25519_PUBLIC_KEY_PATH=/app/ed25519_public.pem
-      - DATABASE_URL_SQLITE=file:/app/prisma/dev.db
-      - NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=rpuyj3qu
-      - NEXT_PUBLIC_CLOUDINARY_API_KEY=768868678858798
-      - CLOUDINARY_API_SECRET=LRhVZsh3rn1X7h0hkK7qOjY0nIY
+    env_file:
+      - ./web/.env.local
 
   api:
     build: ./desktop/api

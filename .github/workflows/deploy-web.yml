@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-    # paths:
-    #   - "web/**"
+    paths:
+      - "web/**"
 
 jobs:
   deploy:
@@ -16,35 +16,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
+          bun-version: 1.3.14
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile
         working-directory: web
 
       - name: Build Next.js
-        run: pnpm next build
+        run: bunx --bun next build
         working-directory: web
 
       - name: Build for Cloudflare
-        run: pnpm opennextjs-cloudflare build
+        run: bunx opennextjs-cloudflare build
         working-directory: web
 
-      # - name: Apply database migrations
-      #   run: pnpm prisma migrate deploy
-      #   working-directory: web
-      #   env:
-      #     DATABASE_URL: ${{ secrets.DIRECT_URL }}
+      - name: Apply D1 Migrations
+        run: bunx wrangler d1 migrations apply secureit --remote
+        working-directory: web
 
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3

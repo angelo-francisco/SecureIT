@@ -5,7 +5,7 @@ import * as schema from "../../db/schema";
 const dbUrl = process.env.DATABASE_URL_SQLITE;
 const dbPath = dbUrl?.startsWith("file:")
   ? dbUrl.replace("file:", "")
-  : "./prisma/dev.db";
+  : "./dev.db";
 
 const sqlite = new Database(dbPath);
 export const db = drizzle(sqlite, { schema });

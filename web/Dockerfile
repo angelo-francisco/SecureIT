@@ -1,9 +1,9 @@
-FROM oven/bun:1.1 AS base
+FROM oven/bun:1.3.14 AS base
 WORKDIR /app
 
-COPY package.json bun.lockb* ./
+RUN apt-get update && apt-get install -y python3 build-essential && rm -rf /var/lib/apt/lists/*
 
-COPY prisma/ ./prisma/
+COPY package.json bun.lockb* ./
 
 RUN bun install
 

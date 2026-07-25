@@ -5,8 +5,16 @@ import {
 } from "@/lib/keys/ed25519";
 
 beforeAll(() => {
-  process.env.ED25519_PRIVATE_KEY_PATH = process.env.ED25519_PRIVATE_KEY_PATH || "/app/ed25519_private.pem";
-  process.env.ED25519_PUBLIC_KEY_PATH = process.env.ED25519_PUBLIC_KEY_PATH || "/app/ed25519_public.pem";
+  if (!process.env.ED25519_PRIVATE_KEY) {
+    process.env.ED25519_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEII9EDpsa1ONU5hnBuipqXwKIfj4BGW/aLQS4b4LyPWuE
+-----END PRIVATE KEY-----`;
+  }
+  if (!process.env.ED25519_PUBLIC_KEY) {
+    process.env.ED25519_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAHrtEND2DcZ62fPtiBqDbvNqoqoaJbwcxW4+WFHsB9Xg=
+-----END PUBLIC KEY-----`;
+  }
 });
 
 describe("lib/keys/ed25519", () => {
