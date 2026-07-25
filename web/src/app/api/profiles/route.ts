@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { subProfile, license, licenseKey } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { hashPassword } from "@/lib/password";
 import { NextResponse } from "next/server";
 
 const PROFILE_LIMITS: Record<string, number> = {
@@ -85,9 +86,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const pinHash = pin
-      ? await Bun.password.hash(pin, { algorithm: "bcrypt", cost: 12 })
-      : null;
+    const pinHash = pin ? await hashPassword(pin) : null;
 
     const created = await db
       .insert(subProfile)

@@ -4,6 +4,7 @@ import { user, license, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { POST } from "@/app/api/licenses/heartbeat/route";
 import { generateLicenseKey } from "@/lib/license-key";
+import { hashPassword } from "@/lib/password";
 import { generateId } from "@/db/schema";
 
 const TEST_PREFIX = "test_heartbeat";
@@ -24,7 +25,7 @@ let testKey = "";
 
 beforeAll(async () => {
   testEmail = `${TEST_PREFIX}_user_${Date.now()}@example.com`;
-  const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+  const pwHash = await hashPassword("TestPass123!", 10);
   userId = generateId();
   await db.insert(user).values({
     id: userId, email: testEmail, passwordHash: pwHash, firstName: "Heartbeat", lastName: "Test",
@@ -84,7 +85,7 @@ describe("POST /api/licenses/heartbeat", () => {
 
   it("revoked key returns valid=false with revoked=true", async () => {
     const revokedUserEmail = `${TEST_PREFIX}_revoked_${Date.now()}@example.com`;
-    const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+    const pwHash = await hashPassword("TestPass123!", 10);
     const revokedUserId = generateId();
     await db.insert(user).values({
       id: revokedUserId, email: revokedUserEmail, passwordHash: pwHash, firstName: "Rev", lastName: "User",
@@ -128,7 +129,7 @@ describe("POST /api/licenses/heartbeat", () => {
 
   it("expired license returns valid=false", async () => {
     const expiredUserEmail = `${TEST_PREFIX}_expired_${Date.now()}@example.com`;
-    const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+    const pwHash = await hashPassword("TestPass123!", 10);
     const expiredUserId = generateId();
     await db.insert(user).values({
       id: expiredUserId, email: expiredUserEmail, passwordHash: pwHash, firstName: "Exp", lastName: "User",

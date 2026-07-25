@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { adminUser, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createToken } from "@/lib/auth";
+import { hashPassword } from "@/lib/password";
 import { generateLicenseKey } from "@/lib/license-key";
 import { generateId } from "@/db/schema";
 
@@ -34,7 +35,7 @@ function makeAdminRequest(url: string, options?: { method?: string; body?: any }
 }
 
 beforeAll(async () => {
-  const pwHash = await Bun.password.hash(ADMIN_PASSWORD, { algorithm: "bcrypt", cost: 10 });
+  const pwHash = await hashPassword(ADMIN_PASSWORD, 10);
   adminUserId = generateId();
   await db
     .insert(adminUser)

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createToken, setTokenCookies } from "@/lib/auth";
+import { hashPassword } from "@/lib/password";
 import { generateId } from "@/db/schema";
 
 export async function POST(request: Request) {
@@ -39,16 +40,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const passwordHash = await Bun.password.hash(password, {
-      algorithm: "bcrypt",
-      cost: 12,
-    });
-    const pinHash = pin
-      ? await Bun.password.hash(pin, {
-          algorithm: "bcrypt",
-          cost: 12,
-        })
-      : null;
+    const passwordHash = await hashPassword(password);
+    const pinHash = pin ? await hashPassword(pin) : null;
 
     const userId = generateId();
     const profileId = generateId();

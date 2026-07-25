@@ -4,6 +4,7 @@ import { user, license, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { POST } from "@/app/api/licenses/activate/route";
 import { generateLicenseKey } from "@/lib/license-key";
+import { hashPassword } from "@/lib/password";
 import { generateId } from "@/db/schema";
 
 const TEST_PREFIX = "test_activate";
@@ -22,10 +23,7 @@ let testUserId = "";
 let testKeyId = "";
 
 beforeAll(async () => {
-  const pwHash = await Bun.password.hash("TestPass123!", {
-    algorithm: "bcrypt",
-    cost: 10,
-  });
+  const pwHash = await hashPassword("TestPass123!", 10);
   testUserId = generateId();
   await db
     .insert(user)
@@ -181,7 +179,7 @@ describe("POST /api/licenses/activate", () => {
 
   it("TRIAL type has correct maxCameras and maxPeople", async () => {
     const trialUserEmail = `${TEST_PREFIX}_trial_${Date.now()}@example.com`;
-    const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+    const pwHash = await hashPassword("TestPass123!", 10);
     const trialUserId = generateId();
     await db
       .insert(user)

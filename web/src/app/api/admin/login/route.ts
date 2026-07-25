@@ -3,6 +3,7 @@ import { createToken } from "@/lib/auth";
 import { db } from "@/db";
 import { adminUser } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { verifyPassword } from "@/lib/password";
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const valid = await Bun.password.verify(password, user.passwordHash);
+    const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json(
         { error: "Credenciais inválidas" },

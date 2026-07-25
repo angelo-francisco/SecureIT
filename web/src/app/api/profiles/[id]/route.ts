@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { subProfile } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { hashPassword } from "@/lib/password";
 import { NextResponse } from "next/server";
 
 export async function PUT(
@@ -33,10 +34,7 @@ export async function PUT(
       if (body.pin === null || body.pin === "") {
         updates.pinHash = null;
       } else if (typeof body.pin === "string" && /^\d{4}$/.test(body.pin)) {
-        updates.pinHash = await Bun.password.hash(body.pin, {
-          algorithm: "bcrypt",
-          cost: 12,
-        });
+        updates.pinHash = await hashPassword(body.pin);
       } else {
         return NextResponse.json({ error: "O PIN deve conter 4 dígitos" }, { status: 400 });
       }

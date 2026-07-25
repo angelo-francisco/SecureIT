@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createToken } from "@/lib/auth";
+import { verifyPassword } from "@/lib/password";
 
 export async function POST(request: Request) {
   try {
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Conta desativada" }, { status: 403 });
     }
 
-    const validPin = await Bun.password.verify(pin, foundUser.pinHash);
+    const validPin = await verifyPassword(pin, foundUser.pinHash);
     if (!validPin) {
       return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
     }

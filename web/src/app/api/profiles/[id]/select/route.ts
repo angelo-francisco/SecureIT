@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { subProfile } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { verifyPassword } from "@/lib/password";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -30,7 +31,7 @@ export async function POST(
       if (!pin || typeof pin !== "string") {
         return NextResponse.json({ error: "PIN obrigatório" }, { status: 400 });
       }
-      const valid = await Bun.password.verify(pin, profile.pinHash);
+      const valid = await verifyPassword(pin, profile.pinHash);
       if (!valid) {
         return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
       }
