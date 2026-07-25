@@ -1,23 +1,18 @@
-FROM node:22-slim
-
-ENV PNPM_HOME="/pnpm"
-
-ENV PATH="$PNPM_HOME:$PATH"
-
-RUN corepack enable
-
+FROM oven/bun:1.1 AS base
 WORKDIR /app
 
-COPY package.json pnpm-*.yaml ./
+COPY package.json bun.lockb* ./
 
-COPY prisma ./prisma/
+COPY prisma/ ./prisma
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+RUN bun install
 
 COPY . .
 
-RUN pnpm prisma generate
+ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
 
-CMD [pnpm dev"]
+ENV PORT=3000
+
+CMD ["bun", "--bun", "next", "dev"]

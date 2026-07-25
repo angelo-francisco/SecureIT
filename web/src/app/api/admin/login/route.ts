@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { createToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -22,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await Bun.password.verify(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json(
         { error: "Credenciais inválidas" },

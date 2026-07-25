@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { POST } from "@/app/api/licenses/validate/route";
 import { generateLicenseKey } from "@/lib/license-key";
-import bcrypt from "bcryptjs";
 
 const TEST_PREFIX = "test_validate";
 
@@ -22,7 +21,10 @@ let testKey = "";
 
 beforeAll(async () => {
   testEmail = `${TEST_PREFIX}_user_${Date.now()}@example.com`;
-  const pwHash = await bcrypt.hash("TestPass123!", 10);
+  const pwHash = await await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  });
   const user = await prisma.user.create({
     data: {
       email: testEmail,
@@ -90,7 +92,10 @@ describe("POST /api/licenses/validate", () => {
 
   it("revoked returns valid=false", async () => {
     const revokedUserEmail = `${TEST_PREFIX}_revoked_${Date.now()}@example.com`;
-    const pwHash = await bcrypt.hash("TestPass123!", 10);
+    const pwHash = await await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  });
     const revokedUser = await prisma.user.create({
       data: { email: revokedUserEmail, passwordHash: pwHash, firstName: "Rev", lastName: "User" },
     });

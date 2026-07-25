@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 
 const PROFILE_LIMITS: Record<string, number> = {
   basic: 2,
@@ -84,7 +83,10 @@ export async function POST(request: Request) {
         userId: session.sub,
         name: name.trim(),
         avatarColor: avatarColor || "#2C9ED5",
-        pinHash: pin ? await bcrypt.hash(pin, 10) : null,
+        pinHash: pin ? await Bun.password.hash(pin, {
+  algorithm: "bcrypt",
+  cost: 12
+}); : null,
       },
     });
 

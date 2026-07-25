@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { POST } from "@/app/api/licenses/activate/route";
 import { generateLicenseKey } from "@/lib/license-key";
-import bcrypt from "bcryptjs";
 
 const TEST_PREFIX = "test_activate";
 
@@ -20,7 +19,10 @@ let testUserId = "";
 let testKeyId = "";
 
 beforeAll(async () => {
-  const pwHash = await bcrypt.hash("TestPass123!", 10);
+  const pwHash = await await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  });
   const user = await prisma.user.create({
     data: {
       email: testUserEmail,
@@ -166,7 +168,10 @@ describe("POST /api/licenses/activate", () => {
 
   it("TRIAL type has correct maxCameras and maxPeople", async () => {
     const trialUserEmail = `${TEST_PREFIX}_trial_${Date.now()}@example.com`;
-    const pwHash = await bcrypt.hash("TestPass123!", 10);
+    const pwHash = await await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  });
     const trialUser = await prisma.user.create({
       data: {
         email: trialUserEmail,

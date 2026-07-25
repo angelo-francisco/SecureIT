@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { POST } from "@/app/api/licenses/heartbeat/route";
 import { generateLicenseKey } from "@/lib/license-key";
-import bcrypt from "bcryptjs";
 
 const TEST_PREFIX = "test_heartbeat";
 
@@ -22,7 +21,10 @@ let testKey = "";
 
 beforeAll(async () => {
   testEmail = `${TEST_PREFIX}_user_${Date.now()}@example.com`;
-  const pwHash = await bcrypt.hash("TestPass123!", 10);
+  const pwHash = await await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  }); 
   const user = await prisma.user.create({
     data: {
       email: testEmail,
@@ -98,7 +100,10 @@ describe("POST /api/licenses/heartbeat", () => {
 
   it("revoked key returns valid=false with revoked=true", async () => {
     const revokedUserEmail = `${TEST_PREFIX}_revoked_${Date.now()}@example.com`;
-    const pwHash = await bcrypt.hash("TestPass123!", 10);
+    const pwHash = await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  }); 
     const revokedUser = await prisma.user.create({
       data: { email: revokedUserEmail, passwordHash: pwHash, firstName: "Rev", lastName: "User" },
     });
@@ -144,8 +149,10 @@ describe("POST /api/licenses/heartbeat", () => {
 
   it("expired license returns valid=false", async () => {
     const expiredUserEmail = `${TEST_PREFIX}_expired_${Date.now()}@example.com`;
-    const pwHash = await bcrypt.hash("TestPass123!", 10);
-    const expiredUser = await prisma.user.create({
+    const pwHash = await await Bun.password.hash("TestPass123!", {
+    algorithm: "bcrypt",
+    cost: 10
+  });     const expiredUser = await prisma.user.create({
       data: { email: expiredUserEmail, passwordHash: pwHash, firstName: "Exp", lastName: "User" },
     });
 

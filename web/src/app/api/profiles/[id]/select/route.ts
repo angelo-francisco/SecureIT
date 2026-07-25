@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 
 export async function POST(
   request: Request,
@@ -25,7 +24,7 @@ export async function POST(
       if (!pin || typeof pin !== "string") {
         return NextResponse.json({ error: "PIN obrigatório" }, { status: 400 });
       }
-      const valid = await bcrypt.compare(pin, profile.pinHash);
+      const valid = await Bun.password.verify(pin, profile.pinHash);
       if (!valid) {
         return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
       }

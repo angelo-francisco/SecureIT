@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createToken, setTokenCookies } from "@/lib/auth";
 
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const validPin = await bcrypt.compare(pin, user.pinHash);
+    const validPin = await Bun.password.verify(pin, user.pinHash);
     if (!validPin) {
       return NextResponse.json(
         { error: "Email ou PIN incorrectos" },

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createToken, setTokenCookies } from "@/lib/auth";
 
@@ -37,8 +36,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
-    const pinHash = pin ? await bcrypt.hash(pin, 12) : null;
+    const passwordHash = await Bun.password.hash(password, {
+  algorithm: "bcrypt",
+  cost: 12
+});
+    const pinHash = pin ? await Bun.password.hash(pin, {
+  algorithm: "bcrypt",
+  cost: 12
+}); : null;
 
     const user = await prisma.user.create({
       data: {

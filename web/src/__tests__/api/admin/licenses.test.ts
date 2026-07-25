@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { createToken } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
-import bcrypt from "bcryptjs";
 
 let adminToken = "";
 let adminUserId = "";
@@ -32,7 +31,10 @@ function makeAdminRequest(url: string, options?: { method?: string; body?: any }
 }
 
 beforeAll(async () => {
-  const pwHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  const pwHash = await await Bun.password.hash(ADMIN_PASSWORD, {
+    algorithm: "bcrypt",
+    cost: 10
+  }); 
   const admin = await prisma.adminUser.create({
     data: { email: ADMIN_EMAIL, passwordHash: pwHash },
   });

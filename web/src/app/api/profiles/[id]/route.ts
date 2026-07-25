@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 
 export async function PUT(
   request: Request,
@@ -29,7 +28,10 @@ export async function PUT(
       if (body.pin === null || body.pin === "") {
         data.pinHash = null;
       } else if (typeof body.pin === "string" && /^\d{4}$/.test(body.pin)) {
-        data.pinHash = await bcrypt.hash(body.pin, 10);
+        data.pinHash = await Bun.password.hash(body.pin, {
+  algorithm: "bcrypt",
+  cost: 12
+});
       } else {
         return NextResponse.json({ error: "O PIN deve conter 4 dígitos" }, { status: 400 });
       }

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createToken, setTokenCookies } from "@/lib/auth";
 
@@ -29,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await Bun.password.verify(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json(
         { error: "Email ou palavra-passe incorrectos" },
