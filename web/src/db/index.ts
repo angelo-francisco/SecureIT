@@ -10,8 +10,8 @@ function getDb(): DrizzleDB {
   if (_db) return _db;
 
   const dbUrl = process.env.DATABASE_URL_SQLITE;
-  const nodeEnv = process.env.NODE_ENVIRONMENT
-  if (NODE_ENVIRONMENT === "development") {
+  const nodeEnv = process.env.NODE_ENV
+  if (nodeEnv === "development") {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Database } = require("bun:sqlite");
     // eslint-disable-next-line @typescript-eslint/no-require-imports
