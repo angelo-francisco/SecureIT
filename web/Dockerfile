@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY package.json bun.lockb* ./
 
-COPY prisma/ ./prisma
+COPY prisma/ ./prisma/
 
 RUN bun install
 

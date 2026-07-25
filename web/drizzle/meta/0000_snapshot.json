@@ -1,0 +1,1238 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "6",
+  "dialect": "sqlite",
+  "tables": {
+    "User": {
+      "name": "User",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "passwordHash": {
+          "autoincrement": false,
+          "name": "passwordHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "firstName": {
+          "autoincrement": false,
+          "name": "firstName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastName": {
+          "autoincrement": false,
+          "name": "lastName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "autoincrement": false,
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pinHash": {
+          "autoincrement": false,
+          "name": "pinHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totpSecret": {
+          "autoincrement": false,
+          "name": "totpSecret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totpEnabled": {
+          "default": false,
+          "autoincrement": false,
+          "name": "totpEnabled",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isActive": {
+          "default": true,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "User_email_key": {
+          "name": "User_email_key",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "LicenseKey": {
+      "name": "LicenseKey",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "key": {
+          "autoincrement": false,
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "autoincrement": false,
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "durationDays": {
+          "autoincrement": false,
+          "name": "durationDays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maxCameras": {
+          "default": -1,
+          "autoincrement": false,
+          "name": "maxCameras",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maxPeople": {
+          "default": -1,
+          "autoincrement": false,
+          "name": "maxPeople",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "default": "'PENDING'",
+          "autoincrement": false,
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batchName": {
+          "autoincrement": false,
+          "name": "batchName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "LicenseKey_key_idx": {
+          "name": "LicenseKey_key_idx",
+          "columns": [
+            "key"
+          ],
+          "isUnique": false
+        },
+        "LicenseKey_key_key": {
+          "name": "LicenseKey_key_key",
+          "columns": [
+            "key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "License": {
+      "name": "License",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "keyId": {
+          "autoincrement": false,
+          "name": "keyId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paymentRequestId": {
+          "autoincrement": false,
+          "name": "paymentRequestId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activatedAt": {
+          "autoincrement": false,
+          "name": "activatedAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiresAt": {
+          "autoincrement": false,
+          "name": "expiresAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastChecked": {
+          "autoincrement": false,
+          "name": "lastChecked",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hardwareFp": {
+          "autoincrement": false,
+          "name": "hardwareFp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "signedPayload": {
+          "autoincrement": false,
+          "name": "signedPayload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "default": "'ACTIVE'",
+          "autoincrement": false,
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "License_userId_idx": {
+          "name": "License_userId_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        },
+        "License_paymentRequestId_key": {
+          "name": "License_paymentRequestId_key",
+          "columns": [
+            "paymentRequestId"
+          ],
+          "isUnique": true
+        },
+        "License_userId_key": {
+          "name": "License_userId_key",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": true
+        },
+        "License_keyId_key": {
+          "name": "License_keyId_key",
+          "columns": [
+            "keyId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "License_paymentRequestId_PaymentRequest_id_fk": {
+          "name": "License_paymentRequestId_PaymentRequest_id_fk",
+          "tableFrom": "License",
+          "tableTo": "PaymentRequest",
+          "columnsFrom": [
+            "paymentRequestId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        },
+        "License_userId_User_id_fk": {
+          "name": "License_userId_User_id_fk",
+          "tableFrom": "License",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "License_keyId_LicenseKey_id_fk": {
+          "name": "License_keyId_LicenseKey_id_fk",
+          "tableFrom": "License",
+          "tableTo": "LicenseKey",
+          "columnsFrom": [
+            "keyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "AdminUser": {
+      "name": "AdminUser",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "passwordHash": {
+          "autoincrement": false,
+          "name": "passwordHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "AdminUser_email_key": {
+          "name": "AdminUser_email_key",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "EmailCode": {
+      "name": "EmailCode",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "autoincrement": false,
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiresAt": {
+          "autoincrement": false,
+          "name": "expiresAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "used": {
+          "default": false,
+          "autoincrement": false,
+          "name": "used",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "EmailCode_email_code_idx": {
+          "name": "EmailCode_email_code_idx",
+          "columns": [
+            "email",
+            "code"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "Plan": {
+      "name": "Plan",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "autoincrement": false,
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "basePrice": {
+          "autoincrement": false,
+          "name": "basePrice",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "default": "'USD'",
+          "autoincrement": false,
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "durationDays": {
+          "autoincrement": false,
+          "name": "durationDays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isActive": {
+          "default": true,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isDefault": {
+          "default": false,
+          "autoincrement": false,
+          "name": "isDefault",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "name": "updatedAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "PaymentInfo": {
+      "name": "PaymentInfo",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "iban": {
+          "autoincrement": false,
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accountName": {
+          "autoincrement": false,
+          "name": "accountName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bankName": {
+          "autoincrement": false,
+          "name": "bankName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isActive": {
+          "default": true,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reference": {
+          "autoincrement": false,
+          "name": "reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "PaymentRequest": {
+      "name": "PaymentRequest",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "planId": {
+          "autoincrement": false,
+          "name": "planId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paymentInfoId": {
+          "autoincrement": false,
+          "name": "paymentInfoId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proofPublicId": {
+          "autoincrement": false,
+          "name": "proofPublicId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proofUrl": {
+          "autoincrement": false,
+          "name": "proofUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "default": "'PENDING'",
+          "autoincrement": false,
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adminNote": {
+          "autoincrement": false,
+          "name": "adminNote",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "selectedFeatures": {
+          "autoincrement": false,
+          "name": "selectedFeatures",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "selectedServices": {
+          "autoincrement": false,
+          "name": "selectedServices",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totalPrice": {
+          "autoincrement": false,
+          "name": "totalPrice",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reviewedAt": {
+          "autoincrement": false,
+          "name": "reviewedAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "PaymentRequest_userId_idx": {
+          "name": "PaymentRequest_userId_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "PaymentRequest_paymentInfoId_PaymentInfo_id_fk": {
+          "name": "PaymentRequest_paymentInfoId_PaymentInfo_id_fk",
+          "tableFrom": "PaymentRequest",
+          "tableTo": "PaymentInfo",
+          "columnsFrom": [
+            "paymentInfoId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "PaymentRequest_planId_Plan_id_fk": {
+          "name": "PaymentRequest_planId_Plan_id_fk",
+          "tableFrom": "PaymentRequest",
+          "tableTo": "Plan",
+          "columnsFrom": [
+            "planId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "PaymentRequest_userId_User_id_fk": {
+          "name": "PaymentRequest_userId_User_id_fk",
+          "tableFrom": "PaymentRequest",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "SubProfile": {
+      "name": "SubProfile",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avatarColor": {
+          "default": "'#2C9ED5'",
+          "autoincrement": false,
+          "name": "avatarColor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pinHash": {
+          "autoincrement": false,
+          "name": "pinHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isDefault": {
+          "default": false,
+          "autoincrement": false,
+          "name": "isDefault",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "SubProfile_userId_idx": {
+          "name": "SubProfile_userId_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "SubProfile_userId_User_id_fk": {
+          "name": "SubProfile_userId_User_id_fk",
+          "tableFrom": "SubProfile",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "PlanFeature": {
+      "name": "PlanFeature",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "planId": {
+          "autoincrement": false,
+          "name": "planId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "autoincrement": false,
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isActive": {
+          "default": true,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "PlanFeature_planId_name_key": {
+          "name": "PlanFeature_planId_name_key",
+          "columns": [
+            "planId",
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "PlanFeature_planId_Plan_id_fk": {
+          "name": "PlanFeature_planId_Plan_id_fk",
+          "tableFrom": "PlanFeature",
+          "tableTo": "Plan",
+          "columnsFrom": [
+            "planId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "PlanService": {
+      "name": "PlanService",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "planId": {
+          "autoincrement": false,
+          "name": "planId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "autoincrement": false,
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isActive": {
+          "default": true,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "PlanService_planId_name_key": {
+          "name": "PlanService_planId_name_key",
+          "columns": [
+            "planId",
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "PlanService_planId_Plan_id_fk": {
+          "name": "PlanService_planId_Plan_id_fk",
+          "tableFrom": "PlanService",
+          "tableTo": "Plan",
+          "columnsFrom": [
+            "planId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "MaintenanceRequest": {
+      "name": "MaintenanceRequest",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "licenseId": {
+          "autoincrement": false,
+          "name": "licenseId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "autoincrement": false,
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "default": "'PENDING'",
+          "autoincrement": false,
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proofPublicId": {
+          "autoincrement": false,
+          "name": "proofPublicId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "proofUrl": {
+          "autoincrement": false,
+          "name": "proofUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "adminNote": {
+          "autoincrement": false,
+          "name": "adminNote",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hasPaidLicense": {
+          "default": false,
+          "autoincrement": false,
+          "name": "hasPaidLicense",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalPrice": {
+          "autoincrement": false,
+          "name": "totalPrice",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "name": "updatedAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {
+        "MaintenanceRequest_licenseId_License_id_fk": {
+          "name": "MaintenanceRequest_licenseId_License_id_fk",
+          "tableFrom": "MaintenanceRequest",
+          "tableTo": "License",
+          "columnsFrom": [
+            "licenseId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        },
+        "MaintenanceRequest_userId_User_id_fk": {
+          "name": "MaintenanceRequest_userId_User_id_fk",
+          "tableFrom": "MaintenanceRequest",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "Notification": {
+      "name": "Notification",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "autoincrement": false,
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "autoincrement": false,
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message": {
+          "autoincrement": false,
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "link": {
+          "autoincrement": false,
+          "name": "link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "read": {
+          "default": false,
+          "autoincrement": false,
+          "name": "read",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "Notification_userId_read_idx": {
+          "name": "Notification_userId_read_idx",
+          "columns": [
+            "userId",
+            "read"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "Notification_userId_User_id_fk": {
+          "name": "Notification_userId_User_id_fk",
+          "tableFrom": "Notification",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}
