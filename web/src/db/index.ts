@@ -1,11 +1,8 @@
-import { drizzle as drizzleBunSqlite } from "drizzle-orm/bun-sqlite";
 import { drizzle as drizzleD1 } from "drizzle-orm/d1";
-import { Database } from "bun:sqlite";
 import * as schema from "./schema";
 
-type BunSqliteDB = ReturnType<typeof drizzleBunSqlite<typeof schema>>;
 type D1DB = ReturnType<typeof drizzleD1<typeof schema>>;
-type DrizzleDB = BunSqliteDB | D1DB;
+type DrizzleDB = D1DB;
 
 let _db: DrizzleDB | undefined;
 
@@ -15,8 +12,12 @@ function getDb(): DrizzleDB {
   const dbUrl = process.env.DATABASE_URL_SQLITE;
 
   if (dbUrl?.startsWith("file:")) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Database } = require("bun:sqlite");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { drizzle } = require("drizzle-orm/bun-sqlite");
     const sqlite = new Database("./dev.db");
-    _db = drizzleBunSqlite(sqlite, { schema });
+    _db = drizzle(sqlite, { schema }) as DrizzleDB;
   } else {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getCloudflareContext } = require("@opennextjs/cloudflare");
