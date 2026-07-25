@@ -6,10 +6,8 @@ services:
       - "3000:3000"
     volumes:
       - ./web:/app
-      # - pnpm_node_modules:/app/node_modules
-      # - pnpm_store:/app/.next
+      - /app/node_modules
     environment:
-      # - DATABASE_URL=postgresql://neondb_owner:npg_6tx7OljCsDpA@ep-young-union-asboe64e.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - DATABASE_URL=postgresql://postgres.mssenmvmvtiorabwguxi:SECUREITDB123SECUREITDB123@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true
       - DIRECT_URL=postgresql://postgres.mssenmvmvtiorabwguxi:SECUREITDB123SECUREITDB123@aws-0-eu-west-1.pooler.supabase.com:5432/postgres
       - JWT_SECRET=x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-

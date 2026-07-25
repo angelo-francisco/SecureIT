@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Key, Loader, Check, X, ArrowLeft }from "lucide-react";
 import { useLicense } from "../../hooks/useLicense";
 import { licenseApi } from "../../api-client/license";
 import { useAuthStore } from "../../hooks";
 import { useToast } from "@/packages/ui";
 import { useNavigate } from "react-router-dom";
-
+  
 interface LicensePageProps {
   onClose?: () => void;
 }
@@ -26,6 +26,13 @@ export default function LicensePage({ onClose }: LicensePageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (hasLicense && isActive) {
+      const timer = setTimeout(() => navigate("/panel"), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasLicense, isActive, navigate]);
 
   const handleActivate = async () => {
     if (!key || !user?.email || !user?.id) return;
@@ -115,59 +122,44 @@ export default function LicensePage({ onClose }: LicensePageProps) {
 
       <div className="flex-1 overflow-y-auto flex justify-center">
         {hasLicense && isActive ? (
-          <div className="w-full max-w-md space-y-6">
-            <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check size={20} className="text-green-400" />
+          <div className="w-full max-w-md space-y-4">
+            <div className="p-6 border border-border bg-surface">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-success/15 flex items-center justify-center">
+                  <Check size={20} className="text-success" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold">Licença Activa</p>
-                  <p className="text-gray-400 text-sm">
-                    {type === "TRIAL" ? "Trial" : "Standard"}
-                  </p>
+                  <p className="text-text font-semibold text-lg">Licença Activa</p>
+                  <p className="text-text-muted text-sm">{type === "TRIAL" ? "Trial" : "Standard"}</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-400 text-sm">Activada em</span>
-                  <span className="text-white text-sm">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-text-muted text-base">Activada em</span>
+                  <span className="text-text text-base">
                     {activatedAt
                       ? new Date(activatedAt).toLocaleDateString("pt-BR")
                       : "—"}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400 text-sm">Expira em</span>
-                  <span className="text-white text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-text-muted text-base">Expira em</span>
+                  <span className="text-text text-base">
                     {expiresAt
                       ? new Date(expiresAt).toLocaleDateString("pt-BR")
                       : "—"}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400 text-sm">Dias restantes</span>
-                  <span className="text-white text-sm font-semibold">
-                    {daysRemaining}
-                  </span>
+                <div className="flex justify-between items-center">
+                  <span className="text-text-muted text-base">Dias restantes</span>
+                  <span className="text-text text-base font-semibold">{daysRemaining}</span>
                 </div>
-              </div>
-
-              <div className="mt-6">
-                <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all"
-                    style={{
-                      width: `${Math.min(100, (daysRemaining / (type === "TRIAL" ? 14 : 30)) * 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
+              </div>  
             </div>
 
-            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <p className="text-gray-400 text-xs">
+            <div className="p-4 border border-border bg-surface">
+              <p className="text-text-muted text-base text-center">
                 A licença é verificada automaticamente a cada 6 horas. Se faltam
                 3 dias ou menos, receberá um aviso diário.
               </p>

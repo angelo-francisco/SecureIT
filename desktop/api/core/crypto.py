@@ -8,6 +8,7 @@ using the public key loaded from the configured PEM file.
 
 import base64
 import json
+import logging
 from typing import Optional
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -15,6 +16,7 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 from core.config import settings
 
+logger = logging.getLogger("crypto")
 
 _cached_public_key: Optional[Ed25519PublicKey] = None
 
@@ -24,6 +26,9 @@ def _get_public_key() -> Ed25519PublicKey:
     global _cached_public_key
     if _cached_public_key is not None:
         return _cached_public_key
+
+    pem_path = settings.ED25519_PUBLIC_KEY_PATH
+    logger.info("Loading Ed25519 public key from: %s (exists=%s)", pem_path, __import__("pathlib").Path(pem_path).exists())
 
     pem_data = settings.get_ed25519_public_key().encode("utf-8")
     key = load_pem_public_key(pem_data)
@@ -52,34 +57,44 @@ def verify_license_token(token: str) -> Optional[dict]:
         The decoded payload dict if verification succeeds, None otherwise.
     """
     try:
+        if not token:
+            logger.warning("verify_license_token: empty token")
+            return None
+
         parts = token.split(".")
         if len(parts) != 3:
+            logger.warning("verify_license_token: expected 3 JWT parts, got %d", len(parts))
             return None
 
         header_b64, payload_b64, signature_b64 = parts
 
-        # Verify header algorithm
         header = json.loads(_base64url_decode(header_b64))
-        if header.get("alg") != "EdDSA":
+        alg = header.get("alg")
+        logger.info("verify_license_token: header alg=%s, keys_in_header=%s", alg, list(header.keys()))
+        if alg != "EdDSA":
+            logger.warning("verify_license_token: expected alg=EdDSA, got %s", alg)
             return None
 
-        # Verify signature
         public_key = _get_public_key()
         sign_input = f"{header_b64}.{payload_b64}".encode("utf-8")
         signature = _base64url_decode(signature_b64)
 
+        logger.info("verify_license_token: sign_input length=%d, signature length=%d", len(sign_input), len(signature))
+
         public_key.verify(signature, sign_input)
 
-        # Decode and return payload
         payload = json.loads(_base64url_decode(payload_b64))
+        logger.info("verify_license_token: payload iss=%s", payload.get("iss"))
 
-        # Verify issuer (jose sets 'iss' claim per JWT standard)
         if payload.get("iss") != "secureit-web":
+            logger.warning("verify_license_token: expected iss=secureit-web, got %s", payload.get("iss"))
             return None
 
+        logger.info("verify_license_token: SUCCESS")
         return payload
 
-    except Exception:
+    except Exception as e:
+        logger.error("verify_license_token: Exception: %s: %s", type(e).__name__, e)
         return None
 
 

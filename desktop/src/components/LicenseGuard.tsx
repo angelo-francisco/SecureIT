@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../hooks";
 import { useLicenseGuard, type LicenseGuardStatus } from "../hooks/useLicenseGuard";
+import { useLicenseStore } from "../stores/license";
 import LicensePage from "../pages/panel/LicensePage";
 import * as Lucide from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function LicenseBlockScreen({ reason }: { reason: LicenseGuardStatus }) {
   const messages: Record<string, { title: string; description: string; icon: ReactNode }> = {
@@ -28,7 +31,7 @@ function LicenseBlockScreen({ reason }: { reason: LicenseGuardStatus }) {
     },
     invalid_signature: {
       title: "Licença Inválida",
-      description: "Os dados da licença foram alterados. Insira uma nova chave.",
+      description: "Os dados da licença foram alterados. Insira uma nova chave para continuar.",
       icon: <Lucide.ShieldAlert size={48} className="text-red-400" />,
     },
     error: {
@@ -39,13 +42,41 @@ function LicenseBlockScreen({ reason }: { reason: LicenseGuardStatus }) {
   };
 
   const info = messages[reason] || messages.error;
+  const navigate = useNavigate();
+  const [showLicensePage, setShowLicensePage] = useState(false);
+
+  const handleClearAndReenter = () => {
+    useLicenseStore.getState().clearLicense();
+    setShowLicensePage(true);
+  };
+
+  if (showLicensePage) {
+    return <LicensePage />;
+  }
 
   return (
-    <div className="flex-1 h-full flex items-center justify-center p-8">
+    <div className="min-h-screen bg-bg flex items-center justify-center">
       <div className="text-center max-w-md">
         <div className="mb-6 flex justify-center">{info.icon}</div>
-        <h2 className="text-xl font-bold text-white mb-2">{info.title}</h2>
-        <p className="text-gray-400 text-sm">{info.description}</p>
+        <h2 className="text-xl md:text-2xl font-bold text-white">{info.title}</h2>
+        <p className="text-gray-300 text-lg">{info.description}</p>
+        {(reason === "invalid_signature" || reason === "expired") && (
+          <button
+            onClick={handleClearAndReenter}
+            className="cursor-pointer flex items-center justify-center gap-2 w-full mt-3 py-3 text-text border border-gray-500 transition-all duration-150 hover:bg-gray-800"
+          >
+            <Lucide.RefreshCw size={18} strokeWidth={2} />
+            <span>Inserir nova chave</span>
+          </button>
+        )}
+        <button
+          onClick={() => {
+            navigate("/profiles")
+          }}
+          className="cursor-pointer flex items-center justify-center w-full mt-3 py-3 text-text border border-gray-500 transition-all duration-150"
+        >
+          <Lucide.ArrowLeft size={20} strokeWidth={2} />
+        </button>
       </div>
     </div>
   );
@@ -57,12 +88,12 @@ interface LicenseGuardProps {
 
 export function LicenseGuard({ children }: LicenseGuardProps) {
   const user = useAuthStore((s) => s.user);
-  const { status } = useLicenseGuard(user?.id ?? null);
+  const { status,licenseInfo } = useLicenseGuard(user?.id ?? null);
 
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
-        <Lucide.Loader size={24} className="animate-spin text-primary" />
+        <Lucide.Loader size={30} className="animate-spin" />
       </div>
     );
   }

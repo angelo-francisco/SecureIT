@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     if (licenseKey.status === "ACTIVE") {
       const existingLicense = await prisma.license.findUnique({
         where: { keyId: licenseKey.id },
+        include: { user: true },
       });
 
       if (existingLicense) {
@@ -53,13 +54,34 @@ export async function POST(request: Request) {
           const features: string[] =
             licenseKey.type === "STANDARD" ? ["face_recognition"] : [];
           const publicKey = await getPublicKeyPemString();
+
+          let signedPayload = existingLicense.signedPayload;
+          if (!signedPayload) {
+            const payload = {
+              key: licenseKey.key,
+              type: licenseKey.type,
+              userId: existingLicense.userId,
+              email: existingLicense.user?.email ?? "",
+              maxCameras: licenseKey.maxCameras,
+              maxPeople: licenseKey.maxPeople,
+              features,
+              activatedAt: existingLicense.activatedAt.toISOString(),
+              expiresAt: existingLicense.expiresAt.toISOString(),
+            };
+            signedPayload = await signLicensePayload(payload);
+            await prisma.license.update({
+              where: { id: existingLicense.id },
+              data: { signedPayload },
+            });
+          }
+
           return NextResponse.json({
             valid: true,
             licenseId: existingLicense.id,
             expiresAt: existingLicense.expiresAt,
             activatedAt: existingLicense.activatedAt,
             type: licenseKey.type,
-            signedPayload: existingLicense.signedPayload || "",
+            signedPayload,
             publicKey,
             maxCameras: licenseKey.maxCameras,
             maxPeople: licenseKey.maxPeople,

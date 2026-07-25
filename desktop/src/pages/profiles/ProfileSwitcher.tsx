@@ -31,6 +31,7 @@ export default function ProfileSwitcher() {
 
   const handleSelect = async (profile: ProfileData) => {
     if (profile.hasPin) {
+
       setPinModal(profile);
       return;
     }
@@ -167,36 +168,49 @@ function PinEntryModal({
 }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
+  const { toast } = useToast()
 
-  useEffect(() => {
+  const handleOnComplete = () => {
     if (pin.length === 4) {
       onComplete(pin);
+    } else {
+      setError("Digite o PIN [4 DÍGITOS]")
     }
-  }, [pin, onComplete]);
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs" onClick={onClose}>
       <div
         className={`bg-surface border border-border p-8 w-full max-w-md shadow-2xl ${error ? "animate-shake" : ""}`}
         onClick={(e) => e.stopPropagation()}
+        onAnimationEnd={() => setTimeout(() => setError(false),5000)}
       >
-        <div className="flex flex-col items-center">
-          <h3 className="text-2xl font-semibold text-text mb-5 uppercase">insira o código de acesso</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-2xl font-semibold text-text uppercase">código de acesso</h3>
+          <button
+            onClick={onClose}
+            className="cursor-pointer border border-border flex justify-center items-center text-center p-1 text-white font-semibold transition-colors"
+          >
+            <Lucide.X size={16}/>
+          </button>
+        </div>  
+        <div className="flex gap-3 items-center mt-8">
           <PinInput
             value={pin}
             onChange={(v) => { setPin(v); setError(false); }}
             autoFocus
           />
-          {error && (
-            <p className="text-sm text-error mt-3">PIN incorrecto</p>
-          )}
+          
+          <button
+            onClick={handleOnComplete}
+            className="cursor-pointer w-full p-4 bg-primary flex justify-center text-lg text-white font-semibold transition-colors"
+          >
+            <Lucide.ArrowRight />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="cursor-pointer w-full bg-red-500 mt-6 h-12 text-lg text-white font-semibold transition-colors"
-        >
-          Cancelar
-        </button>
+        {error && (
+          <p className="text-error mt-3">{error}</p>
+        )}
       </div>
     </div>
   );

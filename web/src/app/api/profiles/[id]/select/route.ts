@@ -13,7 +13,7 @@ export async function POST(
   }
   try {
     const { id } = await params;
-    const body = (await request.json()) as any;
+    const body = await request.json();
     const { pin } = body;
 
     const profile = await prisma.subProfile.findUnique({ where: { id } });

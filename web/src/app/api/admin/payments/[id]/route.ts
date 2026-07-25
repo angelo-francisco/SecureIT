@@ -2,6 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
+import {
+  signLicensePayload,
+  getPublicKeyPemString,
+} from "@/lib/keys/ed25519";
 
 export async function PUT(
   request: Request,
@@ -48,7 +52,26 @@ export async function PUT(
 
       const existingLicense = await prisma.license.findUnique({
         where: { userId: payment.userId },
+        include: { key: true },
       });
+
+      const user = await prisma.user.findUnique({
+        where: { id: payment.userId },
+      });
+
+      const features: string[] =
+        payment.plan.name === "STANDARD" ? ["face_recognition"] : [];
+
+      const basePayload = {
+        type: payment.plan.name,
+        userId: payment.userId,
+        email: user?.email ?? "",
+        maxCameras: payment.plan.name === "TRIAL" ? 1 : -1,
+        maxPeople: payment.plan.name === "TRIAL" ? 10 : -1,
+        features,
+        activatedAt: now.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+      };
 
       if (!existingLicense) {
         let key = generateLicenseKey();
@@ -58,6 +81,8 @@ export async function PUT(
           if (!existing) exists = false;
           else key = generateLicenseKey();
         }
+
+        const signedPayload = await signLicensePayload({ ...basePayload, key });
 
         const licenseKey = await prisma.licenseKey.create({
           data: {
@@ -75,6 +100,7 @@ export async function PUT(
             paymentRequestId: payment.id,
             activatedAt: now,
             expiresAt,
+            signedPayload,
           },
         });
       } else {
@@ -82,9 +108,18 @@ export async function PUT(
           ? new Date(existingLicense.expiresAt.getTime() + payment.plan.durationDays * 24 * 60 * 60 * 1000)
           : expiresAt;
 
+        const signedPayload = await signLicensePayload({
+          ...basePayload,
+          key: existingLicense.key.key,
+          expiresAt: newExpiresAt.toISOString(),
+        });
+
         await prisma.license.update({
           where: { id: existingLicense.id },
-          data: { expiresAt: newExpiresAt },
+          data: {
+            expiresAt: newExpiresAt,
+            signedPayload,
+          },
         });
       }
 

@@ -234,41 +234,14 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 
         {step === 2 && selectedPlan && (
           <>
-
-            {selectedPlan.features.length > 0 && selectedPlan.features.some((f) => f.price > 0) && (
-              <div>
-                <h4 className="text-sm font-medium text-text mb-2">Features Opcionais</h4>
-                <div className="space-y-2">
-                  {selectedPlan.features.filter((f) => f.price > 0).map((feature) => (
-                    <label key={feature.id} className="flex items-center justify-between p-3 bg-surface border border-border rounded-lg cursor-pointer hover:border-primary/50 transition-all">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedFeatures.includes(feature.id)}
-                          onChange={() => toggleFeature(feature.id)}
-                          className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                        />
-                        <div>
-                          <span className="text-sm text-text">{feature.name}</span>
-                          {feature.description && (
-                            <p className="text-xs text-text-muted">{feature.description}</p>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium text-primary">${feature.price.toFixed(2)}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
             {selectedPlan.services.length > 0 && selectedPlan.services.some((s) => s.price > 0) && (
               <div>
-                <h4 className="text-base md:text-xl text-text">Serviços Opcionais</h4>
-                <div className="space-y-2">
+                <h4 className="text-base md:text-xl text-text">Serviços e Funcionalidades (Opcionais)</h4>
+                <div className="space-y-2 py-2">
                   {selectedPlan.services.filter((s) => s.price > 0).map((service) => {
                     const isTooltipOpen = openTooltipId === service.id;
                     return ( 
-                      <label key={service.id} className="flex items-center py-3 px-4 justify-between bg-surface cursor-pointer hover:border-primary/50 transition-all">
+                      <label key={service.id} className="flex items-center px-4 justify-between bg-surface cursor-pointer hover:border-primary/50 transition-all">
                         <div className="flex items-center justify-start gap-2">
                           <input
                             type="checkbox"
@@ -314,7 +287,57 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
                         </div>
                           <span className="text-base md:text-lg font-bold text-primary">${service.price.toFixed(2)}</span>
                       </label>
-                    )})} 
+                  )})}  
+                  {selectedPlan.features.filter((f) => f.price > 0).map((feature) => { 
+                    const isTooltipOpen = openTooltipId === feature.id;
+                    return ( 
+                      <label key={feature.id} className="flex items-center px-4 justify-between bg-surface cursor-pointer hover:border-primary/50 transition-all">
+                        <div className="flex items-center justify-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeatures.includes(feature.id)}
+                            onChange={() => toggleFeature(feature.id)}
+                            className="relative h-4 w-4 cursor-pointer appearance-none border border-gray-300 bg-white transition-all duration-200 
+                            checked:border-primary checked:bg-primary 
+                            focus:outline-none focus:ring-0 focus:ring-offset-0
+                            after:absolute after:left-[50%] after:top-[50%] after:-translate-y-1/2 after:-translate-x-1/2 after:h-[10px] after:w-[5px] 
+                            after:rotate-45 after:border-b-2 after:border-r-2 after:border-white after:content-[''] 
+                            after:opacity-0 checked:after:opacity-100"
+                          />
+                          <div className="flex gap-1">
+                            <span className="text-base md:text-xl font-semibold text-tex">{feature.name}</span>
+                            {feature.description && (
+                              <div className="relative flex items-center" onMouseEnter={(e) => {
+                                    e.stopPropagation();
+                                    setOpenTooltipId(isTooltipOpen ? null : feature.id);
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.stopPropagation();
+                                    setOpenTooltipId(null);
+                                  }}>
+                                <button
+                                  type="button"
+                                  className={`p-1 rounded-full transition-colors ${
+                                    isTooltipOpen ? 'text-primary' : 'text-text-muted'
+                                  }`}
+                                >
+                                  <Info size={20} />
+                                </button>
+
+                                {isTooltipOpen && (
+                                  <div className="absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-lg bg-gray-900 p-3 text-xs md:text-sm text-white shadow-xl animate-fade-in">
+                                    <p className="leading-tight">{feature.description}</p>
+                                    
+                                    <div className="absolute top-full left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900" />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                          <span className="text-base md:text-lg font-bold text-primary">${feature.price.toFixed(2)}</span>
+                      </label>
+                  )})}
                 </div>
               </div>
             )}
@@ -428,7 +451,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
               </div>
               {selectedPlan.features.filter((f) => selectedFeatures.includes(f.id) && f.price > 0).map((f) => (
                 <div key={f.id} className="flex items-center justify-between">
-                  <span className="text-base text-gray-200">+ {f.name}</span>
+                  <span className="text-base text-gray-200">{f.name}</span>
                   <span className="text-lg text-text">${f.price.toFixed(2)}</span>
                 </div>
               ))}
