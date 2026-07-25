@@ -182,7 +182,7 @@ export function NewLicenseModal({
                       )}
                       <div className="flex items-baseline gap-1 mt-2">
                         <span className="text-xl font-bold text-text">
-                          €{Number(plan.price).toFixed(2)}
+                          €{Number(plan.basePrice).toFixed(2)}
                         </span>
                         <span className="text-xs text-text-muted">
                           / {plan.durationDays} dias
@@ -261,7 +261,7 @@ export function NewLicenseModal({
                     <div className="flex items-center justify-between pt-2 border-t border-border">
                       <span className="text-sm text-text-muted">Montante</span>
                       <span className="text-base font-bold text-primary">
-                        €{Number(selectedPlan?.price || 0).toFixed(2)}
+                        €{Number(selectedPlan?.basePrice || 0).toFixed(2)}
                       </span>
                     </div>
                   </div>

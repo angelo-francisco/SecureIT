@@ -9,7 +9,7 @@ export function useExchangeRate() {
   useEffect(() => {
     fetch("/api/exchange-rate")
       .then((r) => r.json())
-      .then((data) => {
+      .then((data: any) => {
         if (data.rate) setRate(data.rate);
       })
       .catch(() => {})

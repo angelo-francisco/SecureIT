@@ -17,7 +17,7 @@ export async function GET() {
 
     if (!res.ok) throw new Error("Exchange API failed");
 
-    const data = await res.json();
+    const data = (await res.json()) as { rates?: { AOA?: number } };
     const aoaRate = data?.rates?.AOA;
 
     if (typeof aoaRate === "number" && aoaRate > 0) {

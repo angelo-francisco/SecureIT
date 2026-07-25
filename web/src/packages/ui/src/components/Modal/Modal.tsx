@@ -8,9 +8,10 @@ interface ModalProps {
   onClose?: () => void;
   children: ReactNode;
   className?: string;
+  disableBackdropClose?: boolean;
 }
 
-export function Modal({ open, onClose, children, className = "" }: ModalProps) {
+export function Modal({ open, onClose, children, className = "", disableBackdropClose = false }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -40,7 +41,7 @@ export function Modal({ open, onClose, children, className = "" }: ModalProps) {
     <div
       className="fixed inset-0 flex items-center justify-center z-[1000]"
       onClick={(e) => {
-        if (e.target === e.currentTarget) handleClose();
+        if (e.target === e.currentTarget && !disableBackdropClose) handleClose();
       }}
     >
       <div

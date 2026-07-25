@@ -6,6 +6,7 @@ import { Modal } from "@/packages/ui";
 
 interface LicenseData {
   id: string;
+  status: string;
   activatedAt: string;
   expiresAt: string;
   machineHash: string | null;

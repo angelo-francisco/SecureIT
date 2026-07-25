@@ -46,6 +46,7 @@ interface CloudinaryResult {
 
 interface PlansSectionProps {
   data: { plans: Plan[]; paymentInfo: PaymentInfo | null };
+  onClose?: () => void;
 }
 
 export interface PlansSectionHandle {
@@ -68,7 +69,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
     const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(initialData.paymentInfo);
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-    const [openTooltipId, setOpenTooltipId] = useState(null);
+    const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [uploadedProof, setUploadedProof] = useState<CloudinaryResult | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -153,7 +154,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
         setSelectedFeatures([]);
         setSelectedServices([]);
         setUploadedProof(null);
-        onClose()
+        onClose?.()
       } catch (err) {
         toast(err instanceof Error ? err.message : "Erro ao submeter pagamento");
       } finally {
@@ -388,7 +389,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
                   )}
                   <div className="flex items-center justify-between">
                     <span className="text-base text-gray-200 font-bold">Montante</span>
-                    <span className="text-lg text-primary">{convert(total.toFixed(2))} Kz</span>
+                    <span className="text-lg text-primary">{convert(Number(total.toFixed(2)))} Kz</span>
                   </div>
                 </div>
               ) : (
@@ -411,7 +412,6 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
                 <CldUploadWidget
                   signatureEndpoint="/api/sign-cloudinary-params"
                   uploadPreset="secureit-payments"
-                  className="rounded-none"
                   options={{ 
                     maxFiles: 1,
                     resourceType: "auto",

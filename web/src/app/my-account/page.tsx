@@ -77,7 +77,7 @@ export default function MyAccountPage() {
     try {
       const res = await fetch("/api/payment-info");
       if (res.ok) {
-        const data = await res.json();
+        const data: { id: string; iban: string; accountName: string; bankName: string | null; reference: string | null } = await res.json();
         setPaymentInfo(data);
       }
     } catch {}
@@ -94,7 +94,7 @@ export default function MyAccountPage() {
         }
         return r.json();
       })
-      .then((data) => {
+      .then((data: any) => {
         if (data?.user) {
           setUser({
             firstName: data.user.firstName || "",
