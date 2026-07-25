@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { planService } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 
@@ -7,7 +9,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   const { id } = await params;
   try {
-    const services = await prisma.planService.findMany({ where: { planId: id }, orderBy: { createdAt: "asc" } });
+    const services = await db
+      .select()
+      .from(planService)
+      .where(eq(planService.planId, id))
+      .orderBy(asc(planService.createdAt))
+      .all();
     return NextResponse.json(services);
   } catch (error) {
     console.error("[Admin Plan Services GET]", error);
@@ -24,12 +31,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { name, description, price } = body;
     if (!name) return NextResponse.json({ error: "Nome em falta" }, { status: 400 });
 
-    const service = await prisma.planService.create({
-      data: { planId: id, name, description, price: price || 0 },
-    });
+    const service = await db
+      .insert(planService)
+      .values({ planId: id, name, description, price: price || 0 })
+      .returning()
+      .get();
     return NextResponse.json(service);
   } catch (error: any) {
-    if (error?.code === "P2002") return NextResponse.json({ error: "Serviço já existe neste plano" }, { status: 409 });
+    if (error?.message?.includes("UNIQUE constraint")) {
+      return NextResponse.json({ error: "Serviço já existe neste plano" }, { status: 409 });
+    }
     console.error("[Admin Plan Services POST]", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
@@ -44,15 +55,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { serviceId, name, description, price, isActive } = body;
     if (!serviceId) return NextResponse.json({ error: "serviceId em falta" }, { status: 400 });
 
-    const service = await prisma.planService.update({
-      where: { id: serviceId },
-      data: {
-        ...(name !== undefined && { name }),
-        ...(description !== undefined && { description }),
-        ...(price !== undefined && { price }),
-        ...(isActive !== undefined && { isActive }),
-      },
-    });
+    const updates: Record<string, unknown> = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (price !== undefined) updates.price = price;
+    if (isActive !== undefined) updates.isActive = isActive;
+
+    const service = await db
+      .update(planService)
+      .set(updates)
+      .where(eq(planService.id, serviceId))
+      .returning()
+      .get();
     return NextResponse.json(service);
   } catch (error) {
     console.error("[Admin Plan Services PUT]", error);
@@ -69,7 +83,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const serviceId = searchParams.get("serviceId");
     if (!serviceId) return NextResponse.json({ error: "serviceId em falta" }, { status: 400 });
 
-    await prisma.planService.delete({ where: { id: serviceId } });
+    await db.delete(planService).where(eq(planService.id, serviceId)).run();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[Admin Plan Services DELETE]", error);

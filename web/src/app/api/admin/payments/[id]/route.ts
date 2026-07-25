@@ -1,11 +1,10 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { paymentRequest, plan, licenseKey, license, user, notification } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
-import {
-  signLicensePayload,
-  getPublicKeyPemString,
-} from "@/lib/keys/ed25519";
+import { signLicensePayload } from "@/lib/keys/ed25519";
 
 export async function PUT(
   request: Request,
@@ -24,127 +23,155 @@ export async function PUT(
       return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
     }
 
-    const payment = await prisma.paymentRequest.findUnique({
-      where: { id },
-      include: { plan: true },
-    });
+    const payment = await db
+      .select()
+      .from(paymentRequest)
+      .where(eq(paymentRequest.id, id))
+      .get();
 
     if (!payment) {
       return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
     }
 
     if (payment.status !== "PENDING") {
-      return NextResponse.json({ error: "Pagamento já foi processado" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Pagamento já foi processado" },
+        { status: 400 }
+      );
     }
 
-    const updated = await prisma.paymentRequest.update({
-      where: { id },
-      data: {
+    const planRow = await db.select().from(plan).where(eq(plan.id, payment.planId)).get();
+
+    const now = new Date().toISOString();
+
+    await db
+      .update(paymentRequest)
+      .set({
         status,
         adminNote: adminNote || null,
-        reviewedAt: new Date(),
-      },
-    });
+        reviewedAt: now,
+      })
+      .where(eq(paymentRequest.id, id))
+      .run();
 
-    if (status === "APPROVED") {
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + payment.plan.durationDays * 24 * 60 * 60 * 1000);
+    if (status === "APPROVED" && planRow) {
+      const nowDate = new Date();
+      const expiresAt = new Date(
+        nowDate.getTime() + planRow.durationDays * 24 * 60 * 60 * 1000
+      );
+      const expiresAtStr = expiresAt.toISOString();
 
-      const existingLicense = await prisma.license.findUnique({
-        where: { userId: payment.userId },
-        include: { key: true },
-      });
+      const existingLicense = await db
+        .select()
+        .from(license)
+        .where(eq(license.userId, payment.userId))
+        .get();
 
-      const user = await prisma.user.findUnique({
-        where: { id: payment.userId },
-      });
+      let existingKey: typeof licenseKey.$inferSelect | undefined;
+      if (existingLicense) {
+        existingKey = await db
+          .select()
+          .from(licenseKey)
+          .where(eq(licenseKey.id, existingLicense.keyId))
+          .get();
+      }
+
+      const payUser = await db.select().from(user).where(eq(user.id, payment.userId)).get();
 
       const features: string[] =
-        payment.plan.name === "STANDARD" ? ["face_recognition"] : [];
+        planRow.name === "STANDARD" ? ["face_recognition"] : [];
 
       const basePayload = {
-        type: payment.plan.name,
+        type: planRow.name,
         userId: payment.userId,
-        email: user?.email ?? "",
-        maxCameras: payment.plan.name === "TRIAL" ? 1 : -1,
-        maxPeople: payment.plan.name === "TRIAL" ? 10 : -1,
+        email: payUser?.email ?? "",
+        maxCameras: planRow.name === "TRIAL" ? 1 : -1,
+        maxPeople: planRow.name === "TRIAL" ? 10 : -1,
         features,
-        activatedAt: now.toISOString(),
-        expiresAt: expiresAt.toISOString(),
+        activatedAt: now,
+        expiresAt: expiresAtStr,
       };
 
-      if (!existingLicense) {
+      if (!existingLicense || !existingKey) {
         let key = generateLicenseKey();
         let exists = true;
         while (exists) {
-          const existing = await prisma.licenseKey.findUnique({ where: { key } });
+          const existing = await db.select().from(licenseKey).where(eq(licenseKey.key, key)).get();
           if (!existing) exists = false;
           else key = generateLicenseKey();
         }
 
         const signedPayload = await signLicensePayload({ ...basePayload, key });
 
-        const licenseKey = await prisma.licenseKey.create({
-          data: {
+        const createdKey = await db
+          .insert(licenseKey)
+          .values({
             key,
-            type: payment.plan.name,
-            durationDays: payment.plan.durationDays,
+            type: planRow.name,
+            durationDays: planRow.durationDays,
             status: "ACTIVE",
-          },
-        });
+          })
+          .returning()
+          .get();
 
-        await prisma.license.create({
-          data: {
-            keyId: licenseKey.id,
+        await db
+          .insert(license)
+          .values({
+            keyId: createdKey.id,
             userId: payment.userId,
             paymentRequestId: payment.id,
             activatedAt: now,
-            expiresAt,
+            expiresAt: expiresAtStr,
             signedPayload,
-          },
-        });
+          })
+          .run();
       } else {
-        const newExpiresAt = existingLicense.expiresAt.getTime() > now.getTime()
-          ? new Date(existingLicense.expiresAt.getTime() + payment.plan.durationDays * 24 * 60 * 60 * 1000)
-          : expiresAt;
+        const existingExpires = new Date(existingLicense.expiresAt);
+        const newExpiresAt =
+          existingExpires.getTime() > nowDate.getTime()
+            ? new Date(
+                existingExpires.getTime() +
+                  planRow.durationDays * 24 * 60 * 60 * 1000
+              )
+            : expiresAt;
 
         const signedPayload = await signLicensePayload({
           ...basePayload,
-          key: existingLicense.key.key,
+          key: existingKey.key,
           expiresAt: newExpiresAt.toISOString(),
         });
 
-        await prisma.license.update({
-          where: { id: existingLicense.id },
-          data: {
-            expiresAt: newExpiresAt,
+        await db
+          .update(license)
+          .set({
+            expiresAt: newExpiresAt.toISOString(),
             signedPayload,
-          },
-        });
+          })
+          .where(eq(license.id, existingLicense.id))
+          .run();
       }
 
-      await prisma.notification.create({
-        data: {
-          userId: payment.userId,
-          type: "LICENSE_APPROVED",
-          title: "Licença Aprovada",
-          message: `O seu pagamento para o plano "${payment.plan.name}" foi aprovado. A sua licença está agora ativa.`,
-        },
-      });
-    } else if (status === "REJECTED") {
-      await prisma.notification.create({
-        data: {
-          userId: payment.userId,
-          type: "LICENSE_REJECTED",
-          title: "Pagamento Rejeitado",
-          message: `O seu pagamento para o plano "${payment.plan.name}" foi rejeitado.${adminNote ? ` Motivo: ${adminNote}` : ""}`,
-        },
-      });
+      await db.insert(notification).values({
+        userId: payment.userId,
+        type: "LICENSE_APPROVED",
+        title: "Licença Aprovada",
+        message: `O seu pagamento para o plano "${planRow.name}" foi aprovado. A sua licença está agora ativa.`,
+      }).run();
+    } else if (status === "REJECTED" && planRow) {
+      await db.insert(notification).values({
+        userId: payment.userId,
+        type: "LICENSE_REJECTED",
+        title: "Pagamento Rejeitado",
+        message: `O seu pagamento para o plano "${planRow.name}" foi rejeitado.${adminNote ? ` Motivo: ${adminNote}` : ""}`,
+      }).run();
     }
 
-    return NextResponse.json(updated);
+    return NextResponse.json({ id, status, adminNote, reviewedAt: now });
   } catch (error) {
     console.error("[Admin Payment PUT]", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 }
+    );
   }
 }

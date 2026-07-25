@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { licenseKey, license, user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET(
@@ -12,23 +14,26 @@ export async function GET(
   }
   try {
     const { id } = await params;
-    const license = await prisma.licenseKey.findUnique({
-      where: { id },
-      include: {
-        license: {
-          include: { user: { select: { email: true, firstName: true, lastName: true } } },
-        },
-      },
-    });
+    const key = await db.select().from(licenseKey).where(eq(licenseKey.id, id)).get();
 
-    if (!license) {
-      return NextResponse.json(
-        { error: "Licença não encontrada" },
-        { status: 404 }
-      );
+    if (!key) {
+      return NextResponse.json({ error: "Licença não encontrada" }, { status: 404 });
     }
 
-    return NextResponse.json(license);
+    const lic = await db.select().from(license).where(eq(license.keyId, id)).get();
+
+    let licUser: { email: string; firstName: string; lastName: string } | null = null;
+    if (lic) {
+      const u = await db.select().from(user).where(eq(user.id, lic.userId)).get();
+      if (u) {
+        licUser = { email: u.email, firstName: u.firstName, lastName: u.lastName };
+      }
+    }
+
+    return NextResponse.json({
+      ...key,
+      license: lic ? { ...lic, user: licUser } : null,
+    });
   } catch (error) {
     console.error("[Admin Get License]", error);
     return NextResponse.json(
@@ -48,19 +53,17 @@ export async function DELETE(
   }
   try {
     const { id } = await params;
-    const license = await prisma.licenseKey.findUnique({ where: { id } });
+    const key = await db.select().from(licenseKey).where(eq(licenseKey.id, id)).get();
 
-    if (!license) {
-      return NextResponse.json(
-        { error: "Licença não encontrada" },
-        { status: 404 }
-      );
+    if (!key) {
+      return NextResponse.json({ error: "Licença não encontrada" }, { status: 404 });
     }
 
-    await prisma.licenseKey.update({
-      where: { id },
-      data: { status: "REVOKED" },
-    });
+    await db
+      .update(licenseKey)
+      .set({ status: "REVOKED" })
+      .where(eq(licenseKey.id, id))
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

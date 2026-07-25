@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -9,22 +11,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email obrigatório" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true, isActive: true },
-    });
+    const foundUser = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email))
+      .get();
 
-    if (!user) {
+    if (!foundUser) {
       return NextResponse.json({ error: "Email não encontrado" }, { status: 404 });
     }
 
-    if (!user.isActive) {
+    if (!foundUser.isActive) {
       return NextResponse.json({ error: "Conta desactivada" }, { status: 403 });
     }
 
     return NextResponse.json({ valid: true });
   } catch (error) {
     console.error("[CheckEmail]", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 }
+    );
   }
 }

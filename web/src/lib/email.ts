@@ -1,19 +1,20 @@
-import { prisma } from "./prisma";
+import { db } from "@/db";
+import { emailCode } from "@/db/schema";
+import { eq, and, gt } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 
 const generateCode = customAlphabet("0123456789", 6);
 
 export async function createEmailCode(email: string): Promise<string> {
-  await prisma.emailCode.deleteMany({
-    where: { email, used: false },
-  });
+  await db
+    .delete(emailCode)
+    .where(and(eq(emailCode.email, email), eq(emailCode.used, false)))
+    .run();
 
   const code = generateCode();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-  await prisma.emailCode.create({
-    data: { email, code, expiresAt },
-  });
+  await db.insert(emailCode).values({ email, code, expiresAt }).run();
 
   return code;
 }
@@ -22,21 +23,27 @@ export async function verifyEmailCode(
   email: string,
   code: string
 ): Promise<boolean> {
-  const record = await prisma.emailCode.findFirst({
-    where: {
-      email,
-      code,
-      used: false,
-      expiresAt: { gt: new Date() },
-    },
-  });
+  const record = await db
+    .select()
+    .from(emailCode)
+    .where(
+      and(
+        eq(emailCode.email, email),
+        eq(emailCode.code, code),
+        eq(emailCode.used, false),
+        gt(emailCode.expiresAt, new Date().toISOString())
+      )
+    )
+    .limit(1)
+    .get();
 
   if (!record) return false;
 
-  await prisma.emailCode.update({
-    where: { id: record.id },
-    data: { used: true },
-  });
+  await db
+    .update(emailCode)
+    .set({ used: true })
+    .where(eq(emailCode.id, record.id))
+    .run();
 
   return true;
 }
@@ -46,7 +53,4 @@ export async function sendVerificationEmail(
   code: string
 ): Promise<void> {
   console.log(`[Email] Sending code ${code} to ${email}`);
-
-  // TODO: Integrate with SMTP (nodemailer) when SMTP is configured
-  // For now, just log the code for development
 }

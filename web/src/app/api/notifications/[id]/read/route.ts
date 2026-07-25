@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { notification } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -12,11 +14,13 @@ export async function PUT(
   }
   try {
     const { id } = await params;
-    const notification = await prisma.notification.updateMany({
-      where: { id, userId: session.sub },
-      data: { read: true },
-    });
-    return NextResponse.json({ updated: notification.count });
+    const result = await db
+      .update(notification)
+      .set({ read: true })
+      .where(and(eq(notification.id, id), eq(notification.userId, session.sub)))
+      .run();
+
+    return NextResponse.json({ updated: true });
   } catch (error) {
     console.error("[Notification READ]", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

@@ -44,9 +44,9 @@
 			"binding": "DATABASE_URL_SQLITE",
 			"database_name": "secureit",
 			"database_id": "209ed914-21b8-4bba-bab3-b22a1f1ad2b6",
-		"migrations_dir": "prisma/migrations_sqlite",
+		"migrations_dir": "drizzle",
 		"migrations_table": "d1_migrations",
-		"migrations_pattern": "prisma/migrations_sqlite/*/migration.sql"
+		"migrations_pattern": "drizzle/0[0-9][0-9][0-9]_.*\\.sql"
 		}
 	]
 }

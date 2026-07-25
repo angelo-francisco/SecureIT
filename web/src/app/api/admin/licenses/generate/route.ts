@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { licenseKey } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getAdminSession } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
 
@@ -31,10 +33,7 @@ export async function POST(request: Request) {
     }
 
     if (!["TRIAL", "STANDARD"].includes(type)) {
-      return NextResponse.json(
-        { error: "Tipo inválido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Tipo inválido" }, { status: 400 });
     }
 
     if (quantity > 100) {
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
       let exists = true;
 
       while (exists) {
-        const existing = await prisma.licenseKey.findUnique({ where: { key } });
+        const existing = await db.select().from(licenseKey).where(eq(licenseKey.key, key)).get();
         if (!existing) {
           exists = false;
         } else {
@@ -62,26 +61,28 @@ export async function POST(request: Request) {
         }
       }
 
-      const license = await prisma.licenseKey.create({
-        data: {
+      const created = await db
+        .insert(licenseKey)
+        .values({
           key,
           type,
           durationDays,
           maxCameras: finalMaxCameras,
           maxPeople: finalMaxPeople,
           batchName: batchName || null,
-        },
-      });
+        })
+        .returning()
+        .get();
 
       licenses.push({
-        id: license.id,
-        key: license.key,
-        type: license.type,
-        durationDays: license.durationDays,
-        maxCameras: license.maxCameras,
-        maxPeople: license.maxPeople,
-        batchName: license.batchName,
-        createdAt: license.createdAt,
+        id: created.id,
+        key: created.key,
+        type: created.type,
+        durationDays: created.durationDays,
+        maxCameras: created.maxCameras,
+        maxPeople: created.maxPeople,
+        batchName: created.batchName,
+        createdAt: created.createdAt,
       });
     }
 

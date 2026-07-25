@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user, license, licenseKey } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { POST } from "@/app/api/licenses/activate/route";
 import { generateLicenseKey } from "@/lib/license-key";
+import { generateId } from "@/db/schema";
 
 const TEST_PREFIX = "test_activate";
 
@@ -19,43 +22,47 @@ let testUserId = "";
 let testKeyId = "";
 
 beforeAll(async () => {
-  const pwHash = await await Bun.password.hash("TestPass123!", {
+  const pwHash = await Bun.password.hash("TestPass123!", {
     algorithm: "bcrypt",
-    cost: 10
+    cost: 10,
   });
-  const user = await prisma.user.create({
-    data: {
+  testUserId = generateId();
+  await db
+    .insert(user)
+    .values({
+      id: testUserId,
       email: testUserEmail,
       passwordHash: pwHash,
       firstName: "Test",
       lastName: "Activate",
-    },
-  });
-  testUserId = user.id;
+    })
+    .run();
 
   testKey = generateLicenseKey();
-  const key = await prisma.licenseKey.create({
-    data: {
+  testKeyId = generateId();
+  await db
+    .insert(licenseKey)
+    .values({
+      id: testKeyId,
       key: testKey,
       type: "STANDARD",
       durationDays: 30,
       maxCameras: -1,
       maxPeople: -1,
       status: "PENDING",
-    },
-  });
-  testKeyId = key.id;
+    })
+    .run();
 });
 
 afterAll(async () => {
-  await prisma.license.deleteMany({ where: { userId: testUserId } });
-  await prisma.licenseKey.deleteMany({ where: { id: testKeyId } });
-  await prisma.user.deleteMany({ where: { id: testUserId } });
+  await db.delete(license).where(eq(license.userId, testUserId)).run();
+  await db.delete(licenseKey).where(eq(licenseKey.id, testKeyId)).run();
+  await db.delete(user).where(eq(user.id, testUserId)).run();
 });
 
 beforeEach(async () => {
-  await prisma.license.deleteMany({ where: { userId: testUserId } });
-  await prisma.licenseKey.update({ where: { id: testKeyId }, data: { status: "PENDING" } });
+  await db.delete(license).where(eq(license.userId, testUserId)).run();
+  await db.update(licenseKey).set({ status: "PENDING" }).where(eq(licenseKey.id, testKeyId)).run();
 });
 
 describe("POST /api/licenses/activate", () => {
@@ -115,29 +122,33 @@ describe("POST /api/licenses/activate", () => {
 
   it("nonexistent user returns 404", async () => {
     const newKey = generateLicenseKey();
-    const created = await prisma.licenseKey.create({
-      data: { key: newKey, type: "STANDARD", durationDays: 30 },
-    });
+    const createdId = generateId();
+    await db
+      .insert(licenseKey)
+      .values({ id: createdId, key: newKey, type: "STANDARD", durationDays: 30 })
+      .run();
     try {
       const req = makeRequest({ key: newKey, email: "nobody@example.com" });
       const response = await POST(req);
       expect(response.status).toBe(404);
     } finally {
-      await prisma.licenseKey.delete({ where: { id: created.id } });
+      await db.delete(licenseKey).where(eq(licenseKey.id, createdId)).run();
     }
   });
 
   it("revoked key returns 403", async () => {
     const newKey = generateLicenseKey();
-    const created = await prisma.licenseKey.create({
-      data: { key: newKey, type: "STANDARD", durationDays: 30, status: "REVOKED" },
-    });
+    const createdId = generateId();
+    await db
+      .insert(licenseKey)
+      .values({ id: createdId, key: newKey, type: "STANDARD", durationDays: 30, status: "REVOKED" })
+      .run();
     try {
       const req = makeRequest({ key: newKey, email: testUserEmail });
       const response = await POST(req);
       expect(response.status).toBe(403);
     } finally {
-      await prisma.licenseKey.delete({ where: { id: created.id } });
+      await db.delete(licenseKey).where(eq(licenseKey.id, createdId)).run();
     }
   });
 
@@ -146,15 +157,17 @@ describe("POST /api/licenses/activate", () => {
     await POST(req1);
 
     const secondKey = generateLicenseKey();
-    const secondKeyRecord = await prisma.licenseKey.create({
-      data: { key: secondKey, type: "STANDARD", durationDays: 30, status: "PENDING" },
-    });
+    const secondKeyId = generateId();
+    await db
+      .insert(licenseKey)
+      .values({ id: secondKeyId, key: secondKey, type: "STANDARD", durationDays: 30, status: "PENDING" })
+      .run();
     try {
       const req2 = makeRequest({ key: secondKey, email: testUserEmail, hardwareFp: "hw-002" });
       const response = await POST(req2);
       expect(response.status).toBe(400);
     } finally {
-      await prisma.licenseKey.delete({ where: { id: secondKeyRecord.id } });
+      await db.delete(licenseKey).where(eq(licenseKey.id, secondKeyId)).run();
     }
   });
 
@@ -168,30 +181,19 @@ describe("POST /api/licenses/activate", () => {
 
   it("TRIAL type has correct maxCameras and maxPeople", async () => {
     const trialUserEmail = `${TEST_PREFIX}_trial_${Date.now()}@example.com`;
-    const pwHash = await await Bun.password.hash("TestPass123!", {
-    algorithm: "bcrypt",
-    cost: 10
-  });
-    const trialUser = await prisma.user.create({
-      data: {
-        email: trialUserEmail,
-        passwordHash: pwHash,
-        firstName: "Trial",
-        lastName: "User",
-      },
-    });
+    const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+    const trialUserId = generateId();
+    await db
+      .insert(user)
+      .values({ id: trialUserId, email: trialUserEmail, passwordHash: pwHash, firstName: "Trial", lastName: "User" })
+      .run();
 
     const trialKey = generateLicenseKey();
-    const trialKeyRecord = await prisma.licenseKey.create({
-      data: {
-        key: trialKey,
-        type: "TRIAL",
-        durationDays: 7,
-        maxCameras: 1,
-        maxPeople: 10,
-        status: "PENDING",
-      },
-    });
+    const trialKeyId = generateId();
+    await db
+      .insert(licenseKey)
+      .values({ id: trialKeyId, key: trialKey, type: "TRIAL", durationDays: 7, maxCameras: 1, maxPeople: 10, status: "PENDING" })
+      .run();
 
     try {
       const req = makeRequest({ key: trialKey, email: trialUserEmail, hardwareFp: "trial-hw" });
@@ -204,9 +206,9 @@ describe("POST /api/licenses/activate", () => {
       expect(data.maxPeople).toBe(10);
       expect(data.features).toEqual([]);
     } finally {
-      await prisma.license.deleteMany({ where: { userId: trialUser.id } });
-      await prisma.licenseKey.delete({ where: { id: trialKeyRecord.id } });
-      await prisma.user.delete({ where: { id: trialUser.id } });
+      await db.delete(license).where(eq(license.userId, trialUserId)).run();
+      await db.delete(licenseKey).where(eq(licenseKey.id, trialKeyId)).run();
+      await db.delete(user).where(eq(user.id, trialUserId)).run();
     }
   });
 });

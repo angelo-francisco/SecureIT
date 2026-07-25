@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { verifyEmailCode } from "@/lib/email";
 import { createToken, setTokenCookies } from "@/lib/auth";
 
@@ -22,34 +24,37 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    const foundUser = await db.select().from(user).where(eq(user.email, email)).get();
+    if (!foundUser) {
       return NextResponse.json(
         { error: "Utilizador não encontrado" },
         { status: 404 }
       );
     }
 
-    if (!user.isActive) {
-      return NextResponse.json(
-        { error: "Conta desativada" },
-        { status: 403 }
-      );
+    if (!foundUser.isActive) {
+      return NextResponse.json({ error: "Conta desativada" }, { status: 403 });
     }
 
-    const accessToken = await createToken({ sub: user.id, email: user.email }, "access");
-    const refreshToken = await createToken({ sub: user.id, email: user.email }, "refresh");
+    const accessToken = await createToken(
+      { sub: foundUser.id, email: foundUser.email },
+      "access"
+    );
+    const refreshToken = await createToken(
+      { sub: foundUser.id, email: foundUser.email },
+      "refresh"
+    );
 
     const body = {
       access_token: accessToken,
       user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        totpEnabled: user.totpEnabled,
-        createdAt: user.createdAt,
+        id: foundUser.id,
+        email: foundUser.email,
+        firstName: foundUser.firstName,
+        lastName: foundUser.lastName,
+        phone: foundUser.phone,
+        totpEnabled: foundUser.totpEnabled,
+        createdAt: foundUser.createdAt,
       },
     };
 

@@ -8,12 +8,8 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || "x4$n!bnme4(khao6sy@8t*x&d1jn
 process.env.ED25519_PRIVATE_KEY_PATH = privateKeyPath;
 process.env.ED25519_PUBLIC_KEY_PATH = publicKeyPath;
 
-const { PrismaClient: TestPrismaClient } = await import("../generated/prisma-node/client");
+const { db: testDb } = await import("./helpers/db");
 
-const testPrisma = new TestPrismaClient({
-  datasourceUrl: process.env.DATABASE_URL_SQLITE,
-});
-
-vi.mock("@/lib/prisma", () => ({
-  prisma: testPrisma,
+vi.mock("@/db", () => ({
+  db: testDb,
 }));

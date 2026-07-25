@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { subProfile, license, licenseKey } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -14,18 +16,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const profiles = await prisma.subProfile.findMany({
-      where: { userId: session.sub },
-      orderBy: { createdAt: "asc" },
-      select: {
-        id: true,
-        name: true,
-        avatarColor: true,
-        isDefault: true,
-        createdAt: true,
-        pinHash: true,
-      },
-    });
+    const profiles = await db
+      .select()
+      .from(subProfile)
+      .where(eq(subProfile.userId, session.sub))
+      .all();
+
     return NextResponse.json(
       profiles.map((p) => ({
         id: p.id,
@@ -59,43 +55,57 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "O PIN deve conter 4 dígitos" }, { status: 400 });
     }
 
-    const count = await prisma.subProfile.count({
-      where: { userId: session.sub },
-    });
+    const countResult = await db.all<{ count: number }>(
+      sql`SELECT count(*) as "count" FROM ${subProfile} WHERE ${eq(subProfile.userId, session.sub)}`
+    );
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.sub },
-      include: { license: { include: { key: true } } },
-    });
+    const profileCount = countResult?.[0]?.count ?? 0;
 
-    const licenseType = user?.license?.key?.type?.toLowerCase() ?? "basic";
+    const userLicense = await db
+      .select()
+      .from(license)
+      .where(eq(license.userId, session.sub))
+      .get();
+
+    let licenseType = "basic";
+    if (userLicense) {
+      const keyRow = await db
+        .select()
+        .from(licenseKey)
+        .where(eq(licenseKey.id, userLicense.keyId))
+        .get();
+      licenseType = keyRow?.type?.toLowerCase() ?? "basic";
+    }
     const maxProfiles = PROFILE_LIMITS[licenseType] ?? 2;
 
-    if (count >= maxProfiles) {
+    if (profileCount >= maxProfiles) {
       return NextResponse.json(
         { error: `Máximo de ${maxProfiles} perfis para o plano ${licenseType}` },
         { status: 400 }
       );
     }
 
-    const profile = await prisma.subProfile.create({
-      data: {
+    const pinHash = pin
+      ? await Bun.password.hash(pin, { algorithm: "bcrypt", cost: 12 })
+      : null;
+
+    const created = await db
+      .insert(subProfile)
+      .values({
         userId: session.sub,
         name: name.trim(),
         avatarColor: avatarColor || "#2C9ED5",
-        pinHash: pin ? await Bun.password.hash(pin, {
-  algorithm: "bcrypt",
-  cost: 12
-}); : null,
-      },
-    });
+        pinHash,
+      })
+      .returning()
+      .get();
 
     return NextResponse.json({
-      id: profile.id,
-      name: profile.name,
-      avatarColor: profile.avatarColor,
-      isDefault: profile.isDefault,
-      hasPin: !!profile.pinHash,
+      id: created.id,
+      name: created.name,
+      avatarColor: created.avatarColor,
+      isDefault: created.isDefault,
+      hasPin: !!created.pinHash,
     });
   } catch (error) {
     console.error("[Profiles POST]", error);

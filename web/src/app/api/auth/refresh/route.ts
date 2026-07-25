@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyRefreshToken, createToken } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST() {
   try {
@@ -14,11 +16,17 @@ export async function POST() {
 
     const payload = await verifyRefreshToken(refreshToken);
     if (!payload) {
-      return NextResponse.json({ error: "Refresh token inválido" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Refresh token inválido" },
+        { status: 401 }
+      );
     }
 
     if (payload.sub === "admin") {
-      const newAccessToken = await createToken({ sub: "admin", email: payload.email }, "access");
+      const newAccessToken = await createToken(
+        { sub: "admin", email: payload.email },
+        "access"
+      );
       const response = NextResponse.json({ access_token: newAccessToken });
       response.cookies.set("admin_token", newAccessToken, {
         httpOnly: true,
@@ -30,8 +38,12 @@ export async function POST() {
       return response;
     }
 
-    const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || !user.isActive) {
+    const foundUser = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, payload.sub))
+      .get();
+    if (!foundUser || !foundUser.isActive) {
       return NextResponse.json({ error: "Conta desativada" }, { status: 401 });
     }
 

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@/packages/ui"],
-  serverExternalPackages: ["@prisma/client", ".prisma/client"],
+  serverExternalPackages: ["better-sqlite3"],
   images: {
     remotePatterns: [
       {

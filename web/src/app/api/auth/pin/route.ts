@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
@@ -20,31 +22,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.pinHash) {
-      return NextResponse.json(
-        { error: "PIN incorrecto" },
-        { status: 401 }
-      );
+    const foundUser = await db.select().from(user).where(eq(user.email, email)).get();
+    if (!foundUser || !foundUser.pinHash) {
+      return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
     }
 
-    if (!user.isActive) {
-      return NextResponse.json(
-        { error: "Conta desativada" },
-        { status: 403 }
-      );
+    if (!foundUser.isActive) {
+      return NextResponse.json({ error: "Conta desativada" }, { status: 403 });
     }
 
-    const validPin = await Bun.password.verify(pin, user.pinHash);
+    const validPin = await Bun.password.verify(pin, foundUser.pinHash);
     if (!validPin) {
-      return NextResponse.json(
-        { error: "PIN incorrecto" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
     }
 
     const pinToken = await createToken(
-      { sub: user.id, email: user.email },
+      { sub: foundUser.id, email: foundUser.email },
       "access"
     );
 

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createEmailCode, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
@@ -13,8 +15,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    const foundUser = await db.select().from(user).where(eq(user.email, email)).get();
+    if (!foundUser) {
       return NextResponse.json(
         { error: "Email não registado" },
         { status: 404 }

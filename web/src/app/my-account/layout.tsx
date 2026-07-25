@@ -1,5 +1,7 @@
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 
@@ -13,16 +15,13 @@ export default async function MyAccountLayout({
     redirect("/login");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.sub },
-    select: {
-      firstName: true,
-      lastName: true,
-      email: true,
-    },
-  });
+  const foundUser = await db
+    .select()
+    .from(user)
+    .where(eq(user.id, session.sub))
+    .get();
 
-  if (!user) {
+  if (!foundUser) {
     redirect("/login");
   }
 

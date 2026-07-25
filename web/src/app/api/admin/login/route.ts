@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createToken } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { adminUser } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.adminUser.findUnique({ where: { email } });
+    const user = await db.select().from(adminUser).where(eq(adminUser.email, email)).get();
     if (!user) {
       return NextResponse.json(
         { error: "Email ou palavra-passe incorrectos" },
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const token = await createToken({ sub: "admin", email: email });
+    const token = await createToken({ sub: "admin", email });
 
     const response = NextResponse.json({ success: true });
     response.cookies.set("admin_token", token, {

@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { subProfile } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -14,33 +16,38 @@ export async function PUT(
     const { id } = await params;
     const body = (await request.json()) as any;
 
-    const profile = await prisma.subProfile.findUnique({ where: { id } });
+    const profile = await db
+      .select()
+      .from(subProfile)
+      .where(eq(subProfile.id, id))
+      .get();
     if (!profile || profile.userId !== session.sub) {
       return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
     }
 
-    const data: Record<string, unknown> = {};
-
-    if (body.name?.trim()) data.name = body.name.trim();
-    if (body.avatarColor) data.avatarColor = body.avatarColor;
+    const updates: Record<string, unknown> = {};
+    if (body.name?.trim()) updates.name = body.name.trim();
+    if (body.avatarColor) updates.avatarColor = body.avatarColor;
 
     if (body.pin !== undefined) {
       if (body.pin === null || body.pin === "") {
-        data.pinHash = null;
+        updates.pinHash = null;
       } else if (typeof body.pin === "string" && /^\d{4}$/.test(body.pin)) {
-        data.pinHash = await Bun.password.hash(body.pin, {
-  algorithm: "bcrypt",
-  cost: 12
-});
+        updates.pinHash = await Bun.password.hash(body.pin, {
+          algorithm: "bcrypt",
+          cost: 12,
+        });
       } else {
         return NextResponse.json({ error: "O PIN deve conter 4 dígitos" }, { status: 400 });
       }
     }
 
-    const updated = await prisma.subProfile.update({
-      where: { id },
-      data,
-    });
+    const updated = await db
+      .update(subProfile)
+      .set(updates)
+      .where(eq(subProfile.id, id))
+      .returning()
+      .get();
 
     return NextResponse.json({
       id: updated.id,
@@ -66,16 +73,23 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const profile = await prisma.subProfile.findUnique({ where: { id } });
+    const profile = await db
+      .select()
+      .from(subProfile)
+      .where(eq(subProfile.id, id))
+      .get();
     if (!profile || profile.userId !== session.sub) {
       return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
     }
 
     if (profile.isDefault) {
-      return NextResponse.json({ error: "Não é possível eliminar o perfil principal" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Não é possível eliminar o perfil principal" },
+        { status: 400 }
+      );
     }
 
-    await prisma.subProfile.delete({ where: { id } });
+    await db.delete(subProfile).where(eq(subProfile.id, id)).run();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[Profile DELETE]", error);

@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user, license, licenseKey } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { POST } from "@/app/api/licenses/heartbeat/route";
 import { generateLicenseKey } from "@/lib/license-key";
+import { generateId } from "@/db/schema";
 
 const TEST_PREFIX = "test_heartbeat";
 
@@ -21,50 +24,31 @@ let testKey = "";
 
 beforeAll(async () => {
   testEmail = `${TEST_PREFIX}_user_${Date.now()}@example.com`;
-  const pwHash = await await Bun.password.hash("TestPass123!", {
-    algorithm: "bcrypt",
-    cost: 10
-  }); 
-  const user = await prisma.user.create({
-    data: {
-      email: testEmail,
-      passwordHash: pwHash,
-      firstName: "Heartbeat",
-      lastName: "Test",
-    },
-  });
-  userId = user.id;
+  const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+  userId = generateId();
+  await db.insert(user).values({
+    id: userId, email: testEmail, passwordHash: pwHash, firstName: "Heartbeat", lastName: "Test",
+  }).run();
 
   testKey = generateLicenseKey();
-  const futureExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-  const now = new Date();
+  keyId = generateId();
+  const now = new Date().toISOString();
+  const futureExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const key = await prisma.licenseKey.create({
-    data: {
-      key: testKey,
-      type: "STANDARD",
-      durationDays: 30,
-      status: "ACTIVE",
-    },
-  });
-  keyId = key.id;
+  await db.insert(licenseKey).values({
+    id: keyId, key: testKey, type: "STANDARD", durationDays: 30, status: "ACTIVE",
+  }).run();
 
-  const license = await prisma.license.create({
-    data: {
-      keyId: key.id,
-      userId: user.id,
-      activatedAt: now,
-      expiresAt: futureExpiry,
-      hardwareFp: "test-hw-fp",
-    },
-  });
-  licenseId = license.id;
+  licenseId = generateId();
+  await db.insert(license).values({
+    id: licenseId, keyId, userId, activatedAt: now, expiresAt: futureExpiry, hardwareFp: "test-hw-fp",
+  }).run();
 });
 
 afterAll(async () => {
-  await prisma.license.deleteMany({ where: { userId } });
-  await prisma.licenseKey.deleteMany({ where: { id: keyId } });
-  await prisma.user.deleteMany({ where: { id: userId } });
+  await db.delete(license).where(eq(license.userId, userId)).run();
+  await db.delete(licenseKey).where(eq(licenseKey.id, keyId)).run();
+  await db.delete(user).where(eq(user.id, userId)).run();
 });
 
 describe("POST /api/licenses/heartbeat", () => {
@@ -100,41 +84,36 @@ describe("POST /api/licenses/heartbeat", () => {
 
   it("revoked key returns valid=false with revoked=true", async () => {
     const revokedUserEmail = `${TEST_PREFIX}_revoked_${Date.now()}@example.com`;
-    const pwHash = await Bun.password.hash("TestPass123!", {
-    algorithm: "bcrypt",
-    cost: 10
-  }); 
-    const revokedUser = await prisma.user.create({
-      data: { email: revokedUserEmail, passwordHash: pwHash, firstName: "Rev", lastName: "User" },
-    });
+    const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+    const revokedUserId = generateId();
+    await db.insert(user).values({
+      id: revokedUserId, email: revokedUserEmail, passwordHash: pwHash, firstName: "Rev", lastName: "User",
+    }).run();
 
     const revokedKey = generateLicenseKey();
-    const revokedKeyRecord = await prisma.licenseKey.create({
-      data: { key: revokedKey, type: "STANDARD", durationDays: 30, status: "REVOKED" },
-    });
+    const revokedKeyId = generateId();
+    await db.insert(licenseKey).values({
+      id: revokedKeyId, key: revokedKey, type: "STANDARD", durationDays: 30, status: "REVOKED",
+    }).run();
 
-    const futureExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const revokedLicense = await prisma.license.create({
-      data: {
-        keyId: revokedKeyRecord.id,
-        userId: revokedUser.id,
-        activatedAt: new Date(),
-        expiresAt: futureExpiry,
-        hardwareFp: "some-hw",
-      },
-    });
+    const futureExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const revokedLicenseId = generateId();
+    await db.insert(license).values({
+      id: revokedLicenseId, keyId: revokedKeyId, userId: revokedUserId,
+      activatedAt: new Date().toISOString(), expiresAt: futureExpiry, hardwareFp: "some-hw",
+    }).run();
 
     try {
-      const req = makeRequest({ licenseId: revokedLicense.id });
+      const req = makeRequest({ licenseId: revokedLicenseId });
       const response = await POST(req);
       const data = await response.json();
 
       expect(data.valid).toBe(false);
       expect(data.revoked).toBe(true);
     } finally {
-      await prisma.license.delete({ where: { id: revokedLicense.id } });
-      await prisma.licenseKey.delete({ where: { id: revokedKeyRecord.id } });
-      await prisma.user.delete({ where: { id: revokedUser.id } });
+      await db.delete(license).where(eq(license.id, revokedLicenseId)).run();
+      await db.delete(licenseKey).where(eq(licenseKey.id, revokedKeyId)).run();
+      await db.delete(user).where(eq(user.id, revokedUserId)).run();
     }
   });
 
@@ -149,40 +128,37 @@ describe("POST /api/licenses/heartbeat", () => {
 
   it("expired license returns valid=false", async () => {
     const expiredUserEmail = `${TEST_PREFIX}_expired_${Date.now()}@example.com`;
-    const pwHash = await await Bun.password.hash("TestPass123!", {
-    algorithm: "bcrypt",
-    cost: 10
-  });     const expiredUser = await prisma.user.create({
-      data: { email: expiredUserEmail, passwordHash: pwHash, firstName: "Exp", lastName: "User" },
-    });
+    const pwHash = await Bun.password.hash("TestPass123!", { algorithm: "bcrypt", cost: 10 });
+    const expiredUserId = generateId();
+    await db.insert(user).values({
+      id: expiredUserId, email: expiredUserEmail, passwordHash: pwHash, firstName: "Exp", lastName: "User",
+    }).run();
 
     const expiredKey = generateLicenseKey();
-    const expiredKeyRecord = await prisma.licenseKey.create({
-      data: { key: expiredKey, type: "STANDARD", durationDays: 1, status: "ACTIVE" },
-    });
+    const expiredKeyId = generateId();
+    await db.insert(licenseKey).values({
+      id: expiredKeyId, key: expiredKey, type: "STANDARD", durationDays: 1, status: "ACTIVE",
+    }).run();
 
-    const pastExpiry = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-    const expiredLicense = await prisma.license.create({
-      data: {
-        keyId: expiredKeyRecord.id,
-        userId: expiredUser.id,
-        activatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        expiresAt: pastExpiry,
-        hardwareFp: "some-hw",
-      },
-    });
+    const pastExpiry = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+    const expiredLicenseId = generateId();
+    await db.insert(license).values({
+      id: expiredLicenseId, keyId: expiredKeyId, userId: expiredUserId,
+      activatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: pastExpiry, hardwareFp: "some-hw",
+    }).run();
 
     try {
-      const req = makeRequest({ licenseId: expiredLicense.id });
+      const req = makeRequest({ licenseId: expiredLicenseId });
       const response = await POST(req);
       const data = await response.json();
 
       expect(data.valid).toBe(false);
       expect(data.isActive).toBe(false);
     } finally {
-      await prisma.license.delete({ where: { id: expiredLicense.id } });
-      await prisma.licenseKey.delete({ where: { id: expiredKeyRecord.id } });
-      await prisma.user.delete({ where: { id: expiredUser.id } });
+      await db.delete(license).where(eq(license.id, expiredLicenseId)).run();
+      await db.delete(licenseKey).where(eq(licenseKey.id, expiredKeyId)).run();
+      await db.delete(user).where(eq(user.id, expiredUserId)).run();
     }
   });
 

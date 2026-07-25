@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { verifyTOTP } from "@/lib/totp";
-import { createToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { code, email } = (await request.json()) as any;
+    const { code } = (await request.json()) as any;
 
     if (!code) {
       return NextResponse.json(
@@ -20,37 +21,33 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.sub },
-    });
+    const foundUser = await db.select().from(user).where(eq(user.id, session.sub)).get();
 
-    if (!user) {
+    if (!foundUser) {
       return NextResponse.json(
         { error: "Utilizador não encontrado" },
         { status: 404 }
       );
     }
 
-    if (!user.totpSecret) {
+    if (!foundUser.totpSecret) {
       return NextResponse.json(
         { error: "TOTP não está configurado" },
         { status: 400 }
       );
     }
 
-    const valid = verifyTOTP(user.totpSecret, code);
+    const valid = verifyTOTP(foundUser.totpSecret, code);
     if (!valid) {
-      return NextResponse.json(
-        { error: "Código inválido" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Código inválido" }, { status: 401 });
     }
 
-    if (!user.totpEnabled) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { totpEnabled: true },
-      });
+    if (!foundUser.totpEnabled) {
+      await db
+        .update(user)
+        .set({ totpEnabled: true })
+        .where(eq(user.id, foundUser.id))
+        .run();
     }
 
     return NextResponse.json({ success: true });

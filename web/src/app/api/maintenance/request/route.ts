@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { maintenanceRequest, license, paymentRequest } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -19,38 +21,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Descrição em falta" }, { status: 400 });
     }
 
-    const license = await prisma.license.findFirst({
-      where: {
-        id: licenseId,
-        userId: session.sub,
-        status: "ACTIVE",
-        expiresAt: { gt: new Date() },
-      },
-    });
+    const now = new Date().toISOString();
+    const lic = await db
+      .select()
+      .from(license)
+      .where(
+        and(
+          eq(license.id, licenseId),
+          eq(license.userId, session.sub),
+          eq(license.status, "ACTIVE")
+        )
+      )
+      .get();
 
-    if (!license) {
-      return NextResponse.json({ error: "Licença inválida ou inativa" }, { status: 400 });
+    if (!lic || new Date(lic.expiresAt) <= new Date()) {
+      return NextResponse.json(
+        { error: "Licença inválida ou inativa" },
+        { status: 400 }
+      );
     }
 
-    const hasPaidLicense = await prisma.paymentRequest.findFirst({
-      where: {
-        userId: session.sub,
-        status: "APPROVED",
-      },
-    });
+    const hasPaidLicense = await db
+      .select()
+      .from(paymentRequest)
+      .where(
+        and(eq(paymentRequest.userId, session.sub), eq(paymentRequest.status, "APPROVED"))
+      )
+      .limit(1)
+      .get();
 
-    const maintenance = await prisma.maintenanceRequest.create({
-      data: {
+    const created = await db
+      .insert(maintenanceRequest)
+      .values({
         userId: session.sub,
         licenseId,
         description,
         hasPaidLicense: !!hasPaidLicense,
         ...(proofPublicId && { proofPublicId }),
         ...(proofUrl && { proofUrl }),
-      },
-    });
+      })
+      .returning()
+      .get();
 
-    return NextResponse.json(maintenance);
+    return NextResponse.json(created);
   } catch (error) {
     console.error("[Maintenance Request]", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

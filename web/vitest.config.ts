@@ -14,7 +14,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@/generated/prisma": path.resolve(__dirname, "./src/generated/prisma-node"),
     },
   },
 });

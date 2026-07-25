@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { paymentInfo } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 
@@ -8,7 +10,12 @@ export async function GET() {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const info = await prisma.paymentInfo.findFirst({ where: { isActive: true } });
+    const info = await db
+      .select()
+      .from(paymentInfo)
+      .where(eq(paymentInfo.isActive, true))
+      .limit(1)
+      .get();
     return NextResponse.json(info || null);
   } catch (error) {
     console.error("[Admin PaymentInfo GET]", error);
@@ -26,22 +33,34 @@ export async function PUT(request: Request) {
     const { iban, accountName, bankName, reference } = body;
 
     if (!iban || !accountName) {
-      return NextResponse.json({ error: "IBAN e nome da conta são obrigatórios" }, { status: 400 });
+      return NextResponse.json(
+        { error: "IBAN e nome da conta são obrigatórios" },
+        { status: 400 }
+      );
     }
 
-    const existing = await prisma.paymentInfo.findFirst({ where: { isActive: true } });
+    const existing = await db
+      .select()
+      .from(paymentInfo)
+      .where(eq(paymentInfo.isActive, true))
+      .limit(1)
+      .get();
 
     if (existing) {
-      const updated = await prisma.paymentInfo.update({
-        where: { id: existing.id },
-        data: { iban, accountName, bankName, reference },
-      });
+      const updated = await db
+        .update(paymentInfo)
+        .set({ iban, accountName, bankName, reference })
+        .where(eq(paymentInfo.id, existing.id))
+        .returning()
+        .get();
       return NextResponse.json(updated);
     }
 
-    const created = await prisma.paymentInfo.create({
-      data: { iban, accountName, bankName, reference },
-    });
+    const created = await db
+      .insert(paymentInfo)
+      .values({ iban, accountName, bankName, reference })
+      .returning()
+      .get();
     return NextResponse.json(created);
   } catch (error) {
     console.error("[Admin PaymentInfo PUT]", error);

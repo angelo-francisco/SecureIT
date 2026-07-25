@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createToken, setTokenCookies } from "@/lib/auth";
+import { generateId } from "@/db/schema";
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await db.select().from(user).where(eq(user.email, email)).get();
     if (existing) {
       return NextResponse.json(
         { error: "Email já registado" },
@@ -37,45 +40,71 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await Bun.password.hash(password, {
-  algorithm: "bcrypt",
-  cost: 12
-});
-    const pinHash = pin ? await Bun.password.hash(pin, {
-  algorithm: "bcrypt",
-  cost: 12
-}); : null;
+      algorithm: "bcrypt",
+      cost: 12,
+    });
+    const pinHash = pin
+      ? await Bun.password.hash(pin, {
+          algorithm: "bcrypt",
+          cost: 12,
+        })
+      : null;
 
-    const user = await prisma.user.create({
-      data: {
+    const userId = generateId();
+    const profileId = generateId();
+    const now = new Date().toISOString();
+
+    await db
+      .insert(user)
+      .values({
+        id: userId,
         email,
         passwordHash,
         pinHash,
         firstName,
         lastName,
         phone: phone || null,
-        profiles: {
-          create: {
-            name: firstName,
-            avatarColor: "#2C9ED5",
-            isDefault: true,
-          },
-        },
-      },
-    });
+        createdAt: now,
+      })
+      .run();
 
-    const accessToken = await createToken({ sub: user.id, email: user.email }, "access");
-    const refreshToken = await createToken({ sub: user.id, email: user.email }, "refresh");
+    const { subProfile } = await import("@/db/schema");
+    await db
+      .insert(subProfile)
+      .values({
+        id: profileId,
+        userId,
+        name: firstName,
+        avatarColor: "#2C9ED5",
+        isDefault: true,
+        createdAt: now,
+      })
+      .run();
+
+    const createdUser = await db.select().from(user).where(eq(user.id, userId)).get();
+    if (!createdUser) {
+      return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    }
+
+    const accessToken = await createToken(
+      { sub: createdUser.id, email: createdUser.email },
+      "access"
+    );
+    const refreshToken = await createToken(
+      { sub: createdUser.id, email: createdUser.email },
+      "refresh"
+    );
 
     const body = {
       access_token: accessToken,
       user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        totpEnabled: user.totpEnabled,
-        createdAt: user.createdAt,
+        id: createdUser.id,
+        email: createdUser.email,
+        firstName: createdUser.firstName,
+        lastName: createdUser.lastName,
+        phone: createdUser.phone,
+        totpEnabled: createdUser.totpEnabled,
+        createdAt: createdUser.createdAt,
       },
     };
 

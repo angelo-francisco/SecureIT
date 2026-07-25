@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { notification } from "@/db/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -8,17 +10,19 @@ export async function GET() {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   try {
-    const notifications = await prisma.notification.findMany({
-      where: { userId: session.sub },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    });
+    const notifications = await db
+      .select()
+      .from(notification)
+      .where(eq(notification.userId, session.sub))
+      .orderBy(desc(notification.createdAt))
+      .limit(50)
+      .all();
 
-    const unreadCount = await prisma.notification.count({
-      where: { userId: session.sub, read: false },
-    });
+    const unreadResult = await db.all<{ count: number }>(
+      sql`SELECT count(*) as "count" FROM ${notification} WHERE ${eq(notification.userId, session.sub)} AND ${eq(notification.read, false)}`
+    );
 
-    return NextResponse.json({ notifications, unreadCount });
+    return NextResponse.json({ notifications, unreadCount: unreadResult?.[0]?.count ?? 0 });
   } catch (error) {
     console.error("[Notifications GET]", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

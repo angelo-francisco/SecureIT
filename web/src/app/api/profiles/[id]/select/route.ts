@@ -1,4 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { subProfile } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -12,10 +14,14 @@ export async function POST(
   }
   try {
     const { id } = await params;
-    const body = await request.json();
+    const body = (await request.json()) as { pin?: string };
     const { pin } = body;
 
-    const profile = await prisma.subProfile.findUnique({ where: { id } });
+    const profile = await db
+      .select()
+      .from(subProfile)
+      .where(eq(subProfile.id, id))
+      .get();
     if (!profile || profile.userId !== session.sub) {
       return NextResponse.json({ error: "Perfil não encontrado" }, { status: 404 });
     }

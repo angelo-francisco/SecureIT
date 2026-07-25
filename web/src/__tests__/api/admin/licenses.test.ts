@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { adminUser, licenseKey } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createToken } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
+import { generateId } from "@/db/schema";
 
 let adminToken = "";
 let adminUserId = "";
@@ -31,19 +34,17 @@ function makeAdminRequest(url: string, options?: { method?: string; body?: any }
 }
 
 beforeAll(async () => {
-  const pwHash = await await Bun.password.hash(ADMIN_PASSWORD, {
-    algorithm: "bcrypt",
-    cost: 10
-  }); 
-  const admin = await prisma.adminUser.create({
-    data: { email: ADMIN_EMAIL, passwordHash: pwHash },
-  });
-  adminUserId = admin.id;
+  const pwHash = await Bun.password.hash(ADMIN_PASSWORD, { algorithm: "bcrypt", cost: 10 });
+  adminUserId = generateId();
+  await db
+    .insert(adminUser)
+    .values({ id: adminUserId, email: ADMIN_EMAIL, passwordHash: pwHash })
+    .run();
   adminToken = await createToken({ sub: "admin", email: ADMIN_EMAIL }, "access");
 });
 
 afterAll(async () => {
-  await prisma.adminUser.deleteMany({ where: { id: adminUserId } });
+  await db.delete(adminUser).where(eq(adminUser.id, adminUserId)).run();
 });
 
 const testLicenseKeys: string[] = [];
@@ -167,24 +168,26 @@ describe("DELETE /api/admin/licenses/[id]", () => {
     const { DELETE: licenseDelete } = await import("@/app/api/admin/licenses/[id]/route");
 
     const newKey = generateLicenseKey();
-    const created = await prisma.licenseKey.create({
-      data: { key: newKey, type: "STANDARD", durationDays: 30 },
-    });
+    const createdId = generateId();
+    await db
+      .insert(licenseKey)
+      .values({ id: createdId, key: newKey, type: "STANDARD", durationDays: 30 })
+      .run();
 
     try {
-      const req = makeAdminRequest(`http://localhost/api/admin/licenses/${created.id}`, {
+      const req = makeAdminRequest(`http://localhost/api/admin/licenses/${createdId}`, {
         method: "DELETE",
       });
-      const response = await licenseDelete(req, { params: Promise.resolve({ id: created.id }) });
+      const response = await licenseDelete(req, { params: Promise.resolve({ id: createdId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
 
-      const updated = await prisma.licenseKey.findUnique({ where: { id: created.id } });
+      const updated = await db.select().from(licenseKey).where(eq(licenseKey.id, createdId)).get();
       expect(updated!.status).toBe("REVOKED");
     } finally {
-      await prisma.licenseKey.delete({ where: { id: created.id } });
+      await db.delete(licenseKey).where(eq(licenseKey.id, createdId)).run();
     }
   });
 

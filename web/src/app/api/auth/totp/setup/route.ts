@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { createTOTP, getTOTPUri } from "@/lib/totp";
 
@@ -10,32 +12,31 @@ export async function POST() {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.sub },
-    });
+    const foundUser = await db.select().from(user).where(eq(user.id, session.sub)).get();
 
-    if (!user) {
+    if (!foundUser) {
       return NextResponse.json(
         { error: "Utilizador não encontrado" },
         { status: 404 }
       );
     }
 
-    if (user.totpEnabled) {
+    if (foundUser.totpEnabled) {
       return NextResponse.json(
         { error: "TOTP já está configurado" },
         { status: 400 }
       );
     }
 
-    const totp = createTOTP(user.email);
+    const totp = createTOTP(foundUser.email);
     const secret = totp.secret.base32;
     const uri = getTOTPUri(totp);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { totpSecret: secret },
-    });
+    await db
+      .update(user)
+      .set({ totpSecret: secret })
+      .where(eq(user.id, foundUser.id))
+      .run();
 
     return NextResponse.json({ secret, uri });
   } catch (error) {

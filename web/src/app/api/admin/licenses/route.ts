@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/db";
+import { licenseKey, license } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET(request: Request) {
@@ -13,26 +15,40 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const status = searchParams.get("status") || undefined;
 
-    const where: Record<string, unknown> = {};
-    if (status) where.status = status;
+    const conditions = status ? eq(licenseKey.status, status) : undefined;
 
-    const [licenses, total] = await Promise.all([
-      prisma.licenseKey.findMany({
-        where,
-        include: {
-          license: {
-            include: { user: { select: { email: true, firstName: true, lastName: true } } },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.licenseKey.count({ where }),
-    ]);
+    const keys = await db
+      .select()
+      .from(licenseKey)
+      .where(conditions)
+      .orderBy(desc(licenseKey.createdAt))
+      .limit(limit)
+      .offset((page - 1) * limit)
+      .all();
+
+    const countResult = await db.all<{ count: number }>(
+      sql`SELECT count(*) as "count" FROM ${licenseKey}${conditions ? sql` WHERE ${conditions}` : sql``}`
+    );
+
+    const total = Number(countResult?.[0]?.count ?? 0);
+
+    const keysWithLicenses = await Promise.all(
+      keys.map(async (key) => {
+        const lic = await db
+          .select()
+          .from(license)
+          .where(eq(license.keyId, key.id))
+          .get();
+
+        return {
+          ...key,
+          license: lic || null,
+        };
+      })
+    );
 
     return NextResponse.json({
-      licenses,
+      licenses: keysWithLicenses,
       pagination: {
         page,
         limit,
