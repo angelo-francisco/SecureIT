@@ -6,7 +6,6 @@
       "name": "secureit-web",
       "dependencies": {
         "@paralleldrive/cuid2": "^3.3.0",
-        "better-sqlite3": "^13.0.1",
         "class-variance-authority": "^0.7.1",
         "cloudinary": "^2.10.0",
         "clsx": "^2.1.1",
@@ -30,7 +29,6 @@
       "devDependencies": {
         "@biomejs/biome": "2.5.5",
         "@opennextjs/cloudflare": "^1.20.1",
-        "@types/better-sqlite3": "^7.6.13",
         "@types/bun": "^1.3.14",
         "@types/node": "^22.0.0",
         "@types/qrcode": "^1.5.5",

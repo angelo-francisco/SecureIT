@@ -1,4 +1,4 @@
-# name: Deploy Web
+# name: Pre-Deploy Actions
 
 # on:
 #   push:
@@ -15,23 +15,6 @@
 #     steps:
 #       - name: Checkout Repository
 #         uses: actions/checkout@v4
-
-#       - name: Setup Bun
-#         uses: oven-sh/setup-bun@v2
-#         with:
-#           bun-version: 1.3.14
-
-#       - name: Install dependencies
-#         run: bun install --frozen-lockfile
-#         working-directory: web
-
-#       - name: Build Next.js
-#         run: bunx --bun next build
-#         working-directory: web
-
-#       - name: Build for Cloudflare
-#         run: bunx opennextjs-cloudflare build
-#         working-directory: web
 
 #       - name: Apply D1 Migrations
 #         run: bunx wrangler d1 migrations apply secureit --remote
