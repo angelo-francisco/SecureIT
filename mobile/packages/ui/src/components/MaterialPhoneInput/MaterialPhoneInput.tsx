@@ -106,16 +106,16 @@ function CountrySelect({ value, onChange }: { value?: string; onChange: (v: stri
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-1 h-8 text-text hover:bg-surface-hover transition-colors rounded"
+        className="flex items-center gap-1.5 px-1 h-8 text-text hover:bg-surface-hover transition-colors"
       >
-        {Flag && <span className="inline-flex w-5 h-4 shrink-0 overflow-hidden rounded-sm"><Flag title={country.label} /></span>}
+        {Flag && <span className="inline-flex w-5 h-4 shrink-0 overflow-hidden"><Flag title={country.label} /></span>}
         <svg className={cn("w-3 h-3 text-text-muted transition-transform shrink-0", open && "rotate-180")} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M2 4.5L6 8.5L10 4.5" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-64 max-h-64 overflow-y-auto bg-surface border border-border rounded-lg shadow-xl z-50 scrollbar-thin">
+        <div className="absolute top-full left-0 mt-1 w-64 max-h-64 overflow-y-auto bg-surface border border-border shadow-xl z-50 scrollbar-thin">
           {COUNTRIES.map((c) => {
             const F = flags[c.code as keyof typeof flags];
             return (

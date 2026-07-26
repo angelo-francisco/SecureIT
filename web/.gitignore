@@ -2,7 +2,9 @@
 .open-next
 .wrangler
 src/generated
-dev.db
+*.db
+*.db-wal
+*.db-shm
 .env.local
 
 # Logs
