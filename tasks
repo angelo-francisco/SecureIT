@@ -1,11 +1,3 @@
-continue the previous tasks
-no desktop a parte de licença de aparecer em configuracoes e e lá deve ser possivel apenas visualizar a licença actual, os seus dados e revogá-la; com o estilo roudend-less bonitinho;
-melhorar a home page, nao consigo clicar nas coisas;
-deixar o design das notificacoes minimalista, retira os icones do conteudo, deixa so o texto e a data ficam no lado direito
-o utilizador nao pode utilizar duas licenças ao mesmo tempo, nem comprar outra enquanto uma estiver ativa, ele precisa revogar a licença ativa e comprar a nova, faz questao de enviar sempre um toast informando
-o design dos pagamentos nao esta muito bom, deixa no estilo na plataforma, retira as bordas e deixa só dividers
-muda o nome do accordation Licenças para Licença, agora ele deve apenas mostrar a licença actual, alguns dos seus dados principais; e o estado, revogada, aprovada, em uso/ativa;
-adicionar a opcao de pesquisa por rosto no app desktop na parte de pessoa, ele devera capturar o rosto e fazer uma pesquisa na dbw
-
-tasks minhas [nao é para o opencode]
-testar pessoas e camares no sistema
+erro em pessoas no desktop, sempre q abro, Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+adicionar analise de comportamento nas camaras, adiciona agora uma seccao na model da camara chamada de tarefa esse campo pode possuir 3 diferentes valores: D (detection), FR (face recognition) ou BA (behaviour analysis); actualiza o formulario para permitir selecionar uma dessas opcoes; cria dps o websocket para analise de comportamento utiliza algoritmos opensource eficientes q permitam determinar se a pessoa esta roubando alguma coisa na loja e se o alerta for positivo manda um sinal para o frontend disparando um alarme
+no licensesettings apos revogar a licença manda o user de volta para o perfil, limpa os dados necessarios e fecha mandando ele para o profiles

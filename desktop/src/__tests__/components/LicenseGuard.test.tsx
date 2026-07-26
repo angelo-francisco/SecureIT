@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => vi.fn(),
+}));
+
 vi.mock("@/hooks", () => ({
   useAuthStore: Object.assign(vi.fn((selector?: (s: any) => any) => {
     const state = { user: { id: "user-1" } };
@@ -24,6 +28,8 @@ vi.mock("lucide-react", () => ({
   MonitorX: (props: any) => <div data-testid="icon-monitor-x" {...props} />,
   ShieldAlert: (props: any) => <div data-testid="icon-shield-alert" {...props} />,
   AlertTriangle: (props: any) => <div data-testid="icon-alert-triangle" {...props} />,
+  RefreshCw: (props: any) => <div data-testid="icon-refresh" {...props} />,
+  ArrowLeft: (props: any) => <div data-testid="icon-arrow-left" {...props} />,
 }));
 
 import { LicenseGuard } from "@/components/LicenseGuard";
@@ -128,6 +134,6 @@ describe("LicenseGuard", () => {
 
     render(<LicenseGuard><div>child</div></LicenseGuard>);
 
-    expect(mockUseLicenseGuard).toHaveBeenCalledWith("user-1");
+    expect(mockUseLicenseGuard).toHaveBeenCalledWith("user-1", 0);
   });
 });

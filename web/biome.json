@@ -6,12 +6,13 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignore": [
-	      ".next/**/*",
-	      "node_modules/**/*",
-	      "dist/**/*",
-	      "out/**/*"
-	    ]
+		"includes": [
+			"**",
+			"!**/.next/**/*",
+			"!**/node_modules/**/*",
+			"!**/dist/**/*",
+			"!**/out/**/*"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -21,10 +22,10 @@
 		"enabled": true,
 		"rules": {
 			"preset": "recommended",
-			"recommended": true,
-	      	"correctness": {
-		        "noUnusedImports": "warn"
-		    }
+			"preset": "recommended",
+			"correctness": {
+				"noUnusedImports": "warn"
+			}
 		}
 	},
 	"javascript": {
@@ -40,5 +41,4 @@
 			}
 		}
 	}
-
 }

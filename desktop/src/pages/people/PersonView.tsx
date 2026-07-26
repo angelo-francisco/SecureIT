@@ -190,7 +190,7 @@ export default function PersonView({ onClose }: PersonViewProps) {
         ) : (
           <div className="w-full max-w-xl space-y-6 pb-8">
             {/* Visual Header / Avatar Banner */}
-            <div className="flex flex-col items-center gap-4 bg-white/[0.02] border border-white/[0.04] rounded-2xl p-6 relative overflow-hidden">
+            <div className="flex flex-col items-center gap-4 bg-white/[0.02] border border-white/[0.04] p-6 relative overflow-hidden">
               <div className="relative w-36 h-36 rounded-full overflow-hidden border-2 border-primary group">
                 {currentPhotoUrl ? (
                   <img src={currentPhotoUrl} alt={person.full_name} className="w-full h-full object-cover" />
@@ -247,7 +247,7 @@ export default function PersonView({ onClose }: PersonViewProps) {
             </div>
 
             {/* Banned State Toggle */}
-            <div className="bg-white/[0.02] border border-white/[0.04] rounded-2xl p-5 flex items-center justify-between">
+            <div className="bg-white/[0.02] border border-white/[0.04] p-5 flex items-center justify-between">
               <div className="space-y-1.5 pr-4">
                 <label className="text-sm font-medium text-text">Bloquear Acesso (Banido)</label>
                 <p className="text-xs text-text-muted">
@@ -275,11 +275,11 @@ export default function PersonView({ onClose }: PersonViewProps) {
                   className="pl-9 h-9 text-sm"
                 />
               </div>
-              <div className="max-h-[160px] overflow-y-auto rounded-lg border border-border bg-surface p-1 space-y-1">
+              <div className="max-h-[160px] overflow-y-auto border border-border bg-surface p-1 space-y-1">
                 {filteredRoles.map((role) => (
                   <label
                     key={role.id}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors ${
                       selectedRoleIds.includes(role.id)
                         ? "bg-primary/10 text-primary"
                         : "hover:bg-white/[0.04]"
@@ -307,7 +307,7 @@ export default function PersonView({ onClose }: PersonViewProps) {
 
             {/* Custom Field Values for selected roles */}
             {selectedRoles.map((role) => (
-              <div key={role.id} className="space-y-3 border border-border rounded-xl p-4 bg-white/[0.01]">
+              <div key={role.id} className="space-y-3 border border-border p-4 bg-white/[0.01]">
                 <h4 className="text-sm font-semibold text-primary">{role.name}</h4>
                 {role.fields.length === 0 ? (
                   <p className="text-xs text-text-muted py-1">Nenhum campo personalizado definido.</p>
@@ -334,7 +334,7 @@ export default function PersonView({ onClose }: PersonViewProps) {
                           <select
                             value={val as string}
                             onChange={(e) => updateField(role.id, field.label, e.target.value)}
-                            className="w-full h-12 rounded-lg border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:border-primary"
+                            className="w-full h-12 border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:border-primary"
                             required={field.required}
                           >
                             <option value="">Selecione...</option>
@@ -393,7 +393,7 @@ export default function PersonView({ onClose }: PersonViewProps) {
       <Modal
         open={deleteConfirm}
         onClose={() => setDeleteConfirm(false)}
-        className="max-w-md bg-surface-dark border border-border-dark rounded-xl p-6"
+        className="max-w-md bg-surface-dark border border-border-dark p-6"
       >
         <h3 className="text-xl font-bold text-text mb-4">Confirmar remoção</h3>
         <p className="text-text-muted mb-6">

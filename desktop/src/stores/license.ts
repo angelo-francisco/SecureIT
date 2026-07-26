@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface LicenseData {
   licenseId: string | null;
   key: string | null;
-  type: "TRIAL" | "STANDARD" | null;
+	type: "B2C" | "B2B" | null;
   activatedAt: string | null;
   expiresAt: string | null;
   lastChecked: string | null;
@@ -20,6 +20,7 @@ interface LicenseState extends LicenseData {
   daysRemaining: number;
   setLicense: (data: LicenseData) => void;
   clearLicense: () => void;
+  rehydrate: () => void;
   updateLastChecked: () => void;
   updateLastValidated: () => void;
 }
@@ -98,6 +99,11 @@ export const useLicenseStore = create<LicenseState>((set, get) => {
       };
       saveToStorage(empty);
       set({ ...empty, isActive: false, daysRemaining: 0 });
+    },
+    rehydrate: () => {
+      const fresh = loadFromStorage();
+      const { isActive, daysRemaining } = calculateState(fresh);
+      set({ ...fresh, isActive, daysRemaining });
     },
     updateLastChecked: () => {
       const now = new Date().toISOString();

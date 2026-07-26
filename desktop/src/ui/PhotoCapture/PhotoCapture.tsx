@@ -128,7 +128,7 @@ export function PhotoCapture({
           autoPlay
           playsInline
           muted
-          className="aspect-video rounded-lg"
+          className="aspect-video"
         />
 
         <div className="flex gap-2">

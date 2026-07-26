@@ -70,7 +70,7 @@ export default function CameraList({ onClose }: CameraListProps) {
           <div className="relative w-64">
             <Lucide.Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <Input
-              placeholder="Buscar por localização..."
+              placeholder="Nome ou localização..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-12 text-lg rounded-none"
@@ -107,7 +107,7 @@ export default function CameraList({ onClose }: CameraListProps) {
           />
         ) : (
           <div className="w-full flex justify-center items-center flex-col text-center gap-3 mt-16">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+            <div className="w-14 h-14 bg-white/[0.04] flex items-center justify-center">
               <Lucide.VideoOff size={28} className="text-text-muted" />
             </div>
             <div className="flex flex-col gap-1/2 max-w-md">

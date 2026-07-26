@@ -17,7 +17,7 @@ export default function DetectedFaces() {
       <div className="flex items-center justify-end mb-4">
         <button
           onClick={() => { setKnownOnly(!knownOnly); setPage(1); }}
-          className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+          className={`flex items-center gap-1.5 text-xs px-3 py-1.5 border transition-colors ${
             knownOnly
               ? "bg-primary/15 border-primary/30 text-primary"
               : "bg-white/[0.04] border-white/[0.08] text-text-muted hover:text-text"
@@ -42,10 +42,10 @@ export default function DetectedFaces() {
           {data.results.map((detection) => (
             <div
               key={detection.id}
-              className="flex items-center gap-4 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors"
+              className="flex items-center gap-4 px-4 py-3 bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors"
             >
               <div
-                className="w-14 h-14 rounded-lg bg-black/40 overflow-hidden shrink-0 cursor-pointer border border-white/[0.08]"
+                className="w-14 h-14 bg-black/40 overflow-hidden shrink-0 cursor-pointer border border-white/[0.08]"
                 onClick={() => {
                   if (detection.photo) setPreviewPhoto(`${baseUrl}/media/${detection.photo}`);
                 }}
@@ -112,10 +112,10 @@ export default function DetectedFaces() {
       <Modal
         open={previewPhoto !== null}
         onClose={() => setPreviewPhoto(null)}
-        className="max-w-2xl bg-surface-dark border border-border-dark rounded-xl p-2"
+        className="max-w-2xl bg-surface-dark border border-border-dark p-2"
       >
         {previewPhoto && (
-          <img src={previewPhoto} alt="Rosto detectado" className="w-full h-auto rounded-lg" />
+          <img src={previewPhoto} alt="Rosto detectado" className="w-full h-auto" />
         )}
       </Modal>
     </>

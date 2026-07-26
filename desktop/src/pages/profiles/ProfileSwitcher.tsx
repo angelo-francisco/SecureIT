@@ -87,71 +87,71 @@ export default function ProfileSwitcher() {
 
   return (
     <div className="min-h-screen">
-      <Navbar/>
+      <Navbar />
       <div className="min-h-screen w-full flex items-center justify-center flex-col">
 
-      <h1 className="text-text text-4xl font-semibold mb-1">
-        Seja bem-vindo, <span className="capitalize">{user?.firstName}!</span>
-      </h1>
+        <h1 className="text-text text-4xl font-semibold mb-1">
+          Seja bem-vindo, <span className="capitalize">{user?.firstName}!</span>
+        </h1>
 
-      <p className="text-text-muted text-2xl text-text mb-8">
-        Selecione um dos perfis abaixo para continuar
-      </p>
+        <p className="text-text-muted text-2xl text-text mb-8">
+          Selecione um dos perfis abaixo para continuar
+        </p>
 
-      <div className="flex flex-wrap justify-center gap-6 max-w-3xl">
-        {profiles.map((profile) => {
-          const isSelecting = selectingId === profile.id;
-          return (
-            <button
-              key={profile.id}
-              onClick={() => handleSelect(profile)}
-              disabled={!!selectingId}
-              className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
-            >
-              <div className="relative">
-                <div
-                  className="w-32 h-32 flex items-center justify-center text-white text-5xl font-bold transition-all group-hover:ring-4 group-hover:ring-primary/50 group-hover:brightness-110"
-                  style={{ backgroundColor: profile.avatarColor }}
-                >
-                  {isSelecting ? (
-                    <Loader w={40} />
-                  ) : (
-                    profile.name[0].toUpperCase()
-                  )}
+        <div className="flex flex-wrap justify-center gap-6 max-w-3xl">
+          {profiles.map((profile) => {
+            const isSelecting = selectingId === profile.id;
+            return (
+              <button
+                key={profile.id}
+                onClick={() => handleSelect(profile)}
+                disabled={!!selectingId}
+                className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
+              >
+                <div className="relative">
+                  <div
+                    className="w-32 h-32 flex items-center justify-center text-white text-5xl font-bold transition-all group-hover:ring-4 group-hover:ring-primary/50 group-hover:brightness-110"
+                    style={{ backgroundColor: profile.avatarColor }}
+                  >
+                    {isSelecting ? (
+                      <Loader w={40} />
+                    ) : (
+                      profile.name[0].toUpperCase()
+                    )}
+                  </div>
                 </div>
-              </div>
-              <span className="flex items-center gap-2 text-center text-lg capitalize font-medium text-text-muted group-hover:text-text transition-colors truncate max-w-[128px]">
-                {profile.name} {profile.hasPin && (
+                <span className="flex items-center gap-2 text-center text-lg capitalize font-medium text-text-muted group-hover:text-text transition-colors truncate max-w-[128px]">
+                  {profile.name} {profile.hasPin && (
                     <Lucide.Lock size={16} className="text-text-muted" />
-                )}
-              </span>
-            </button>
-          );
-        })}
+                  )}
+                </span>
+              </button>
+            );
+          })}
 
-        <button
-          onClick={() => handleCreating()}
-          disabled={!!selectingId}
-          className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
-        >
-          <div className="w-32 h-32 border-2 border-dashed border-border flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-primary/5">
-            <Lucide.Plus size={40} className="text-text-muted group-hover:text-primary transition-colors" />
-          </div>
-          <span className="text-lg font-medium text-text-muted group-hover:text-primary transition-colors">
-            Criar Perfil
-          </span>
-        </button>
+          <button
+            onClick={() => handleCreating()}
+            disabled={!!selectingId}
+            className="cursor-pointer group flex flex-col items-center gap-3 transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
+          >
+            <div className="w-32 h-32 border-2 border-dashed border-border flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-primary/5">
+              <Lucide.Plus size={40} className="text-text-muted group-hover:text-primary transition-colors" />
+            </div>
+            <span className="text-lg font-medium text-text-muted group-hover:text-primary transition-colors">
+              Criar Perfil
+            </span>
+          </button>
+        </div>
+
+        {pinModal && (
+          <PinEntryModal
+            profile={pinModal}
+            onComplete={handlePinComplete}
+            onClose={() => setPinModal(null)}
+          />
+        )}
       </div>
-
-      {pinModal && (
-        <PinEntryModal
-          profile={pinModal}
-          onComplete={handlePinComplete}
-          onClose={() => setPinModal(null)}
-        />
-      )}
     </div>
-      </div>
 
   );
 }
@@ -167,23 +167,25 @@ function PinEntryModal({
   onClose: () => void;
 }) {
   const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
-  const { toast } = useToast()
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleOnComplete = () => {
+  const handleOnComplete = async () => {
+    setLoading(true)
     if (pin.length === 4) {
-      onComplete(pin);
+      await onComplete(pin);
     } else {
-      setError("Digite o PIN [4 DÍGITOS]")
+      setError("O PIN deve conter 4 dígitos")
     }
+    setLoading(false)
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs " onClick={onClose}>
       <div
-        className={`bg-surface border border-border p-8 w-full max-w-md shadow-2xl ${error ? "animate-shake" : ""}`}
+        className="transition-opacity duration-300 ease-out ease-in bg-surface border border-border p-8 w-full max-w-md shadow-2xl"
         onClick={(e) => e.stopPropagation()}
-        onAnimationEnd={() => setTimeout(() => setError(false),5000)}
+
       >
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-semibold text-text uppercase">código de acesso</h3>
@@ -191,21 +193,27 @@ function PinEntryModal({
             onClick={onClose}
             className="cursor-pointer border border-border flex justify-center items-center text-center p-1 text-white font-semibold transition-colors"
           >
-            <Lucide.X size={16}/>
+            <Lucide.X size={16} />
           </button>
-        </div>  
+        </div>
         <div className="flex gap-3 items-center mt-8">
           <PinInput
             value={pin}
-            onChange={(v) => { setPin(v); setError(false); }}
+            onChange={(v) => { setPin(v); setError(""); }}
             autoFocus
+            className={`${error ? "animate-shake" : ""}`}
+            onAnimationEnd={() => setTimeout(() => setError(""), 5000)}
           />
-          
+
           <button
             onClick={handleOnComplete}
             className="cursor-pointer w-full p-4 bg-primary flex justify-center text-lg text-white font-semibold transition-colors"
           >
-            <Lucide.ArrowRight />
+            {loading ? (
+              <Lucide.Loader className="animate-spin infinite"/>
+            ) : (
+              <Lucide.ArrowRight />
+            )}
           </button>
         </div>
         {error && (

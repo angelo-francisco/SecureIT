@@ -7,29 +7,30 @@ type DrizzleDB = D1DB;
 let _db: DrizzleDB | undefined;
 
 function getDb(): DrizzleDB {
-  if (_db) return _db;
+	if (_db) return _db;
 
-  const dbUrl = process.env.DATABASE_URL_SQLITE;
-  const nodeEnv = process.env.NODE_ENV
-  if (nodeEnv === "development") {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { Database } = require("bun:sqlite");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { drizzle } = require("drizzle-orm/bun-sqlite");
-    const sqlite = new Database("./dev.db");
-    _db = drizzle(sqlite, { schema }) as DrizzleDB;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getCloudflareContext } = require("@opennextjs/cloudflare");
-    const { env } = getCloudflareContext();
-    _db = drizzleD1(env.DATABASE_URL_SQLITE, { schema });
-  }
+	const dbUrl = process.env.DATABASE_URL_SQLITE;
+	const nodeEnv = process.env.NODE_ENV;
+	if (nodeEnv === "development") {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		const { Database } = require("bun:sqlite");
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		const { drizzle } = require("drizzle-orm/bun-sqlite");
+		const sqlite = new Database("./dev.db");
+		sqlite.run("PRAGMA journal_mode=WAL");
+		_db = drizzle(sqlite, { schema }) as DrizzleDB;
+	} else {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		const { getCloudflareContext } = require("@opennextjs/cloudflare");
+		const { env } = getCloudflareContext();
+		_db = drizzleD1(env.DATABASE_URL_SQLITE, { schema });
+	}
 
-  return _db;
+	return _db;
 }
 
 export const db = new Proxy({} as DrizzleDB, {
-  get(_, prop) {
-    return (_db ?? getDb())[prop as keyof DrizzleDB] as any;
-  },
+	get(_, prop) {
+		return (_db ?? getDb())[prop as keyof DrizzleDB] as any;
+	},
 });

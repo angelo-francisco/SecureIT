@@ -9,6 +9,7 @@ interface PinInputProps {
   disabled?: boolean;
   autoFocus?: boolean;
   className?: string;
+  onAnimationEnd?: () => void;
 }
 
 export function PinInput({
@@ -18,6 +19,7 @@ export function PinInput({
   disabled = false,
   autoFocus = true,
   className = "",
+  onAnimationEnd = () => {}
 }: PinInputProps) {
   const [focused, setFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -97,7 +99,7 @@ export function PinInput({
   while (digits.length < length) digits.push("");
 
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    <div className={`flex items-center gap-2.5 ${className}`} onAnimationEnd={onAnimationEnd}>
       {Array.from({ length }).map((_, i) => {
         const filled = !!digits[i];
         const isActive = i === activeIndex && focused;

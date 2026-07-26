@@ -49,18 +49,18 @@ describe("useLicense", () => {
     expect(result.current.hasLicense).toBe(false);
   });
 
-  it("isTrial is true when type is TRIAL", () => {
-    useLicenseStore.setState({ type: "TRIAL" });
+  it("isB2C is true when type is B2C", () => {
+    useLicenseStore.setState({ type: "B2C" });
     const { result } = renderHook(() => useLicense());
-    expect(result.current.isTrial).toBe(true);
-    expect(result.current.isStandard).toBe(false);
+    expect(result.current.isB2C).toBe(true);
+    expect(result.current.isB2B).toBe(false);
   });
 
-  it("isStandard is true when type is STANDARD", () => {
-    useLicenseStore.setState({ type: "STANDARD" });
+  it("isB2B is true when type is B2B", () => {
+    useLicenseStore.setState({ type: "B2B" });
     const { result } = renderHook(() => useLicense());
-    expect(result.current.isStandard).toBe(true);
-    expect(result.current.isTrial).toBe(false);
+    expect(result.current.isB2B).toBe(true);
+    expect(result.current.isB2C).toBe(false);
   });
 
   it("maxCameras becomes Infinity when store value is -1", () => {

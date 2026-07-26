@@ -44,7 +44,7 @@ export function PersonInspector({ personId }: PersonInspectorProps) {
 
   return (
     <div className="p-5 space-y-5">
-      <div className="flex flex-col items-center gap-3 bg-white/[0.02] border border-white/[0.04] rounded-2xl p-5 relative overflow-hidden">
+      <div className="flex flex-col items-center gap-3 bg-white/[0.02] border border-white/[0.04] p-5 relative overflow-hidden">
         <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-primary">
           {photoUrl ? (
             <img src={photoUrl} alt={person.full_name} className="w-full h-full object-cover" />
@@ -74,7 +74,7 @@ export function PersonInspector({ personId }: PersonInspectorProps) {
           {person.roles.map((pr) => {
             const role = roleMap[pr.role_id];
             return (
-              <div key={pr.id} className="border border-border rounded-xl p-4 bg-white/[0.01] space-y-3">
+              <div key={pr.id} className="border border-border p-4 bg-white/[0.01] space-y-3">
                 <h5 className="text-sm font-semibold text-primary">{pr.role_name}</h5>
                 {role?.fields && role.fields.length > 0 ? (
                   role.fields.sort((a, b) => a.sort_order - b.sort_order).map((field) => {

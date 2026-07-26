@@ -25,7 +25,7 @@ export function InspectorPanel({ open, onClose, title, children }: InspectorPane
           <h2 className="text-lg font-bold text-text">{title ?? "Inspetor"}</h2>
           <button
             onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+            className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
           >
             <Lucide.X size={16} strokeWidth={2} />
           </button>

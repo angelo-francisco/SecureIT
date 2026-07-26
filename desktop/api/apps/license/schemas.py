@@ -26,6 +26,10 @@ class LicenseVerifyRequest(BaseModel):
     hardware_fingerprint: str
 
 
+class LicenseVerifyOnlineRequest(BaseModel):
+    user_id: str
+
+
 class LicenseFeaturesRequest(BaseModel):
     user_id: str
 

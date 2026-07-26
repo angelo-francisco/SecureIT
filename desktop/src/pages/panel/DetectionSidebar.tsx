@@ -33,7 +33,7 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
         <div className="flex items-center gap-2">
           <Lucide.Bell size={18} className="text-primary" />
           <span className="text-sm font-semibold text-text">Detecções</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-text-muted font-mono">
+          <span className="text-[10px] px-1.5 py-0.5 bg-white/[0.06] text-text-muted font-mono">
             {events.length}
           </span>
         </div>
@@ -41,7 +41,7 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
           {onToggleNavbar && (
             <button
               onClick={onToggleNavbar}
-              className="p-1.5 rounded-lg text-text-muted hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="p-1.5 text-text-muted hover:text-white hover:bg-white/[0.06] transition-colors"
               title={navbarHidden ? "Mostrar navbar" : "Ocultar navbar"}
             >
               {navbarHidden ? (
@@ -115,7 +115,7 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
                         {eventTitle(ev.type, ev.unknown, ev.name)}
                       </span>
                       {ev.confidence != null && (
-                        <span className={`text-[9px] px-1 py-0.5 rounded font-medium ${badgeColor}`}>
+                        <span className={`text-[9px] px-1 py-0.5 font-medium ${badgeColor}`}>
                           {(ev.confidence * 100).toFixed(0)}%
                         </span>
                       )}

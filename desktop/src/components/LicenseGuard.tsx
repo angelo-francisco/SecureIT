@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "../hooks";
 import { useLicenseGuard, type LicenseGuardStatus } from "../hooks/useLicenseGuard";
 import { useLicenseStore } from "../stores/license";
@@ -11,7 +11,7 @@ function LicenseBlockScreen({ reason }: { reason: LicenseGuardStatus }) {
   const messages: Record<string, { title: string; description: string; icon: ReactNode }> = {
     expired: {
       title: "Licença Expirada",
-      description: "A sua licença expirou. Insira uma nova chave de licença para continuar.",
+      description: "A sua licença expirou. Acesse o My Account na versão web para mais detalhes ou insira uma nova chave.",
       icon: <Lucide.Clock size={48} className="text-red-400" />,
     },
     revoked: {
@@ -88,12 +88,18 @@ interface LicenseGuardProps {
 
 export function LicenseGuard({ children }: LicenseGuardProps) {
   const user = useAuthStore((s) => s.user);
-  const { status,licenseInfo } = useLicenseGuard(user?.id ?? null);
+  const [recheckKey, setRecheckKey] = useState(0);
+  const { status, licenseInfo } = useLicenseGuard(user?.id ?? null, recheckKey);
+
+  const handleActivated = useCallback(() => {
+    setRecheckKey((k) => k + 1);
+  }, []);
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <Lucide.Loader size={30} className="animate-spin" />
+      <div className="min-h-screen bg-bg flex items-center justify-center gap-2">
+        <Lucide.Loader size={45} className="animate-spin text-primary" />
+        <p className="font-bold text-xl text-text">Verificando a licença...</p>
       </div>
     );
   }
@@ -103,7 +109,7 @@ export function LicenseGuard({ children }: LicenseGuardProps) {
   }
 
   if (status === "no_license") {
-    return <LicensePage />;
+    return <LicensePage onActivated={handleActivated} />;
   }
 
   return <LicenseBlockScreen reason={status} />;

@@ -53,7 +53,7 @@ export function PinInput({ onComplete }: PinInputProps) {
           type="text"
           onChange={(e) => handleInput(idx, e)}
           onKeyDown={(e) => handleKeyDown(idx, e)}
-          className="h-14 w-full bg-surface border border-border rounded-lg text-center text-text text-lg font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
+          className="h-14 w-full bg-surface border border-border text-center text-text text-lg font-bold focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all caret-primary"
         />
       ))}
     </div>

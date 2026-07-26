@@ -72,7 +72,7 @@ export function CustomizablePin({
           placeholder="•"
           type="text"
           inputMode="numeric"
-          className={`h-14 w-full rounded-lg text-center text-lg font-bold focus:outline-none transition-all caret-primary ${pinClass} ${error ? "!border-error" : ""}`}
+          className={`h-14 w-full text-center text-lg font-bold focus:outline-none transition-all caret-primary ${pinClass} ${error ? "!border-error" : ""}`}
           onChange={(e) => handleInput(idx, e)}
           onKeyDown={(e) => handleKeyDown(idx, e)}
         />

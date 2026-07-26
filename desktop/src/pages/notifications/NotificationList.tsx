@@ -49,7 +49,7 @@ export default function NotificationList({ onClose }: NotificationListProps) {
           <h2 className="text-xl font-bold text-text">Notificações</h2>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-white/[0.04] p-1">
             {filters.map((opt) => (
               <button
                 key={opt.value}
@@ -57,7 +57,7 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                   setFilter(opt.value);
                   setPage(1);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 text-sm font-medium transition-all ${
                   filter === opt.value
                     ? "bg-primary/15 text-primary shadow-sm"
                     : "text-text-muted hover:text-text"
@@ -70,7 +70,7 @@ export default function NotificationList({ onClose }: NotificationListProps) {
           {onClose && (
             <button
               onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+              className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
             >
               <Lucide.X size={16} strokeWidth={2} />
             </button>
@@ -84,41 +84,42 @@ export default function NotificationList({ onClose }: NotificationListProps) {
             <Loader w={50} />
           </div>
         ) : data && Array.isArray(data.results) && data.results.length > 0 ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
             {data.results.map((n) => (
               <div
                 key={n.id}
-                className="flex items-start gap-3 bg-surface border border-border rounded-xl px-5 py-4"
+                className="flex items-center gap-4 px-5 py-3.5 border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors"
               >
-                <div className="mt-0.5">{levelIcon(n.level)}</div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-sm font-semibold text-text">{n.title}</h1>
-                  <p className="text-sm text-text-muted mt-0.5">{n.description}</p>
-                  <div className="flex items-center gap-4 mt-2">
-                    {n.photo && (
-                      <button
-                        onClick={() => setImageModal(`${getApiBaseUrl()}/media/${n.photo}`)}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Ver Imagem
-                      </button>
-                    )}
-                    {n.camera_name && (
-                      <button
-                        onClick={() => panelNavigate?.("camera-monitor")}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        {n.camera_name}
-                      </button>
-                    )}
-                    <span className="text-xs text-text-muted">
-                      {n.created_at}
-                    </span>
-                  </div>
+                  <p className="text-sm font-medium text-text">{n.title}</p>
+                  <p className="text-sm text-text-muted mt-0.5 truncate">{n.description}</p>
+                  {(n.photo || n.camera_name) && (
+                    <div className="flex items-center gap-4 mt-1.5">
+                      {n.photo && (
+                        <button
+                          onClick={() => setImageModal(`${getApiBaseUrl()}/media/${n.photo}`)}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Ver Imagem
+                        </button>
+                      )}
+                      {n.camera_name && (
+                        <button
+                          onClick={() => panelNavigate?.("camera-monitor")}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {n.camera_name}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
+                <span className="text-xs text-text-muted whitespace-nowrap shrink-0">
+                  {n.created_at}
+                </span>
                 <button
                   onClick={() => deleteNotification.mutate(n.id)}
-                  className="p-2 rounded-lg hover:bg-white/[0.06] text-text-muted hover:text-red-500 transition-colors shrink-0"
+                  className="p-2 hover:bg-white/[0.06] text-text-muted hover:text-red-500 transition-colors shrink-0"
                 >
                   <Lucide.Trash size={16} />
                 </button>
@@ -134,7 +135,7 @@ export default function NotificationList({ onClose }: NotificationListProps) {
           </div>
         ) : (
           <div className="w-full flex justify-center items-center flex-col text-center gap-3 mt-16">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+            <div className="w-14 h-14 bg-white/[0.04] flex items-center justify-center">
               <Lucide.BellOff size={28} className="text-text-muted" />
             </div>
             <div className="flex flex-col gap-1 max-w-md">
@@ -157,13 +158,13 @@ export default function NotificationList({ onClose }: NotificationListProps) {
         {imageModal && (
           <div className="relative">
             <img
-              className="max-w-[90vw] max-h-[80vh] rounded-lg"
+              className="max-w-[90vw] max-h-[80vh]"
               src={imageModal}
               alt="Imagem da Notificação"
             />
             <button
               onClick={() => setImageModal(null)}
-              className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70"
+              className="absolute top-2 right-2 p-2 bg-black/50 text-white hover:bg-black/70"
             >
               <Lucide.X size={20} />
             </button>

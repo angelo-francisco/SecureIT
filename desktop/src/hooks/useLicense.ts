@@ -4,8 +4,8 @@ export function useLicense() {
   const store = useLicenseStore();
 
   const hasLicense = store.licenseId !== null;
-  const isTrial = store.type === "TRIAL";
-  const isStandard = store.type === "STANDARD";
+	const isB2C = store.type === "B2C";
+	const isB2B = store.type === "B2B";
 
   const maxCameras = store.maxCameras === -1 ? Infinity : store.maxCameras;
   const maxPeople = store.maxPeople === -1 ? Infinity : store.maxPeople;
@@ -14,8 +14,8 @@ export function useLicense() {
   return {
     ...store,
     hasLicense,
-    isTrial,
-    isStandard,
+		isB2C,
+		isB2B,
     maxCameras,
     maxPeople,
     faceRecognition,

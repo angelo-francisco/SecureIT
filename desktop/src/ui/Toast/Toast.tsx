@@ -32,7 +32,7 @@ export function ToastContainer() {
               toast.onClick?.();
               removeToast(toast.id);
             }}
-            className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-sm animate-in slide-in-from-right ${bgMap[toast.type]} ${toast.onClick ? "cursor-pointer" : ""}`}
+            className={`pointer-events-auto flex items-start gap-3 px-4 py-3 border shadow-lg backdrop-blur-sm animate-in slide-in-from-right ${bgMap[toast.type]} ${toast.onClick ? "cursor-pointer" : ""}`}
           >
             <Icon size={18} className="shrink-0 mt-0.5" />
             <p className="text-sm flex-1">{toast.message}</p>

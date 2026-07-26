@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { licenseApi } from "../api-client/license";
+import { useLicenseStore } from "../stores/license";
 
 export type LicenseGuardStatus =
   | "loading"
@@ -12,7 +13,7 @@ export type LicenseGuardStatus =
   | "invalid_signature"
   | "error";
 
-export function useLicenseGuard(userId: string | null) {
+export function useLicenseGuard(userId: string | null, recheckKey: number = 0) {
   const [status, setStatus] = useState<LicenseGuardStatus>("loading");
   const [licenseInfo, setLicenseInfo] = useState<any>(null);
 
@@ -38,6 +39,21 @@ export function useLicenseGuard(userId: string | null) {
         if (result.valid) {
           setStatus("valid");
           setLicenseInfo(result);
+
+          useLicenseStore.getState().setLicense({
+            licenseId: result.license_id,
+            key: result.license_key,
+            type: result.license_type as "B2C" | "B2B",
+            activatedAt: result.activated_at,
+            expiresAt: result.expires_at,
+            lastChecked: new Date().toISOString(),
+            lastValidatedAt: result.last_validated_at,
+            maxCameras: result.max_cameras,
+            maxPeople: result.max_people,
+            features: result.features,
+            signedPayload: null,
+            publicKey: null,
+          });
         } else {
           setStatus((result.reason as LicenseGuardStatus) || "error");
           setLicenseInfo(result);
@@ -52,7 +68,7 @@ export function useLicenseGuard(userId: string | null) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, recheckKey]);
 
   return { status, licenseInfo };
 }

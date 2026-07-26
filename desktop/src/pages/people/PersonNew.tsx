@@ -116,7 +116,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
               e.preventDefault();
               onClose();
             }}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+            className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
           >
             <Lucide.X size={16} strokeWidth={2} />
           </button>
@@ -162,11 +162,11 @@ export default function PersonNew({ onClose }: PersonNewProps) {
                 className="pl-9 h-9 text-sm"
               />
             </div>
-            <div className="max-h-[160px] overflow-y-auto rounded-lg border border-border bg-surface p-1 space-y-1">
+            <div className="max-h-[160px] overflow-y-auto border border-border bg-surface p-1 space-y-1">
               {filteredRoles.map((role) => (
                 <label
                   key={role.id}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors ${
                     selectedRoleIds.includes(role.id)
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-white/[0.04]"
@@ -193,7 +193,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
           </div>
 
           {selectedRoles.map((role) => (
-            <div key={role.id} className="space-y-3 border border-border rounded-xl p-4">
+            <div key={role.id} className="space-y-3 border border-border p-4">
               <h4 className="text-sm font-semibold text-primary">{role.name}</h4>
               {role.fields.length === 0 ? (
                 <p className="text-xs text-text-muted py-2">Nenhum campo personalizado definido.</p>
@@ -220,7 +220,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
                         <select
                           value={val as string}
                           onChange={(e) => updateField(role.id, field.label, e.target.value)}
-                          className="w-full h-12 rounded-lg border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:border-primary"
+                          className="w-full h-12 border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:border-primary"
                           required={field.required}
                         >
                           <option value="">Selecione...</option>
@@ -247,13 +247,13 @@ export default function PersonNew({ onClose }: PersonNewProps) {
           <div className="space-y-2">
             <label className="text-sm font-medium text-text mb-2">Fotografia *</label>
             {photo ? (
-              <div className="relative w-40 h-40 rounded-xl overflow-hidden border border-border">
+              <div className="relative w-40 h-40 overflow-hidden border border-border">
                 <img src={photo} alt="Preview" className="w-full h-full object-cover" />
                 <div className="absolute bottom-2 right-2 flex gap-1">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    className="p-1.5 bg-black/60 text-white hover:bg-black/80 transition-colors"
                     title="Upload foto"
                   >
                     <Lucide.Upload size={14} />
@@ -261,7 +261,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
                   <button
                     type="button"
                     onClick={() => { startCapture(); }}
-                    className="p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    className="p-1.5 bg-black/60 text-white hover:bg-black/80 transition-colors"
                     title="Capturar da câmara"
                   >
                     <Lucide.RefreshCw size={14} />
@@ -273,7 +273,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
                 <button
                   type="button"
                   onClick={startCapture}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
+                  className={`flex items-center gap-2 px-4 py-3 border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
                     errors.photo ? "border-red-400 text-red-400" : "border-border"
                   }`}
                 >
@@ -283,7 +283,7 @@ export default function PersonNew({ onClose }: PersonNewProps) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
+                  className={`flex items-center gap-2 px-4 py-3 border border-dashed text-text-muted hover:text-primary hover:border-primary transition-colors text-sm ${
                     errors.photo ? "border-red-400 text-red-400" : "border-border"
                   }`}
                 >

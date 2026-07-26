@@ -48,7 +48,7 @@ export interface ActivateResponse {
   licenseId: string;
   expiresAt: string;
   activatedAt: string;
-  type: "TRIAL" | "STANDARD";
+	type: "B2C" | "B2B";
   signedPayload: string;
   publicKey: string;
   maxCameras: number;
@@ -146,6 +146,12 @@ export const  licenseApi = {
       body: JSON.stringify(data),
     }),
 
+  verifyOnline: (data: { user_id: string }) =>
+    apiFetch<LocalVerifyResponse>("/api/license/verify-online", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
   getCurrent: (userId: string) =>
     apiFetch<LocalLicenseResponse>(
       `/api/license/current?user_id=${encodeURIComponent(userId)}`
@@ -167,5 +173,10 @@ export const  licenseApi = {
     }>("/api/license/features", {
       method: "POST",
       body: JSON.stringify({ user_id: userId }),
+    }),
+
+  revoke: () =>
+    webFetch<{ success: boolean }>("/api/licenses/revoke", {
+      method: "POST",
     }),
 };

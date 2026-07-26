@@ -2,8 +2,10 @@ import math
 from datetime import datetime, timezone
 
 from core.crypto import verify_license_token
+from core.config import settings
 from core.hardware import get_hardware_fingerprint
 from fastapi import APIRouter, HTTPException
+import httpx
 
 from .models import License
 from .schemas import (
@@ -13,6 +15,7 @@ from .schemas import (
     LicenseResponse,
     LicenseStoreRequest,
     LicenseVerifyRequest,
+    LicenseVerifyOnlineRequest,
 )
 
 router = APIRouter(prefix="/license", tags=["license"])
@@ -83,7 +86,7 @@ async def store_license(data: LicenseStoreRequest):
 
     return {
         "success": True,
-        "license_id": str(license_obj.id),
+        "license_id": license_obj.license_id,
     }
 
 
@@ -137,7 +140,7 @@ async def verify_license(data: LicenseVerifyRequest):
 
     return LicenseResponse(
         valid=True,
-        license_id=str(license_obj.id),
+        license_id=license_obj.license_id,
         license_key=license_obj.license_key,
         license_type=license_obj.license_type,
         activated_at=license_obj.activated_at,
@@ -148,6 +151,65 @@ async def verify_license(data: LicenseVerifyRequest):
         features=license_obj.features,
         status=license_obj.status,
         days_remaining=days_left,
+    )
+
+
+@router.post("/verify-online")
+async def verify_online(data: LicenseVerifyOnlineRequest):
+    license_obj = await License.filter(
+        user_id=data.user_id, status="ACTIVE"
+    ).first()
+
+    if not license_obj:
+        return LicenseResponse(
+            valid=False,
+            reason="no_license",
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(
+                f"{settings.WEB_URL}/api/licenses/heartbeat",
+                json={
+                    "licenseId": license_obj.license_id,
+                    "hardwareFp": license_obj.hardware_fingerprint,
+                },
+            )
+            web_data = resp.json()
+    except Exception:
+        raise HTTPException(status_code=502, detail="Não foi possível contactar o servidor web")
+
+    if web_data.get("revoked"):
+        await license_obj.delete()
+        return LicenseResponse(
+            valid=False,
+            reason="revoked",
+        )
+
+    if not web_data.get("valid"):
+        await license_obj.delete()
+        return LicenseResponse(
+            valid=False,
+            reason=web_data.get("error", "invalid"),
+        )
+
+    now = datetime.now(timezone.utc)
+    license_obj.last_validated_at = now
+    await license_obj.save()
+
+    return LicenseResponse(
+        valid=True,
+        license_id=license_obj.license_id,
+        license_key=license_obj.license_key,
+        license_type=license_obj.license_type,
+        activated_at=license_obj.activated_at,
+        expires_at=license_obj.expires_at,
+        last_validated_at=now,
+        max_cameras=license_obj.max_cameras,
+        max_people=license_obj.max_people,
+        features=license_obj.features,
+        status=license_obj.status,
+        days_remaining=web_data.get("daysRemaining", 0),
     )
 
 
@@ -163,7 +225,7 @@ async def get_current_license(user_id: str):
     days_left = _days_remaining(license_obj.expires_at)
     return {
         "exists": True,
-        "license_id": str(license_obj.id),
+        "license_id": license_obj.license_id,
         "license_key": license_obj.license_key,
         "license_type": license_obj.license_type,
         "activated_at": license_obj.activated_at.isoformat(),

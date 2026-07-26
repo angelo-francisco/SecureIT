@@ -1,232 +1,237 @@
 "use client";
 
 import { useState, forwardRef, useImperativeHandle } from "react";
-import { Key, Shield, Clock, Eye, X } from "lucide-react";
+import { Shield, Key, X } from "lucide-react";
 import { Modal } from "@/packages/ui";
 
 interface LicenseData {
-  id: string;
-  status: string;
-  activatedAt: string;
-  expiresAt: string;
-  machineHash: string | null;
-  key: {
-    key: string;
-    type: string;
-    durationDays: number;
-  };
-}
-
-interface PlanData {
-  name: string;
-  durationDays: number;
-}
-
-interface PaymentData {
-  id: string;
-  planId: string;
-  status: string;
-  adminNote: string | null;
-  selectedFeatures: string | null;
-  selectedServices: string | null;
-  totalPrice: number | null;
-  createdAt: string;
-  reviewedAt: string | null;
-  plan: PlanData;
+	id: string;
+	status: string;
+	activatedAt: string;
+	expiresAt: string;
+	machineHash: string | null;
+	key: {
+		key: string;
+		type: string;
+		status: string;
+		durationDays: number;
+	};
 }
 
 interface LicensesApiResponse {
-  license: LicenseData | null;
-  payments: PaymentData[];
+	license: LicenseData | null;
+	payments: unknown[];
 }
 
 interface LicensesSectionProps {
-  data: LicensesApiResponse | null;
-  onNavigateToPlans?: () => void;
+	data: LicensesApiResponse | null;
+	onNavigateToPlans?: () => void;
 }
 
 export interface LicensesSectionHandle {
-  fetchData: () => Promise<LicensesApiResponse | null>;
+	fetchData: () => Promise<LicensesApiResponse | null>;
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PENDING: { label: "Pendente", color: "text-warning" },
-  APPROVED: { label: "Aprovado", color: "text-success" },
-  REJECTED: { label: "Rejeitado", color: "text-error" },
+const LICENSE_STATUS: Record<
+	string,
+	{ label: string; color: string; bg: string }
+> = {
+	ACTIVE: { label: "Activa", color: "text-success", bg: "bg-success/10" },
+	APPROVED: { label: "Aprovada", color: "text-primary", bg: "bg-primary/10" },
+	REVOKED: { label: "Revogada", color: "text-error", bg: "bg-error/10" },
+	EXPIRED: { label: "Expirada", color: "text-text-muted", bg: "bg-white/[0.06]" },
+	PENDING: { label: "Pendente", color: "text-warning", bg: "bg-warning/10" },
 };
 
-export const LicensesSection = forwardRef<LicensesSectionHandle, LicensesSectionProps>(
-  ({ data }, ref) => {
-    const [response, setResponse] = useState<LicensesApiResponse | null>(data);
-    const [detailPayment, setDetailPayment] = useState<PaymentData | null>(null);
+export const LicensesSection = forwardRef<
+	LicensesSectionHandle,
+	LicensesSectionProps
+>(({ data }, ref) => {
+	const [response, setResponse] = useState<LicensesApiResponse | null>(data);
+	const [revoking, setRevoking] = useState(false);
+	const [confirmRevoke, setConfirmRevoke] = useState(false);
 
-    useImperativeHandle(ref, () => ({
-      fetchData: async () => {
-        const res = await fetch("/api/my-account/license");
-        if (res.ok) {
-          const d = (await res.json()) as LicensesApiResponse;
-          setResponse(d);
-          return d;
-        }
-        return null;
-      },
-    }));
+	useImperativeHandle(ref, () => ({
+		fetchData: async () => {
+			const res = await fetch("/api/my-account/license");
+			if (res.ok) {
+				const d = (await res.json()) as LicensesApiResponse;
+				setResponse(d);
+				return d;
+			}
+			return null;
+		},
+	}));
 
-    const payments = response?.payments ?? [];
-    const license = response?.license;
-    const isActive = license
-      ? license.status === "ACTIVE" && new Date(license.expiresAt) > new Date()
-      : false;
+	const license = response?.license;
+	const isActive = license
+		? license.key.status === "ACTIVE" && new Date(license.expiresAt) > new Date()
+		: false;
 
-    return (
-      <div className="space-y-4">
-        {license && (
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                isActive ? "bg-success/15" : "bg-error/15"
-              }`}
-            >
-              <Shield size={18} className={isActive ? "text-success" : "text-error"} />
-            </div>
-            <div>
-              <p className="text-base font-medium text-text">
-                Licença {isActive ? "Ativa" : "Expirada"} — {license.key.type}
-              </p>
-              <p className={`text-sm font-medium ${isActive ? "text-success" : "text-error"}`}>
-                Expira em {new Date(license.expiresAt).toLocaleDateString("pt-PT")}
-              </p>
-            </div>
-          </div>
-        )}
+	const statusInfo = license
+		? isActive
+			? LICENSE_STATUS.ACTIVE
+			: license.key.status === "REVOKED"
+				? LICENSE_STATUS.REVOKED
+				: LICENSE_STATUS.EXPIRED
+		: null;
 
-        {payments.length === 0 ? (
-          <div className="text-center py-8 text-text-muted">
-            <Key size={40} className="text-primary mx-auto mb-3" />
-            <p className="text-base md:text-lg">Nenhum registo de licença encontrado</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-base md:text-lg">
-              <thead>
-                <tr className="border-b border-border text-left text-sm font-medium text-text-muted uppercase tracking-wider">
-                  <th className="px-4 py-3">Data</th>
-                  <th className="px-4 py-3">Plano</th>
-                  <th className="px-4 py-3">Duração</th>
-                  <th className="px-4 py-3">Estado</th>
-                  <th className="px-4 py-3 text-right">Preço</th>
-                  <th className="px-4 py-3 w-12"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {payments.map((p) => {
-                  const s = STATUS_LABELS[p.status] ?? { label: p.status, color: "text-text-muted" };
-                  return (
-                    <tr
-                      key={p.id}
-                      className="hover:bg-surface-hover/50 transition-colors cursor-pointer"
-                      onClick={() => setDetailPayment(p)}
-                    >
-                      <td className="px-4 py-3.5 text-text whitespace-nowrap">
-                        {new Date(p.createdAt).toLocaleDateString("pt-PT")}
-                      </td>
-                      <td className="px-4 py-3.5 text-text font-medium">{p.plan.name}</td>
-                      <td className="px-4 py-3.5 text-text-muted">{p.plan.durationDays} dias</td>
-                      <td className={`px-4 py-3.5 font-medium ${s.color}`}>{s.label}</td>
-                      <td className="px-4 py-3.5 text-right text-text font-medium">
-                        {p.totalPrice != null ? `$${p.totalPrice.toFixed(2)}` : "—"}
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <button className="p-1 rounded hover:bg-surface-hover text-text-muted hover:text-text transition-colors">
-                          <Eye size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+	const handleRevoke = async () => {
+		setRevoking(true);
+		try {
+			const res = await fetch("/api/licenses/revoke", { method: "POST" });
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.error);
+			}
+			setResponse((prev) =>
+				prev
+					? {
+						...prev,
+						license: prev.license
+							? { ...prev.license, key: { ...prev.license.key, status: "REVOKED" } }
+							: null,
+					}
+					: null,
+			);
+			setConfirmRevoke(false);
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setRevoking(false);
+		}
+	};
 
-        {detailPayment && (
-          <Modal open onClose={() => setDetailPayment(null)} className="w-full max-w-lg mx-4">
-            <div className="bg-surface border border-border p-6 max-h-[85vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xl md:text-2xl font-display font-bold text-text">Detalhes da Licença</h3>
-                <button
-                  onClick={() => setDetailPayment(null)}
-                  className="p-1.5 border text-text-muted hover:text-text hover:bg-surface-hover transition-all"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+	if (!license) {
+		return (
+			<div className="text-center py-8 text-text-muted">
+				<Key size={40} className="text-primary mx-auto mb-3" />
+				<p className="text-base md:text-lg">
+					Nenhuma licença registada
+				</p>
+			</div>
+		);
+	}
 
-              <div className="space-y-3">
-                <DetailRow label="Plano" value={detailPayment.plan.name} />
-                <DetailRow label="Estado" value={
-                  <span className={`font-medium ${STATUS_LABELS[detailPayment.status]?.color ?? ""}`}>
-                    {STATUS_LABELS[detailPayment.status]?.label ?? detailPayment.status}
-                  </span>
-                } />
-                <DetailRow label="Duração" value={`${detailPayment.plan.durationDays} dias`} />
-                <DetailRow label="Preço" value={detailPayment.totalPrice != null ? `$${detailPayment.totalPrice.toFixed(2)}` : "—"} />
-                <DetailRow
-                  label="Submetido em"
-                  value={new Date(detailPayment.createdAt).toLocaleString("pt-PT")}
-                />
-                {detailPayment.reviewedAt && (
-                  <DetailRow
-                    label="Revisado em"
-                    value={new Date(detailPayment.reviewedAt).toLocaleString("pt-PT")}
-                  />
-                )}
-                {detailPayment.adminNote && (
-                  <DetailRow label="Nota do admin" value={detailPayment.adminNote} />
-                )}
-                {detailPayment.selectedFeatures && (
-                  <DetailRow label="Features" value={detailPayment.selectedFeatures} />
-                )}
-                {detailPayment.selectedServices && (
-                  <DetailRow label="Serviços" value={detailPayment.selectedServices} />
-                )}
-                {license && detailPayment.status === "APPROVED" && (
-                  <>
-                    <div className="border-t border-border my-3" />
-                    <DetailRow label="Chave" value={
-                      <code className="font-mono text-sm">{license.key.key}</code>
-                    } />
-                    <DetailRow
-                      label="Ativada em"
-                      value={new Date(license.activatedAt).toLocaleString("pt-PT")}
-                    />
-                    <DetailRow
-                      label="Expira em"
-                      value={new Date(license.expiresAt).toLocaleString("pt-PT")}
-                    />
-                    {license.machineHash && (
-                      <DetailRow label="Máquina" value={
-                        <code className="font-mono text-sm break-all">{license.machineHash}</code>
-                      } />
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </Modal>
-        )}
-      </div>
-    );
-  }
-);
+	return (
+		<div className="space-y-3">
+			<div className="flex items-center justify-between">
+				<h1 className="text-lg font-bold text-text">
+					{license.key.type} [<span
+						className={`px-2 py-1 text-base font-bold ${statusInfo?.color} ${statusInfo?.bg}`}
+					>
+						{statusInfo?.label}
+					</span>]
+				</h1>
+				<div className="flex gap-2 items-center justify-center">
+					{isActive && (
+						<button
+							onClick={() => setConfirmRevoke(true)}
+							className=" px-2 py-1 border text-base font-medium bg-red-500 text-white hover:text-error/80 transition-colors"
+						>
+							Revogar
+						</button>
+					)}
+
+				</div>
+			</div>
+
+			<div className="border-t border-border/50 pt-3 space-y-1">
+				<DetailRow
+					label="Chave"
+					value={license.key.key}
+				/>
+				<DetailRow
+					label="Tipo"
+					value={license.key.type === "B2B" ? "B2B" : "B2C"}
+				/>
+				<DetailRow
+					label="Activada em"
+					value={new Date(license.activatedAt).toLocaleDateString("pt-PT")}
+				/>
+				<DetailRow
+					label="Expira em"
+					value={new Date(license.expiresAt).toLocaleDateString("pt-PT")}
+				/>
+				<DetailRow
+					label="Dias restantes"
+					value={String(
+						Math.max(
+							0,
+							Math.ceil(
+								(new Date(license.expiresAt).getTime() - Date.now()) /
+								(1000 * 60 * 60 * 24),
+							),
+						),
+					)}
+				/>
+				{license.machineHash && (
+					<DetailRow
+						label="Máquina"
+						value={
+							<code className="font-mono text-xs break-all">
+								{license.machineHash}
+							</code>
+						}
+					/>
+				)}
+			</div>
+
+			<Modal
+				open={confirmRevoke}
+				onClose={() => setConfirmRevoke(false)}
+				className="w-full max-w-sm mx-4"
+			>
+				<div className="bg-surface border border-border p-6">
+					<div className="flex items-center justify-between mb-4">
+						<h3 className="text-lg font-bold text-text">
+							Revogar Licença
+						</h3>
+						<button
+							onClick={() => setConfirmRevoke(false)}
+							className="p-1.5 border text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+						>
+							<X size={18} />
+						</button>
+					</div>
+					<p className="text-base text-text-muted mb-6">
+						Tem certeza que deseja revogar a licença? Esta acção não pode
+						ser desfeita. Precisará de uma nova chave para reactivar.
+					</p>
+					<div className="flex gap-3">
+						<button
+							onClick={() => setConfirmRevoke(false)}
+							className="flex-1 py-2.5 text-sm font-medium text-text-muted border border-border hover:bg-surface-hover transition-all"
+						>
+							Cancelar
+						</button>
+						<button
+							onClick={handleRevoke}
+							disabled={revoking}
+							className="flex-1 py-2.5 text-sm font-medium text-white bg-error hover:bg-error/80 transition-all disabled:opacity-50"
+						>
+							{revoking ? "A revogar..." : "Revogar"}
+						</button>
+					</div>
+				</div>
+			</Modal>
+		</div>
+	);
+});
 
 LicensesSection.displayName = "LicensesSection";
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex justify-between items-start gap-4">
-      <span className="text-base text-text-muted shrink-0">{label}</span>
-      <span className="text-base text-text text-right">{value}</span>
-    </div>
-  );
+function DetailRow({
+	label,
+	value,
+}: {
+	label: string;
+	value: React.ReactNode;
+}) {
+	return (
+		<div className="flex justify-between items-center">
+			<span className="text-base text-text-muted">{label}</span>
+			<span className="text-lg text-text">{value}</span>
+		</div>
+	);
 }

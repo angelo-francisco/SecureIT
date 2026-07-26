@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATABASE_URL: str = "postgres://secureit:secureit@localhost:5432/secureit"
+    WEB_URL: str = "http://localhost:3000"
     YOLO_PATH: Path = BASE_DIR / "yolo"
     MEDIA_ROOT: Path = BASE_DIR / "media"
     UPLOAD_MAX_SIZE: int = 3 * 1024 * 1024

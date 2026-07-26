@@ -47,7 +47,7 @@ function PinInput({ onComplete, error }: { onComplete: (pin: string) => void; er
           type="password"
           onChange={(e) => handleInput(idx, e)}
           onKeyDown={(e) => handleKeyDown(idx, e)}
-          className="h-14 w-14 bg-[#0d1420] border-2 border-border-light rounded-xl text-center text-text text-xl font-bold focus:border-primary focus:ring-4 focus:ring-primary/20 focus:outline-none transition-all duration-200 caret-transparent select-none [&:not(:placeholder-shown)]:border-primary/60"
+          className="h-14 w-14 bg-[#0d1420] border-2 border-border-light text-center text-text text-xl font-bold focus:border-primary focus:ring-4 focus:ring-primary/20 focus:outline-none transition-all duration-200 caret-transparent select-none [&:not(:placeholder-shown)]:border-primary/60"
           autoFocus={idx === 0}
           inputMode="numeric"
         />

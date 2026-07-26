@@ -135,14 +135,14 @@ export default function CameraView() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-text">Tipo de Conexão</label>
-              <p className="text-sm text-text-secondary bg-white/[0.04] rounded-lg px-3 py-2">
+              <p className="text-sm text-text-secondary bg-white/[0.04] px-3 py-2">
                 {camera.connection_type === "L" ? "Local / USB" : "Wi-Fi"}
               </p>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-text">Informações de Conexão</label>
-              <pre className="text-sm text-text-secondary bg-white/[0.04] rounded-lg px-3 py-2 overflow-x-auto whitespace-pre-wrap font-mono">
+              <pre className="text-sm text-text-secondary bg-white/[0.04] px-3 py-2 overflow-x-auto whitespace-pre-wrap font-mono">
                 {camera.connection_info
                   ? JSON.stringify(camera.connection_info, null, 2)
                   : "—"}
@@ -152,7 +152,7 @@ export default function CameraView() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-text mr-2">Estado</label>
               <span
-                className={`inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full font-medium ${
+                className={`inline-flex items-center gap-1.5 text-sm px-2.5 py-1 font-medium ${
                   camera.status
                     ? "bg-green-400/10 text-green-400"
                     : "bg-red-400/10 text-red-400"
@@ -189,7 +189,7 @@ export default function CameraView() {
       <Modal
         open={deleteConfirm}
         onClose={() => setDeleteConfirm(false)}
-        className="max-w-md bg-surface-dark border border-border-dark rounded-xl p-6"
+        className="max-w-md bg-surface-dark border border-border-dark p-6"
       >
         <h3 className="text-xl font-bold text-text mb-4">Confirmar remoção</h3>
         <p className="text-text-muted mb-6">
@@ -248,14 +248,14 @@ function EditableField({
             />
             <button
               onClick={onSave}
-              className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              className="p-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               title="Salvar"
             >
               <Lucide.Check size={16} />
             </button>
             <button
               onClick={onCancel}
-              className="p-2 rounded-lg bg-white/[0.06] text-text-muted hover:text-white transition-colors"
+              className="p-2 bg-white/[0.06] text-text-muted hover:text-white transition-colors"
               title="Cancelar"
             >
               <Lucide.X size={16} />
@@ -263,12 +263,12 @@ function EditableField({
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-text-secondary bg-white/[0.04] rounded-lg px-3 py-2 flex-1">
+            <span className="text-sm text-text-secondary bg-white/[0.04] px-3 py-2 flex-1">
               {value}
             </span>
             <button
               onClick={onStartEdit}
-              className="p-2 rounded-lg bg-white/[0.06] text-text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-all duration-150"
+              className="p-2 bg-white/[0.06] text-text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-all duration-150"
               title="Editar"
             >
               <Lucide.Pencil size={14} />

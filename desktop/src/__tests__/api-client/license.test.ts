@@ -78,7 +78,7 @@ describe("licenseApi", () => {
       license_id: "lic-1",
       user_id: "user-1",
       license_key: "KEY-1",
-      license_type: "STANDARD",
+      license_type: "B2C",
       activated_at: "2025-01-01T00:00:00Z",
       expires_at: "2026-01-01T00:00:00Z",
       hardware_fingerprint: "fp-123",

@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
-import { Key, Loader, Check, X, ArrowLeft }from "lucide-react";
+import { useState } from "react";
+import { Key, Loader, Check, X, ArrowLeft } from "lucide-react";
 import { useLicense } from "../../hooks/useLicense";
 import { licenseApi } from "../../api-client/license";
 import { useAuthStore } from "../../hooks";
 import { useToast } from "@/packages/ui";
 import { useNavigate } from "react-router-dom";
-  
+
 interface LicensePageProps {
   onClose?: () => void;
+  onActivated?: () => void;
 }
 
-export default function LicensePage({ onClose }: LicensePageProps) {
+export default function LicensePage({ onClose, onActivated }: LicensePageProps) {
   const {
     hasLicense,
     type,
@@ -21,21 +22,20 @@ export default function LicensePage({ onClose }: LicensePageProps) {
     setLicense,
   } = useLicense();
   const user = useAuthStore((s) => s.user);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [justActivated, setJustActivated] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (hasLicense && isActive) {
-      const timer = setTimeout(() => navigate("/panel"), 8000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasLicense, isActive, navigate]);
 
   const handleActivate = async () => {
     if (!key || !user?.email || !user?.id) return;
+
+    if (hasLicense && isActive) {
+      toast("Já possui uma licença ativa. Revogue-a antes de activar uma nova.", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -87,11 +87,10 @@ export default function LicensePage({ onClose }: LicensePageProps) {
         publicKey: activateResult.publicKey,
       });
 
+      setJustActivated(true);
       toast("Licença activada com sucesso!", "success");
       setKey("");
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erro ao activar licença";
       toast(err instanceof Error ? err.message : "Erro ao activar licença", "error");
     } finally {
       setLoading(false);
@@ -109,19 +108,21 @@ export default function LicensePage({ onClose }: LicensePageProps) {
     return parts.join("-");
   };
 
+  const showLicenseInfo = justActivated || (hasLicense && isActive);
+
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center">
       {onClose && (
         <button
           onClick={onClose}
-          className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+          className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
         >
           <X size={16} strokeWidth={2} />
         </button>
       )}
 
       <div className="flex-1 overflow-y-auto flex justify-center">
-        {hasLicense && isActive ? (
+        {showLicenseInfo ? (
           <div className="w-full max-w-md space-y-4">
             <div className="p-6 border border-border bg-surface">
               <div className="flex items-center gap-3 mb-5">
@@ -130,7 +131,7 @@ export default function LicensePage({ onClose }: LicensePageProps) {
                 </div>
                 <div>
                   <p className="text-text font-semibold text-lg">Licença Activa</p>
-                  <p className="text-text-muted text-sm">{type === "TRIAL" ? "Trial" : "Standard"}</p>
+                  <p className="text-text-muted text-sm">{type === "B2B" ? "B2B" : "B2C"}</p>
                 </div>
               </div>
 
@@ -155,7 +156,7 @@ export default function LicensePage({ onClose }: LicensePageProps) {
                   <span className="text-text-muted text-base">Dias restantes</span>
                   <span className="text-text text-base font-semibold">{daysRemaining}</span>
                 </div>
-              </div>  
+              </div>
             </div>
 
             <div className="p-4 border border-border bg-surface">
@@ -164,6 +165,13 @@ export default function LicensePage({ onClose }: LicensePageProps) {
                 3 dias ou menos, receberá um aviso diário.
               </p>
             </div>
+
+            <button
+              onClick={onActivated}
+              className="cursor-pointer w-full bg-primary text-text py-3 font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              Continuar para o Painel
+            </button>
           </div>
         ) : (
           <div className="w-full max-w-md space-y-6">

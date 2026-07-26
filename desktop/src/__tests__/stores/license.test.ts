@@ -43,7 +43,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-123",
       key: "KEY-AAAA",
-      type: "STANDARD",
+      type: "B2C",
       activatedAt: new Date().toISOString(),
       expiresAt: futureDate,
       lastChecked: null,
@@ -58,7 +58,7 @@ describe("useLicenseStore", () => {
     const state = useLicenseStore.getState();
     expect(state.licenseId).toBe("lic-123");
     expect(state.key).toBe("KEY-AAAA");
-    expect(state.type).toBe("STANDARD");
+    expect(state.type).toBe("B2C");
     expect(state.isActive).toBe(true);
     expect(state.daysRemaining).toBeGreaterThanOrEqual(9);
     expect(state.maxCameras).toBe(5);
@@ -72,7 +72,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-expired",
       key: "KEY-EXPIRED",
-      type: "TRIAL",
+      type: "B2B",
       activatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       expiresAt: pastDate,
       lastChecked: null,
@@ -95,7 +95,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-123",
       key: "KEY-AAAA",
-      type: "STANDARD",
+      type: "B2C",
       activatedAt: new Date().toISOString(),
       expiresAt: futureDate,
       lastChecked: null,
@@ -151,7 +151,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-persist",
       key: "KEY-PERSIST",
-      type: "TRIAL",
+      type: "B2B",
       activatedAt: new Date().toISOString(),
       expiresAt: futureDate,
       lastChecked: null,
@@ -168,7 +168,7 @@ describe("useLicenseStore", () => {
     const parsed = JSON.parse(stored!);
     expect(parsed.licenseId).toBe("lic-persist");
     expect(parsed.key).toBe("KEY-PERSIST");
-    expect(parsed.type).toBe("TRIAL");
+    expect(parsed.type).toBe("B2B");
   });
 
   it("persists to localStorage on clearLicense", () => {
@@ -177,7 +177,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-to-clear",
       key: "KEY-CLEAR",
-      type: "STANDARD",
+      type: "B2C",
       activatedAt: new Date().toISOString(),
       expiresAt: futureDate,
       lastChecked: null,
@@ -203,7 +203,7 @@ describe("useLicenseStore", () => {
     const data = {
       licenseId: "lic-stored",
       key: "KEY-STORED",
-      type: "STANDARD",
+      type: "B2C",
       activatedAt: new Date().toISOString(),
       expiresAt: futureDate,
       lastChecked: null,
@@ -235,7 +235,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-no-exp",
       key: "KEY-NO-EXP",
-      type: "TRIAL",
+      type: "B2B",
       activatedAt: new Date().toISOString(),
       expiresAt: null,
       lastChecked: null,
@@ -258,7 +258,7 @@ describe("useLicenseStore", () => {
     useLicenseStore.getState().setLicense({
       licenseId: "lic-past",
       key: "KEY-PAST",
-      type: "TRIAL",
+      type: "B2B",
       activatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       expiresAt: pastDate,
       lastChecked: null,

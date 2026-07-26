@@ -7,6 +7,7 @@ import { PanelNavContext } from "../../hooks/usePanelNavigate";
 import { connectCamera, disconnectCamera } from "../../lib/websocket";
 import { useCameras } from "../../hooks";
 import { useDetectionEventsStore } from "../../stores/detectionEvents";
+import { useCameraViewStore } from "../../stores";
 import * as Lucide from "lucide-react";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
@@ -19,7 +20,6 @@ import PersonView from "../people/PersonView";
 import RoleManagement from "../people/RoleManagement";
 import NotificationList from "../notifications/NotificationList";
 import Settings from "./Settings";
-import LicensePage from "./LicensePage";
 import { useLicenseValidation } from "../../hooks/useLicenseValidation";
 
 interface ViewConfigEntry {
@@ -38,7 +38,6 @@ const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
   "person-view": { title: "Detalhes da Pessoa", icon: <Lucide.User size={20} />, component: PersonView },
   "role-management": { title: "Gerenciar Cargos", icon: <Lucide.FolderTree size={20} />, component: RoleManagement },
   notifications: { title: "Notificações", icon: <Lucide.Bell size={20} />, component: NotificationList },
-  license: { title: "Licença", icon: <Lucide.Key size={20} />, component: LicensePage },
   settings: { title: "Configurações", icon: <Lucide.Settings size={20} />, component: Settings },
 };
 
@@ -195,7 +194,11 @@ export default function Dashboard() {
               {cameras.map((camera) => (
                 <div
                   key={camera.id}
-                  className="border border-gray-600 relative bg-black w-full h-full overflow-hidden"
+                  onClick={() => {
+                    useCameraViewStore.getState().setCameraId(camera.id);
+                    setActiveView("camera-view");
+                  }}
+                  className="border border-gray-600 relative bg-black w-full h-full overflow-hidden cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all duration-200"
                 >
                   <div className="w-full h-full flex items-center justify-center">
                     <img

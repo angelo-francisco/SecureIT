@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLicenseStore } from "../stores/license";
 import { licenseApi } from "../api-client/license";
 import { useToastStore } from "../stores/toast";
+import { useAuthStore } from "./useAuth";
 
 const VALIDATION_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
 const ALERT_THRESHOLD_DAYS = 3;
@@ -30,6 +31,7 @@ export function useLicenseValidation() {
     updateLastValidated,
     clearLicense,
   } = useLicenseStore();
+  const user = useAuthStore((s) => s.user);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const validate = async () => {
@@ -47,6 +49,9 @@ export function useLicenseValidation() {
 
       if (result.revoked) {
         clearLicense();
+        if (user?.id) {
+          licenseApi.clearLocal(user.id).catch(() => {});
+        }
         useToastStore
           .getState()
           .addToast("Licença revogada. Contacte o suporte.", "error");
@@ -55,6 +60,9 @@ export function useLicenseValidation() {
 
       if (!result.valid) {
         clearLicense();
+        if (user?.id) {
+          licenseApi.clearLocal(user.id).catch(() => {});
+        }
         useToastStore
           .getState()
           .addToast("Licença inválida ou expirada.", "error");
@@ -78,6 +86,9 @@ export function useLicenseValidation() {
 
       if (result.daysRemaining <= 0) {
         clearLicense();
+        if (user?.id) {
+          licenseApi.clearLocal(user.id).catch(() => {});
+        }
         useToastStore
           .getState()
           .addToast("Licença expirada. Insira uma nova licença.", "error");

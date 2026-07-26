@@ -6,45 +6,51 @@ import { verifyPassword } from "@/lib/password";
 import { NextResponse } from "next/server";
 
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+	request: Request,
+	{ params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await getSession(request);
-  if (!session) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-  }
-  try {
-    const { id } = await params;
-    const body = (await request.json()) as { pin?: string };
-    const { pin } = body;
+	const session = await getSession(request);
+	if (!session) {
+		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+	}
+	try {
+		const { id } = await params;
+		const body = (await request.json()) as { pin?: string };
+		const { pin } = body;
 
-    const profile = await db
-      .select()
-      .from(subProfile)
-      .where(eq(subProfile.id, id))
-      .get();
-    if (!profile || profile.userId !== session.sub) {
-      return NextResponse.json({ error: "Perfil não encontrado" }, { status: 404 });
-    }
+		const profile = await db
+			.select()
+			.from(subProfile)
+			.where(eq(subProfile.id, id))
+			.get();
+		if (!profile || profile.userId !== session.sub) {
+			return NextResponse.json(
+				{ error: "Perfil não encontrado" },
+				{ status: 404 },
+			);
+		}
 
-    if (profile.pinHash) {
-      if (!pin || typeof pin !== "string") {
-        return NextResponse.json({ error: "PIN obrigatório" }, { status: 400 });
-      }
-      const valid = await verifyPassword(pin, profile.pinHash);
-      if (!valid) {
-        return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
-      }
-    }
+		if (profile.pinHash) {
+			if (!pin || typeof pin !== "string") {
+				return NextResponse.json({ error: "PIN obrigatório" }, { status: 400 });
+			}
+			const valid = await verifyPassword(pin, profile.pinHash);
+			if (!valid) {
+				return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
+			}
+		}
 
-    return NextResponse.json({
-      id: profile.id,
-      name: profile.name,
-      avatarColor: profile.avatarColor,
-      isDefault: profile.isDefault,
-    });
-  } catch (error) {
-    console.error("[Profile Select]", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
-  }
+		return NextResponse.json({
+			id: profile.id,
+			name: profile.name,
+			avatarColor: profile.avatarColor,
+			isDefault: profile.isDefault,
+		});
+	} catch (error) {
+		console.error("[Profile Select]", error);
+		return NextResponse.json(
+			{ error: "Erro interno do servidor" },
+			{ status: 500 },
+		);
+	}
 }

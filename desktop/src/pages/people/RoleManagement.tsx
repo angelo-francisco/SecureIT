@@ -198,7 +198,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
               </div>
               <div className="space-y-3">
                 {form.fields.map((field, idx) => (
-                  <div key={idx} className="flex items-start gap-2 bg-white/[0.03] rounded-lg p-3">
+                  <div key={idx} className="flex items-start gap-2 bg-white/[0.03] p-3">
                     <div className="flex-1 space-y-2">
                       <div className="flex gap-2">
                         <div className="flex-1">
@@ -211,7 +211,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
                         <select
                           value={field.field_type}
                           onChange={(e) => updateField(idx, "field_type", e.target.value)}
-                          className="h-12 rounded-lg border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:border-primary"
+                          className="h-12 border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:border-primary"
                         >
                           {FIELD_TYPES.map((t) => (
                             <option key={t.value} value={t.value}>{t.label}</option>
@@ -238,7 +238,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
                       </label>
                       <button
                         onClick={() => removeField(idx)}
-                        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-text-muted hover:text-red-500 transition-colors"
+                        className="p-1.5 hover:bg-white/[0.06] text-text-muted hover:text-red-500 transition-colors"
                       >
                         <Lucide.Trash size={14} />
                       </button>
@@ -275,12 +275,12 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
         <Modal
           open={deleteConfirm}
           onClose={() => setDeleteConfirm(false)}
-          className="max-w-md bg-surface border border-border rounded-xl p-6"
+          className="max-w-md bg-surface border border-border p-6"
         >
           <h3 className="text-lg font-bold text-text mb-4">Confirmar remoção</h3>
           {deleteError ? (
             <>
-              <div className="bg-red-400/10 border border-red-400/30 text-red-400 text-sm rounded-lg p-3 mb-4">
+              <div className="bg-red-400/10 border border-red-400/30 text-red-400 text-sm p-3 mb-4">
                 {deleteError}
               </div>
               <div className="flex justify-end">
@@ -310,7 +310,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
           <button
             type="button"
             onClick={() => panelNavigate?.("people")}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+              className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
           >
             <Lucide.ArrowLeft size={16} strokeWidth={2} />
           </button>
@@ -324,7 +324,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
           {onClose && (
             <button
               onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+            className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
             >
               <Lucide.X size={16} strokeWidth={2} />
             </button>
@@ -342,7 +342,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
             {roles.map((role) => (
               <div
                 key={role.id}
-                className="flex items-center justify-between bg-surface border border-border rounded-xl px-5 py-4"
+                className="flex items-center justify-between bg-surface border border-border px-5 py-4"
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-text">{role.name}</h3>
@@ -351,7 +351,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
                   )}
                   <div className="flex gap-1.5 mt-2 flex-wrap">
                     {role.fields.map((f) => (
-                      <span key={f.id} className="px-2 py-0.5 rounded bg-white/[0.05] text-xs text-text-muted">
+                      <span key={f.id} className="px-2 py-0.5 bg-white/[0.05] text-xs text-text-muted">
                         {f.label} ({f.field_type}{f.required ? ", obrigatório" : ""})
                       </span>
                     ))}
@@ -360,7 +360,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
                 <div className="flex gap-2 ml-4 shrink-0">
                   <button
                     onClick={() => startEdit(role)}
-                    className="p-2 rounded-lg hover:bg-white/[0.06] text-text-muted hover:text-primary transition-colors"
+                    className="p-2 hover:bg-white/[0.06] text-text-muted hover:text-primary transition-colors"
                   >
                     <Lucide.Pencil size={16} />
                   </button>
@@ -370,7 +370,7 @@ export default function RoleManagement({ onClose }: RoleManagementProps) {
           </div>
         ) : (
           <div className="w-full flex justify-center items-center flex-col text-center gap-3 mt-16">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+            <div className="w-14 h-14 bg-white/[0.04] flex items-center justify-center">
               <Lucide.FolderTree size={28} className="text-text-muted" />
             </div>
             <div className="flex flex-col gap-1 max-w-md">

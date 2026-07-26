@@ -5,6 +5,7 @@ import { usePersonViewStore } from "../../stores";
 import { Button, Table, Badge, Loader, Pagination, Input } from "@/packages/ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
+import FaceSearchModal from "./FaceSearchModal";
 
 interface PeopleListProps {
   onClose?: () => void;
@@ -13,6 +14,7 @@ interface PeopleListProps {
 export default function PeopleList({ onClose }: PeopleListProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [faceSearchOpen, setFaceSearchOpen] = useState(false);
   const { data, isLoading } = usePeople(search || undefined, page);
   const panelNavigate = usePanelNavigate();
 
@@ -46,7 +48,7 @@ export default function PeopleList({ onClose }: PeopleListProps) {
         return (
           <div className="flex gap-1 flex-wrap">
             {roles.map((r, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-medium">
+              <span key={i} className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium">
                 {r.role_name}
               </span>
             ))}
@@ -94,6 +96,14 @@ export default function PeopleList({ onClose }: PeopleListProps) {
           <Button
             size="sm"
             variant="outline"
+            icon={<Lucide.ScanFace size={14} />}
+            onClick={() => setFaceSearchOpen(true)}
+          >
+            Pesquisar Rosto
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
             icon={<Lucide.FolderTree size={14} />}
             onClick={() => panelNavigate?.("role-management")}
           >
@@ -109,7 +119,7 @@ export default function PeopleList({ onClose }: PeopleListProps) {
           {onClose && (
             <button
               onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+              className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
             >
               <Lucide.X size={16} strokeWidth={2} />
             </button>
@@ -138,7 +148,7 @@ export default function PeopleList({ onClose }: PeopleListProps) {
           </>
         ) : (
           <div className="w-full flex justify-center items-center flex-col text-center gap-3 mt-16">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+            <div className="w-14 h-14 bg-white/[0.04] flex items-center justify-center">
               <Lucide.UserX size={28} className="text-text-muted" />
             </div>
             <div className="flex flex-col gap-1 max-w-md">
@@ -152,6 +162,11 @@ export default function PeopleList({ onClose }: PeopleListProps) {
           </div>
         )}
       </div>
+
+      <FaceSearchModal
+        open={faceSearchOpen}
+        onClose={() => setFaceSearchOpen(false)}
+      />
     </div>
   );
 }

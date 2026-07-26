@@ -12,8 +12,7 @@ export type ViewId =
   | "person-view"
   | "role-management"
   | "notifications"
-  | "settings"
-  | "license";
+  | "settings";
 
 interface MenuItem {
   id: ViewId;
@@ -25,8 +24,7 @@ const menuItems: MenuItem[] = [
   { id: "cameras", icon: Lucide.Video, label: "Câmeras" },
   { id: "people", icon: Lucide.Users, label: "Pessoas" },
   { id: "notifications", icon: Lucide.Bell, label: "Notificações" },
-  { id: "license", icon: Lucide.Key, label: "Licença" },
-  { id: "settings", icon: Lucide.Settings, label: "Configurações" },
+  { id: "settings", icon: Lucide.Plus, label: "Outros" },
 ];
 
 interface FloatingNavbarProps {
@@ -50,9 +48,9 @@ export function FloatingNavbar({ activeView, onSelect }: FloatingNavbarProps) {
               key={item.id}
               onClick={() => onSelect(item.id)}
               className={`
-                cursor-pointer relative flex items-center gap-2 px-4 py-2.5 rounded-xl
+                cursor-pointer select-none relative flex items-center gap-2 px-4 py-2.5
                 font-medium
-                transition-all duration-200
+                transition-all duration-200 active:scale-95
                 ${isActive
                   ? "text-white"
                   : "text-gray-400 hover:text-gray-200"

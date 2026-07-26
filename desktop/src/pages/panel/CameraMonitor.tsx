@@ -101,7 +101,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6 pt-0">
-          <div className="relative w-full max-w-4xl aspect-video rounded-xl overflow-hidden border border-border bg-black">
+          <div className="relative w-full max-w-4xl aspect-video overflow-hidden border border-border bg-black">
             <img
               ref={(el) => { if (el) imageRefs.current.set(`cam-${selectedCam.id}`, el); }}
               className="w-full h-full object-contain"
@@ -110,7 +110,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
             {state?.faces?.map((f, i) => (
               <div
                 key={i}
-                className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm text-white text-xs rounded-lg px-3 py-2 border border-white/10"
+                className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-2 border border-white/10"
               >
                 {f.unknown ? (
                   <span className="text-red-400 font-medium">Indivíduo Desconhecido</span>
@@ -138,7 +138,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
         {onClose && (
           <button
             onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
+            className="flex items-center justify-center w-8 h-8 bg-white/[0.06] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all duration-150"
           >
             <Lucide.X size={16} strokeWidth={2} />
           </button>
@@ -184,7 +184,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
 
         {(!cameras || cameras.length === 0) && (
           <div className="w-full flex justify-center items-center flex-col text-center gap-3 mt-16">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+            <div className="w-14 h-14 bg-white/[0.04] flex items-center justify-center">
               <Lucide.VideoOff size={28} className="text-text-muted" />
             </div>
             <div className="flex flex-col gap-1 max-w-md">
@@ -211,7 +211,7 @@ function CameraTile({
   return (
     <button
       onClick={onClick}
-      className="relative aspect-video rounded-xl overflow-hidden border border-border bg-black group hover:border-primary/50 transition-colors text-left"
+      className="relative aspect-video overflow-hidden border border-border bg-black group hover:border-primary/50 transition-colors text-left"
     >
       <img
         ref={(el) => { if (el) imageRefs.current.set(`cam-${cam.id}`, el); }}
@@ -259,7 +259,7 @@ function FaceTile({
   return (
     <button
       onClick={onClick}
-      className="relative aspect-[4/3] rounded-lg overflow-hidden border border-border bg-black group hover:border-cyan-500/50 transition-colors text-left"
+      className="relative aspect-[4/3] overflow-hidden border border-border bg-black group hover:border-cyan-500/50 transition-colors text-left"
     >
       <img
         ref={(el) => { if (el) imageRefs.current.set(`cam-${cam.id}`, el); }}
@@ -274,7 +274,7 @@ function FaceTile({
             {state.faces.map((f, i) => (
               <div
                 key={i}
-                className={`text-[10px] leading-tight px-1.5 py-0.5 rounded ${
+                className={`text-[10px] leading-tight px-1.5 py-0.5 ${
                   f.unknown
                     ? "bg-red-500/80 text-white"
                     : "bg-green-500/80 text-white"
@@ -292,7 +292,7 @@ function FaceTile({
       </div>
 
       <div className="absolute top-1.5 left-1.5">
-        <span className="text-[10px] font-medium text-cyan-400 bg-black/60 px-1.5 py-0.5 rounded">
+        <span className="text-[10px] font-medium text-cyan-400 bg-black/60 px-1.5 py-0.5">
           FR
         </span>
       </div>
