@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from websocket.area_detection import AreaDetectionManager
 from websocket.face_recognition import FaceRecognitionManager
+from websocket.behaviour_analysis import BehaviourAnalysisManager
 
 
 @asynccontextmanager
@@ -68,6 +69,11 @@ async def area_detection_ws(websocket: WebSocket):
 @app.websocket("/ws/face-recognition")
 async def face_recognition_ws(websocket: WebSocket):
     manager = FaceRecognitionManager(websocket)
+    await manager.handle()
+
+@app.websocket("/ws/behaviour-analysis")
+async def behaviour_analysis_ws(websocket: WebSocket):
+    manager = BehaviourAnalysisManager(websocket)
     await manager.handle()
 
 

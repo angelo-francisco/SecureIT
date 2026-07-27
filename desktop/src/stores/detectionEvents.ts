@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type DetectionType = "face" | "people";
+export type DetectionType = "face" | "people" | "behaviour";
 
 export interface DetectionEvent {
   id: number;

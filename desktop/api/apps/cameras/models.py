@@ -16,6 +16,12 @@ class CameraType(StrEnum):
     WIFI = "W"
 
 
+class CameraTask(StrEnum):
+    DETECTION = "D"
+    FACE_RECOGNITION = "FR"
+    BEHAVIOUR_ANALYSIS = "BA"
+
+
 class Camera(models.Model):
     id = fields.IntField(pk=True)
     profile = fields.ForeignKeyField("models.Profile", related_name="cameras")
@@ -24,6 +30,7 @@ class Camera(models.Model):
     status = fields.BooleanField(default=True, null=True)
     connection_type = fields.CharEnumField(CameraType, max_length=1, null=True)
     connection_info = fields.JSONField(default=dict, null=True)
+    task = fields.CharEnumField(CameraTask, max_length=2, default=CameraTask.DETECTION, null=True)
     face_recognition = fields.BooleanField(default=False)
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
@@ -51,6 +58,13 @@ class Camera(models.Model):
                 return path.split("video")[-1] if "video" in path else path
             return self.connection_info.get("id", path)
         return None
+
+    def effective_task(self) -> str:
+        if self.task and self.task != CameraTask.DETECTION:
+            return self.task
+        if self.face_recognition:
+            return CameraTask.FACE_RECOGNITION
+        return CameraTask.DETECTION
 
     def __str__(self) -> str:
         return self.get_name()

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { FloatingNavbar } from "../../components/FloatingNavbar";
 import type { ViewId } from "../../components/FloatingNavbar";
 import { Loader } from "@/packages/ui";
@@ -114,13 +114,33 @@ export default function Dashboard() {
               timestamp: now,
             });
           }
+        } else if (data.type === "behaviour_alert") {
+          const key = `behaviour-${Date.now()}`;
+          if (key !== lastKey) {
+            lastKey = key;
+            useDetectionEventsStore.getState().addEvent({
+              type: "behaviour",
+              person_id: null,
+              name: (data.description as string) || "Comportamento suspeito",
+              unknown: false,
+              confidence: null,
+              camera_id: camera.id,
+              camera_name: camera.name,
+              timestamp: Date.now(),
+            });
+            const sound = document.getElementById("soundEffect") as HTMLAudioElement;
+            if (sound) {
+              sound.currentTime = 0;
+              sound.play().catch(() => {});
+            }
+          }
         }
       };
 
       const key = connectCamera(
         camera.id,
         camera.video_source,
-        camera.face_recognition ? "face-recognition" : "area-detection",
+        camera.task === "FR" ? "face-recognition" : camera.task === "BA" ? "behaviour-analysis" : "area-detection",
         (blob) => {
           const img = imageRefs.current.get(`cam-${camera.id}`);
           if (img) {
@@ -129,6 +149,7 @@ export default function Dashboard() {
             setTimeout(() => URL.revokeObjectURL(url), 1000);
           }
           setConnectingCameras((prev) => {
+            if (!prev.has(camera.id)) return prev;
             const next = new Set(prev);
             next.delete(camera.id);
             return next;
@@ -152,7 +173,9 @@ export default function Dashboard() {
     };
   }, [cameraIds]);
 
-  const close = () => setActiveView(null);
+  const close = useCallback(() => setActiveView(null), []);
+
+  const navContextValue = useCallback((view: string) => setActiveView(view as ViewId), []);
 
   const viewEntry = activeView ? viewConfig[activeView] : undefined;
   const ViewComponent = viewEntry?.component;
@@ -242,7 +265,7 @@ export default function Dashboard() {
       )}
 
       <PanelNavContext.Provider
-        value={(view) => setActiveView(view as ViewId)}
+        value={navContextValue}
       >
         <PanelSheet open={activeView !== null} onClose={close}>
           {ViewComponent && <ViewComponent onClose={close} />}

@@ -51,7 +51,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
       const key = connectCamera(
         cam.id,
         cam.video_source,
-        "area-detection",
+        cam.task === "FR" ? "face-recognition" : cam.task === "BA" ? "behaviour-analysis" : "area-detection",
         (blob) => {
           const img = imageRefs.current.get(`cam-${cam.id}`);
           if (img) {
@@ -81,8 +81,8 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
   }, [cameraIds, updateCamState]);
 
   const selectedCam = cameras?.find((c) => c.id === selectedCamera);
-  const regularCams = cameras?.filter((c) => !c.face_recognition) ?? [];
-  const faceCams = cameras?.filter((c) => c.face_recognition) ?? [];
+  const regularCams = cameras?.filter((c) => c.task !== "FR") ?? [];
+  const faceCams = cameras?.filter((c) => c.task === "FR") ?? [];
 
   if (selectedCamera && selectedCam) {
     const state = camStates[String(selectedCam.id)];
@@ -203,7 +203,7 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
 function CameraTile({
   cam, state, imageRefs, onClick,
 }: {
-  cam: { id: number; name: string; video_source: string | number | null; face_recognition: boolean };
+  cam: { id: number; name: string; video_source: string | number | null; task: string };
   state?: CameraState;
   imageRefs: React.MutableRefObject<Map<string, HTMLImageElement>>;
   onClick: () => void;
@@ -251,7 +251,7 @@ function CameraTile({
 function FaceTile({
   cam, state, imageRefs, onClick,
 }: {
-  cam: { id: number; name: string; video_source: string | number | null; face_recognition: boolean };
+  cam: { id: number; name: string; video_source: string | number | null; task: string };
   state?: CameraState;
   imageRefs: React.MutableRefObject<Map<string, HTMLImageElement>>;
   onClick: () => void;

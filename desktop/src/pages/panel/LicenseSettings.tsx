@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLicense } from "../../hooks/useLicense";
 import { useLicenseStore } from "../../stores/license";
 import { licenseApi, type LocalLicenseResponse } from "../../api-client/license";
 import { useAuthStore } from "../../hooks";
 import { useToast } from "@/packages/ui";
 import { Loader, Modal } from "@/packages/ui";
+import { disconnectAll } from "../../lib/websocket";
 import * as Lucide from "lucide-react";
 
 interface LicenseSettingsProps {
@@ -14,6 +16,8 @@ interface LicenseSettingsProps {
 export default function LicenseSettings({ onClose }: LicenseSettingsProps) {
   const { setLicense, clearLicense } = useLicense();
   const user = useAuthStore((s) => s.user);
+  const clearProfile = useAuthStore((s) => s.clearProfile);
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [revoking, setRevoking] = useState(false);
   const [confirmRevoke, setConfirmRevoke] = useState(false);
@@ -122,8 +126,11 @@ export default function LicenseSettings({ onClose }: LicenseSettingsProps) {
       await licenseApi.clearLocal(user.id);
       clearLicense();
       setApiLicense({ exists: false });
+      disconnectAll();
+      clearProfile();
       toast("Licença revogada com sucesso!", "success");
       setConfirmRevoke(false);
+      navigate("/profiles", { replace: true });
     } catch (err) {
       toast(
         err instanceof Error ? err.message : "Erro ao revogar licença",

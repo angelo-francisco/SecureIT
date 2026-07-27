@@ -14,6 +14,7 @@ function eventTitle(
   name: string | null,
 ): string {
   if (type === "face") return unknown ? "Desconhecido" : name ?? "Desconhecido";
+  if (type === "behaviour") return name ?? "Comportamento Suspeito";
   return name ?? "Pessoa(s) detectada(s)";
 }
 
@@ -73,25 +74,34 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
           <div className="flex flex-col">
             {events.map((ev) => {
               const isFace = ev.type === "face";
-              const dotColor = isFace
-                ? ev.unknown
-                  ? "bg-red-500"
-                  : "bg-green-500"
-                : "bg-amber-500";
+              const isBehaviour = ev.type === "behaviour";
+              const dotColor = isBehaviour
+                ? "bg-red-500 animate-pulse"
+                : isFace
+                  ? ev.unknown
+                    ? "bg-red-500"
+                    : "bg-green-500"
+                  : "bg-amber-500";
 
-              const nameColor = isFace
-                ? ev.unknown
-                  ? "text-red-400"
-                  : "text-green-400"
-                : "text-amber-400";
+              const nameColor = isBehaviour
+                ? "text-red-400"
+                : isFace
+                  ? ev.unknown
+                    ? "text-red-400"
+                    : "text-green-400"
+                  : "text-amber-400";
 
-              const badgeColor = isFace
-                ? ev.unknown
-                  ? "bg-red-400/10 text-red-400"
-                  : "bg-green-400/10 text-green-400"
-                : "bg-amber-400/10 text-amber-400";
+              const badgeColor = isBehaviour
+                ? "bg-red-400/15 text-red-400 border border-red-400/30"
+                : isFace
+                  ? ev.unknown
+                    ? "bg-red-400/10 text-red-400"
+                    : "bg-green-400/10 text-green-400"
+                  : "bg-amber-400/10 text-amber-400";
 
-              const icon = isFace ? (
+              const icon = isBehaviour ? (
+                <Lucide.ShieldAlert size={14} />
+              ) : isFace ? (
                 <Lucide.ScanFace size={14} />
               ) : (
                 <Lucide.Users size={14} />
@@ -100,9 +110,9 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
               return (
                 <div
                   key={ev.id}
-                  className={`flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors ${
-                    ev.person_id && onInspectPerson ? "cursor-pointer" : ""
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] transition-colors ${
+                    isBehaviour ? "bg-red-500/5 border-l-2 border-l-red-500" : "hover:bg-white/[0.03]"
+                  } ${ev.person_id && onInspectPerson ? "cursor-pointer" : ""}`}
                   onClick={() => {
                     if (ev.person_id && onInspectPerson) onInspectPerson(ev.person_id);
                   }}

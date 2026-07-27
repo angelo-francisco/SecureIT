@@ -17,6 +17,16 @@ class CameraUpdate(BaseModel):
     location: str | None = None
     connection_info: dict | None = None
     face_recognition: bool | None = None
+    task: str | None = None
+
+    @field_validator("task")
+    @classmethod
+    def validate_task(cls, v: str | None) -> str | None:
+        if v is not None:
+            v = v.upper()
+            if v not in ("D", "FR", "BA"):
+                raise ValueError("Tarefa inválida. Use D, FR ou BA.")
+        return v
 
 
 class CameraCreate(BaseModel):
@@ -25,6 +35,7 @@ class CameraCreate(BaseModel):
     connection_type: str
     connection_info: dict = {}
     face_recognition: bool = False
+    task: str = "D"
 
     @field_validator("connection_type")
     @classmethod
@@ -32,6 +43,14 @@ class CameraCreate(BaseModel):
         v = v.upper()
         if v not in ("L", "W"):
             raise ValueError("Tipo de conexão inválido. Use Local ou Wi-Fi.")
+        return v
+
+    @field_validator("task")
+    @classmethod
+    def validate_task(cls, v: str) -> str:
+        v = v.upper()
+        if v not in ("D", "FR", "BA"):
+            raise ValueError("Tarefa inválida. Use D, FR ou BA.")
         return v
 
     @field_validator("connection_info")

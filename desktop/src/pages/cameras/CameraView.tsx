@@ -3,7 +3,9 @@ import { useCamera, useUpdateCamera, useDeleteCamera } from "../../hooks";
 import { useCameraViewStore } from "../../stores/cameraView";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
-import { Button, Loader, Input, Toggle, Modal } from "@/packages/ui";
+import { Button, Loader, Input, Modal } from "@/packages/ui";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
+import type { CameraTask } from "../../types/camera";
 import * as Lucide from "lucide-react";
 
 export default function CameraView() {
@@ -59,11 +61,11 @@ export default function CameraView() {
     panelNavigate?.("cameras");
   }
 
-  async function handleFaceRecognitionChange(checked: boolean) {
+  async function handleTaskChange(newTask: CameraTask) {
     if (!camera) return;
     await updateCamera.mutateAsync({
       id: camera.id,
-      data: { face_recognition: checked },
+      data: { task: newTask, face_recognition: newTask === "FR" },
     });
     toast("As alterações apenas serão aplicadas após recarregar a página (F5)", "warning");
   }
@@ -168,14 +170,28 @@ export default function CameraView() {
             </div>
 
             <div className="pt-4 border-t border-border">
-              <Toggle
-                label="Reconhecimento facial"
-                checked={camera.face_recognition}
-                onChange={(e) => handleFaceRecognitionChange(e.target.checked)}
-              />
-              <p className="text-xs text-text-muted mt-1">
-                Detetar e reconhecer rostos automaticamente nesta câmara
-              </p>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-text">Tarefa da Câmara</label>
+                <Select
+                  value={camera.task || "D"}
+                  onValueChange={(v) => handleTaskChange(v as CameraTask)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="D">Detecção de Área</SelectItem>
+                    <SelectItem value="FR">Reconhecimento Facial</SelectItem>
+                    <SelectItem value="BA">Análise de Comportamento</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-text-muted mt-1">
+                  {camera.task === "D" && "Detetar pessoas na área de monitoramento"}
+                  {camera.task === "FR" && "Detetar e reconhecer rostos automaticamente nesta câmara"}
+                  {camera.task === "BA" && "Analisar comportamento suspeito e gerar alertas"}
+                  {!camera.task && "Detetar pessoas na área de monitoramento"}
+                </p>
+              </div>
             </div>
 
             <div className="pt-4 border-t border-border space-y-1 text-xs text-text-muted">

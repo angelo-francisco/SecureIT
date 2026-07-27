@@ -4,6 +4,7 @@ import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
 import { Input, Button, Toggle, OutlinedInput  } from "@/packages/ui";
 import { LucideInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
+import type { CameraTask } from "../../types/camera";
 import * as Lucide from "lucide-react";
 
 interface CameraNewProps {
@@ -26,7 +27,7 @@ export default function CameraNew({ onClose }: CameraNewProps) {
   const [localCamera, setLocalCamera] = useState("");
   const [isDemo, setIsDemo] = useState(false);
   const [demoPath, setDemoPath] = useState("");
-  const [faceRecognition, setFaceRecognition] = useState(false);
+  const [task, setTask] = useState<CameraTask>("D");
   const [errors, setErrors] = useState<FormErrors>({});
   const createCamera = useCreateCamera();
   const { data: localDevices } = useLocalDevices();
@@ -78,7 +79,8 @@ export default function CameraNew({ onClose }: CameraNewProps) {
         location: location.trim(),
         connection_type: connectionType as "L" | "W",
         connection_info,
-        face_recognition: faceRecognition,
+        task,
+        face_recognition: task === "FR",
       });
       toast("Câmara criada com sucesso", "success");
       panelNavigate?.("cameras");
@@ -207,14 +209,24 @@ export default function CameraNew({ onClose }: CameraNewProps) {
           )}
 
           <div className="pt-4 border-t border-border">
-            <Toggle
-              label="Reconhecimento facial"
-              checked={faceRecognition}
-              onChange={(e) => setFaceRecognition(e.target.checked)}
-            />
-            <p className="text-lg text-text-muted mt-1">
-              Detetar e reconhecer rostos automaticamente nesta câmara
-            </p>
+            <div className="space-y-3">
+              <label className="text-base font-medium text-text">Tarefa da Câmara</label>
+              <Select value={task} onValueChange={(v) => setTask(v as CameraTask)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="D">Detecção de Área</SelectItem>
+                  <SelectItem value="FR">Reconhecimento Facial</SelectItem>
+                  <SelectItem value="BA">Análise de Comportamento</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-lg text-text-muted mt-1">
+                {task === "D" && "Detetar pessoas na área de monitoramento"}
+                {task === "FR" && "Detetar e reconhecer rostos automaticamente nesta câmara"}
+                {task === "BA" && "Analisar comportamento suspeito e gerar alertas"}
+              </p>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

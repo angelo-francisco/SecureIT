@@ -36,6 +36,7 @@ async def create_camera(profile_id: str, data: CameraCreate) -> Camera:
         connection_type=data.connection_type,
         connection_info=data.connection_info,
         face_recognition=data.face_recognition,
+        task=data.task.upper() if data.task else "D",
     )
     await log_action("create", "camera", camera.id)
     return camera
@@ -54,6 +55,12 @@ async def update_camera(camera_id: int, profile_id: str, data: dict) -> Camera:
         camera.connection_info = info
     if "face_recognition" in data:
         camera.face_recognition = data["face_recognition"]
+    if "task" in data:
+        camera.task = data["task"].upper() if data["task"] else "D"
+        if camera.task == "FR":
+            camera.face_recognition = True
+        elif camera.task != "FR":
+            camera.face_recognition = False
 
     await camera.save()
     await log_action("update", "camera", camera.id)
