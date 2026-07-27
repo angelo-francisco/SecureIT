@@ -1,59 +1,130 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { Menu, X } from "lucide-react";
+
+const navLinks = [
+	{ label: "Funcionalidades", href: "/#features" },
+	{ label: "Preços", href: "/pricing" },
+	{ label: "Sobre", href: "/about" },
+	{ label: "Contacto", href: "/#contact" },
+];
 
 export function Navbar({ inMyAccount = false }: { inMyAccount?: boolean }) {
-	if (inMyAccount)
+	const [scrolled, setScrolled] = useState(false);
+	const [mobileOpen, setMobileOpen] = useState(false);
+
+	useEffect(() => {
+		const onScroll = () => setScrolled(window.scrollY > 20);
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
+
+	if (inMyAccount) {
 		return (
 			<nav className="relative top-0 z-50 py-5">
-				<div
-					className={
-						"px-4 md:px-4" +
-						" flex items-center justify-center md:justify-between"
-					}
-				>
+				<div className="px-4 md:px-4 flex items-center justify-center md:justify-between">
 					<div className="flex gap-2 justify-center items-center">
-						<Link
-							href="/"
-							className="flex items-center justify-center items-center gap-1.5 transition-colors"
-						>
-							<Image
-								src="/logo.png"
-								alt="SecureIT"
-								width={40}
-								height={40}
-								className="h-6 md:h-8 w-auto"
-							/>
-							<h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">
-								SecureIT
-							</h1>
+						<Link href="/" className="flex items-center gap-1.5 transition-colors">
+							<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-6 md:h-8 w-auto" />
+							<h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">SecureIT</h1>
 						</Link>
-						<div className="min-h-8 w-[1px] bg-gray-300"></div>
+						<div className="min-h-8 w-[1px] bg-gray-300" />
 						<h1 className="font-bold text-2xl md:text-3xl">Minha Conta</h1>
 					</div>
 				</div>
 			</nav>
 		);
+	}
 
 	return (
-		<nav className="relative z-50">
-			<div className="absolute top-5 left-1/2 md:left-5 -translate-x-1/2 md:-translate-x-0 flex items-center justify-between">
-				<Link
-					href="/"
-					className="flex items-center justify-center items-center gap-1.5 transition-colors"
-				>
-					<Image
-						src="/logo.png"
-						alt="SecureIT"
-						width={40}
-						height={40}
-						className="h-8 w-auto"
-					/>
-					<h1 className="text-3xl font-bold leading-10 text-text tracking-tight">
-						SecureIT
-					</h1>
+		<nav
+			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+				scrolled
+					? "bg-bg/80 backdrop-blur-xl border-b border-border"
+					: "bg-transparent"
+			}`}
+		>
+			<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+				<Link href="/" className="flex items-center gap-2 shrink-0">
+					<Image src="/logo.png" alt="SecureIT" width={36} height={36} className="h-7 w-auto" />
+					<span className="text-xl font-bold text-text tracking-tight">SecureIT</span>
 				</Link>
+
+				<div className="hidden md:flex items-center gap-1">
+					{navLinks.map((link) => (
+						<Link
+							key={link.href}
+							href={link.href}
+							className="px-3 py-2 text-sm font-medium text-text-muted hover:text-text transition-colors"
+						>
+							{link.label}
+						</Link>
+					))}
+				</div>
+
+				<div className="hidden md:flex items-center gap-3">
+					<ThemeToggle />
+					<Link
+						href="/login"
+						className="px-4 py-2 text-sm font-medium text-text-muted hover:text-text border border-border hover:border-border-light transition-all"
+					>
+						Iniciar Sessão
+					</Link>
+					<Link
+						href="/signup"
+						className="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover transition-colors"
+					>
+						Começar Agora
+					</Link>
+				</div>
+
+				<div className="flex md:hidden items-center gap-2">
+					<ThemeToggle />
+					<button
+						onClick={() => setMobileOpen(!mobileOpen)}
+						className="p-2 text-text-muted hover:text-text"
+					>
+						{mobileOpen ? <X size={20} /> : <Menu size={20} />}
+					</button>
+				</div>
 			</div>
+
+			{mobileOpen && (
+				<div className="md:hidden bg-surface border-b border-border animate-slide-in-up">
+					<div className="px-6 py-4 space-y-1">
+						{navLinks.map((link) => (
+							<Link
+								key={link.href}
+								href={link.href}
+								onClick={() => setMobileOpen(false)}
+								className="block px-3 py-3 text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
+							>
+								{link.label}
+							</Link>
+						))}
+						<div className="pt-3 border-t border-border space-y-2">
+							<Link
+								href="/login"
+								onClick={() => setMobileOpen(false)}
+								className="block text-center py-3 text-sm font-medium text-text-muted border border-border hover:bg-surface-hover transition-colors"
+							>
+								Iniciar Sessão
+							</Link>
+							<Link
+								href="/signup"
+								onClick={() => setMobileOpen(false)}
+								className="block text-center py-3 text-sm font-semibold text-white bg-primary hover:bg-primary-hover transition-colors"
+							>
+								Começar Agora
+							</Link>
+						</div>
+					</div>
+				</div>
+			)}
 		</nav>
 	);
 }
