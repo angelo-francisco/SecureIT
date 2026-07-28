@@ -81,8 +81,8 @@ export const LicensesSection = forwardRef<
 		try {
 			const res = await fetch("/api/licenses/revoke", { method: "POST" });
 			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.error);
+				const data = (await res.json()) as { error?: string };
+				throw new Error(data.error ?? "Erro ao revogar licença");
 			}
 			setResponse((prev) =>
 				prev
