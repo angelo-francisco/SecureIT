@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 
 const navLinks = [
 	{ label: "Funcionalidades", href: "/#features" },
@@ -28,7 +28,7 @@ export function Navbar({
 
 	if (minimal) {
 		return (
-		<nav className="relative top-0 z-50 py-6 px-4 md:px-6">
+			<nav className="relative top-0 z-50 py-6 px-4 md:px-6">
 				<div className="flex items-center">
 					<Link href="/" className="flex items-center gap-2.5">
 						<Image
@@ -66,16 +66,15 @@ export function Navbar({
 
 	return (
 		<nav
-			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-				scrolled
+			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
 					? "bg-bg/80 backdrop-blur-xl border-b border-border"
 					: "bg-transparent"
-			}`}
+				}`}
 		>
-			<div className="max-w-7xl mx-auto px-6 h-22 flex items-center justify-between">
+			<div className="w-full mx-auto px-6 py-4 flex items-center justify-around">
 				<Link href="/" className="flex items-center gap-2.5 shrink-0">
-					<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-8 w-auto" />
-					<span className="text-3xl font-bold text-text tracking-tight">SecureIT</span>
+					<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-9 w-auto" />
+					<span className="text-4xl font-bold text-text tracking-tight">SecureIT</span>
 				</Link>
 
 				<div className="hidden md:flex items-center gap-1">
@@ -83,7 +82,7 @@ export function Navbar({
 						<Link
 							key={link.href}
 							href={link.href}
-							className="px-4 py-2.5 text-base font-medium text-text-muted hover:text-text transition-colors"
+							className="px-4 py-2.5 text-xl font-medium text-text hover:bg-bg hover:border transition-colors"
 						>
 							{link.label}
 						</Link>
@@ -94,16 +93,12 @@ export function Navbar({
 					<ThemeToggle />
 					<Link
 						href="/login"
-						className="px-5 py-2.5 text-base font-medium text-text-muted hover:text-text border border-border hover:border-border-light transition-all"
+						className="flex items-center gap-1 px-5 py-2.5 text-xl font-medium text-text-muted hover:text-text border border-border hover:border-border-light transition-all"
 					>
-						Iniciar Sessão
+						<User className="w-4 h-4"/>
+						Entrar
 					</Link>
-					<Link
-						href="/signup"
-						className="px-5 py-2.5 text-base font-semibold text-white bg-primary hover:bg-primary-hover transition-colors"
-					>
-						Começar Agora
-					</Link>
+
 				</div>
 
 				<div className="flex md:hidden items-center gap-2">
