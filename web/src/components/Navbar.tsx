@@ -28,17 +28,17 @@ export function Navbar({
 
 	if (minimal) {
 		return (
-			<nav className="relative top-0 z-50 py-5 px-4 md:px-6">
+		<nav className="relative top-0 z-50 py-5 px-4 md:px-6">
 				<div className="flex items-center">
-					<Link href="/" className="flex items-center gap-2">
+					<Link href="/" className="flex items-center gap-2.5">
 						<Image
 							src="/logo.png"
 							alt="SecureIT"
-							width={36}
-							height={36}
-							className="h-7 w-auto"
+							width={40}
+							height={40}
+							className="h-8 w-auto"
 						/>
-						<span className="text-xl font-bold text-text tracking-tight">
+						<span className="text-2xl font-bold text-text tracking-tight">
 							SecureIT
 						</span>
 					</Link>
@@ -52,8 +52,8 @@ export function Navbar({
 			<nav className="relative top-0 z-50 py-5">
 				<div className="px-4 md:px-4 flex items-center justify-center md:justify-between">
 					<div className="flex gap-2 justify-center items-center">
-						<Link href="/" className="flex items-center gap-1.5 transition-colors">
-							<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-6 md:h-8 w-auto" />
+						<Link href="/" className="flex items-center gap-2.5 transition-colors">
+							<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-8 w-auto" />
 							<h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">SecureIT</h1>
 						</Link>
 						<div className="min-h-8 w-[1px] bg-gray-300" />
@@ -72,10 +72,10 @@ export function Navbar({
 					: "bg-transparent"
 			}`}
 		>
-			<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-				<Link href="/" className="flex items-center gap-2 shrink-0">
-					<Image src="/logo.png" alt="SecureIT" width={36} height={36} className="h-7 w-auto" />
-					<span className="text-xl font-bold text-text tracking-tight">SecureIT</span>
+			<div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+				<Link href="/" className="flex items-center gap-2.5 shrink-0">
+					<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-8 w-auto" />
+					<span className="text-2xl font-bold text-text tracking-tight">SecureIT</span>
 				</Link>
 
 				<div className="hidden md:flex items-center gap-1">
@@ -83,7 +83,7 @@ export function Navbar({
 						<Link
 							key={link.href}
 							href={link.href}
-							className="px-3 py-2 text-sm font-medium text-text-muted hover:text-text transition-colors"
+							className="px-4 py-2.5 text-base font-medium text-text-muted hover:text-text transition-colors"
 						>
 							{link.label}
 						</Link>
@@ -94,13 +94,13 @@ export function Navbar({
 					<ThemeToggle />
 					<Link
 						href="/login"
-						className="px-4 py-2 text-sm font-medium text-text-muted hover:text-text border border-border hover:border-border-light transition-all"
+						className="px-5 py-2.5 text-base font-medium text-text-muted hover:text-text border border-border hover:border-border-light transition-all"
 					>
 						Iniciar Sessão
 					</Link>
 					<Link
 						href="/signup"
-						className="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover transition-colors"
+						className="px-5 py-2.5 text-base font-semibold text-white bg-primary hover:bg-primary-hover transition-colors"
 					>
 						Começar Agora
 					</Link>
@@ -112,7 +112,7 @@ export function Navbar({
 						onClick={() => setMobileOpen(!mobileOpen)}
 						className="p-2 text-text-muted hover:text-text"
 					>
-						{mobileOpen ? <X size={20} /> : <Menu size={20} />}
+						{mobileOpen ? <X size={24} /> : <Menu size={24} />}
 					</button>
 				</div>
 			</div>
