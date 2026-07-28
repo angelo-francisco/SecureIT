@@ -25,13 +25,12 @@ vi.mock("@/hooks", async (importOriginal) => {
   };
 });
 
-vi.mock("@/packages/ui", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/packages/ui")>();
-  return {
-    ...actual,
-    useToast: () => ({ toast: mockToast }),
-  };
-});
+vi.mock("@/packages/ui", () => ({
+  useToast: () => ({ toast: mockToast }),
+  Loader: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  Modal: ({ children, open, onClose }: { children?: React.ReactNode; open?: boolean; onClose?: () => void }) =>
+    open ? <div data-testid="modal">{children}</div> : null,
+}));
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";

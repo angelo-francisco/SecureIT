@@ -1,9 +1,23 @@
 import { createId } from "@paralleldrive/cuid2";
 import { Database } from "bun:sqlite";
+import { hashSync } from "bcryptjs";
+import { readFileSync } from "fs";
 import { resolve } from "path";
 
-const DB_PATH = resolve(import.meta.dir, "..", "dev.db");
+const DB_PATH = resolve(import.meta.dir, "..", "secureit.db");
+const MIGRATION_PATH = resolve(import.meta.dir, "..", "src", "db", "0000_dizzy_redwing.sql");
+
 const db = new Database(DB_PATH);
+db.run("PRAGMA journal_mode=WAL");
+
+// Apply migration if tables don't exist yet
+const tablesExist = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='User'").get();
+if (!tablesExist) {
+	console.log("Applying migration...");
+	const sql = readFileSync(MIGRATION_PATH, "utf-8");
+	db.exec(sql);
+	console.log("Migration applied.");
+}
 
 function run(sql: string, params?: any[]) {
 	if (params) {
@@ -19,8 +33,7 @@ function query(sql: string, params?: any[]): any[] {
 
 function main() {
 	const adminEmail = "admin@secureit.com";
-	const adminPasswordHash =
-		"$2b$12$uw/SYHkEWL1aVO82pPcbfut2Z7/e/aB1r5LTyw1IW8LEOWtRIwdBG";
+	const adminPasswordHash = hashSync("admin123", 12);
 	const now = new Date().toISOString();
 
 	console.log(`\nSeeding ${DB_PATH}...\n`);
