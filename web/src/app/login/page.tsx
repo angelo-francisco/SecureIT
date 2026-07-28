@@ -38,7 +38,7 @@ export default function LoginPage() {
 
 	return (
 		<div className="min-h-screen ">
-			<Navbar />
+			<Navbar minimal />
 			<section className="relative overflow-hidden min-h-screen flex justify-center items-center">
 				<div className="p-5 flex flex-col items-center w-full max-w-[480px]">
 					<div className="w-full flex flex-col">

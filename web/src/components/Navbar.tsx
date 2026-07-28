@@ -13,7 +13,10 @@ const navLinks = [
 	{ label: "Contacto", href: "/#contact" },
 ];
 
-export function Navbar({ inMyAccount = false }: { inMyAccount?: boolean }) {
+export function Navbar({
+	inMyAccount = false,
+	minimal = false,
+}: { inMyAccount?: boolean; minimal?: boolean }) {
 	const [scrolled, setScrolled] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -22,6 +25,27 @@ export function Navbar({ inMyAccount = false }: { inMyAccount?: boolean }) {
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);
 	}, []);
+
+	if (minimal) {
+		return (
+			<nav className="relative top-0 z-50 py-5 px-4 md:px-6">
+				<div className="flex items-center">
+					<Link href="/" className="flex items-center gap-2">
+						<Image
+							src="/logo.png"
+							alt="SecureIT"
+							width={36}
+							height={36}
+							className="h-7 w-auto"
+						/>
+						<span className="text-xl font-bold text-text tracking-tight">
+							SecureIT
+						</span>
+					</Link>
+				</div>
+			</nav>
+		);
+	}
 
 	if (inMyAccount) {
 		return (
