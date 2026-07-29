@@ -227,12 +227,12 @@ export default function MyAccountPage() {
 			<Modal
 				open={plansModalOpen}
 				disableBackdropClose
-				className="w-full max-w-5xl mx-4"
+				className="w-full max-w-xl mx-4"
 			>
 				<div className="bg-surface border border-border p-6 max-h-[85vh] overflow-y-auto">
 					<div className="flex items-center justify-center gap-2.5 mb-5">
 						<h2 className="text-xl md:text-2xl font-display font-bold text-text">
-							Planos e Pagamentos
+							Obter Licença
 						</h2>
 					</div>
 					<PlansSection
@@ -262,7 +262,7 @@ export default function MyAccountPage() {
 								className="w-full flex items-center gap-3 px-4 py-3 text-left text-base md:text-lg font-medium text-text hover:bg-surface-hover transition-all"
 							>
 								<CreditCard size={18} className="text-primary" />
-								Planos e Pagamentos
+								Obter Licença
 							</button>
 							<button
 								onClick={async () => {

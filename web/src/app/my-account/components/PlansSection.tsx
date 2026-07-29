@@ -74,6 +74,7 @@ const INCLUDED_FEATURES = [
 export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 	({ data: initialData, onClose }, ref) => {
 		const { toast } = useToast();
+		const ANNUAL_DISCOUNT = 0.17;
 		const { convert } = useExchangeRate();
 		const [plans, setPlans] = useState<Plan[]>(initialData.plans);
 		const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(
@@ -82,11 +83,16 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 		const [selectedPlan, setSelectedPlan] = useState<Plan | null>(
 			initialData.plans[0] ?? null,
 		);
+		const [annual, setAnnual] = useState(false);
 		const [uploadedProof, setUploadedProof] = useState<CloudinaryResult | null>(
 			null,
 		);
 		const [submitting, setSubmitting] = useState(false);
 		const [copiedField, setCopiedField] = useState<string | null>(null);
+
+		const monthlyPrice = selectedPlan?.basePrice ?? 0;
+		const annualPrice = monthlyPrice * 12 * (1 - ANNUAL_DISCOUNT);
+		const displayPrice = annual ? annualPrice : monthlyPrice;
 
 		const copyToClipboard = useCallback((text: string, field: string) => {
 			navigator.clipboard.writeText(text).then(() => {
@@ -121,7 +127,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						planId: selectedPlan.id,
 						proofPublicId: uploadedProof.public_id,
 						proofUrl: uploadedProof.secure_url,
-						totalPrice: selectedPlan.basePrice,
+						totalPrice: displayPrice,
 					}),
 				});
 				if (!res.ok) {
@@ -154,19 +160,48 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 		return (
 			<div className="space-y-6">
 				<div className="card-sharp border-primary/25 bg-primary/5 p-5">
-					<h3 className="text-xl font-bold text-text">{selectedPlan.name}</h3>
-					<p className="text-text-muted mb-3">{selectedPlan.description}</p>
-					<div className="flex items-baseline gap-1">
-						<span className="text-2xl font-bold text-text">
-							${selectedPlan.basePrice.toFixed(2)}
+					<h3 className="text-2xl text-center font-bold text-text">{selectedPlan.name}</h3>
+					<p className="text-text-muted text-center mb-3">{selectedPlan.description}</p>
+
+					<div className="flex justify-center items-baseline gap-1">
+						<span className="text-3xl font-bold text-text">
+							{convert(displayPrice)} Kz
 						</span>
-						<span className="text-sm text-text-muted">/ mês</span>
+						<span className="text-sm text-text-muted">
+							{annual ? "/ano" : "/ mês"}
+						</span>
 					</div>
-					<div className="mt-3 space-y-1">
+					{annual && (
+						<p className="text-xs text-text-muted text-center mt-1">
+							{convert(monthlyPrice)} Kz/mês · {convert(monthlyPrice * 12)} Kz sem desconto
+						</p>
+					)}
+
+					<div className="mt-4 flex items-center justify-center gap-3">
+						<span className={`text-xs font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
+							Mensal
+						</span>
+						<button
+							onClick={() => setAnnual(!annual)}
+							className={`relative w-10 h-5 rounded-full transition-colors ${annual ? "bg-primary" : "bg-border"}`}
+						>
+							<div
+								className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${annual ? "translate-x-5" : "translate-x-0"}`}
+							/>
+						</button>
+						<span className={`text-xs font-medium ${annual ? "text-text" : "text-text-muted"}`}>
+							Anual
+						</span>
+						<span className="text-[10px] text-primary font-semibold bg-primary/10 px-1.5 py-0.5">
+							-{Math.round(ANNUAL_DISCOUNT * 100)}%
+						</span>
+					</div>
+
+					<div className="mt-4 space-y-1">
 						{INCLUDED_FEATURES.map((f) => (
 							<div
 								key={f}
-								className="flex items-center gap-1.5 text-sm text-text-muted"
+								className="flex items-center gap-1.5 text-base text-text-muted"
 							>
 								<Check size={14} className="text-primary shrink-0" />
 								{f}
@@ -184,7 +219,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-gray-200 font-bold">IBAN</span>
 								<div className="flex items-center gap-2">
-									<span className="text-sm text-text">
+									<span className="text-base text-text">
 										{paymentInfo.iban}
 									</span>
 									<button
@@ -192,42 +227,42 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 										onClick={() =>
 											copyToClipboard(paymentInfo.iban, "iban")
 										}
-										className="cursor-pointer text-text-muted hover:text-primary transition-colors"
+										className="text-base cursor-pointer text-text-muted hover:text-primary transition-colors"
 										title="Copiar IBAN"
 									>
 										{copiedField === "iban" ? (
-											<Check size={14} className="text-success" />
+											<Check size={16} className="text-success" />
 										) : (
-											<Copy size={14} />
+											<Copy size={16} />
 										)}
 									</button>
 								</div>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-sm text-gray-200 font-bold">
+								<span className="text-base text-gray-200 font-bold">
 									Titular
 								</span>
-								<span className="text-sm font-medium text-text">
+								<span className="text-base font-medium text-text">
 									{paymentInfo.accountName}
 								</span>
 							</div>
 							{paymentInfo.bankName && (
 								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-200 font-bold">
+									<span className="text-base text-gray-200 font-bold">
 										Banco
 									</span>
-									<span className="text-sm text-text">
+									<span className="text-base text-text">
 										{paymentInfo.bankName}
 									</span>
 								</div>
 							)}
 							{paymentInfo.reference && (
 								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-200 font-bold">
+									<span className="text-base text-gray-200 font-bold">
 										Referência
 									</span>
 									<div className="flex items-center gap-2">
-										<span className="text-sm text-text">
+										<span className="text-base text-text">
 											{paymentInfo.reference}
 										</span>
 										<button
@@ -239,25 +274,14 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 											title="Copiar Referência"
 										>
 											{copiedField === "reference" ? (
-												<Check size={14} className="text-success" />
+												<Check size={16} className="text-success" />
 											) : (
-												<Copy size={14} />
+												<Copy size={16} />
 											)}
 										</button>
 									</div>
 								</div>
 							)}
-							<div className="flex items-center justify-between">
-								<span className="text-sm text-gray-200 font-bold">
-									Montante
-								</span>
-								<span className="text-sm text-primary">
-									{convert(
-										Number(selectedPlan.basePrice.toFixed(2)),
-									)}{" "}
-									Kz
-								</span>
-							</div>
 						</div>
 					) : (
 						<div className="text-center py-4 text-text-muted text-base md:text-lg">
@@ -267,10 +291,10 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 				</div>
 
 				<div className="card-sharp border-primary/20 bg-primary/[0.03] p-5">
-					<p className="text-sm font-semibold text-text mb-3">
+					<p className="text-lg font-semibold text-text">
 						Precisa de um plano personalizado para a sua empresa?
 					</p>
-					<p className="text-xs text-text-muted mb-4">
+					<p className="text-base text-text-muted mb-4">
 						Contacte a nossa equipa para uma solução à medida das suas
 						necessidades.
 					</p>
@@ -368,10 +392,10 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 									className="w-full border-2 border-dashed border-border p-6 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
 								>
 									<Upload size={22} className="text-text-muted" />
-									<span className="text-sm text-text-muted">
+									<span className="text-base text-text-muted">
 										Clique para carregar comprovativo
 									</span>
-									<span className="text-xs text-text-muted">
+									<span className="text-base text-text-muted">
 										JPG, PNG, WebP ou PDF — máx. 2MB
 									</span>
 								</button>
@@ -382,21 +406,18 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 
 				<div className="bg-surface border border-border p-4">
 					<div className="flex items-center justify-between">
-						<span className="text-sm text-gray-200">Preço Base</span>
-						<span className="text-lg text-text">
-							${selectedPlan.basePrice.toFixed(2)}
-						</span>
+						<span className="text-sm text-text-muted">Plano</span>
+						<span className="text-sm text-text">{selectedPlan.name} ({annual ? "Anual" : "Mensal"})</span>
+					</div>
+					<div className="flex items-center justify-between mt-1">
+						<span className="text-sm text-text-muted">{annual ? "12 meses" : "1 mês"}</span>
+						<span className="text-sm text-text">{annual ? `${convert(monthlyPrice)} Kz/mês` : ""}</span>
 					</div>
 					<div className="border-t border-border mt-2 pt-2 flex items-center justify-between">
 						<span className="text-base font-semibold text-text">Total</span>
-						<div className="text-right">
-							<span className="text-lg md:text-2xl font-bold text-primary">
-								${selectedPlan.basePrice.toFixed(2)}
-							</span>
-							<p className="text-sm text-gray-300">
-								&#8776; {convert(selectedPlan.basePrice)} Kz
-							</p>
-						</div>
+						<span className="text-lg md:text-xl font-bold text-text">
+							{convert(displayPrice)} Kz
+						</span>
 					</div>
 				</div>
 
