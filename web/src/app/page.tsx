@@ -6,6 +6,7 @@ import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
 import { CountUp } from "@/components/animations/CountUp";
 import { Marquee } from "@/components/animations/Marquee";
+import { DownloadSection } from "@/app/components/DownloadSection";
 import {
 	Shield,
 	Eye,
@@ -348,6 +349,8 @@ export default function HomePage() {
 					))}
 				</div>
 			</section>
+
+			<DownloadSection />
 
 			<section id="contact" className="relative py-32 px-8 overflow-hidden">
 				<ParallaxLayer speed="slow" className="absolute inset-0 bg-dots" />
