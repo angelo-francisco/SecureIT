@@ -10,7 +10,6 @@ const productLinks = [
 ];
 
 const companyLinks = [
-	{ label: "Sobre Nós", href: "/about" },
 	{ label: "Contacto", href: "/#contact" },
 	{ label: "Termos de Uso", href: "#" },
 	{ label: "Política de Privacidade", href: "#" },

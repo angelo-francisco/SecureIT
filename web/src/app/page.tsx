@@ -16,6 +16,8 @@ import {
 	Monitor,
 	Fingerprint,
 	Brain,
+	Globe,
+	Rocket,
 	Lock,
 	Zap,
 	ChevronRight,
@@ -181,6 +183,57 @@ export default function HomePage() {
 					</div>
 				</Marquee>
 			</section> */}
+
+			{/* Mission */}
+			<section className="py-32 px-8 border-b border-border">
+				<div className="max-w-7xl mx-auto">
+					<div className="grid md:grid-cols-2 gap-16 items-center">
+						<RevealOnScroll>
+							<div>
+								<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
+									Missão
+								</p>
+								<h2 className="text-4xl font-extrabold tracking-tight mb-6">
+									Vigilância inteligente
+									<br />
+									<span className="text-text-muted">para todos.</span>
+								</h2>
+								<p className="text-text-muted leading-relaxed mb-4">
+									Acreditamos que segurança não deveria ser um luxo. Com tecnologia de
+									inteligência artificial acessível, pretendemos que qualquer pessoa ou
+									empresa possa proteger os seus espaços de forma inteligente e eficiente.
+								</p>
+								<p className="text-text-muted leading-relaxed">
+									Desde a deteção de pessoas em tempo real até ao reconhecimento facial
+									e análise comportamental — tudo funciona numa plataforma unificada que
+									funciona no desktop, navegador e telemóvel.
+								</p>
+							</div>
+						</RevealOnScroll>
+
+						<RevealOnScroll variant="right">
+							<div className="card-sharp p-10 bg-surface/50">
+								<div className="space-y-6">
+									{[
+										{ icon: Eye, text: "Reconhecimento facial com IA profunda" },
+										{ icon: Shield, text: "Deteção de pessoas YOLOv11 em tempo real" },
+										{ icon: Lock, text: "Criptografia de ponta a ponta" },
+										{ icon: Globe, text: "Desktop, web e mobile sincronizados" },
+										{ icon: Rocket, text: "Alertas em menos de 2 segundos" },
+									].map((item) => (
+										<div key={item.text} className="flex items-center gap-4">
+											<div className="w-9 h-9 shrink-0 flex items-center justify-center border border-primary/25 bg-primary/10">
+												<item.icon className="w-4 h-4 text-primary" />
+											</div>
+											<span className="text-sm text-text">{item.text}</span>
+										</div>
+									))}
+								</div>
+							</div>
+						</RevealOnScroll>
+					</div>
+				</div>
+			</section>
 
 			<section id="features" className="py-32 px-8">
 				<div className="max-w-7xl mx-auto">

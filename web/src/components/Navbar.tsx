@@ -9,7 +9,6 @@ import { Menu, X, User } from "lucide-react";
 const navLinks = [
 	{ label: "Funcionalidades", href: "/#features" },
 	{ label: "Licenças", href: "/pricing" },
-	{ label: "Sobre", href: "/about" },
 	{ label: "Contacto", href: "/#contact" },
 ];
 
@@ -71,7 +70,7 @@ export function Navbar({
 					: "bg-transparent"
 				}`}
 		>
-			<div className="w-full mx-auto px-6 py-4 flex items-center justify-around">
+			<div className="w-full mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
 				<Link href="/" className="flex items-center gap-2.5 shrink-0">
 					<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-9 w-auto" />
 					<span className="text-4xl font-bold text-text tracking-tight">SecureIT</span>
