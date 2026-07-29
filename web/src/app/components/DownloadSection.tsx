@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
-import { TurnstileModal } from "@/components/TurnstileModal";
+import { TurnstileModal } from "./TurnstileModal";
 
 const RELEASES_URL = "https://github.com/angelo-francisco/SecureIT/releases";
 
