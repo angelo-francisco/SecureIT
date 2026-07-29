@@ -28,7 +28,7 @@ vi.mock("@/hooks", async (importOriginal) => {
 vi.mock("@/packages/ui", () => ({
   useToast: () => ({ toast: mockToast }),
   Loader: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  Modal: ({ children, open, onClose }: { children?: React.ReactNode; open?: boolean; onClose?: () => void }) =>
+  Modal: ({ children, open }: { children?: React.ReactNode; open?: boolean }) =>
     open ? <div data-testid="modal">{children}</div> : null,
 }));
 
@@ -44,7 +44,7 @@ const mockToast = vi.fn();
 
 function resetStore() {
   useAuthStore.setState({
-    user: { id: "user-1", email: "test@test.com", name: "Test" },
+    user: { id: "user-1", email: "test@test.com", firstName: "Test", lastName: "User", phone: null, totpEnabled: false, isActive: true, createdAt: "2025-01-01T00:00:00Z" },
     selectedProfile: { id: "p1", user_id: "user-1", display_name: "Test" } as never,
   });
 }

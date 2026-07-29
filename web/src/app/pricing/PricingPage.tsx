@@ -71,16 +71,12 @@ export function PricingPageContent() {
 		<div className="min-h-screen">
 			<Navbar />
 
-			{/* Hero */}
 			<section className="relative min-h-[50vh] flex items-center overflow-hidden pt-24">
 				<div className="absolute inset-0 bg-dots" />
 				<ParallaxLayer speed="slow" className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(44,158,213,0.1)_0%,transparent_60%)]" />
 
 				<div className="relative z-10 max-w-7xl mx-auto px-8 py-20 w-full text-center">
 					<RevealOnScroll variant="scale">
-						<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
-							Preços
-						</p>
 						<h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[0.95]">
 							Planos simples.
 							<br />

@@ -27,20 +27,6 @@ export default function NotificationList({ onClose }: NotificationListProps) {
   );
   const deleteNotification = useDeleteNotification();
 
-  const levelIcon = (level: string) => {
-    switch (level) {
-      case "I":
-        return <Lucide.Info size={20} className="text-blue-400" />;
-      case "E":
-        return <Lucide.Ban size={20} className="text-red-400" />;
-      case "S":
-      case "P":
-        return <Lucide.CircleAlert size={20} className="text-amber-400" />;
-      default:
-        return <Lucide.Bell size={20} className="text-text-muted" />;
-    }
-  };
-
   return (
     <div className="flex-1 h-full flex flex-col relative overflow-hidden">
       <header className="flex items-center justify-between shrink-0">

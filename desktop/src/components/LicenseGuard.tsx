@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useAuthStore } from "../hooks";
 import { useLicenseGuard, type LicenseGuardStatus } from "../hooks/useLicenseGuard";
 import { useLicenseStore } from "../stores/license";
@@ -89,7 +89,7 @@ interface LicenseGuardProps {
 export function LicenseGuard({ children }: LicenseGuardProps) {
   const user = useAuthStore((s) => s.user);
   const [recheckKey, setRecheckKey] = useState(0);
-  const { status, licenseInfo } = useLicenseGuard(user?.id ?? null, recheckKey);
+  const { status } = useLicenseGuard(user?.id ?? null, recheckKey);
 
   const handleActivated = useCallback(() => {
     setRecheckKey((k) => k + 1);

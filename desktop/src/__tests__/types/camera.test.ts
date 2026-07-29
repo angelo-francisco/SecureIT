@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Camera, CameraFormData, CameraTask, ConnectionType } from "@/types/camera";
+import type { Camera, CameraFormData, CameraTask } from "@/types/camera";
 
 describe("CameraTask type", () => {
   it("accepts valid task values", () => {

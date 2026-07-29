@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   return (

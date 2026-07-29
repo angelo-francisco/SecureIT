@@ -37,7 +37,7 @@ import { useLicenseGuard } from "@/hooks/useLicenseGuard";
 
 const mockUseLicenseGuard = vi.mocked(useLicenseGuard);
 
-function mockGuard(status: string, licenseInfo: any = null) {
+function mockGuard(status: "loading" | "valid" | "no_license" | "expired" | "revoked" | "stale" | "fingerprint_mismatch" | "invalid_signature" | "error", licenseInfo: any = null) {
   mockUseLicenseGuard.mockReturnValue({ status, licenseInfo });
 }
 

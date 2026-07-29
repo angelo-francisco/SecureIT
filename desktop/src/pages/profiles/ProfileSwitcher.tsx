@@ -145,7 +145,6 @@ export default function ProfileSwitcher() {
 
         {pinModal && (
           <PinEntryModal
-            profile={pinModal}
             onComplete={handlePinComplete}
             onClose={() => setPinModal(null)}
           />
@@ -158,11 +157,9 @@ export default function ProfileSwitcher() {
 
 
 function PinEntryModal({
-  profile,
   onComplete,
   onClose,
 }: {
-  profile: ProfileData;
   onComplete: (pin: string) => void;
   onClose: () => void;
 }) {
