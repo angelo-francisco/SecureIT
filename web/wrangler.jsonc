@@ -36,6 +36,9 @@
 			"head_sampling_rate": 1
 		}
 	},
+	"vars": {
+		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAEA25NMSuBlkv4PQ"
+	},
 	"d1_databases": [
 		{
 			"binding": "DATABASE_URL_SQLITE",
