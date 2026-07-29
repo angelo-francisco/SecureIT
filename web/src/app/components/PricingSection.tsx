@@ -67,34 +67,29 @@ export function PricingSection() {
 						<div className="p-8 card-sharp animate-pulse h-96" />
 					</div>
 				) : (
-					<div className="max-w-md mx-auto">
-						{/* Toggle mensal/anual */}
+					<div className="max-w-lg mx-auto">
 						<div className="flex items-center justify-center gap-3 mb-8">
 							<span className={`text-sm font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
 								Mensal
 							</span>
 							<button
 								onClick={() => setAnnual(!annual)}
-								className={`relative w-12 h-6 rounded-full transition-colors ${annual ? "bg-primary" : "bg-border"}`}
+								className={`relative w-12 h-6 transition-colors ${annual ? "bg-primary" : "bg-border"}`}
 							>
 								<div
-									className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${annual ? "translate-x-6" : "translate-x-0.5"}`}
+									className={`absolute top-0.5 w-5 h-5 bg-white shadow transition-transform ${annual ? "translate-x-6" : "translate-x-0.5"}`}
 								/>
 							</button>
 							<span className={`text-sm font-medium ${annual ? "text-text" : "text-text-muted"}`}>
 								Anual
 							</span>
-							<span className="text-xs text-primary font-semibold bg-primary/10 px-2 py-0.5">
-								-{Math.round(ANNUAL_DISCOUNT * 100)}%
-							</span>
 						</div>
 
-						<div className="p-8 card-sharp bg-primary/5 border-primary/25 text-center">
-
-							<h4 className="text-2xl uppercase font-bold text-text mb-1">
+						<div className="p-8 card-sharp bg-primary/5 border-primary/25">
+							<h4 className="text-left text-2xl font-bold text-text mb-1">
 								{plan.name}
 							</h4>
-							<p className="text-text-muted text-base mb-6">
+							<p className="text-left text-text-muted text-base mb-6">
 								{plan.description}
 							</p>
 

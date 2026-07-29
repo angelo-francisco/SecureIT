@@ -18,9 +18,11 @@ export function useExchangeRate() {
 
 	const convert = (usd: number): string => {
 		if (!rate) return "---";
-		return (usd * rate).toLocaleString("pt-AO", {
-			minimumFractionDigits: 2,
-			maximumFractionDigits: 2,
+		const value = usd * rate;
+		const rounded = Math.ceil(value / 100) * 100;
+		return rounded.toLocaleString("pt-AO", {
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0,
 		});
 	};
 
