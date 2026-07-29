@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { PricingPageContent } from "./PricingPage";
 
 export const metadata: Metadata = {
-	title: "Preços",
+	title: "Licenças",
 	description:
-		"Planos de vigilância inteligente SecureIT. B2C para particulares e B2B para empresas. Câmeras ilimitadas, reconhecimento facial e alertas em tempo real.",
+		"Licença SecureIT — acesso completo a todas as funcionalidades. Câmeras ilimitadas, reconhecimento facial, alertas em tempo real e análise comportamental.",
 	alternates: { canonical: "/pricing" },
 	openGraph: {
-		title: "Preços | SecureIT",
+		title: "Licenças | SecureIT",
 		description:
-			"Planos de vigilância inteligente. B2C para particulares e B2B para empresas.",
+			"Licença única com tudo incluído. Câmeras ilimitadas, reconhecimento facial e alertas em tempo real.",
 	},
 };
 

@@ -10,43 +10,18 @@ export async function POST() {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
 	try {
-		await db
-			.delete(planService)
-			.where(eq(planService.name, "Instalação e Configuração"))
-			.run();
-
-		const existing = await db.select().from(plan).limit(1).get();
-		if (existing) {
-			const plans = await db.select().from(plan).all();
-			const plansWithRelations = await Promise.all(
-				plans.map(async (p) => {
-					const features = await db
-						.select()
-						.from(planFeature)
-						.where(eq(planFeature.planId, p.id))
-						.all();
-					const services = await db
-						.select()
-						.from(planService)
-						.where(eq(planService.planId, p.id))
-						.all();
-					return { ...p, features, services };
-				}),
-			);
-			return NextResponse.json({
-				message: "Planos já existem",
-				plans: plansWithRelations,
-			});
-		}
+		await db.delete(planService).run();
+		await db.delete(planFeature).run();
+		await db.delete(plan).run();
 
 		const now = new Date().toISOString();
 
-		const b2c = await db
+		const licenca = await db
 			.insert(plan)
 			.values({
-				name: "B2C",
-				description: "Para residências ou utilizadores individuas",
-				basePrice: 75.25,
+				name: "Licença",
+				description: "Acesso completo a todas as funcionalidades do SecureIT",
+				basePrice: 81.27,
 				currency: "USD",
 				durationDays: 30,
 				isDefault: true,
@@ -59,19 +34,19 @@ export async function POST() {
 			.insert(planFeature)
 			.values([
 				{
-					planId: b2c.id,
+					planId: licenca.id,
 					name: "Análise Comportamental",
 					description: "Análise avançada de comportamento em tempo real",
 					price: 0,
 				},
 				{
-					planId: b2c.id,
+					planId: licenca.id,
 					name: "Cloud Storage",
 					description: "Armazenamento de gravações na cloud",
 					price: 0,
 				},
 				{
-					planId: b2c.id,
+					planId: licenca.id,
 					name: "Tunnel de Acesso Remoto",
 					description: "Acesso remoto seguro às suas câmeras",
 					price: 0,
@@ -79,70 +54,20 @@ export async function POST() {
 			])
 			.run();
 
-		const b2b = await db
-			.insert(plan)
-			.values({
-				name: "B2B",
-				description: "Para para empresas e negócios",
-				basePrice: 81.27,
-				currency: "USD",
-				durationDays: 30,
-				updatedAt: now,
-			})
-			.returning()
-			.get();
-
-		await db
-			.insert(planFeature)
-			.values([
-				{
-					planId: b2b.id,
-					name: "Análise Comportamental",
-					description: "Análise avançada de comportamento em tempo real",
-					price: 0,
-				},
-				{
-					planId: b2b.id,
-					name: "Cloud Storage",
-					description: "Armazenamento de gravações na cloud",
-					price: 0,
-				},
-				{
-					planId: b2b.id,
-					name: "Tunnel de Acesso Remoto",
-					description: "Acesso remoto seguro às suas câmeras",
-					price: 0,
-				},
-			])
-			.run();
-
-		const b2cFeatures = await db
+		const features = await db
 			.select()
 			.from(planFeature)
-			.where(eq(planFeature.planId, b2c.id))
+			.where(eq(planFeature.planId, licenca.id))
 			.all();
-		const b2cServices = await db
+		const services = await db
 			.select()
 			.from(planService)
-			.where(eq(planService.planId, b2c.id))
-			.all();
-		const b2bFeatures = await db
-			.select()
-			.from(planFeature)
-			.where(eq(planFeature.planId, b2b.id))
-			.all();
-		const b2bServices = await db
-			.select()
-			.from(planService)
-			.where(eq(planService.planId, b2b.id))
+			.where(eq(planService.planId, licenca.id))
 			.all();
 
 		return NextResponse.json({
-			message: "Planos criados com sucesso",
-			plans: [
-				{ ...b2c, features: b2cFeatures, services: b2cServices },
-				{ ...b2b, features: b2bFeatures, services: b2bServices },
-			],
+			message: "Plano criado com sucesso",
+			plans: [{ ...licenca, features, services }],
 		});
 	} catch (error) {
 		console.error("[Seed Plans]", error);

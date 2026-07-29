@@ -4,7 +4,7 @@ import { MessageCircle, Mail, Phone } from "lucide-react";
 
 const productLinks = [
 	{ label: "Funcionalidades", href: "/#features" },
-	{ label: "Preços", href: "/pricing" },
+	{ label: "Licenças", href: "/pricing" },
 	{ label: "Plataformas", href: "/#platform" },
 	{ label: "Reconhecimento Facial", href: "/#features" },
 ];

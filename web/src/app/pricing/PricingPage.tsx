@@ -12,11 +12,11 @@ import { ChevronDown, Check, MessageCircle, Mail, Phone } from "lucide-react";
 const faqs = [
 	{
 		q: "Posso experimentar antes de comprar?",
-		a: "Sim! Oferecemos um período de teste gratuito de 14 dias para todos os planos, sem necessidade de cartão de crédito.",
+		a: "Sim! Oferecemos um período de teste gratuito de 14 dias, sem necessidade de cartão de crédito.",
 	},
 	{
 		q: "Quantas câmeras posso ligar?",
-		a: "Todos os planos incluem câmeras ilimitadas. Não há restrições no número de câmeras ou dispositivos.",
+		a: "A licença inclui câmeras ilimitadas. Não há restrições no número de câmeras ou dispositivos.",
 	},
 	{
 		q: "Funciona com qualquer câmera?",
@@ -36,7 +36,7 @@ const faqs = [
 	},
 	{
 		q: "Que suporte técnico oferecem?",
-		a: "Suporte por WhatsApp, email e telefone durante horário comercial. Clientes B2B têm suporte prioritário 24/7.",
+		a: "Suporte por WhatsApp, email e telefone durante horário comercial.",
 	},
 	{
 		q: "Como funciona o reconhecimento facial?",
@@ -78,13 +78,13 @@ export function PricingPageContent() {
 				<div className="relative z-10 max-w-7xl mx-auto px-8 py-20 w-full text-center">
 					<RevealOnScroll variant="scale">
 						<h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[0.95]">
-							Planos simples.
+							Uma licença.
 							<br />
-							<span className="gradient-text">Sem surpresas.</span>
+							<span className="gradient-text">Tudo incluído.</span>
 						</h1>
 						<p className="mt-6 text-lg text-text-muted max-w-lg mx-auto">
-							Escolha o plano ideal para as suas necessidades.
-							Câmeras ilimitadas em todos os planos.
+							Acesso completo a todas as funcionalidades do SecureIT.
+							Câmeras ilimitadas, IA e alertas em tempo real.
 						</p>
 					</RevealOnScroll>
 				</div>
@@ -105,7 +105,7 @@ export function PricingPageContent() {
 					<RevealOnScroll>
 						<div className="text-center mb-16">
 							<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
-								Incluído em todos os planos
+								Incluído na licença
 							</p>
 							<h2 className="text-3xl font-extrabold tracking-tight">
 								O que obtém
@@ -167,11 +167,11 @@ export function PricingPageContent() {
 				<div className="max-w-3xl mx-auto text-center">
 					<RevealOnScroll variant="scale">
 						<h2 className="text-4xl font-extrabold tracking-tight mb-6">
-							Precisa de um plano personalizado?
+							Precisa de algo personalizado?
 						</h2>
 						<p className="text-text-muted mb-10 max-w-lg mx-auto">
-							Para empresas com necessidades específicas, oferecemos planos
-							customizados. Fale connosco.
+							Para empresas com necessidades específicas, oferecemos soluções
+							à medida. Fale connosco.
 						</p>
 						<div className="flex flex-wrap items-center justify-center gap-4">
 							<a

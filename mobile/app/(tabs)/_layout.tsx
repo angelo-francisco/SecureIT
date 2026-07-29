@@ -15,12 +15,10 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          justifyContent: 'space-between',
-          paddingHorizontal: 0,
+          paddingHorizontal: 24,
         },
         tabBarItemStyle: {
           flex: 1,
-          maxWidth: undefined,
         },
       }}>
       <Tabs.Screen

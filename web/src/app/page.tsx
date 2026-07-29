@@ -278,6 +278,24 @@ export default function HomePage() {
 				</div>
 			</section> */}
 
+			<section className="py-20 px-8 border-y border-border bg-surface/20">
+				<div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
+					{[
+						{ value: 12000, suffix: "+", label: "Câmeras" },
+						{ value: 120, suffix: "+", label: "Utilizadores" },
+						{ value: 99.9, suffix: "%", label: "Uptime", decimals: 1 },
+						{ value: 3, suffix: "", label: "Plataformas" },
+					].map((stat) => (
+						<div key={stat.label} className="bg-bg p-8 text-center">
+							<div className="text-3xl font-extrabold text-text mb-1">
+								<CountUp end={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
+							</div>
+							<p className="text-xs text-text-muted">{stat.label}</p>
+						</div>
+					))}
+				</div>
+			</section>
+
 			<section id="contact" className="relative py-32 px-8 overflow-hidden">
 				<ParallaxLayer speed="slow" className="absolute inset-0 bg-dots" />
 

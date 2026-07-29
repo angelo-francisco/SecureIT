@@ -5,6 +5,7 @@
     "": {
       "name": "secureit-web",
       "dependencies": {
+        "@marsidev/react-turnstile": "^1.5.4",
         "@paralleldrive/cuid2": "^3.3.0",
         "@types/bcryptjs": "^3.0.0",
         "bcryptjs": "^3.0.3",
@@ -363,6 +364,8 @@
     "@libsql/linux-x64-musl": ["@libsql/linux-x64-musl@0.3.19", "", { "os": "linux", "cpu": "x64" }, "sha512-BLsXyJaL8gZD8+3W2LU08lDEd9MIgGds0yPy5iNPp8tfhXx3pV/Fge2GErN0FC+nzt4DYQtjL+A9GUMglQefXQ=="],
 
     "@libsql/win32-x64-msvc": ["@libsql/win32-x64-msvc@0.3.19", "", { "os": "win32", "cpu": "x64" }, "sha512-ay1X9AobE4BpzG0XPw1gplyLZPGHIgJOovvW23gUrukRegiUP62uzhpRbKNogLlUOynyXeq//prHgPXiebUfWg=="],
+
+    "@marsidev/react-turnstile": ["@marsidev/react-turnstile@1.5.4", "", { "peerDependencies": { "react": "^17.0.2 || ^18.0.0 || ^19.0", "react-dom": "^17.0.2 || ^18.0.0 || ^19.0" } }, "sha512-2+ulBzQPYcC5jZ4Pghlcc6a6+CQ6L0cgTxtbavZbcHcG5/wSQsTAM+vDudF94L9AUPG4uSNQF1kotmvx0Ns/QA=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.6", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1" } }, "sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg=="],
 
