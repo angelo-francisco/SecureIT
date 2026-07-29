@@ -82,49 +82,12 @@ const steps = [
 	},
 ];
 
-const stats = [
-	{ value: 98, suffix: "%", label: "Uptime garantido" },
-	{ value: 2, suffix: "s", label: "Tempo de alerta", prefix: "<" },
-	{ value: 3, suffix: "", label: "Plataformas" },
-];
-
-const testimonials = [
-	{
-		quote: "O SecureIT transformou a segurança do nosso edifício. O reconhecimento facial é incrivelmente preciso.",
-		author: "Carlos Mendes",
-		role: "Director de Operações, Hotel Continental",
-	},
-	{
-		quote: "A multi-plataforma é um diferencial enorme. Monitorizo as câmeras do telemóvel quando estou fora.",
-		author: "Ana Ferreira",
-		role: "Proprietária, Residencial Aurora",
-	},
-	{
-		quote: "A análise de comportamento detectou uma intrusão antes mesmo de alguém se aperceber. Impressionante.",
-		author: "Miguel Santos",
-		role: "Segurança Privada, Grupo AngoSafe",
-	},
-];
-
-const trustLogos = [
-	"Hotel Continental",
-	"AngoSafe",
-	"Residencial Aurora",
-	"Grupo Imobiliar",
-	"Condomínio Sol",
-	"Edifício Central",
-	"Parque Industrial",
-	"Universidade Lusíada",
-];
 
 export default function HomePage() {
 	return (
 		<div className="min-h-screen">
 			<Navbar />
 
-			{/* ══════════════════════════════════════════
-			    SECTION 1 — HERO (Parallax + Gradient)
-			    ══════════════════════════════════════════ */}
 			<section className="relative min-h-screen flex items-center overflow-hidden">
 				<div className="absolute inset-0 bg-grid" />
 
@@ -170,29 +133,12 @@ export default function HomePage() {
 				<div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg to-transparent" />
 			</section>
 
-			{/* <section className="py-12 border-y border-border bg-surface/20">
-				<p className="text-center text-xs font-semibold text-text-muted uppercase tracking-widest mb-8">
-					Utilizado por empresas de referência
-				</p>
-				<Marquee speed={35} className="opacity-50">
-					<div className="flex items-center gap-16 px-8">
-						{trustLogos.map((name) => (
-							<span key={name} className="text-sm font-semibold text-text-muted whitespace-nowrap tracking-wide uppercase">
-								{name}
-							</span>
-						))}
-					</div>
-				</Marquee>
-			</section> */}
-
-			{/* Mission */}
 			<section className="py-32 px-8 border-b border-border">
-				<div className="max-w-7xl mx-auto">
-					<div className="grid md:grid-cols-2 gap-16 items-center">
+				<div className="flex items-center flex-col gap-2">
 						<RevealOnScroll>
 							<div>
 								<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
-									Missão
+									Quem somos?
 								</p>
 								<h2 className="text-4xl font-extrabold tracking-tight mb-6">
 									Vigilância inteligente
@@ -206,33 +152,10 @@ export default function HomePage() {
 								</p>
 								<p className="text-text-muted leading-relaxed">
 									Desde a deteção de pessoas em tempo real até ao reconhecimento facial
-									e análise comportamental — tudo funciona numa plataforma unificada que
-									funciona no desktop, navegador e telemóvel.
+									e análise comportamental — tudo funciona numa plataforma unificada e multi-plataforma.
 								</p>
 							</div>
 						</RevealOnScroll>
-
-						<RevealOnScroll variant="right">
-							<div className="card-sharp p-10 bg-surface/50">
-								<div className="space-y-6">
-									{[
-										{ icon: Eye, text: "Reconhecimento facial com IA profunda" },
-										{ icon: Shield, text: "Deteção de pessoas YOLOv11 em tempo real" },
-										{ icon: Lock, text: "Criptografia de ponta a ponta" },
-										{ icon: Globe, text: "Desktop, web e mobile sincronizados" },
-										{ icon: Rocket, text: "Alertas em menos de 2 segundos" },
-									].map((item) => (
-										<div key={item.text} className="flex items-center gap-4">
-											<div className="w-9 h-9 shrink-0 flex items-center justify-center border border-primary/25 bg-primary/10">
-												<item.icon className="w-4 h-4 text-primary" />
-											</div>
-											<span className="text-sm text-text">{item.text}</span>
-										</div>
-									))}
-								</div>
-							</div>
-						</RevealOnScroll>
-					</div>
 				</div>
 			</section>
 
@@ -300,53 +223,6 @@ export default function HomePage() {
 							))}
 						</div>
 					</div>
-				</div>
-			</section>
-
-			{/* <section className="py-32 px-8 bg-surface/20">
-				<div className="max-w-7xl mx-auto">
-					<RevealOnScroll>
-						<div className="text-center mb-20">
-							<h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-								O que dizem
-								<br />
-								<span className="text-text-muted">os nossos clientes</span>
-							</h2>
-						</div>
-					</RevealOnScroll>
-
-					<div className="grid md:grid-cols-3 gap-px bg-border">
-						{testimonials.map((t, i) => (
-							<RevealOnScroll key={t.author} delay={i * 120}>
-								<div className="bg-bg p-10 h-full flex flex-col">
-									<Quote className="w-8 h-8 text-primary/30 mb-6" />
-									<p className="text-text text-base leading-relaxed flex-1 mb-8">&ldquo;{t.quote}&rdquo;</p>
-									<div>
-										<p className="text-sm font-bold text-text">{t.author}</p>
-										<p className="text-sm text-text-muted mt-1">{t.role}</p>
-									</div>
-								</div>
-							</RevealOnScroll>
-						))}
-					</div>
-				</div>
-			</section> */}
-
-			<section className="py-20 px-8 border-y border-border bg-surface/20">
-				<div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
-					{[
-						{ value: 12000, suffix: "+", label: "Câmeras" },
-						{ value: 120, suffix: "+", label: "Utilizadores" },
-						{ value: 99.9, suffix: "%", label: "Uptime", decimals: 1 },
-						{ value: 3, suffix: "", label: "Plataformas" },
-					].map((stat) => (
-						<div key={stat.label} className="bg-bg p-8 text-center">
-							<div className="text-3xl font-extrabold text-text mb-1">
-								<CountUp end={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
-							</div>
-							<p className="text-xs text-text-muted">{stat.label}</p>
-						</div>
-					))}
 				</div>
 			</section>
 
