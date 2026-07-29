@@ -70,11 +70,6 @@ jobs:
         with:
           workspaces: desktop/src-tauri
 
-      - name: Install WebView2
-        uses: crazy-max/ghaction-chocolatey@v3
-        with:
-          args: install webview2 -y --no-progress
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
