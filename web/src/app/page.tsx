@@ -7,6 +7,24 @@ import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
 import { CountUp } from "@/components/animations/CountUp";
 import { Marquee } from "@/components/animations/Marquee";
 import { DownloadSection } from "@/app/components/DownloadSection";
+import { useEffect, useState } from "react";
+
+function useIsDesktop() {
+	const [isDesktop, setIsDesktop] = useState(false);
+
+	useEffect(() => {
+		const check = () => {
+			const width = window.innerWidth;
+			const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+			setIsDesktop(width >= 1024 && !hasTouch);
+		};
+		check();
+		window.addEventListener("resize", check);
+		return () => window.removeEventListener("resize", check);
+	}, []);
+
+	return isDesktop;
+}
 import {
 	Shield,
 	Eye,
@@ -84,6 +102,8 @@ const steps = [
 
 
 export default function HomePage() {
+	const isDesktop = useIsDesktop();
+
 	return (
 		<div className="min-h-screen">
 			<Navbar />
@@ -226,7 +246,7 @@ export default function HomePage() {
 				</div>
 			</section>
 
-			<DownloadSection />
+			{isDesktop && <DownloadSection />}
 
 			<section id="contact" className="relative py-32 px-8 overflow-hidden">
 				<ParallaxLayer speed="slow" className="absolute inset-0 bg-dots" />
