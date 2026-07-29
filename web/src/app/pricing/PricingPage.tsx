@@ -77,70 +77,18 @@ export function PricingPageContent() {
 
 				<div className="relative z-10 max-w-7xl mx-auto px-8 py-20 w-full text-center">
 					<RevealOnScroll variant="scale">
-						<h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[0.95]">
+						<h1 className="mb-16 text-5xl sm:text-6xl font-extrabold tracking-tight leading-[0.95]">
 							Uma licença.
 							<br />
 							<span className="gradient-text">Tudo incluído.</span>
 						</h1>
-						<p className="mt-6 text-lg text-text-muted max-w-lg mx-auto">
-							Acesso completo a todas as funcionalidades do SecureIT.
-							Câmeras ilimitadas, IA e alertas em tempo real.
-						</p>
+						<PricingSection />
 					</RevealOnScroll>
-				</div>
-			</section>
-
-			{/* Pricing Cards */}
-			<section className="pb-32 px-8">
-				<RevealOnScroll>
-					<PricingSection />
-				</RevealOnScroll>
-			</section>
-
-			<div className="section-line max-w-7xl mx-auto" />
-
-			{/* Feature Comparison */}
-			<section className="py-32 px-8">
-				<div className="max-w-5xl mx-auto">
-					<RevealOnScroll>
-						<div className="text-center mb-16">
-							<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
-								Incluído na licença
-							</p>
-							<h2 className="text-3xl font-extrabold tracking-tight">
-								O que obtém
-							</h2>
-						</div>
-					</RevealOnScroll>
-
-					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
-						{[
-							"Câmeras ilimitadas",
-							"Pessoas ilimitadas",
-							"Deteção de pessoas (YOLOv11)",
-							"Reconhecimento facial",
-							"Alertas em tempo real",
-							"Multi-plataforma",
-							"Criptografia E2E",
-							"Actualizações gratuitas",
-							"Suporte por WhatsApp",
-						].map((feature, i) => (
-							<RevealOnScroll key={feature} delay={i * 40}>
-								<div className="bg-bg p-6 flex items-center gap-3">
-									<div className="w-6 h-6 shrink-0 flex items-center justify-center bg-success/15 border border-success/25">
-										<Check className="w-3.5 h-3.5 text-success" />
-									</div>
-									<span className="text-sm text-text">{feature}</span>
-								</div>
-							</RevealOnScroll>
-						))}
-					</div>
 				</div>
 			</section>
 
 			<div className="section-line max-w-7xl mx-auto" />
 
-			{/* FAQ */}
 			<section className="py-32 px-8 bg-surface/20">
 				<div className="max-w-3xl mx-auto">
 					<RevealOnScroll>

@@ -153,26 +153,21 @@ export default function HomePage() {
 				<div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg to-transparent" />
 			</section>
 
-			<section className="py-32 px-8 border-b border-border">
+			<section id="about" className="py-32 px-8 border-b border-border">
 				<div className="flex items-center flex-col gap-2">
 						<RevealOnScroll>
-							<div>
-								<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
+							<div className="text-center">
+								<p className="text-xl font-bold text-primary uppercase tracking-widest mb-4">
 									Quem somos?
 								</p>
-								<h2 className="text-4xl font-extrabold tracking-tight mb-6">
-									Vigilância inteligente
-									<br />
-									<span className="text-text-muted">para todos.</span>
+								<h2 className="text-4xl font-extrabold mb-6">
+									Vigilância inteligente <br className="block md:hidden"/> para todos
 								</h2>
-								<p className="text-text-muted leading-relaxed mb-4">
-									Acreditamos que segurança não deveria ser um luxo. Com tecnologia de
-									inteligência artificial acessível, pretendemos que qualquer pessoa ou
-									empresa possa proteger os seus espaços de forma inteligente e eficiente.
-								</p>
-								<p className="text-text-muted leading-relaxed">
+								<p className="text-text-muted text-lg md:text-2xl max-w-3xl mb-4">
+									Com tecnologia de inteligência artificial acessível, permitimos a qualquer
+									empresa ou residência garantimos a segurança do que é valioso para si.
 									Desde a deteção de pessoas em tempo real até ao reconhecimento facial
-									e análise comportamental — tudo funciona numa plataforma unificada e multi-plataforma.
+									e análise comportamental. Tudo numa única plataforma.
 								</p>
 							</div>
 						</RevealOnScroll>

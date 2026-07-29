@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Key } from "lucide-react";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 
 interface PlanFeature {
@@ -28,9 +28,12 @@ interface Plan {
 	services: PlanService[];
 }
 
+const ANNUAL_DISCOUNT = 0.17;
+
 export function PricingSection() {
 	const { convert } = useExchangeRate();
 	const [plan, setPlan] = useState<Plan | null>(null);
+	const [annual, setAnnual] = useState(false);
 
 	useEffect(() => {
 		fetch("/api/plans")
@@ -40,6 +43,10 @@ export function PricingSection() {
 			})
 			.catch(() => {});
 	}, []);
+
+	const monthlyPrice = plan?.basePrice ?? 0;
+	const annualPrice = monthlyPrice * 12 * (1 - ANNUAL_DISCOUNT);
+	const displayPrice = annual ? annualPrice : monthlyPrice;
 
 	const includedFeatures = [
 		"Câmeras ilimitadas",
@@ -52,44 +59,59 @@ export function PricingSection() {
 	return (
 		<section
 			id="pricing"
-			className="min-h-screen flex items-center justify-center px-8"
+			className="flex items-center justify-center px-8"
 		>
 			<div className="max-w-7xl mx-auto w-full">
-				<div className="text-center mb-16">
-					<h3 className="text-3xl font-bold text-text mb-4">
-						Licenciamento
-					</h3>
-					<p className="text-text-muted max-w-lg mx-auto">
-						Um único plano com tudo incluído
-					</p>
-				</div>
-
 				{!plan ? (
 					<div className="max-w-md mx-auto">
 						<div className="p-8 card-sharp animate-pulse h-96" />
 					</div>
 				) : (
 					<div className="max-w-md mx-auto">
+						{/* Toggle mensal/anual */}
+						<div className="flex items-center justify-center gap-3 mb-8">
+							<span className={`text-sm font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
+								Mensal
+							</span>
+							<button
+								onClick={() => setAnnual(!annual)}
+								className={`relative w-12 h-6 rounded-full transition-colors ${annual ? "bg-primary" : "bg-border"}`}
+							>
+								<div
+									className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${annual ? "translate-x-6" : "translate-x-0.5"}`}
+								/>
+							</button>
+							<span className={`text-sm font-medium ${annual ? "text-text" : "text-text-muted"}`}>
+								Anual
+							</span>
+							<span className="text-xs text-primary font-semibold bg-primary/10 px-2 py-0.5">
+								-{Math.round(ANNUAL_DISCOUNT * 100)}%
+							</span>
+						</div>
+
 						<div className="p-8 card-sharp bg-primary/5 border-primary/25 text-center">
-							<h4 className="text-xl font-semibold text-text mb-1">
+
+							<h4 className="text-2xl uppercase font-bold text-text mb-1">
 								{plan.name}
 							</h4>
-							<p className="text-text-muted text-sm mb-6">
+							<p className="text-text-muted text-base mb-6">
 								{plan.description}
 							</p>
 
 							<div className="mb-6">
 								<div className="flex items-baseline justify-center gap-1">
-									<span className="text-5xl font-bold text-text">
-										${plan.basePrice.toFixed(2)}
+									<span className="text-4xl font-bold text-text">
+										{convert(displayPrice)} Kz
 									</span>
 									<span className="text-sm text-text-muted">
-										/ {plan.durationDays} dias
+										{annual ? "/ano" : `/ ${plan.durationDays} dias`}
 									</span>
 								</div>
-								<p className="text-sm text-primary mt-1">
-									≈ {convert(plan.basePrice)} Kz
-								</p>
+								{annual && (
+									<p className="text-xs text-text-muted mt-1">
+										{convert(monthlyPrice)} Kz/dia · {convert(monthlyPrice * 12)} Kz sem desconto
+									</p>
+								)}
 							</div>
 
 							<ul className="space-y-3 text-sm text-text-muted mb-8 text-left max-w-xs mx-auto">
