@@ -197,16 +197,16 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					<>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{plans.map((plan) => (
-								<button
-									key={plan.id}
-									onClick={() =>
-										!selectedPlan ? selectPlan(plan) : setSelectedPlan(null)
-									}
-									className={`relative text-left border p-5 transition-all hover:border-primary/50 ${
-										selectedPlan?.id === plan.id
-											? "border-primary ring-1 ring-primary/30"
-											: "border-border"
-									}`}
+									<button
+										key={plan.id}
+										onClick={() =>
+											!selectedPlan ? selectPlan(plan) : setSelectedPlan(null)
+										}
+										className={`relative text-left card-sharp p-5 transition-all ${
+											selectedPlan?.id === plan.id
+												? "border-primary ring-1 ring-primary/30"
+												: "border-border"
+										}`}
 								>
 									<div className="absolute bottom-5 right-5">
 										{selectedPlan?.id === plan.id ? (

@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ChevronRight, Check, Zap, Shield, Eye } from "lucide-react";
+import {
+	ChevronRight,
+	Check,
+	Home,
+	Building2,
+	Zap,
+	Shield,
+	Eye,
+} from "lucide-react";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 
 interface PlanFeature {
@@ -63,32 +71,41 @@ export function PricingSection() {
 				</div>
 
 				{plans.length === 0 ? (
-					<div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+					<div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto items-stretch">
 						{[1, 2].map((i) => (
 							<div
 								key={i}
-								className="p-8 rounded-2xl bg-surface border border-border animate-pulse h-96"
+								className="flex-1 p-8 card-sharp animate-pulse h-96"
 							/>
 						))}
 					</div>
 				) : (
-					<div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-						{plans.map((plan) => (
+					<div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto items-stretch relative">
+						{plans.map((plan, idx) => (
 							<div
 								key={plan.id}
-								className={`p-8 rounded-2xl border transition-all ${
+								className={`flex-1 p-8 card-sharp transition-all ${
 									plan.name === "B2B"
-										? "bg-primary/10 border-primary/25 hover:border-primary/40"
+										? "bg-primary/5 border-primary/25 hover:border-primary/40"
 										: "bg-surface border-border hover:border-border-light"
 								}`}
 							>
 								<div className="flex items-center gap-2 mb-2">
+									{plan.name === "B2B" ? (
+										<Building2 className="w-5 h-5 text-primary shrink-0" />
+									) : (
+										<Home className="w-5 h-5 text-primary shrink-0" />
+									)}
 									<h4 className="text-xl font-semibold text-text">
 										{plan.name}
 									</h4>
-									{plan.name === "B2B" && (
-										<span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-semibold">
-											Empresas
+									{plan.name === "B2B" ? (
+										<span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/15">
+											Empresarial
+										</span>
+									) : (
+										<span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-text-muted bg-surface-hover">
+											Residencial
 										</span>
 									)}
 								</div>
@@ -119,26 +136,9 @@ export function PricingSection() {
 									))}
 								</ul>
 
-								{plan.services.length > 0 && (
-									<div className="mb-6 pt-4 border-t border-border">
-										<p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-											Serviços
-										</p>
-										{plan.services.map((s) => (
-											<div
-												key={s.name}
-												className="flex items-center justify-between text-sm text-text-muted py-1"
-											>
-												<span>{s.name}</span>
-												<span className="text-text">${s.price.toFixed(2)}</span>
-											</div>
-										))}
-									</div>
-								)}
-
 								<Link
-									href={plan.name === "B2B" ? "/signup" : "/signup"}
-									className={`block text-center py-3 rounded-lg font-bold transition-all ${
+									href="/signup"
+									className={`block text-center py-3 font-bold transition-all ${
 										plan.name === "B2B"
 											? "bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20"
 											: "border border-border text-text-muted hover:bg-surface-hover hover:text-text"
@@ -148,6 +148,14 @@ export function PricingSection() {
 								</Link>
 							</div>
 						))}
+
+						<div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+							<div className="w-11 h-11 bg-surface border-2 border-border rounded-full flex items-center justify-center shadow-xl">
+								<span className="text-[11px] font-bold text-text-muted tracking-wider">
+									OU
+								</span>
+							</div>
+						</div>
 					</div>
 				)}
 

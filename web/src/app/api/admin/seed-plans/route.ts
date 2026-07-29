@@ -10,6 +10,11 @@ export async function POST() {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
 	try {
+		await db
+			.delete(planService)
+			.where(eq(planService.name, "Instalação e Configuração"))
+			.run();
+
 		const existing = await db.select().from(plan).limit(1).get();
 		if (existing) {
 			const plans = await db.select().from(plan).all();
@@ -74,16 +79,6 @@ export async function POST() {
 			])
 			.run();
 
-		await db
-			.insert(planService)
-			.values({
-				planId: b2c.id,
-				name: "Instalação e Configuração",
-				description: "Instalação profissional do sistema",
-				price: 12,
-			})
-			.run();
-
 		const b2b = await db
 			.insert(plan)
 			.values({
@@ -119,16 +114,6 @@ export async function POST() {
 					price: 0,
 				},
 			])
-			.run();
-
-		await db
-			.insert(planService)
-			.values({
-				planId: b2b.id,
-				name: "Instalação e Configuração",
-				description: "Instalação profissional do sistema",
-				price: 16,
-			})
 			.run();
 
 		const b2cFeatures = await db
