@@ -45,7 +45,7 @@ export function PricingSection() {
 	}, []);
 
 	const monthlyPrice = plan?.basePrice ?? 0;
-	const annualPrice = monthlyPrice * 12 * (1 - ANNUAL_DISCOUNT);
+	const annualPrice = monthlyPrice * 12;
 	const displayPrice = annual ? annualPrice : monthlyPrice;
 
 	const includedFeatures = [
@@ -67,9 +67,9 @@ export function PricingSection() {
 						<div className="p-8 card-sharp animate-pulse h-96" />
 					</div>
 				) : (
-					<div className="max-w-lg mx-auto">
+					<div className="max-w-md mx-auto">
 						<div className="flex items-center justify-center gap-3 mb-8">
-							<span className={`text-sm font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
+							<span className={`text-base font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
 								Mensal
 							</span>
 							<button
@@ -80,36 +80,31 @@ export function PricingSection() {
 									className={`absolute top-0.5 w-5 h-5 bg-white shadow transition-transform ${annual ? "translate-x-6" : "translate-x-0.5"}`}
 								/>
 							</button>
-							<span className={`text-sm font-medium ${annual ? "text-text" : "text-text-muted"}`}>
+							<span className={`text-base font-medium ${annual ? "text-text" : "text-text-muted"}`}>
 								Anual
 							</span>
 						</div>
 
 						<div className="p-8 card-sharp bg-primary/5 border-primary/25">
-							<h4 className="text-left text-2xl font-bold text-text mb-1">
+							<h4 className="text-2xl font-bold text-text mb-1">
 								{plan.name}
 							</h4>
-							<p className="text-left text-text-muted text-base mb-6">
+							<p className="max-w-sm text-text-muted text-base mb-6">
 								{plan.description}
 							</p>
 
-							<div className="mb-6">
+							<div className="mb-6 text-left">
 								<div className="flex items-baseline justify-center gap-1">
 									<span className="text-4xl font-bold text-text">
 										{convert(displayPrice)} Kz
 									</span>
 									<span className="text-sm text-text-muted">
-										{annual ? "/ano" : `/ ${plan.durationDays} dias`}
+										{annual ? "/ano" : `/mês`}
 									</span>
 								</div>
-								{annual && (
-									<p className="text-xs text-text-muted mt-1">
-										{convert(monthlyPrice)} Kz/dia · {convert(monthlyPrice * 12)} Kz sem desconto
-									</p>
-								)}
 							</div>
 
-							<ul className="space-y-3 text-sm text-text-muted mb-8 text-left max-w-xs mx-auto">
+							<ul className="space-y-3 text-base text-text-muted mb-8 text-left mx-auto">
 								{includedFeatures.map((item) => (
 									<li key={item} className="flex items-center gap-2">
 										<ChevronRight className="w-4 h-4 text-primary shrink-0" />

@@ -4,8 +4,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
-import { CountUp } from "@/components/animations/CountUp";
-import { Marquee } from "@/components/animations/Marquee";
 import { DownloadSection } from "@/app/components/DownloadSection";
 import { useEffect, useState } from "react";
 
@@ -13,14 +11,17 @@ function useIsDesktop() {
 	const [isDesktop, setIsDesktop] = useState(false);
 
 	useEffect(() => {
-		const check = () => {
-			const width = window.innerWidth;
-			const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-			setIsDesktop(width >= 1024 && !hasTouch);
+		const getDeviceType = () => {
+			const ua = navigator.userAgent;
+			if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+				return "Tablet";
+			}
+			if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated/i.test(ua)) {
+				return "Mobile";
+			}
+			return "Desktop";
 		};
-		check();
-		window.addEventListener("resize", check);
-		return () => window.removeEventListener("resize", check);
+		setIsDesktop(getDeviceType() === "Desktop");
 	}, []);
 
 	return isDesktop;
@@ -108,7 +109,7 @@ export default function HomePage() {
 		<div className="min-h-screen">
 			<Navbar />
 
-			<section className="relative min-h-screen flex items-center overflow-hidden">
+			<section id="home" className="relative min-h-screen flex items-center overflow-hidden">
 				<div className="absolute inset-0 bg-grid" />
 
 				<ParallaxLayer speed="slow" className="absolute inset-0">
@@ -155,22 +156,22 @@ export default function HomePage() {
 
 			<section id="about" className="py-32 px-8 border-b border-border">
 				<div className="flex items-center flex-col gap-2">
-						<RevealOnScroll>
-							<div className="text-center">
-								<p className="text-xl font-bold text-primary uppercase tracking-widest mb-4">
-									Quem somos?
-								</p>
-								<h2 className="text-4xl font-extrabold mb-6">
-									Vigilância inteligente <br className="block md:hidden"/> para todos
-								</h2>
-								<p className="text-text-muted text-lg md:text-2xl max-w-3xl mb-4">
-									Com tecnologia de inteligência artificial acessível, permitimos a qualquer
-									empresa ou residência garantimos a segurança do que é valioso para si.
-									Desde a deteção de pessoas em tempo real até ao reconhecimento facial
-									e análise comportamental. Tudo numa única plataforma.
-								</p>
-							</div>
-						</RevealOnScroll>
+					<RevealOnScroll>
+						<div className="text-center">
+							<p className="text-xl font-bold text-primary uppercase tracking-widest mb-4">
+								Quem somos?
+							</p>
+							<h2 className="text-4xl font-extrabold mb-6">
+								Vigilância inteligente <br className="block md:hidden" /> para todos
+							</h2>
+							<p className="text-text-muted text-lg md:text-2xl max-w-3xl mb-4">
+								Com tecnologia de inteligência artificial acessível, permitimos a qualquer
+								empresa ou residência garantimos a segurança do que é valioso para si.
+								Desde a deteção de pessoas em tempo real até ao reconhecimento facial
+								e análise comportamental. Tudo numa única plataforma.
+							</p>
+						</div>
+					</RevealOnScroll>
 				</div>
 			</section>
 
@@ -190,7 +191,7 @@ export default function HomePage() {
 								<div className="group p-10 bg-bg hover:bg-surface transition-colors duration-300 h-full">
 									<div className="flex items-center justify-start gap-2 bg-primary/10 mb-3">
 										<feature.icon className="w-6 h-6 text-primary" />
-									<h3 className="text-xl font-bold text-text">{feature.title}</h3>
+										<h3 className="text-xl font-bold text-text">{feature.title}</h3>
 									</div>
 									<p className="text-lg text-text-muted leading-relaxed">{feature.description}</p>
 								</div>

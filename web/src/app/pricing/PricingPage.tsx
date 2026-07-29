@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
 import { PricingSection } from "@/app/components/PricingSection";
-import { ChevronDown, Check, MessageCircle, Mail, Phone } from "lucide-react";
+import { ChevronDown, Mail } from "lucide-react";
 
 const faqs = [
 	{
@@ -86,23 +86,51 @@ export function PricingPageContent() {
 					</RevealOnScroll>
 				</div>
 			</section>
-
+			<div className="section-line max-w-7xl mx-auto" />
+			<section className="py-32 px-8">
+				<div className="max-w-3xl mx-auto text-center">
+					<RevealOnScroll variant="scale">
+						<h2 className="text-4xl font-extrabold tracking-tight mb-6">
+							Precisa mais do que um sistema?
+						</h2>
+						<p className="text-text-muted mb-10 max-w-lg mx-auto">
+							Para empresas ou residências que precisem de comprar e/ou instalar câmaras, DVRs, entre outros, nós temos uma solução à medida.
+						</p>
+						<div className="flex flex-wrap items-center justify-center gap-4">
+							<a
+								href="https://wa.me/244926422462"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="group inline-flex items-center gap-2 px-8 py-4 text-text font-semibold text-base border transition-all"
+							>
+								<Image src={"https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png"}
+									alt={"whatsapp logo"} width={30} height={30} className="w-auto h-6" />
+								Falar no WhatsApp
+							</a>
+							<a
+								href="mailto:newstatesofficial@gmail.com"
+								className="inline-flex items-center gap-2 px-8 py-4 border border-border text-text-muted font-medium text-sm hover:border-border-light hover:text-text transition-all"
+							>
+								<Mail className="w-auto h-6" />
+								Enviar Email
+							</a>
+						</div>
+					</RevealOnScroll>
+				</div>
+			</section>
 			<div className="section-line max-w-7xl mx-auto" />
 
 			<section className="py-32 px-8 bg-surface/20">
 				<div className="max-w-3xl mx-auto">
 					<RevealOnScroll>
 						<div className="text-center mb-16">
-							<p className="text-xs font-semibold text-primary uppercase tracking-widest mb-4">
-								Perguntas Frequentes
-							</p>
 							<h2 className="text-4xl font-extrabold tracking-tight">
 								Ainda tem dúvidas?
 							</h2>
 						</div>
 					</RevealOnScroll>
 
-					<div className="space-y-px">
+					<div className="">
 						{faqs.map((faq) => (
 							<FAQItem key={faq.q} q={faq.q} a={faq.a} />
 						))}
@@ -110,38 +138,7 @@ export function PricingPageContent() {
 				</div>
 			</section>
 
-			{/* CTA */}
-			<section className="py-32 px-8">
-				<div className="max-w-3xl mx-auto text-center">
-					<RevealOnScroll variant="scale">
-						<h2 className="text-4xl font-extrabold tracking-tight mb-6">
-							Precisa de algo personalizado?
-						</h2>
-						<p className="text-text-muted mb-10 max-w-lg mx-auto">
-							Para empresas com necessidades específicas, oferecemos soluções
-							à medida. Fale connosco.
-						</p>
-						<div className="flex flex-wrap items-center justify-center gap-4">
-							<a
-								href="https://wa.me/244926422462"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="group inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold text-sm hover:bg-primary-hover transition-all"
-							>
-								<MessageCircle className="w-4 h-4" />
-								Falar no WhatsApp
-							</a>
-							<a
-								href="mailto:newstatesofficial@gmail.com"
-								className="inline-flex items-center gap-2 px-8 py-4 border border-border text-text-muted font-medium text-sm hover:border-border-light hover:text-text transition-all"
-							>
-								<Mail className="w-4 h-4" />
-								Enviar Email
-							</a>
-						</div>
-					</RevealOnScroll>
-				</div>
-			</section>
+
 
 			<Footer />
 		</div>
