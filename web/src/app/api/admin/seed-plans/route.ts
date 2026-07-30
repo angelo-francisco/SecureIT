@@ -59,15 +59,10 @@ export async function POST() {
 			.from(planFeature)
 			.where(eq(planFeature.planId, licenca.id))
 			.all();
-		const services = await db
-			.select()
-			.from(planService)
-			.where(eq(planService.planId, licenca.id))
-			.all();
 
 		return NextResponse.json({
 			message: "Plano criado com sucesso",
-			plans: [{ ...licenca, features, services }],
+			plans: [{ ...licenca, features, services: [] }],
 		});
 	} catch (error) {
 		console.error("[Seed Plans]", error);
