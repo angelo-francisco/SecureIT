@@ -9,7 +9,17 @@ export function useLicense() {
 
   const maxCameras = store.maxCameras === -1 ? Infinity : store.maxCameras;
   const maxPeople = store.maxPeople === -1 ? Infinity : store.maxPeople;
-  const faceRecognition = store.features.includes("face_recognition");
+
+  function hasFeature(...slugs: string[]): boolean {
+    for (const slug of slugs) {
+      if (store.features.includes(slug)) return true;
+      const nfd = slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (nfd !== slug && store.features.includes(nfd)) return true;
+      const stripped = (nfd || slug).replace(/[^a-z0-9_]/g, "");
+      if (store.features.includes(stripped)) return true;
+    }
+    return false;
+  }
 
   return {
     ...store,
@@ -18,7 +28,7 @@ export function useLicense() {
 		isB2B,
     maxCameras,
     maxPeople,
-    faceRecognition,
+    hasFeature,
     canAddCamera: (currentCount: number) => currentCount < maxCameras,
     canAddPerson: (currentCount: number) => currentCount < maxPeople,
   };

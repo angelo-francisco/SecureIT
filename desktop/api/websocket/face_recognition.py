@@ -14,6 +14,7 @@ from apps.people.service import search_by_embedding
 from services.facenet import detect_faces_in_frame
 from websocket.helpers import (
     authenticate,
+    check_license_feature,
     create_camera_service,
     get_user_camera,
     load_user_config,
@@ -154,6 +155,10 @@ class FaceRecognitionManager:
             await self.ws.close(code=4001)
             return
         self.profile_id = pid
+
+        if not await check_license_feature(self.profile_id, "face_recognition"):
+            await self.ws.close(code=4001, reason="Licença não inclui Reconhecimento Facial")
+            return
 
         await self.ws.accept()
 

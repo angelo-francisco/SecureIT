@@ -10,6 +10,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 from websocket.helpers import (
     authenticate,
+    check_license_feature,
     create_camera_service,
     create_notification,
     get_user_camera,
@@ -432,6 +433,10 @@ class BehaviourAnalysisManager:
             await self.ws.close(code=4001)
             return
         self.profile_id = pid
+
+        if not await check_license_feature(self.profile_id, "analise_comportamental"):
+            await self.ws.close(code=4001, reason="Licença não inclui Análise de Comportamento")
+            return
 
         await self.ws.accept()
 

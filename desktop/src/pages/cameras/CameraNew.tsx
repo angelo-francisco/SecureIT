@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useCreateCamera, useLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
+import { useLicense } from "../../hooks/useLicense";
 import { Input, Button, OutlinedInput  } from "@/packages/ui";
 import { LucideInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
 import type { CameraTask } from "../../types/camera";
@@ -33,6 +34,7 @@ export default function CameraNew({ onClose }: CameraNewProps) {
   const { data: localDevices } = useLocalDevices();
   const panelNavigate = usePanelNavigate();
   const { toast } = useToast();
+  const license = useLicense();
 
   function validate(): FormErrors {
     const errs: FormErrors = {};
@@ -58,6 +60,12 @@ export default function CameraNew({ onClose }: CameraNewProps) {
     }
     if (connectionType === "L" && isDemo && !demoPath.trim()) {
       errs.demoPath = "O caminho do ficheiro é obrigatório";
+    }
+    if (task === "FR" && !license.hasFeature("face_recognition")) {
+      errs.name = "A sua licença não inclui Reconhecimento Facial";
+    }
+    if (task === "BA" && !license.hasFeature("analise_comportamental", "anlise_comportamental")) {
+      errs.name = "A sua licença não inclui Análise de Comportamento";
     }
     return errs;
   }
@@ -216,8 +224,8 @@ export default function CameraNew({ onClose }: CameraNewProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="D">Detecção de Área</SelectItem>
-                  <SelectItem value="FR">Reconhecimento Facial</SelectItem>
-                  <SelectItem value="BA">Análise de Comportamento</SelectItem>
+                  <SelectItem value="FR" disabled={!license.hasFeature("face_recognition")}>Reconhecimento Facial{!license.hasFeature("face_recognition") && " (não disponível na licença)"}</SelectItem>
+                  <SelectItem value="BA" disabled={!license.hasFeature("analise_comportamental", "anlise_comportamental")}>Análise de Comportamento{!license.hasFeature("analise_comportamental", "anlise_comportamental") && " (não disponível na licença)"}</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-lg text-text-muted mt-1">
@@ -225,6 +233,11 @@ export default function CameraNew({ onClose }: CameraNewProps) {
                 {task === "FR" && "Detetar e reconhecer rostos automaticamente nesta câmara"}
                 {task === "BA" && "Analisar comportamento suspeito e gerar alertas"}
               </p>
+              {task !== "D" && ((task === "FR" && !license.hasFeature("face_recognition")) || (task === "BA" && !license.hasFeature("analise_comportamental", "anlise_comportamental"))) && (
+                <p className="text-base text-red-400 mt-1">
+                  A sua licença não inclui esta funcionalidade.
+                </p>
+              )}
             </div>
           </div>
 

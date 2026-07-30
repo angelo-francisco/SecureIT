@@ -3,6 +3,8 @@ from tortoise.expressions import Q
 from apps.cameras.models import Camera
 from apps.cameras.schemas import CameraCreate
 from apps.audit.service import log_action
+from apps.control.models import Profile
+from apps.license.models import License
 from core.exceptions import NotFound, ValidationError_
 
 
@@ -23,7 +25,36 @@ async def get_camera(camera_id: int, profile_id: str) -> Camera:
     return camera
 
 
+TASK_FEATURE_MAP: dict[str, list[str]] = {
+    "D": [],
+    "FR": ["face_recognition"],
+    "BA": ["analise_comportamental", "anlise_comportamental"],
+}
+
+
+async def _check_feature_access(profile_id: str, task: str) -> None:
+    required_features = TASK_FEATURE_MAP.get(task.upper(), [])
+    if not required_features:
+        return
+
+    profile = await Profile.get_or_none(profile_id=profile_id)
+    if not profile:
+        raise ValidationError_("Perfil não encontrado")
+
+    license_obj = await License.filter(
+        user_id=profile.user_id, status="ACTIVE"
+    ).first()
+    if not license_obj:
+        raise ValidationError_("Licença não encontrada. Ative uma licença para usar esta funcionalidade.")
+
+    features = license_obj.features or []
+    if not any(f in features for f in required_features):
+        raise ValidationError_("A sua licença não inclui esta funcionalidade.")
+
+
 async def create_camera(profile_id: str, data: CameraCreate) -> Camera:
+    await _check_feature_access(profile_id, data.task)
+
     if data.connection_type == "L" and not data.connection_info:
         raise ValidationError_("Informações da câmara local são necessárias")
     if data.connection_type == "W" and not data.connection_info.get("stream_url"):
@@ -56,7 +87,9 @@ async def update_camera(camera_id: int, profile_id: str, data: dict) -> Camera:
     if "face_recognition" in data:
         camera.face_recognition = data["face_recognition"]
     if "task" in data:
-        camera.task = data["task"].upper() if data["task"] else "D"
+        new_task = data["task"].upper() if data["task"] else "D"
+        await _check_feature_access(profile_id, new_task)
+        camera.task = new_task
         if camera.task == "FR":
             camera.face_recognition = True
         elif camera.task != "FR":

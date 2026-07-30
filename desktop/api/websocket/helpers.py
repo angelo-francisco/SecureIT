@@ -2,12 +2,35 @@ import logging
 
 from apps.control.models import Profile
 from apps.cameras.models import Camera
+from apps.license.models import License
 from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from core.config import settings
 from services.camera import CameraService
 
 logger = logging.getLogger(__name__)
+
+FEATURE_VARIANTS: dict[str, list[str]] = {
+    "face_recognition": ["face_recognition"],
+    "analise_comportamental": ["analise_comportamental", "anlise_comportamental"],
+}
+
+
+async def check_license_feature(profile_id: str, *feature_slugs: str) -> bool:
+    profile = await Profile.get_or_none(profile_id=profile_id)
+    if not profile:
+        return False
+    license_obj = await License.filter(
+        user_id=profile.user_id, status="ACTIVE"
+    ).first()
+    if not license_obj:
+        return False
+    stored_features = license_obj.features or []
+    for slug in feature_slugs:
+        variants = FEATURE_VARIANTS.get(slug, [slug])
+        if any(v in stored_features for v in variants):
+            return True
+    return False
 
 
 async def authenticate(profile_id: str | None) -> int | None:

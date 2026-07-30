@@ -125,21 +125,29 @@ describe("useLicense", () => {
     expect(result.current.canAddPerson(10000)).toBe(true);
   });
 
-  it("faceRecognition is true when features includes face_recognition", () => {
+  it("hasFeature returns true when features includes the slug", () => {
     useLicenseStore.setState({ features: ["face_recognition", "other"] });
     const { result } = renderHook(() => useLicense());
-    expect(result.current.faceRecognition).toBe(true);
+    expect(result.current.hasFeature("face_recognition")).toBe(true);
+    expect(result.current.hasFeature("other")).toBe(true);
   });
 
-  it("faceRecognition is false when features does not include face_recognition", () => {
+  it("hasFeature returns false when features does not include the slug", () => {
     useLicenseStore.setState({ features: ["other_feature"] });
     const { result } = renderHook(() => useLicense());
-    expect(result.current.faceRecognition).toBe(false);
+    expect(result.current.hasFeature("face_recognition")).toBe(false);
   });
 
-  it("faceRecognition is false when features is empty", () => {
+  it("hasFeature returns false when features is empty", () => {
     useLicenseStore.setState({ features: [] });
     const { result } = renderHook(() => useLicense());
-    expect(result.current.faceRecognition).toBe(false);
+    expect(result.current.hasFeature("face_recognition")).toBe(false);
+  });
+
+  it("hasFeature checks multiple slugs", () => {
+    useLicenseStore.setState({ features: ["anlise_comportamental"] });
+    const { result } = renderHook(() => useLicense());
+    expect(result.current.hasFeature("analise_comportamental", "anlise_comportamental")).toBe(true);
+    expect(result.current.hasFeature("face_recognition", "other")).toBe(false);
   });
 });
