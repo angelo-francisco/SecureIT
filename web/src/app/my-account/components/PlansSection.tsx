@@ -398,12 +398,12 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 
 				<div className="bg-surface border border-border p-4">
 					<div className="flex items-center justify-between">
-						<span className="text-sm text-text-muted">Plano</span>
-						<span className="text-sm text-text">{selectedPlan.name} ({annual ? "Anual" : "Mensal"})</span>
+						<span className="text-base">Plano</span>
+						<span className="text-base text-text">{selectedPlan.name} ({annual ? "Anual" : "Mensal"})</span>
 					</div>
 					<div className="flex items-center justify-between mt-1">
-						<span className="text-sm text-text-muted">{annual ? "12 meses" : "1 mês"}</span>
-						<span className="text-sm text-text">{annual ? `${convert(monthlyPrice)} Kz/mês` : ""}</span>
+						<span className="text-base">{annual ? "12 meses" : "1 mês"}</span>
+						<span className="text-base text-text">{annual ? `${convert(monthlyPrice * 12)} Kz` : `${convert(monthlyPrice)} Kz`}</span>
 					</div>
 					<div className="border-t border-border mt-2 pt-2 flex items-center justify-between">
 						<span className="text-base font-semibold text-text">Total</span>

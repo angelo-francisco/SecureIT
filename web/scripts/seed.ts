@@ -5,19 +5,13 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 const DB_PATH = resolve(import.meta.dir, "..", "secureit.db");
-const MIGRATION_PATH = resolve(import.meta.dir, "..", "src", "db", "0000_dizzy_redwing.sql");
+const MIGRATIONS = [
+	resolve(import.meta.dir, "..", "src", "db", "0000_dizzy_redwing.sql"),
+	resolve(import.meta.dir, "..", "src", "db", "0001_absurd_fat_cobra.sql"),
+];
 
 const db = new Database(DB_PATH);
 db.run("PRAGMA journal_mode=WAL");
-
-// Apply migration if tables don't exist yet
-const tablesExist = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='User'").get();
-if (!tablesExist) {
-	console.log("Applying migration...");
-	const sql = readFileSync(MIGRATION_PATH, "utf-8");
-	db.exec(sql);
-	console.log("Migration applied.");
-}
 
 function run(sql: string, params?: any[]) {
 	if (params) {
@@ -31,115 +25,103 @@ function query(sql: string, params?: any[]): any[] {
 	return params ? db.prepare(sql).all(...params) : db.prepare(sql).all();
 }
 
-function main() {
+async function encryptPaymentField(text: string): Promise<string> {
+	const keyText =
+		process.env.PAYMENT_ENCRYPTION_KEY ||
+		"secureit_payment_db_secret_key_v1_32b";
+	const encoder = new TextEncoder();
+	const keyData = encoder.encode(keyText.padEnd(32, "0").slice(0, 32));
+	const key = await crypto.subtle.importKey(
+		"raw",
+		keyData,
+		{ name: "AES-GCM" },
+		false,
+		["encrypt"],
+	);
+	const iv = crypto.getRandomValues(new Uint8Array(12));
+	const encrypted = await crypto.subtle.encrypt(
+		{ name: "AES-GCM", iv },
+		key,
+		encoder.encode(text),
+	);
+	const ivHex = Array.from(iv)
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+	const cipherHex = Array.from(new Uint8Array(encrypted))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+	return `enc:${ivHex}:${cipherHex}`;
+}
+
+async function main() {
 	const adminEmail = "admin@secureit.com";
 	const adminPasswordHash = hashSync("admin123", 12);
 	const now = new Date().toISOString();
 
 	console.log(`\nSeeding ${DB_PATH}...\n`);
 
-	// --- Admin User ---
-	console.log(`Checking for admin user (${adminEmail})...`);
+	for (const m of MIGRATIONS) {
+		console.log(`Applying ${m.split("/").pop()}...`);
+		db.exec(readFileSync(m, "utf-8"));
+	}
+	console.log("Migrations applied.\n");
+
+	// --- Admin ---
 	const existingAdmin = query(
 		"SELECT id FROM AdminUser WHERE email = ? LIMIT 1",
 		[adminEmail],
 	);
-
 	if (existingAdmin.length > 0) {
-		console.log("Admin user already exists, skipping.");
+		console.log("Admin already exists, skipping.");
 	} else {
-		const adminId = createId();
+		const id = createId();
 		run(
 			"INSERT INTO AdminUser (id, email, passwordHash, createdAt) VALUES (?, ?, ?, ?)",
-			[adminId, adminEmail, adminPasswordHash, now],
+			[id, adminEmail, adminPasswordHash, now],
 		);
-		console.log(`Admin user created (id: ${adminId})`);
+		console.log(`Admin created (id: ${id})`);
 	}
 
-	// --- Plans ---
-	console.log("\nChecking for existing plans...");
+	// --- Plan ---
 	const existingPlans = query("SELECT id, name FROM Plan");
-	const existingPlanNames = new Set(existingPlans.map((p: any) => p.name));
-
-	if (existingPlanNames.size > 0) {
-		console.log(
-			`Plans already exist (${[...existingPlanNames].join(", ")}), skipping.`,
-		);
+	if (existingPlans.length > 0) {
+		console.log(`Plans exist (${existingPlans.map((p: any) => p.name).join(", ")}), skipping.`);
 	} else {
-		const b2cId = createId();
-		const b2bId = createId();
+		const planId = createId();
+		run(
+			`INSERT INTO Plan (id, name, description, basePrice, currency, durationDays, isActive, isDefault, createdAt, updatedAt) VALUES (?, 'Licença', 'Acesso completo a todas as funcionalidades do SecureIT', 81.27, 'USD', 30, 1, 1, ?, ?)`,
+			[planId, now, now],
+		);
 
 		const features = [
-			{
-				name: "Análise Comportamental",
-				desc: "Análise avançada de comportamento em tempo real",
-				price: 0,
-			},
-			{
-				name: "Cloud Storage",
-				desc: "Armazenamento de gravações na cloud",
-				price: 0,
-			},
-			{
-				name: "Acesso Remoto (telefone)",
-				desc: "Acesso remoto seguro às câmeras via telemóvel / smartphone",
-				price: 15,
-			},
+			{ name: "Análise Comportamental", desc: "Análise avançada de comportamento em tempo real" },
+			{ name: "Cloud Storage", desc: "Armazenamento de gravações na cloud" },
+			{ name: "Tunnel de Acesso Remoto", desc: "Acesso remoto seguro às suas câmeras" },
 		];
-
-		// B2C Plan (default)
-		run(
-			`INSERT INTO Plan (id, name, description, basePrice, currency, durationDays, isActive, isDefault, createdAt, updatedAt) VALUES (?, 'B2C', 'Para residências ou utilizadores individuais', 75.25, 'USD', 30, 1, 1, ?, ?)`,
-			[b2cId, now, now],
-		);
 		for (const f of features) {
 			run(
-				`INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`,
-				[createId(), b2cId, f.name, f.desc, f.price, now],
+				"INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, 0, 1, ?)",
+				[createId(), planId, f.name, f.desc, now],
 			);
 		}
-		run(
-			`INSERT INTO PlanService (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, 'Instalação e Configuração', 'Instalação profissional do sistema', 12, 1, ?)`,
-			[createId(), b2cId, now],
-		);
-		console.log("B2C plan created with 3 features + 1 service");
-
-		// B2B Plan
-		run(
-			`INSERT INTO Plan (id, name, description, basePrice, currency, durationDays, isActive, isDefault, createdAt, updatedAt) VALUES (?, 'B2B', 'Para empresas e negócios', 81.27, 'USD', 30, 1, 0, ?, ?)`,
-			[b2bId, now, now],
-		);
-		for (const f of features) {
-			run(
-				`INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`,
-				[createId(), b2bId, f.name, f.desc, f.price, now],
-			);
-		}
-		run(
-			`INSERT INTO PlanService (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, 'Instalação e Configuração', 'Instalação profissional do sistema', 16, 1, ?)`,
-			[createId(), b2bId, now],
-		);
-		console.log("B2B plan created with 3 features + 1 service");
+		console.log(`Plan "Licença" created with ${features.length} features`);
 	}
 
 	// --- Payment Info ---
-	console.log("\nChecking for existing payment info...");
 	const existingPi = query("SELECT id FROM PaymentInfo LIMIT 1");
-
 	if (existingPi.length > 0) {
 		console.log("Payment info already exists, skipping.");
 	} else {
 		const piId = createId();
+		const [encIban, encName, encBank, encRef] = await Promise.all([
+			encryptPaymentField("PT50 0002 0000 0000 0000 0000 0"),
+			encryptPaymentField("SecureIT Angola Lda"),
+			encryptPaymentField("Banco Angolano de Investimentos"),
+			encryptPaymentField("SecureIT-"),
+		]);
 		run(
-			`INSERT INTO PaymentInfo (id, iban, accountName, bankName, reference, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`,
-			[
-				piId,
-				"AO06 0040 0000 8891 2345 6789 1",
-				"SecureIT Lda",
-				"Banco BAI",
-				"926422462",
-				now,
-			],
+			"INSERT INTO PaymentInfo (id, iban, accountName, bankName, reference, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)",
+			[piId, encIban, encName, encBank, encRef, now],
 		);
 		console.log(`Payment info created (id: ${piId})`);
 	}
@@ -147,4 +129,4 @@ function main() {
 	console.log("\nSeed complete.");
 }
 
-main();
+main().catch(console.error);
