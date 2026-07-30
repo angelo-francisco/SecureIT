@@ -73,14 +73,17 @@ function main() {
 			{
 				name: "Análise Comportamental",
 				desc: "Análise avançada de comportamento em tempo real",
+				price: 0,
 			},
 			{
 				name: "Cloud Storage",
 				desc: "Armazenamento de gravações na cloud",
+				price: 0,
 			},
 			{
-				name: "Tunnel de Acesso Remoto",
-				desc: "Acesso remoto seguro às suas câmeras",
+				name: "Acesso Remoto (telefone)",
+				desc: "Acesso remoto seguro às câmeras via telemóvel / smartphone",
+				price: 15,
 			},
 		];
 
@@ -91,8 +94,8 @@ function main() {
 		);
 		for (const f of features) {
 			run(
-				`INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, 0, 1, ?)`,
-				[createId(), b2cId, f.name, f.desc, now],
+				`INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`,
+				[createId(), b2cId, f.name, f.desc, f.price, now],
 			);
 		}
 		run(
@@ -108,8 +111,8 @@ function main() {
 		);
 		for (const f of features) {
 			run(
-				`INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, 0, 1, ?)`,
-				[createId(), b2bId, f.name, f.desc, now],
+				`INSERT INTO PlanFeature (id, planId, name, description, price, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`,
+				[createId(), b2bId, f.name, f.desc, f.price, now],
 			);
 		}
 		run(

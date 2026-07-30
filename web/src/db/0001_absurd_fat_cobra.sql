@@ -1,0 +1,1 @@
+ALTER TABLE `PaymentRequest` ADD `durationDays` integer DEFAULT 30 NOT NULL;

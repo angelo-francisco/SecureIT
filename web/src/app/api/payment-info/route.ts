@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { paymentInfo } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { decryptPaymentInfo } from "@/lib/crypto";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,7 +12,7 @@ export async function GET() {
 			.where(eq(paymentInfo.isActive, true))
 			.limit(1)
 			.get();
-		return NextResponse.json(info || null);
+		return NextResponse.json(info ? await decryptPaymentInfo(info) : null);
 	} catch (error) {
 		console.error("[PaymentInfo GET]", error);
 		return NextResponse.json(

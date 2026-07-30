@@ -3,6 +3,7 @@ import { paymentRequest, plan, paymentInfo, user } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
+import { decryptPaymentInfo } from "@/lib/crypto";
 
 export async function GET() {
 	const session = await getAdminSession();
@@ -33,18 +34,19 @@ export async function GET() {
 					.from(user)
 					.where(eq(user.id, r.userId))
 					.get();
+				const decPi = pi ? await decryptPaymentInfo(pi) : null;
 				return {
 					...r,
 					plan: p ?? null,
-					paymentInfo: pi
+					paymentInfo: decPi
 						? {
-								id: pi.id,
-								iban: pi.iban,
-								accountName: pi.accountName,
-								bankName: pi.bankName,
-								reference: pi.reference,
-								isActive: pi.isActive,
-								createdAt: pi.createdAt,
+								id: decPi.id,
+								iban: decPi.iban,
+								accountName: decPi.accountName,
+								bankName: decPi.bankName,
+								reference: decPi.reference,
+								isActive: decPi.isActive,
+								createdAt: decPi.createdAt,
 							}
 						: null,
 					user: u

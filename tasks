@@ -1,3 +1,12 @@
-erro em pessoas no desktop, sempre q abro, Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
-adicionar analise de comportamento nas camaras, adiciona agora uma seccao na model da camara chamada de tarefa esse campo pode possuir 3 diferentes valores: D (detection), FR (face recognition) ou BA (behaviour analysis); actualiza o formulario para permitir selecionar uma dessas opcoes; cria dps o websocket para analise de comportamento utiliza algoritmos opensource eficientes q permitam determinar se a pessoa esta roubando alguma coisa na loja e se o alerta for positivo manda um sinal para o frontend disparando um alarme
-no licensesettings apos revogar a licença manda o user de volta para o perfil, limpa os dados necessarios e fecha mandando ele para o profiles
+# Database
+- Fix the errors in payment db locally
+- Ensure payment data is encrypted in the database
+
+# Features
+- Create an options section in "Obter Licença"
+  - Add Remote Access (phone)
+- SecureIt app
+  - Add Remote Access feature
+
+# Performance
+- Optimise the app for better performance

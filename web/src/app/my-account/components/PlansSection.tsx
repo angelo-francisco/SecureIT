@@ -74,7 +74,6 @@ const INCLUDED_FEATURES = [
 export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 	({ data: initialData, onClose }, ref) => {
 		const { toast } = useToast();
-		const ANNUAL_DISCOUNT = 0.17;
 		const { convert } = useExchangeRate();
 		const [plans, setPlans] = useState<Plan[]>(initialData.plans);
 		const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(
@@ -91,7 +90,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 		const [copiedField, setCopiedField] = useState<string | null>(null);
 
 		const monthlyPrice = selectedPlan?.basePrice ?? 0;
-		const annualPrice = monthlyPrice * 12 * (1 - ANNUAL_DISCOUNT);
+		const annualPrice = monthlyPrice * 12;
 		const displayPrice = annual ? annualPrice : monthlyPrice;
 
 		const copyToClipboard = useCallback((text: string, field: string) => {
@@ -128,6 +127,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						proofPublicId: uploadedProof.public_id,
 						proofUrl: uploadedProof.secure_url,
 						totalPrice: displayPrice,
+						durationDays: annual ? 365 : 30,
 					}),
 				});
 				if (!res.ok) {
@@ -171,11 +171,6 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							{annual ? "/ano" : "/ mês"}
 						</span>
 					</div>
-					{annual && (
-						<p className="text-xs text-text-muted text-center mt-1">
-							{convert(monthlyPrice)} Kz/mês · {convert(monthlyPrice * 12)} Kz sem desconto
-						</p>
-					)}
 
 					<div className="mt-4 flex items-center justify-center gap-3">
 						<span className={`text-xs font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
@@ -183,17 +178,14 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						</span>
 						<button
 							onClick={() => setAnnual(!annual)}
-							className={`relative w-10 h-5 rounded-full transition-colors ${annual ? "bg-primary" : "bg-border"}`}
+							className={`relative w-10 h-5 transition-colors ${annual ? "bg-primary" : "bg-border"}`}
 						>
 							<div
-								className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${annual ? "translate-x-5" : "translate-x-0"}`}
+								className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white shadow transition-transform ${annual ? "translate-x-5" : "translate-x-0"}`}
 							/>
 						</button>
 						<span className={`text-xs font-medium ${annual ? "text-text" : "text-text-muted"}`}>
 							Anual
-						</span>
-						<span className="text-[10px] text-primary font-semibold bg-primary/10 px-1.5 py-0.5">
-							-{Math.round(ANNUAL_DISCOUNT * 100)}%
 						</span>
 					</div>
 

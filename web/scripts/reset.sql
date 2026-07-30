@@ -5,11 +5,15 @@ PRAGMA foreign_keys = OFF;
 DROP TABLE IF EXISTS SubProfile;
 DROP TABLE IF EXISTS PaymentRequest;
 DROP TABLE IF EXISTS PaymentInfo;
+DROP TABLE IF EXISTS PlanFeature;
+DROP TABLE IF EXISTS PlanService;
 DROP TABLE IF EXISTS Plan;
 DROP TABLE IF EXISTS EmailCode;
 DROP TABLE IF EXISTS AdminUser;
 DROP TABLE IF EXISTS License;
 DROP TABLE IF EXISTS LicenseKey;
+DROP TABLE IF EXISTS MaintenanceRequest;
+DROP TABLE IF EXISTS Notification;
 DROP TABLE IF EXISTS User;
 
 -- Re-enable foreign key constraints

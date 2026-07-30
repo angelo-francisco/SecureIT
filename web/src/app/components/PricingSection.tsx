@@ -28,7 +28,7 @@ interface Plan {
 	services: PlanService[];
 }
 
-const ANNUAL_DISCOUNT = 0.17;
+const ANNUAL_DISCOUNT = 0;
 
 export function PricingSection() {
 	const { convert } = useExchangeRate();

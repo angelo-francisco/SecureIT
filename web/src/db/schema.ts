@@ -190,6 +190,7 @@ export const paymentRequest = sqliteTable(
 		selectedFeatures: text("selectedFeatures"),
 		selectedServices: text("selectedServices"),
 		totalPrice: real("totalPrice"),
+		durationDays: integer("durationDays").notNull().default(30),
 		createdAt: text("createdAt")
 			.notNull()
 			.$defaultFn(() => new Date().toISOString()),

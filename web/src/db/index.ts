@@ -27,6 +27,14 @@ function getDb(): DrizzleDB {
 				"utf-8",
 			);
 			sqlite.exec(migrationSql);
+		} else {
+			try {
+				const prColumns = sqlite.query("PRAGMA table_info(PaymentRequest)").all() as any[];
+				const hasDurationDays = prColumns.some((col) => col.name === "durationDays");
+				if (!hasDurationDays) {
+					sqlite.exec("ALTER TABLE PaymentRequest ADD COLUMN durationDays INTEGER DEFAULT 30 NOT NULL;");
+				}
+			} catch {}
 		}
 
 		_db = drizzle(sqlite, { schema }) as DrizzleDB;

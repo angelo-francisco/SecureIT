@@ -1,8 +1,9 @@
 import { db } from "@/db";
 import { paymentInfo } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
+import { encryptText, decryptPaymentInfo } from "@/lib/crypto";
 
 export async function GET() {
 	const session = await getAdminSession();
@@ -16,7 +17,7 @@ export async function GET() {
 			.where(eq(paymentInfo.isActive, true))
 			.limit(1)
 			.get();
-		return NextResponse.json(info || null);
+		return NextResponse.json(info ? await decryptPaymentInfo(info) : null);
 	} catch (error) {
 		console.error("[Admin PaymentInfo GET]", error);
 		return NextResponse.json(
@@ -42,6 +43,11 @@ export async function PUT(request: Request) {
 			);
 		}
 
+		const encIban = (await encryptText(iban))!;
+		const encAccountName = (await encryptText(accountName))!;
+		const encBankName = bankName ? await encryptText(bankName) : null;
+		const encReference = reference ? await encryptText(reference) : null;
+
 		const existing = await db
 			.select()
 			.from(paymentInfo)
@@ -52,19 +58,29 @@ export async function PUT(request: Request) {
 		if (existing) {
 			const updated = await db
 				.update(paymentInfo)
-				.set({ iban, accountName, bankName, reference })
+				.set({
+					iban: encIban,
+					accountName: encAccountName,
+					bankName: encBankName,
+					reference: encReference,
+				})
 				.where(eq(paymentInfo.id, existing.id))
 				.returning()
 				.get();
-			return NextResponse.json(updated);
+			return NextResponse.json(await decryptPaymentInfo(updated));
 		}
 
 		const created = await db
 			.insert(paymentInfo)
-			.values({ iban, accountName, bankName, reference })
+			.values({
+				iban: encIban,
+				accountName: encAccountName,
+				bankName: encBankName,
+				reference: encReference,
+			})
 			.returning()
 			.get();
-		return NextResponse.json(created);
+		return NextResponse.json(await decryptPaymentInfo(created));
 	} catch (error) {
 		console.error("[Admin PaymentInfo PUT]", error);
 		return NextResponse.json(

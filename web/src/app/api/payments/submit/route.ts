@@ -18,6 +18,7 @@ export async function POST(request: Request) {
 			selectedFeatures,
 			selectedServices,
 			totalPrice,
+			durationDays,
 		} = body;
 
 		if (!planId || !proofPublicId || !proofUrl) {
@@ -89,6 +90,7 @@ export async function POST(request: Request) {
 					selectedServices: JSON.stringify(selectedServices),
 				}),
 				...(totalPrice !== undefined && { totalPrice }),
+				...(durationDays !== undefined && { durationDays }),
 			})
 			.returning()
 			.get();

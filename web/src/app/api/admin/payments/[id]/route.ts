@@ -68,8 +68,9 @@ export async function PUT(
 
 		if (status === "APPROVED" && planRow) {
 			const nowDate = new Date();
+			const licenseDurationDays = payment.durationDays ?? planRow.durationDays;
 			const expiresAt = new Date(
-				nowDate.getTime() + planRow.durationDays * 24 * 60 * 60 * 1000,
+				nowDate.getTime() + licenseDurationDays * 24 * 60 * 60 * 1000,
 			);
 			const expiresAtStr = expiresAt.toISOString();
 
@@ -148,7 +149,7 @@ export async function PUT(
 					.values({
 						key,
 						type: planRow.name,
-						durationDays: planRow.durationDays,
+						durationDays: licenseDurationDays,
 						status: "ACTIVE",
 					})
 					.returning()
@@ -191,7 +192,7 @@ export async function PUT(
 					.values({
 						key,
 						type: planRow.name,
-						durationDays: planRow.durationDays,
+						durationDays: licenseDurationDays,
 						status: "ACTIVE",
 					})
 					.returning()
