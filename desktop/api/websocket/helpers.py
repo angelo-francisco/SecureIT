@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 async def authenticate(profile_id: str | None) -> int | None:
     if not profile_id:
         return None
-    return (await Profile.get(profile_id=profile_id)).id
+    return (await Profile.get(profile_id=profile_id)).profile_id
 
 
 async def load_user_config(profile_id: str) -> dict:

@@ -277,7 +277,7 @@ export default function LicenseSettings({ onClose }: LicenseSettingsProps) {
             <div className="w-full flex flex-col md:flex-row items-center justify-between">
               <div>
                 <h2 className="text-3xl font-bold text-text">
-                  {apiLicense?.license_type === "B2B" ? "B2B" : "B2C"} [<span
+                  Licença [<span
                     className={`px-1 uppercase font-bold ${isActive
                       ? "text-success"
                       : "text-error"
@@ -305,7 +305,7 @@ export default function LicenseSettings({ onClose }: LicenseSettingsProps) {
                   ) : (
                     <Lucide.RefreshCw size={16} />
                   )}
-                  {verifying ? "A verificar..." : "Verificar"}
+                  {verifying ? "" : "Verificar"}
                 </button>
                 {isActive && (
                   <button
@@ -368,16 +368,6 @@ export default function LicenseSettings({ onClose }: LicenseSettingsProps) {
 
                 <span className="text-base text-text font-bold">
                   {apiLicense?.days_remaining ?? 0} dias
-                </span>
-              </div>
-
-              <div className="py-2.5 flex justify-between">
-                <span className="text-base text-text-muted">
-                  Tipo
-                </span>
-
-                <span className="text-base text-text font-bold">
-                  {apiLicense?.license_type}
                 </span>
               </div>
             </div>

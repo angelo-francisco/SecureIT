@@ -29,20 +29,20 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
   }, [events.length]);
 
   return (
-    <div className="w-80 shrink-0 border-l border-white/[0.08] bg-[#0B0E14] flex flex-col h-[100vh]">
+    <div className="w-90 shrink-0 border-l border-white/[0.08] bg-[#0B0E14] flex flex-col h-[100vh]">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] shrink-0">
         <div className="flex items-center gap-2">
           <Lucide.Bell size={18} className="text-primary" />
           <span className="text-sm font-semibold text-text">Detecções</span>
-          <span className="text-[10px] px-1.5 py-0.5 bg-white/[0.06] text-text-muted font-mono">
-            {events.length}
+          <span className="text-[14px] px-1.5 text-text-muted font-mono">
+            ({events.length})
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
           {onToggleNavbar && (
             <button
               onClick={onToggleNavbar}
-              className="p-1.5 text-text-muted hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="cursor-pointer p-1.5 text-text-muted hover:text-white hover:bg-white/[0.06] transition-colors"
               title={navbarHidden ? "Mostrar navbar" : "Ocultar navbar"}
             >
               {navbarHidden ? (
@@ -55,9 +55,9 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
           {events.length > 0 && (
             <button
               onClick={clearEvents}
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-white transition-colors px-1.5 py-1"
+              className="flex text-red-500 items-center gap-1 text-base hover:text-white transition-colors"
             >
-              <Lucide.Trash2 size={13} />
+              <Lucide.Trash2 size={14} />
               Limpar
             </button>
           )}
@@ -100,11 +100,11 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
                   : "bg-amber-400/10 text-amber-400";
 
               const icon = isBehaviour ? (
-                <Lucide.ShieldAlert size={14} />
+                <Lucide.ShieldAlert size={16} />
               ) : isFace ? (
-                <Lucide.ScanFace size={14} />
+                <Lucide.ScanFace size={16} />
               ) : (
-                <Lucide.Users size={14} />
+                <Lucide.Users size={16} />
               );
 
               return (
@@ -117,11 +117,9 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
                     if (ev.person_id && onInspectPerson) onInspectPerson(ev.person_id);
                   }}
                 >
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-xs font-medium truncate ${nameColor}`}>
+                      <span className={`text-base ${nameColor}`}>
                         {eventTitle(ev.type, ev.unknown, ev.name)}
                       </span>
                       {ev.confidence != null && (
@@ -132,8 +130,8 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       {icon}
-                      <span className="text-[10px] text-text-muted truncate">{ev.camera_name}</span>
-                      <span className="text-[10px] text-text-muted/60">
+                      <span className="text-sm text-text-muted truncate">{ev.camera_name}</span>
+                      <span className="text-sm text-text-muted/60">
                         {new Date(ev.timestamp).toLocaleTimeString("pt-PT")}
                       </span>
                     </div>

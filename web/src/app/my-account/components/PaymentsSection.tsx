@@ -64,22 +64,22 @@ export const PaymentsSection = forwardRef<
 
 	return (
 		<div className="overflow-x-auto">
-			<table className="min-w-[850px] w-full">
+			<table className="w-full">
 				<thead>
 					<tr className="border-b border-border">
-						<th className="px-6 py-4 text-left text-base md:text-lg font-semibold text-text">
+						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
 							Nome
 						</th>
-						<th className="px-6 py-4 text-left text-base md:text-lg font-semibold text-text">
+						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
 							Montante
 						</th>
-						<th className="px-6 py-4 text-left text-base md:text-lg font-semibold text-text">
+						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
 							Data
 						</th>
-						<th className="px-6 py-4 text-left text-base md:text-lg font-semibold text-text">
+						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
 							Estado
 						</th>
-						<th className="px-6 py-4 text-left text-base md:text-lg font-semibold text-text">
+						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
 							Outros
 						</th>
 					</tr>
@@ -91,25 +91,25 @@ export const PaymentsSection = forwardRef<
 							key={p.id}
 							className="border-b border-border/50 last:border-b-0 hover:bg-card/40 transition-colors"
 						>
-							<td className="px-6 py-5">
+							<td className="text-center py-4">
 								<p className="text-lg md:text-xl font-semibold text-text whitespace-nowrap">
 									{p.plan.name}
 								</p>
 							</td>
 
-							<td className="px-6 py-5">
+							<td className="text-center py-4">
 								<p className="text-lg md:text-xl font-medium text-text whitespace-nowrap">
 									${(p.totalPrice || p.plan.basePrice).toFixed(2)}
 								</p>
 							</td>
 
-							<td className="px-6 py-5">
+							<td className="text-center py-4">
 								<p className="text-base md:text-lg text-text-muted whitespace-nowrap">
 									{new Date(p.createdAt).toLocaleDateString("pt-PT")}
 								</p>
 							</td>
 
-							<td className="px-6 py-5 whitespace-nowrap">
+							<td className="text-center py-4 whitespace-nowrap">
 								<span
 									className={`inline-flex px-3 py-1 rounded-full text-sm md:text-base font-medium ${statusColor(
 										p.status
@@ -119,7 +119,7 @@ export const PaymentsSection = forwardRef<
 								</span>
 							</td>
 
-							<td className="px-6 py-5 min-w-[220px]">
+							<td className="text-center py-4 min-w-[220px]">
 								<div className="flex flex-col gap-2">
 									{p.proofUrl && (
 										<a

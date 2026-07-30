@@ -3,20 +3,28 @@ from io import BytesIO
 
 import numpy as np
 import torch
-from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image, ImageOps
 
 from core.exceptions import ValidationError_
 
-mtcnn = MTCNN(
-    image_size=320,
-    margin=0,
-    select_largest=True,
-    post_process=True,
-    device="cpu",
-)
+_mtcnn = None
+_resnet = None
 
-resnet = InceptionResnetV1(pretrained="vggface2").eval().to(mtcnn.device)
+
+def _get_models():
+    global _mtcnn, _resnet
+    if _mtcnn is None:
+        from facenet_pytorch import MTCNN, InceptionResnetV1
+
+        _mtcnn = MTCNN(
+            image_size=320,
+            margin=0,
+            select_largest=True,
+            post_process=True,
+            device="cpu",
+        )
+        _resnet = InceptionResnetV1(pretrained="vggface2").eval().to(_mtcnn.device)
+    return _mtcnn, _resnet
 
 
 def base64_to_bytes(photo_b64: str) -> bytes:
@@ -39,6 +47,7 @@ def generate_face_embedding(
     else:
         raise ValueError("É necessário fornecer base64 ou uma imagem PIL")
 
+    mtcnn, resnet = _get_models()
     if detect_face:
         face = mtcnn(image)
         if face is None:
@@ -74,6 +83,7 @@ def treat_photo(base64_photo: str) -> tuple[bytes, Image.Image]:
 
 def detect_faces_in_frame(pil_img: Image.Image, confidence_threshold: float = 0.9) -> list[dict]:
     """Detect faces and generate embeddings for all faces in an image (camera stream use)."""
+    mtcnn, _resnet = _get_models()
     boxes, probs = mtcnn.detect(pil_img)
     if boxes is None:
         return []

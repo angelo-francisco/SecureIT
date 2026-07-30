@@ -7,4 +7,4 @@ aerich upgrade 2>/dev/null || {
   aerich init-db
   echo "Aerich initialized for PostgreSQL"
 }
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 8000

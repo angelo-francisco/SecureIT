@@ -111,10 +111,10 @@ export default function CameraNew({ onClose }: CameraNewProps) {
       <div className="flex-1 overflow-y-auto mt-6 flex justify-center">
         <div className="w-full max-w-xl space-y-5">
           <div className="flex gap-2 items-center justify-between">
-          <div className="space-y-2 w-full">
-            <label className="text-base font-medium text-text">Nome</label>
+          <div className="space-y-2 w-full py-2">
             <OutlinedInput label="Nome" id="camera-name"
               value={name}
+              labelSize={"xl"}
               onChange={(e) => { setName(e.target.value); setErrors((prev) => ({ ...prev, name: undefined })); }}
               className={(errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
             />
@@ -122,8 +122,7 @@ export default function CameraNew({ onClose }: CameraNewProps) {
           </div>
 
           <div className="space-y-2 w-full">
-            <label className="text-base font-medium text-text">Localização</label>
-            <OutlinedInput label="Localização" id="camera-location"
+            <OutlinedInput label="Localização" id="camera-location" labelSize={"xl"}
               value={location}
               onChange={(e) => { setLocation(e.target.value); setErrors((prev) => ({ ...prev, location: undefined })); }}
               className={(errors.location ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}

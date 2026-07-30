@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { user, license, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession, createToken } from "@/lib/auth";
+import { hashPassword } from "@/lib/password";
 
 export async function GET() {
 	try {
@@ -57,6 +58,7 @@ export async function GET() {
 				firstName: foundUser.firstName,
 				lastName: foundUser.lastName,
 				phone: foundUser.phone,
+				hasPin: !!foundUser.pinHash,
 				totpEnabled: foundUser.totpEnabled,
 				isActive: foundUser.isActive,
 				createdAt: foundUser.createdAt,
@@ -97,7 +99,7 @@ export async function PUT(request: Request) {
 		}
 
 		const body = (await request.json()) as any;
-		const { firstName, lastName, phone } = body;
+		const { firstName, lastName, phone, pin } = body;
 
 		if (!firstName?.trim() || !lastName?.trim()) {
 			return NextResponse.json(
@@ -110,6 +112,19 @@ export async function PUT(request: Request) {
 		if (firstName !== undefined) updates.firstName = firstName;
 		if (lastName !== undefined) updates.lastName = lastName;
 		if (phone !== undefined) updates.phone = phone;
+		if (pin !== undefined) {
+			if (pin === null || pin === "") {
+				updates.pinHash = null;
+			} else {
+				if (typeof pin !== "string" || !/^\d{4}$/.test(pin)) {
+					return NextResponse.json(
+						{ error: "O PIN deve conter 4 dígitos" },
+						{ status: 400 },
+					);
+				}
+				updates.pinHash = await hashPassword(pin);
+			}
+		}
 
 		const updated = await db
 			.update(user)

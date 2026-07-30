@@ -142,10 +142,6 @@ export const LicensesSection = forwardRef<
 					value={license.key.key}
 				/>
 				<DetailRow
-					label="Tipo"
-					value={license.key.type === "B2B" ? "B2B" : "B2C"}
-				/>
-				<DetailRow
 					label="Activada em"
 					value={new Date(license.activatedAt).toLocaleDateString("pt-PT")}
 				/>

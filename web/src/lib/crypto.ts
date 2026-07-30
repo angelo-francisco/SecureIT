@@ -86,17 +86,17 @@ export async function decryptText(text: string | null | undefined): Promise<stri
 
 export async function encryptPaymentInfo<T extends Record<string, any>>(info: T): Promise<T> {
 	if (!info) return info;
-	const encrypted = { ...info };
+	const encrypted: Record<string, any> = { ...info };
 	if (encrypted.iban) encrypted.iban = await encryptText(encrypted.iban);
 	if (encrypted.accountName) encrypted.accountName = await encryptText(encrypted.accountName);
 	if (encrypted.bankName) encrypted.bankName = await encryptText(encrypted.bankName);
 	if (encrypted.reference) encrypted.reference = await encryptText(encrypted.reference);
-	return encrypted;
+	return encrypted as T;
 }
 
 export async function decryptPaymentInfo<T extends Record<string, any>>(info: T): Promise<T> {
 	if (!info) return info;
-	const decrypted = { ...info };
+	const decrypted: Record<string, any> = { ...info };
 	if (decrypted.iban) decrypted.iban = (await decryptText(decrypted.iban)) || decrypted.iban;
 	if (decrypted.accountName)
 		decrypted.accountName = (await decryptText(decrypted.accountName)) || decrypted.accountName;
@@ -104,5 +104,5 @@ export async function decryptPaymentInfo<T extends Record<string, any>>(info: T)
 		decrypted.bankName = (await decryptText(decrypted.bankName)) || decrypted.bankName;
 	if (decrypted.reference)
 		decrypted.reference = (await decryptText(decrypted.reference)) || decrypted.reference;
-	return decrypted;
+	return decrypted as T;
 }

@@ -49,7 +49,6 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 	const [step, setStep] = useState<1 | 2 | 3>(1);
 	const [license, setLicense] = useState<LicenseData | null>(null);
 	const [loadingLicense, setLoadingLicense] = useState(false);
-	const [licenseChecked, setLicenseChecked] = useState(false);
 	const [description, setDescription] = useState("");
 	const [uploadedProof, setUploadedProof] = useState<CloudinaryResult | null>(
 		null,
@@ -59,25 +58,28 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 	useEffect(() => {
 		if (!open) return;
 		setLoadingLicense(true);
-		setLicenseChecked(false);
 		fetch("/api/my-account/license")
-			.then(async (res) => {
-				if (res.ok) {
-					const data = (await res.json()) as LicenseData | null;
-					setLicense(data);
+			.then((res) => {
+				if (!res.ok) {
+					throw new Error("Erro durante o processamento");
+				}
+				return res.json();
+			})
+			.then(data => {
+				const l = (data as any)?.license as LicenseData | null
+				if (l && l.status === "ACTIVE" && new Date(l.expiresAt) > new Date()) {
+					setLicense(l);
 				}
 			})
-			.catch(() => {})
+			.catch(() => { })
 			.finally(() => {
 				setLoadingLicense(false);
-				setLicenseChecked(true);
 			});
 	}, [open]);
 
 	const reset = () => {
 		setStep(1);
 		setLicense(null);
-		setLicenseChecked(false);
 		setDescription("");
 		setUploadedProof(null);
 		setSubmitting(false);
@@ -87,10 +89,6 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 		reset();
 		onClose();
 	};
-
-	const isLicenseActive = license
-		? license.status === "ACTIVE" && new Date(license.expiresAt) > new Date()
-		: false;
 
 	const handleSubmit = async () => {
 		if (!license || !description) return;
@@ -140,7 +138,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							<div className="flex items-center justify-center py-10">
 								<Loader size={24} className="animate-spin text-primary" />
 							</div>
-						) : !license || !isLicenseActive ? (
+						) : !license ? (
 							<div className="text-center py-8 space-y-3">
 								<Shield size={40} className="text-text-muted mx-auto" />
 								<p className="text-lg md:text-xl font-semibold text-text">
@@ -197,8 +195,8 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 								<X />
 							</button>
 							<button
-								onClick={() => license && isLicenseActive && setStep(2)}
-								disabled={!license || !isLicenseActive}
+								onClick={() => license && setStep(2)}
+								disabled={!license}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-lg font-bold hover:brightness-110 transition-all disabled:opacity-50"
 							>
 								Continuar

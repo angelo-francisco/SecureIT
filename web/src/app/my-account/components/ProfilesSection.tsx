@@ -38,6 +38,7 @@ export function ProfilesSection() {
 	const [color, setColor] = useState(COLORS[0]);
 	const [pin, setPin] = useState("");
 	const [saving, setSaving] = useState(false);
+	const [changingPin, setChangingPin] = useState(false);
 
 	const fetchData = useCallback(async () => {
 		setLoading(true);
@@ -61,6 +62,7 @@ export function ProfilesSection() {
 		setEditing(null);
 		setName("");
 		setPin("");
+		setChangingPin(false);
 		setColor(
 			profiles.length < COLORS.length ? COLORS[profiles.length] : COLORS[0],
 		);
@@ -72,6 +74,7 @@ export function ProfilesSection() {
 		setName(p.name);
 		setColor(p.avatarColor);
 		setPin("");
+		setChangingPin(false);
 		setModalOpen(true);
 	};
 
@@ -80,6 +83,7 @@ export function ProfilesSection() {
 		setEditing(null);
 		setName("");
 		setPin("");
+		setChangingPin(false);
 	};
 
 	const handleCreate = async () => {
@@ -111,16 +115,21 @@ export function ProfilesSection() {
 
 	const handleUpdate = async () => {
 		if (!editing || !name.trim()) return;
+		const body: Record<string, unknown> = {
+			name: name.trim(),
+			avatarColor: color,
+		};
+		if (editing.hasPin && changingPin) {
+			body.pin = pin || null;
+		} else if (!editing.hasPin) {
+			body.pin = pin || undefined;
+		}
 		setSaving(true);
 		try {
 			const res = await fetch(`/api/profiles/${editing.id}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name: name.trim(),
-					avatarColor: color,
-					pin: pin || undefined,
-				}),
+				body: JSON.stringify(body),
 			});
 			if (!res.ok) {
 				const data = (await res.json()) as any;
@@ -238,11 +247,10 @@ export function ProfilesSection() {
 								<button
 									key={c}
 									onClick={() => setColor(c)}
-									className={`w-7 h-7 rounded-sm transition-all duration-200 ${
-										color === c
-											? "ring-2 ring-offset-2 ring-offset-surface scale-110"
-											: "hover:scale-110"
-									}`}
+									className={`w-7 h-7 rounded-sm transition-all duration-200 ${color === c
+										? "ring-2 ring-offset-2 ring-offset-surface scale-110"
+										: "hover:scale-110"
+										}`}
 									style={{
 										backgroundColor: c,
 										["--tw-ring-color" as string]: c,
@@ -253,10 +261,22 @@ export function ProfilesSection() {
 					</div>
 
 					<div>
-						<label className="text-lg text-text-muted mb-3 block">
-							Código de Acesso
-						</label>
-						<PinInput value={pin} onChange={setPin} length={4} />
+						<div className="flex w-full justify-between items-center">
+							<label className="text-lg text-text-muted mb-3 block">
+								Código de Acesso
+							</label>
+							{editing?.hasPin && !changingPin && (
+								<button
+									onClick={() => setChangingPin(true)}
+									className="text-sm font-semibold text-primary hover:brightness-110 transition-all"
+								>
+									Alterar
+								</button>
+							)}
+						</div>
+						{!(editing?.hasPin && !changingPin) && (
+							<PinInput value={pin} onChange={setPin} length={4} />
+						)}
 					</div>
 
 					<div className="flex items-center gap-3 pt-2">

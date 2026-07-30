@@ -8,7 +8,6 @@ import cv2
 import numpy as np
 from fastapi import WebSocket, WebSocketDisconnect
 
-from services.yolo import YOLOService
 from websocket.helpers import (
     authenticate,
     create_camera_service,
@@ -326,6 +325,8 @@ class BehaviourAnalysisManager:
         return None
 
     def _run_yolo(self, frame: np.ndarray) -> tuple[list, list, int]:
+        from services.yolo import YOLOService  # lazy import
+
         results = YOLOService.predict(frame, imgsz=320, conf=0.3)
         boxes = results[0].boxes
         names = results[0].names

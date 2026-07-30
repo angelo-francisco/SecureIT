@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ToastProvider } from "@/packages/ui";
+
 import "./globals.css";
 
 const siteUrl = "https://www.secureit.co";
@@ -104,7 +105,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body className="min-h-screen bg-bg text-text antialiased font-sans">
-				<ToastProvider>{children}</ToastProvider>
+					<ToastProvider>{children}</ToastProvider>
 			</body>
 		</html>
 	);

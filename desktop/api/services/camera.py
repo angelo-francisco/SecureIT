@@ -5,8 +5,6 @@ from time import sleep
 
 import cv2
 
-from services.yolo import YOLOService
-
 logger = logging.getLogger(__name__)
 
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
@@ -68,6 +66,8 @@ class CameraService:
             sleep(0.3)
 
     def get_frame(self, detect: bool = True) -> tuple[bytes, int]:
+        from services.yolo import YOLOService  # lazy import
+
         frame = self.frame
         people_count = 0
 
