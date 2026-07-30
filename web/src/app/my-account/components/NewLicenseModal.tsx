@@ -12,6 +12,7 @@ import {
 	ChevronRight,
 	ArrowLeft,
 	Copy,
+	ShieldCheck,
 } from "lucide-react";
 import { CldUploadWidget } from "next-cloudinary";
 import type { Plan } from "./PlansSection";
@@ -22,6 +23,18 @@ interface PaymentInfo {
 	accountName: string;
 	bankName: string | null;
 	reference: string | null;
+}
+
+interface LicenseKeyInfo {
+	status: string;
+}
+
+interface LicenseData {
+	id: string;
+	status: string;
+	activatedAt: string;
+	expiresAt: string;
+	key?: LicenseKeyInfo;
 }
 
 interface CloudinaryResult {
@@ -51,6 +64,7 @@ export function NewLicenseModal({
 	const [loading, setLoading] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const [copiedField, setCopiedField] = useState<string | null>(null);
+	const [activeLicense, setActiveLicense] = useState<LicenseData | null>(null);
 
 	const copyToClipboard = (text: string, field: string) => {
 		navigator.clipboard.writeText(text).then(() => {
@@ -59,19 +73,28 @@ export function NewLicenseModal({
 		});
 	};
 
+	const hasActiveLicense =
+		activeLicense !== null &&
+		activeLicense.status === "ACTIVE" &&
+		activeLicense.key?.status !== "REVOKED" &&
+		new Date(activeLicense.expiresAt) > new Date();
+
 	useEffect(() => {
 		if (open) {
 			setStep(1);
 			setSelectedPlan(null);
 			setUploadedProof(null);
+			setActiveLicense(null);
 			setLoading(true);
 			Promise.all([
 				fetch("/api/plans").then((r) => (r.ok ? r.json() : []) as any),
 				fetch("/api/payment-info").then((r) => (r.ok ? r.json() : null) as any),
+				fetch("/api/my-account/license").then((r) => (r.ok ? r.json() : null) as any),
 			])
-				.then(([p, info]) => {
+				.then(([p, info, lic]) => {
 					setPlans(Array.isArray(p) ? p : []);
 					setPaymentInfo(info);
+					if (lic?.license) setActiveLicense(lic.license);
 				})
 				.catch(() => {})
 				.finally(() => setLoading(false));
@@ -117,10 +140,10 @@ export function NewLicenseModal({
 					<div className="flex items-center gap-3">
 						<div>
 							<h3 className="text-lg md:text-xl font-semibold text-text">
-								{step === 1 ? "Escolher Plano" : "Dados para Pagamento"}
+								{step === 1 ? (hasActiveLicense ? "Licença Ativa" : "Escolher Plano") : "Dados para Pagamento"}
 							</h3>
 							<p className="text-base md:text-lg text-text-muted">
-								{step === 1 ? "Selecione o plano desejado" : selectedPlan?.name}
+								{step === 1 ? (hasActiveLicense ? "" : "Selecione o plano desejado") : selectedPlan?.name}
 							</p>
 						</div>
 					</div>
@@ -150,8 +173,18 @@ export function NewLicenseModal({
 							<p className="text-sm text-text-muted">A carregar planos...</p>
 						</div>
 					) : step === 1 ? (
-						/* Step 1 — Plan selection */
-						<div className="space-y-3">
+						hasActiveLicense ? (
+							<div className="text-center py-10 text-text-muted space-y-3">
+								<ShieldCheck size={48} className="mx-auto text-success" />
+								<p className="text-base md:text-lg font-medium text-text">
+									Já possui uma licença ativa
+								</p>
+								<p className="text-sm">
+									Válida até {new Date(activeLicense!.expiresAt).toLocaleDateString("pt-PT")}
+								</p>
+							</div>
+						) : (
+							<div className="space-y-3">
 							{plans.length === 0 ? (
 								<div className="text-center py-10 text-text-muted">
 									<CreditCard size={40} className="mx-auto mb-3 opacity-50" />
@@ -192,6 +225,7 @@ export function NewLicenseModal({
 								))
 							)}
 						</div>
+						)
 					) : (
 						/* Step 2 — Payment details */
 						<div className="space-y-5">
