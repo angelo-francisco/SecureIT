@@ -85,7 +85,9 @@ async function main() {
 	// --- Plan ---
 	const existingPlans = query("SELECT id, name FROM Plan");
 	if (existingPlans.length > 0) {
-		console.log(`Plans exist (${existingPlans.map((p: any) => p.name).join(", ")}), skipping.`);
+		console.log(
+			`Plans exist (${existingPlans.map((p: any) => p.name).join(", ")}), skipping.`,
+		);
 	} else {
 		const planId = createId();
 		run(
@@ -94,9 +96,15 @@ async function main() {
 		);
 
 		const features = [
-			{ name: "Análise Comportamental", desc: "Análise avançada de comportamento em tempo real" },
+			{
+				name: "Análise Comportamental",
+				desc: "Análise avançada de comportamento em tempo real",
+			},
 			{ name: "Cloud Storage", desc: "Armazenamento de gravações na cloud" },
-			{ name: "Tunnel de Acesso Remoto", desc: "Acesso remoto seguro às suas câmeras" },
+			{
+				name: "Tunnel de Acesso Remoto",
+				desc: "Acesso remoto seguro às suas câmeras",
+			},
 		];
 		for (const f of features) {
 			run(

@@ -39,7 +39,11 @@ const LICENSE_STATUS: Record<
 	ACTIVE: { label: "Activa", color: "text-success", bg: "bg-success/10" },
 	APPROVED: { label: "Aprovada", color: "text-primary", bg: "bg-primary/10" },
 	REVOKED: { label: "Revogada", color: "text-error", bg: "bg-error/10" },
-	EXPIRED: { label: "Expirada", color: "text-text-muted", bg: "bg-white/[0.06]" },
+	EXPIRED: {
+		label: "Expirada",
+		color: "text-text-muted",
+		bg: "bg-white/[0.06]",
+	},
 	PENDING: { label: "Pendente", color: "text-warning", bg: "bg-warning/10" },
 };
 
@@ -65,7 +69,8 @@ export const LicensesSection = forwardRef<
 
 	const license = response?.license;
 	const isActive = license
-		? license.key.status === "ACTIVE" && new Date(license.expiresAt) > new Date()
+		? license.key.status === "ACTIVE" &&
+			new Date(license.expiresAt) > new Date()
 		: false;
 
 	const statusInfo = license
@@ -87,11 +92,14 @@ export const LicensesSection = forwardRef<
 			setResponse((prev) =>
 				prev
 					? {
-						...prev,
-						license: prev.license
-							? { ...prev.license, key: { ...prev.license.key, status: "REVOKED" } }
-							: null,
-					}
+							...prev,
+							license: prev.license
+								? {
+										...prev.license,
+										key: { ...prev.license.key, status: "REVOKED" },
+									}
+								: null,
+						}
 					: null,
 			);
 			setConfirmRevoke(false);
@@ -106,9 +114,7 @@ export const LicensesSection = forwardRef<
 		return (
 			<div className="text-center py-8 text-text-muted">
 				<Key size={40} className="text-primary mx-auto mb-3" />
-				<p className="text-base md:text-lg">
-					Nenhuma licença registada
-				</p>
+				<p className="text-base md:text-lg">Nenhuma licença registada</p>
 			</div>
 		);
 	}
@@ -117,11 +123,13 @@ export const LicensesSection = forwardRef<
 		<div className="space-y-3">
 			<div className="flex items-center justify-between">
 				<h1 className="text-lg font-bold text-text">
-					{license.key.type} [<span
+					{license.key.type} [
+					<span
 						className={`px-2 py-1 text-base font-bold ${statusInfo?.color} ${statusInfo?.bg}`}
 					>
 						{statusInfo?.label}
-					</span>]
+					</span>
+					]
 				</h1>
 				<div className="flex gap-2 items-center justify-center">
 					{isActive && (
@@ -132,15 +140,11 @@ export const LicensesSection = forwardRef<
 							Revogar
 						</button>
 					)}
-
 				</div>
 			</div>
 
 			<div className="border-t border-border/50 pt-3 space-y-1">
-				<DetailRow
-					label="Chave"
-					value={license.key.key}
-				/>
+				<DetailRow label="Chave" value={license.key.key} />
 				<DetailRow
 					label="Activada em"
 					value={new Date(license.activatedAt).toLocaleDateString("pt-PT")}
@@ -156,7 +160,7 @@ export const LicensesSection = forwardRef<
 							0,
 							Math.ceil(
 								(new Date(license.expiresAt).getTime() - Date.now()) /
-								(1000 * 60 * 60 * 24),
+									(1000 * 60 * 60 * 24),
 							),
 						),
 					)}
@@ -180,9 +184,7 @@ export const LicensesSection = forwardRef<
 			>
 				<div className="bg-surface border border-border p-6">
 					<div className="flex items-center justify-between mb-4">
-						<h3 className="text-lg font-bold text-text">
-							Revogar Licença
-						</h3>
+						<h3 className="text-lg font-bold text-text">Revogar Licença</h3>
 						<button
 							onClick={() => setConfirmRevoke(false)}
 							className="p-1.5 border text-text-muted hover:text-text hover:bg-surface-hover transition-all"
@@ -191,8 +193,8 @@ export const LicensesSection = forwardRef<
 						</button>
 					</div>
 					<p className="text-base text-text-muted mb-6">
-						Tem certeza que deseja revogar a licença? Esta acção não pode
-						ser desfeita. Precisará de uma nova chave para reactivar.
+						Tem certeza que deseja revogar a licença? Esta acção não pode ser
+						desfeita. Precisará de uma nova chave para reactivar.
 					</p>
 					<div className="flex gap-3">
 						<button

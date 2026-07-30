@@ -16,10 +16,7 @@ export async function POST() {
 			.from(license)
 			.innerJoin(licenseKey, eq(license.keyId, licenseKey.id))
 			.where(
-				and(
-					eq(license.userId, session.sub),
-					eq(licenseKey.status, "ACTIVE"),
-				),
+				and(eq(license.userId, session.sub), eq(licenseKey.status, "ACTIVE")),
 			)
 			.get();
 

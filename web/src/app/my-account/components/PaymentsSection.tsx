@@ -112,7 +112,7 @@ export const PaymentsSection = forwardRef<
 							<td className="text-center py-4 whitespace-nowrap">
 								<span
 									className={`inline-flex px-3 py-1 rounded-full text-sm md:text-base font-medium ${statusColor(
-										p.status
+										p.status,
 									)}`}
 								>
 									{statusLabel(p.status)}

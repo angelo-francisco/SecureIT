@@ -129,9 +129,9 @@ describe("POST /api/licenses/heartbeat", () => {
 			.values({
 				id: revokedKeyId,
 				key: revokedKey,
-		type: "B2C",
-		durationDays: 30,
-		status: "REVOKED",
+				type: "B2C",
+				durationDays: 30,
+				status: "REVOKED",
 			})
 			.run();
 
@@ -196,8 +196,8 @@ describe("POST /api/licenses/heartbeat", () => {
 			.values({
 				id: expiredKeyId,
 				key: expiredKey,
-			type: "B2C",
-			durationDays: 1,
+				type: "B2C",
+				durationDays: 1,
 				status: "ACTIVE",
 			})
 			.run();

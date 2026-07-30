@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { encryptText, decryptText, encryptPaymentInfo, decryptPaymentInfo } from "@/lib/crypto";
+import {
+	encryptText,
+	decryptText,
+	encryptPaymentInfo,
+	decryptPaymentInfo,
+} from "@/lib/crypto";
 
 describe("lib/crypto", () => {
 	it("encrypts and decrypts text correctly", async () => {

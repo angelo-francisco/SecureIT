@@ -7,7 +7,7 @@ interface CountUpProps {
 	duration?: number;
 	prefix?: string;
 	suffix?: string;
-	 decimals?: number;
+	decimals?: number;
 	className?: string;
 }
 

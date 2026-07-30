@@ -17,7 +17,9 @@ function getDb(): DrizzleDB {
 		sqlite.run("PRAGMA journal_mode=WAL");
 
 		const tableExists = sqlite
-			.query("SELECT name FROM sqlite_master WHERE type='table' AND name='User'")
+			.query(
+				"SELECT name FROM sqlite_master WHERE type='table' AND name='User'",
+			)
 			.get();
 		if (!tableExists) {
 			const { readFileSync } = require("node:fs");
@@ -29,10 +31,16 @@ function getDb(): DrizzleDB {
 			sqlite.exec(migrationSql);
 		} else {
 			try {
-				const prColumns = sqlite.query("PRAGMA table_info(PaymentRequest)").all() as any[];
-				const hasDurationDays = prColumns.some((col) => col.name === "durationDays");
+				const prColumns = sqlite
+					.query("PRAGMA table_info(PaymentRequest)")
+					.all() as any[];
+				const hasDurationDays = prColumns.some(
+					(col) => col.name === "durationDays",
+				);
 				if (!hasDurationDays) {
-					sqlite.exec("ALTER TABLE PaymentRequest ADD COLUMN durationDays INTEGER DEFAULT 30 NOT NULL;");
+					sqlite.exec(
+						"ALTER TABLE PaymentRequest ADD COLUMN durationDays INTEGER DEFAULT 30 NOT NULL;",
+					);
 				}
 			} catch {}
 		}

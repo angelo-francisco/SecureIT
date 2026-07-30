@@ -1,1 +1,2 @@
-corri
+ao fazer release do app desktop vc precisa fzr primeiro o build da api desktop precisa garantir q ela está dentro com todas as dependencias e dps builda o desktop normal e ao rodar manda o tauri rodar o outro binario em paralelo (fastapi e tentar em até 3 portas geralmente livres)
+precisa colocar as variaveis de ambiente certas para o build

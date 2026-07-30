@@ -7,7 +7,10 @@ import { signLicensePayload, getPublicKeyPemString } from "@/lib/keys/ed25519";
 import { generateId } from "@/db/schema";
 
 function buildFeatureSlug(name: string): string {
-	return name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+	return name
+		.toLowerCase()
+		.replace(/\s+/g, "_")
+		.replace(/[^a-z0-9_]/g, "");
 }
 
 async function getPlanFeatures(type: string): Promise<string[]> {
@@ -22,7 +25,12 @@ async function getPlanFeatures(type: string): Promise<string[]> {
 			const planFeaturesList = await db
 				.select()
 				.from(planFeature)
-				.where(and(eq(planFeature.planId, planRow.id), eq(planFeature.isActive, true)))
+				.where(
+					and(
+						eq(planFeature.planId, planRow.id),
+						eq(planFeature.isActive, true),
+					),
+				)
 				.all();
 			for (const pf of planFeaturesList) {
 				const slug = buildFeatureSlug(pf.name);

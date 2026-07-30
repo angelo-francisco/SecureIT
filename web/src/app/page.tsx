@@ -16,7 +16,11 @@ function useIsDesktop() {
 			if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
 				return "Tablet";
 			}
-			if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated/i.test(ua)) {
+			if (
+				/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated/i.test(
+					ua,
+				)
+			) {
 				return "Mobile";
 			}
 			return "Desktop";
@@ -51,32 +55,38 @@ const features = [
 	{
 		icon: Eye,
 		title: "Reconhecimento Facial",
-		description: "Identifique automaticamente pessoas conhecidas e desconhecidas com precisão de IA.",
+		description:
+			"Identifique automaticamente pessoas conhecidas e desconhecidas com precisão de IA.",
 	},
 	{
 		icon: Shield,
 		title: "Deteção de Pessoas",
-		description: "YOLOv11 detecta pessoas em tempo real com alta precisão e baixa latência.",
+		description:
+			"YOLOv11 detecta pessoas em tempo real com alta precisão e baixa latência.",
 	},
 	{
 		icon: Bell,
 		title: "Alertas em Tempo Real",
-		description: "Notificações instantâneas quando alguém for detectado nas suas câmeras.",
+		description:
+			"Notificações instantâneas quando alguém for detectado nas suas câmeras.",
 	},
 	{
 		icon: Brain,
 		title: "Análise de Comportamento",
-		description: "Deteção de movimentos suspeitos com análise de fluxo óptico e fundo substractivo.",
+		description:
+			"Deteção de movimentos suspeitos com análise de fluxo óptico e fundo substractivo.",
 	},
 	{
 		icon: Laptop,
 		title: "Multi-Plataforma",
-		description: "Desktop, web e mobile. Acesse de qualquer lugar, a qualquer momento.",
+		description:
+			"Desktop, web e mobile. Acesse de qualquer lugar, a qualquer momento.",
 	},
 	{
 		icon: Lock,
 		title: "Criptografia Avançada",
-		description: "Dados protegidos com criptografia de ponta a ponta e assinaturas digitais.",
+		description:
+			"Dados protegidos com criptografia de ponta a ponta e assinaturas digitais.",
 	},
 ];
 
@@ -84,23 +94,25 @@ const steps = [
 	{
 		num: "01",
 		title: "Conecte",
-		description: "Registe as suas câmeras em minutos. Suporte para RTSP, USB e IP com configuração automática.",
+		description:
+			"Registe as suas câmeras em minutos. Suporte para RTSP, USB e IP com configuração automática.",
 		icon: Zap,
 	},
 	{
 		num: "02",
 		title: "Monitore",
-		description: "IA analisa cada frame em tempo real. Reconhecimento facial, deteção de pessoas e análise comportamental.",
+		description:
+			"IA analisa cada frame em tempo real. Reconhecimento facial, deteção de pessoas e análise comportamental.",
 		icon: Eye,
 	},
 	{
 		num: "03",
 		title: "Reaja",
-		description: "Receba alertas instantânos no desktop, browser ou telemóvel. Responda a incidentes em segundos.",
+		description:
+			"Receba alertas instantânos no desktop, browser ou telemóvel. Responda a incidentes em segundos.",
 		icon: Bell,
 	},
 ];
-
 
 export default function HomePage() {
 	const isDesktop = useIsDesktop();
@@ -109,7 +121,10 @@ export default function HomePage() {
 		<div className="min-h-screen">
 			<Navbar />
 
-			<section id="home" className="relative min-h-screen flex items-center overflow-hidden">
+			<section
+				id="home"
+				className="relative min-h-screen flex items-center overflow-hidden"
+			>
 				<div className="absolute inset-0 bg-grid" />
 
 				<ParallaxLayer speed="slow" className="absolute inset-0">
@@ -118,7 +133,10 @@ export default function HomePage() {
 				</ParallaxLayer>
 
 				<ParallaxLayer className="absolute top-20 right-[10%] w-64 h-64 border border-primary/10 rotate-45 opacity-30" />
-				<ParallaxLayer speed="slow" className="absolute bottom-32 left-[5%] w-40 h-40 border border-primary/10 rotate-12 opacity-20" />
+				<ParallaxLayer
+					speed="slow"
+					className="absolute bottom-32 left-[5%] w-40 h-40 border border-primary/10 rotate-12 opacity-20"
+				/>
 
 				<div className="relative w-full z-10 pt-32 pb-20 flex justify-center items-center flex-col">
 					<h1
@@ -162,13 +180,15 @@ export default function HomePage() {
 								Quem somos?
 							</p>
 							<h2 className="text-4xl font-extrabold mb-6">
-								Vigilância inteligente <br className="block md:hidden" /> para todos
+								Vigilância inteligente <br className="block md:hidden" /> para
+								todos
 							</h2>
 							<p className="text-text-muted text-lg md:text-2xl max-w-3xl mb-4">
-								Com tecnologia de inteligência artificial acessível, permitimos a qualquer
-								empresa ou residência garantimos a segurança do que é valioso para si.
-								Desde a deteção de pessoas em tempo real até ao reconhecimento facial
-								e análise comportamental. Tudo numa única plataforma.
+								Com tecnologia de inteligência artificial acessível, permitimos
+								a qualquer empresa ou residência garantimos a segurança do que é
+								valioso para si. Desde a deteção de pessoas em tempo real até ao
+								reconhecimento facial e análise comportamental. Tudo numa única
+								plataforma.
 							</p>
 						</div>
 					</RevealOnScroll>
@@ -191,9 +211,13 @@ export default function HomePage() {
 								<div className="group p-10 bg-bg hover:bg-surface transition-colors duration-300 h-full">
 									<div className="flex items-center justify-start gap-2 bg-primary/10 mb-3">
 										<feature.icon className="w-6 h-6 text-primary" />
-										<h3 className="text-xl font-bold text-text">{feature.title}</h3>
+										<h3 className="text-xl font-bold text-text">
+											{feature.title}
+										</h3>
 									</div>
-									<p className="text-lg text-text-muted leading-relaxed">{feature.description}</p>
+									<p className="text-lg text-text-muted leading-relaxed">
+										{feature.description}
+									</p>
 								</div>
 							</RevealOnScroll>
 						))}
@@ -230,9 +254,13 @@ export default function HomePage() {
 										<div className="card-sharp p-10 flex-1">
 											<div className="flex items-center gap-3 mb-3">
 												<step.icon className="w-6 h-6 text-primary" />
-												<h3 className="text-2xl font-bold text-text">{step.title}</h3>
+												<h3 className="text-2xl font-bold text-text">
+													{step.title}
+												</h3>
 											</div>
-											<p className="text-text-muted text-lg leading-relaxed">{step.description}</p>
+											<p className="text-text-muted text-lg leading-relaxed">
+												{step.description}
+											</p>
 										</div>
 									</div>
 								</RevealOnScroll>
@@ -251,12 +279,11 @@ export default function HomePage() {
 					<RevealOnScroll variant="scale">
 						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
 							Pronto para modernizar
-							<br />
-							a sua segurança?
+							<br />a sua segurança?
 						</h2>
 						<p className="mt-6 text-2xl text-text-muted max-w-xl mx-auto">
-							Plataforma unificada para desktop, web e dispositivos móveis.
-							Sem complexidade. Com inteligência artificial.
+							Plataforma unificada para desktop, web e dispositivos móveis. Sem
+							complexidade. Com inteligência artificial.
 						</p>
 
 						<div className="mt-8 flex items-center justify-center gap-6">

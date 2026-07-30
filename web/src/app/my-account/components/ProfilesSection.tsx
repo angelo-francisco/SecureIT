@@ -247,10 +247,11 @@ export function ProfilesSection() {
 								<button
 									key={c}
 									onClick={() => setColor(c)}
-									className={`w-7 h-7 rounded-sm transition-all duration-200 ${color === c
-										? "ring-2 ring-offset-2 ring-offset-surface scale-110"
-										: "hover:scale-110"
-										}`}
+									className={`w-7 h-7 rounded-sm transition-all duration-200 ${
+										color === c
+											? "ring-2 ring-offset-2 ring-offset-surface scale-110"
+											: "hover:scale-110"
+									}`}
 									style={{
 										backgroundColor: c,
 										["--tw-ring-color" as string]: c,

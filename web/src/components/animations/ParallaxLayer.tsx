@@ -40,7 +40,8 @@ export function ParallaxLayer({
 		return () => window.removeEventListener("scroll", onScroll);
 	}, [speed]);
 
-	const scrollClass = speed === "slow" ? "parallax-layer-slow" : "parallax-layer";
+	const scrollClass =
+		speed === "slow" ? "parallax-layer-slow" : "parallax-layer";
 
 	return (
 		<div ref={ref} className={`${scrollClass} ${className}`}>

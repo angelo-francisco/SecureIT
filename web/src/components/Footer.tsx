@@ -21,12 +21,19 @@ export function Footer() {
 			<div className="border-t border-border">
 				<div className="max-w-7xl mx-auto px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
 					<p className="text-base text-text-muted">
-						&copy; {new Date().getFullYear()} SecureIT. Todos os direitos reservados.
+						&copy; {new Date().getFullYear()} SecureIT. Todos os direitos
+						reservados.
 					</p>
 					<div className="flex items-center gap-6 text-base text-text-muted">
-						<Link href="#" className="hover:text-text transition-colors">Termos</Link>
-						<Link href="#" className="hover:text-text transition-colors">Privacidade</Link>
-						<Link href="#" className="hover:text-text transition-colors">Cookies</Link>
+						<Link href="#" className="hover:text-text transition-colors">
+							Termos
+						</Link>
+						<Link href="#" className="hover:text-text transition-colors">
+							Privacidade
+						</Link>
+						<Link href="#" className="hover:text-text transition-colors">
+							Cookies
+						</Link>
 					</div>
 				</div>
 			</div>

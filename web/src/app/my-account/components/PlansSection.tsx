@@ -160,8 +160,12 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 		return (
 			<div className="space-y-6">
 				<div className="card-sharp border-primary/25 bg-primary/5 p-5">
-					<h3 className="text-2xl text-center font-bold text-text">{selectedPlan.name}</h3>
-					<p className="text-text-muted text-center mb-3">{selectedPlan.description}</p>
+					<h3 className="text-2xl text-center font-bold text-text">
+						{selectedPlan.name}
+					</h3>
+					<p className="text-text-muted text-center mb-3">
+						{selectedPlan.description}
+					</p>
 
 					<div className="flex justify-center items-baseline gap-1">
 						<span className="text-3xl font-bold text-text">
@@ -173,7 +177,9 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					</div>
 
 					<div className="mt-4 flex items-center justify-center gap-3">
-						<span className={`text-xs font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
+						<span
+							className={`text-xs font-medium ${!annual ? "text-text" : "text-text-muted"}`}
+						>
 							Mensal
 						</span>
 						<button
@@ -184,7 +190,9 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 								className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white shadow transition-transform ${annual ? "translate-x-5" : "translate-x-0"}`}
 							/>
 						</button>
-						<span className={`text-xs font-medium ${annual ? "text-text" : "text-text-muted"}`}>
+						<span
+							className={`text-xs font-medium ${annual ? "text-text" : "text-text-muted"}`}
+						>
 							Anual
 						</span>
 					</div>
@@ -216,9 +224,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 									</span>
 									<button
 										type="button"
-										onClick={() =>
-											copyToClipboard(paymentInfo.iban, "iban")
-										}
+										onClick={() => copyToClipboard(paymentInfo.iban, "iban")}
 										className="text-base cursor-pointer text-text-muted hover:text-primary transition-colors"
 										title="Copiar IBAN"
 									>
@@ -351,13 +357,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							options={{
 								maxFiles: 1,
 								resourceType: "auto",
-								clientAllowedFormats: [
-									"png",
-									"jpeg",
-									"jpg",
-									"webp",
-									"pdf",
-								],
+								clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "pdf"],
 								maxFileSize: 2000000,
 								multiple: false,
 								folder: "secureit/payments",
@@ -399,11 +399,17 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 				<div className="bg-surface border border-border p-4">
 					<div className="flex items-center justify-between">
 						<span className="text-base">Plano</span>
-						<span className="text-base text-text">{selectedPlan.name} ({annual ? "Anual" : "Mensal"})</span>
+						<span className="text-base text-text">
+							{selectedPlan.name} ({annual ? "Anual" : "Mensal"})
+						</span>
 					</div>
 					<div className="flex items-center justify-between mt-1">
 						<span className="text-base">{annual ? "12 meses" : "1 mês"}</span>
-						<span className="text-base text-text">{annual ? `${convert(monthlyPrice * 12)} Kz` : `${convert(monthlyPrice)} Kz`}</span>
+						<span className="text-base text-text">
+							{annual
+								? `${convert(monthlyPrice * 12)} Kz`
+								: `${convert(monthlyPrice)} Kz`}
+						</span>
 					</div>
 					<div className="border-t border-border mt-2 pt-2 flex items-center justify-between">
 						<span className="text-base font-semibold text-text">Total</span>

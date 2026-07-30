@@ -59,7 +59,9 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 			</button>
 			<div className="accordion-grid" data-open={open}>
 				<div>
-					<p className="px-6 pb-6 text-sm text-text-muted leading-relaxed">{a}</p>
+					<p className="px-6 pb-6 text-sm text-text-muted leading-relaxed">
+						{a}
+					</p>
 				</div>
 			</div>
 		</div>
@@ -73,7 +75,10 @@ export function PricingPageContent() {
 
 			<section className="relative min-h-[50vh] flex items-center overflow-hidden pt-24">
 				<div className="absolute inset-0 bg-dots" />
-				<ParallaxLayer speed="slow" className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(44,158,213,0.1)_0%,transparent_60%)]" />
+				<ParallaxLayer
+					speed="slow"
+					className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(44,158,213,0.1)_0%,transparent_60%)]"
+				/>
 
 				<div className="relative z-10 max-w-7xl mx-auto px-8 py-20 w-full text-center">
 					<RevealOnScroll variant="scale">
@@ -94,7 +99,8 @@ export function PricingPageContent() {
 							Precisa mais do que um sistema?
 						</h2>
 						<p className="text-text-muted mb-10 max-w-lg mx-auto">
-							Para empresas ou residências que precisem de comprar e/ou instalar câmaras, DVRs, entre outros, nós temos uma solução à medida.
+							Para empresas ou residências que precisem de comprar e/ou instalar
+							câmaras, DVRs, entre outros, nós temos uma solução à medida.
 						</p>
 						<div className="flex flex-wrap items-center justify-center gap-4">
 							<a
@@ -103,8 +109,15 @@ export function PricingPageContent() {
 								rel="noopener noreferrer"
 								className="group inline-flex items-center gap-2 px-8 py-4 text-text font-semibold text-base border transition-all"
 							>
-								<Image src={"https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png"}
-									alt={"whatsapp logo"} width={30} height={30} className="w-auto h-6" />
+								<Image
+									src={
+										"https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png"
+									}
+									alt={"whatsapp logo"}
+									width={30}
+									height={30}
+									className="w-auto h-6"
+								/>
 								Falar no WhatsApp
 							</a>
 							<a
@@ -137,8 +150,6 @@ export function PricingPageContent() {
 					</div>
 				</div>
 			</section>
-
-
 
 			<Footer />
 		</div>

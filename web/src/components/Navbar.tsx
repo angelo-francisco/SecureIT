@@ -17,7 +17,10 @@ const navLinks = [
 export function Navbar({
 	inMyAccount = false,
 	minimal = false,
-}: { inMyAccount?: boolean; minimal?: boolean }) {
+}: {
+	inMyAccount?: boolean;
+	minimal?: boolean;
+}) {
 	const [scrolled, setScrolled] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -53,9 +56,20 @@ export function Navbar({
 			<nav className="relative top-0 z-50 py-6">
 				<div className="px-4 flex items-center justify-between">
 					<div className="flex gap-2 justify-center items-center">
-						<Link href="/" className="flex items-center gap-2.5 transition-colors">
-							<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-6 md:h-8 w-auto" />
-							<h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">SecureIT</h1>
+						<Link
+							href="/"
+							className="flex items-center gap-2.5 transition-colors"
+						>
+							<Image
+								src="/logo.png"
+								alt="SecureIT"
+								width={40}
+								height={40}
+								className="h-6 md:h-8 w-auto"
+							/>
+							<h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">
+								SecureIT
+							</h1>
 						</Link>
 						<div className="min-h-8 w-[1px] bg-gray-300" />
 						<h1 className="font-bold text-2xl md:text-3xl">Minha Conta</h1>
@@ -67,15 +81,24 @@ export function Navbar({
 
 	return (
 		<nav
-			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+				scrolled
 					? "bg-bg/80 backdrop-blur-xl border-b border-border"
 					: "bg-transparent"
-				}`}
+			}`}
 		>
 			<div className="w-full mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
 				<Link href="/" className="flex items-center gap-2.5 shrink-0">
-					<Image src="/logo.png" alt="SecureIT" width={40} height={40} className="h-9 w-auto" />
-					<span className="text-4xl font-bold text-text tracking-tight">SecureIT</span>
+					<Image
+						src="/logo.png"
+						alt="SecureIT"
+						width={40}
+						height={40}
+						className="h-9 w-auto"
+					/>
+					<span className="text-4xl font-bold text-text tracking-tight">
+						SecureIT
+					</span>
 				</Link>
 
 				<div className="hidden md:flex items-center gap-1">
@@ -96,10 +119,9 @@ export function Navbar({
 						href="/login"
 						className="flex items-center gap-1 px-5 py-2.5 text-xl font-medium text-text-muted hover:text-text border border-border hover:border-border-light transition-all"
 					>
-						<User className="w-4 h-4"/>
+						<User className="w-4 h-4" />
 						Entrar
 					</Link>
-
 				</div>
 
 				<div className="flex md:hidden items-center gap-2">

@@ -10,7 +10,11 @@ interface TurnstileModalProps {
 	downloadUrl: string;
 }
 
-export function TurnstileModal({ open, onClose, downloadUrl }: TurnstileModalProps) {
+export function TurnstileModal({
+	open,
+	onClose,
+	downloadUrl,
+}: TurnstileModalProps) {
 	const [status, setStatus] = useState<"idle" | "verifying" | "done">("idle");
 
 	useEffect(() => {

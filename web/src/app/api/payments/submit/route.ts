@@ -1,5 +1,11 @@
 import { db } from "@/db";
-import { paymentRequest, plan, paymentInfo, license, licenseKey } from "@/db/schema";
+import {
+	paymentRequest,
+	plan,
+	paymentInfo,
+	license,
+	licenseKey,
+} from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
@@ -30,10 +36,7 @@ export async function POST(request: Request) {
 			.from(license)
 			.innerJoin(licenseKey, eq(license.keyId, licenseKey.id))
 			.where(
-				and(
-					eq(license.userId, session.sub),
-					eq(licenseKey.status, "ACTIVE"),
-				),
+				and(eq(license.userId, session.sub), eq(licenseKey.status, "ACTIVE")),
 			)
 			.get();
 

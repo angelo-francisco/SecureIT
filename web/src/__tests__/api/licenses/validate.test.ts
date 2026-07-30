@@ -121,9 +121,9 @@ describe("POST /api/licenses/validate", () => {
 			.values({
 				id: revokedKeyId,
 				key: revokedKey,
-			type: "B2C",
-			durationDays: 30,
-			status: "REVOKED",
+				type: "B2C",
+				durationDays: 30,
+				status: "REVOKED",
 			})
 			.run();
 

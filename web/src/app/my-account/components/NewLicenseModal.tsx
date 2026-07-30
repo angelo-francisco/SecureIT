@@ -89,7 +89,9 @@ export function NewLicenseModal({
 			Promise.all([
 				fetch("/api/plans").then((r) => (r.ok ? r.json() : []) as any),
 				fetch("/api/payment-info").then((r) => (r.ok ? r.json() : null) as any),
-				fetch("/api/my-account/license").then((r) => (r.ok ? r.json() : null) as any),
+				fetch("/api/my-account/license").then(
+					(r) => (r.ok ? r.json() : null) as any,
+				),
 			])
 				.then(([p, info, lic]) => {
 					setPlans(Array.isArray(p) ? p : []);
@@ -140,10 +142,18 @@ export function NewLicenseModal({
 					<div className="flex items-center gap-3">
 						<div>
 							<h3 className="text-lg md:text-xl font-semibold text-text">
-								{step === 1 ? (hasActiveLicense ? "Licença Ativa" : "Escolher Plano") : "Dados para Pagamento"}
+								{step === 1
+									? hasActiveLicense
+										? "Licença Ativa"
+										: "Escolher Plano"
+									: "Dados para Pagamento"}
 							</h3>
 							<p className="text-base md:text-lg text-text-muted">
-								{step === 1 ? (hasActiveLicense ? "" : "Selecione o plano desejado") : selectedPlan?.name}
+								{step === 1
+									? hasActiveLicense
+										? ""
+										: "Selecione o plano desejado"
+									: selectedPlan?.name}
 							</p>
 						</div>
 					</div>
@@ -180,51 +190,54 @@ export function NewLicenseModal({
 									Já possui uma licença ativa
 								</p>
 								<p className="text-sm">
-									Válida até {new Date(activeLicense!.expiresAt).toLocaleDateString("pt-PT")}
+									Válida até{" "}
+									{new Date(activeLicense!.expiresAt).toLocaleDateString(
+										"pt-PT",
+									)}
 								</p>
 							</div>
 						) : (
 							<div className="space-y-3">
-							{plans.length === 0 ? (
-								<div className="text-center py-10 text-text-muted">
-									<CreditCard size={40} className="mx-auto mb-3 opacity-50" />
-									<p className="text-base md:text-lg">
-										Nenhum plano disponível de momento
-									</p>
-								</div>
-							) : (
-								plans.map((plan) => (
-									<button
-										key={plan.id}
-										onClick={() => handleSelectPlan(plan)}
-										className="w-full text-left bg-bg border border-border rounded-xl p-4 transition-all hover:border-primary/50 hover:bg-primary/5 group flex items-center justify-between"
-									>
-										<div className="flex-1 min-w-0">
-											<h4 className="text-sm font-semibold text-text">
-												{plan.name}
-											</h4>
-											{plan.description && (
-												<p className="text-xs text-text-muted mt-0.5">
-													{plan.description}
-												</p>
-											)}
-											<div className="flex items-baseline gap-1 mt-2">
-												<span className="text-xl font-bold text-text">
-													€{Number(plan.basePrice).toFixed(2)}
-												</span>
-												<span className="text-xs text-text-muted">
-													/ {plan.durationDays} dias
-												</span>
+								{plans.length === 0 ? (
+									<div className="text-center py-10 text-text-muted">
+										<CreditCard size={40} className="mx-auto mb-3 opacity-50" />
+										<p className="text-base md:text-lg">
+											Nenhum plano disponível de momento
+										</p>
+									</div>
+								) : (
+									plans.map((plan) => (
+										<button
+											key={plan.id}
+											onClick={() => handleSelectPlan(plan)}
+											className="w-full text-left bg-bg border border-border rounded-xl p-4 transition-all hover:border-primary/50 hover:bg-primary/5 group flex items-center justify-between"
+										>
+											<div className="flex-1 min-w-0">
+												<h4 className="text-sm font-semibold text-text">
+													{plan.name}
+												</h4>
+												{plan.description && (
+													<p className="text-xs text-text-muted mt-0.5">
+														{plan.description}
+													</p>
+												)}
+												<div className="flex items-baseline gap-1 mt-2">
+													<span className="text-xl font-bold text-text">
+														€{Number(plan.basePrice).toFixed(2)}
+													</span>
+													<span className="text-xs text-text-muted">
+														/ {plan.durationDays} dias
+													</span>
+												</div>
 											</div>
-										</div>
-										<ChevronRight
-											size={18}
-											className="text-text-muted group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-3"
-										/>
-									</button>
-								))
-							)}
-						</div>
+											<ChevronRight
+												size={18}
+												className="text-text-muted group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-3"
+											/>
+										</button>
+									))
+								)}
+							</div>
 						)
 					) : (
 						/* Step 2 — Payment details */

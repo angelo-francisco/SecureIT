@@ -57,10 +57,7 @@ export function PricingSection() {
 	];
 
 	return (
-		<section
-			id="pricing"
-			className="flex items-center justify-center px-8"
-		>
+		<section id="pricing" className="flex items-center justify-center px-8">
 			<div className="max-w-7xl mx-auto w-full">
 				{!plan ? (
 					<div className="max-w-md mx-auto">
@@ -69,7 +66,9 @@ export function PricingSection() {
 				) : (
 					<div className="max-w-md mx-auto">
 						<div className="flex items-center justify-center gap-3 mb-8">
-							<span className={`text-base font-medium ${!annual ? "text-text" : "text-text-muted"}`}>
+							<span
+								className={`text-base font-medium ${!annual ? "text-text" : "text-text-muted"}`}
+							>
 								Mensal
 							</span>
 							<button
@@ -80,15 +79,15 @@ export function PricingSection() {
 									className={`absolute top-0.5 w-5 h-5 bg-white shadow transition-transform ${annual ? "translate-x-6" : "translate-x-0.5"}`}
 								/>
 							</button>
-							<span className={`text-base font-medium ${annual ? "text-text" : "text-text-muted"}`}>
+							<span
+								className={`text-base font-medium ${annual ? "text-text" : "text-text-muted"}`}
+							>
 								Anual
 							</span>
 						</div>
 
 						<div className="p-8 card-sharp bg-primary/5 border-primary/25">
-							<h4 className="text-2xl font-bold text-text mb-1">
-								{plan.name}
-							</h4>
+							<h4 className="text-2xl font-bold text-text mb-1">{plan.name}</h4>
 							<p className="max-w-sm text-text-muted text-base mb-6">
 								{plan.description}
 							</p>

@@ -137,7 +137,9 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 							maxLength={4}
 							inputMode="numeric"
 							value={pin}
-							onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+							onChange={(e) =>
+								setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+							}
 						/>
 						<button
 							onClick={handlePinSave}

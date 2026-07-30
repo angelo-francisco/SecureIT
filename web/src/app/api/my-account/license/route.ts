@@ -17,7 +17,10 @@ export async function GET() {
 			.orderBy(desc(license.createdAt))
 			.all();
 
-		const userLicense = userLicenses.find((l) => l.status === "ACTIVE") ?? userLicenses[0] ?? null;
+		const userLicense =
+			userLicenses.find((l) => l.status === "ACTIVE") ??
+			userLicenses[0] ??
+			null;
 
 		let licenseKeyData: typeof licenseKey.$inferSelect | undefined;
 		if (userLicense) {

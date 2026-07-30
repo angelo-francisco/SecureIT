@@ -14,15 +14,28 @@ import {
 	notification,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { createTestUser, createTestToken, makeRequest } from "../helpers/auth";
 import {
-	createTestUser,
-	createTestToken,
-	makeRequest,
-} from "../helpers/auth";
-import { GET as PLANS_GET, POST as PLANS_POST, PUT as PLANS_PUT } from "@/app/api/admin/plans/route";
-import { GET as FEATURES_GET, POST as FEATURES_POST, PUT as FEATURES_PUT, DELETE as FEATURES_DELETE } from "@/app/api/admin/plans/[id]/features/route";
-import { GET as SERVICES_GET, POST as SERVICES_POST, PUT as SERVICES_PUT, DELETE as SERVICES_DELETE } from "@/app/api/admin/plans/[id]/services/route";
-import { GET as PI_GET, PUT as PI_PUT } from "@/app/api/admin/payment-info/route";
+	GET as PLANS_GET,
+	POST as PLANS_POST,
+	PUT as PLANS_PUT,
+} from "@/app/api/admin/plans/route";
+import {
+	GET as FEATURES_GET,
+	POST as FEATURES_POST,
+	PUT as FEATURES_PUT,
+	DELETE as FEATURES_DELETE,
+} from "@/app/api/admin/plans/[id]/features/route";
+import {
+	GET as SERVICES_GET,
+	POST as SERVICES_POST,
+	PUT as SERVICES_PUT,
+	DELETE as SERVICES_DELETE,
+} from "@/app/api/admin/plans/[id]/services/route";
+import {
+	GET as PI_GET,
+	PUT as PI_PUT,
+} from "@/app/api/admin/payment-info/route";
 import { GET as PAYMENTS_GET } from "@/app/api/admin/payments/route";
 import { PUT as PAYMENT_PUT } from "@/app/api/admin/payments/[id]/route";
 import { GET as MAINT_GET } from "@/app/api/admin/maintenance/route";
@@ -64,11 +77,19 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	if (testFeatureId) await db.delete(planFeature).where(eq(planFeature.id, testFeatureId)).run();
-	if (testServiceId) await db.delete(planService).where(eq(planService.id, testServiceId)).run();
+	if (testFeatureId)
+		await db.delete(planFeature).where(eq(planFeature.id, testFeatureId)).run();
+	if (testServiceId)
+		await db.delete(planService).where(eq(planService.id, testServiceId)).run();
 	if (testPlanId) {
-		await db.delete(planFeature).where(eq(planFeature.planId, testPlanId)).run();
-		await db.delete(planService).where(eq(planService.planId, testPlanId)).run();
+		await db
+			.delete(planFeature)
+			.where(eq(planFeature.planId, testPlanId))
+			.run();
+		await db
+			.delete(planService)
+			.where(eq(planService.planId, testPlanId))
+			.run();
 		await db.delete(plan).where(eq(plan.id, testPlanId)).run();
 	}
 	await db.delete(adminUser).where(eq(adminUser.id, adminId)).run();
@@ -206,10 +227,9 @@ describe("Admin Plan Features CRUD", () => {
 
 	it("DELETE - 400 for missing featureId", async () => {
 		const res = await FEATURES_DELETE(
-			makeRequest(
-				`http://localhost/api/admin/plans/${testPlanId}/features`,
-				{ method: "DELETE" },
-			),
+			makeRequest(`http://localhost/api/admin/plans/${testPlanId}/features`, {
+				method: "DELETE",
+			}),
 			{ params: Promise.resolve({ id: testPlanId }) },
 		);
 		expect(res.status).toBe(400);
@@ -280,10 +300,9 @@ describe("Admin Plan Services CRUD", () => {
 
 	it("DELETE - 400 for missing serviceId", async () => {
 		const res = await SERVICES_DELETE(
-			makeRequest(
-				`http://localhost/api/admin/plans/${testPlanId}/services`,
-				{ method: "DELETE" },
-			),
+			makeRequest(`http://localhost/api/admin/plans/${testPlanId}/services`, {
+				method: "DELETE",
+			}),
 			{ params: Promise.resolve({ id: testPlanId }) },
 		);
 		expect(res.status).toBe(400);
@@ -378,7 +397,8 @@ describe("Admin Payments", () => {
 	});
 
 	afterAll(async () => {
-		if (prId) await db.delete(paymentRequest).where(eq(paymentRequest.id, prId)).run();
+		if (prId)
+			await db.delete(paymentRequest).where(eq(paymentRequest.id, prId)).run();
 		await db.delete(license).where(eq(license.userId, userId)).run();
 		await db.delete(notification).where(eq(notification.userId, userId)).run();
 		await db.delete(user).where(eq(user.id, userId)).run();
@@ -456,7 +476,10 @@ describe("Admin Maintenance", () => {
 	});
 
 	afterAll(async () => {
-		await db.delete(maintenanceRequest).where(eq(maintenanceRequest.id, maintId)).run();
+		await db
+			.delete(maintenanceRequest)
+			.where(eq(maintenanceRequest.id, maintId))
+			.run();
 	});
 
 	it("GET /api/admin/maintenance - lists requests", async () => {

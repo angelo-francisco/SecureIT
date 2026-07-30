@@ -6,7 +6,11 @@ interface MarqueeProps {
 	speed?: number;
 }
 
-export function Marquee({ children, className = "", speed = 30 }: MarqueeProps) {
+export function Marquee({
+	children,
+	className = "",
+	speed = 30,
+}: MarqueeProps) {
 	return (
 		<div className={`overflow-hidden ${className}`}>
 			<div

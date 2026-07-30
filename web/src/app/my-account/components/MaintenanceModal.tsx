@@ -65,13 +65,13 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 				}
 				return res.json();
 			})
-			.then(data => {
-				const l = (data as any)?.license as LicenseData | null
+			.then((data) => {
+				const l = (data as any)?.license as LicenseData | null;
 				if (l && l.status === "ACTIVE" && new Date(l.expiresAt) > new Date()) {
 					setLicense(l);
 				}
 			})
-			.catch(() => { })
+			.catch(() => {})
 			.finally(() => {
 				setLoadingLicense(false);
 			});

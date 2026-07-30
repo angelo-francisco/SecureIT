@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, vi, beforeEach } from "vitest";
+import {
+	describe,
+	it,
+	expect,
+	beforeAll,
+	afterAll,
+	vi,
+	beforeEach,
+} from "vitest";
 import { db } from "@/db";
 import {
 	user,
@@ -12,8 +20,16 @@ import {
 	maintenanceRequest,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { createTestUser, createTestToken, createTestLicense, makeRequest } from "../helpers/auth";
-import { GET as PROFILES_GET, POST as PROFILES_POST } from "@/app/api/profiles/route";
+import {
+	createTestUser,
+	createTestToken,
+	createTestLicense,
+	makeRequest,
+} from "../helpers/auth";
+import {
+	GET as PROFILES_GET,
+	POST as PROFILES_POST,
+} from "@/app/api/profiles/route";
 import { GET as NOTIFICATIONS_GET } from "@/app/api/notifications/route";
 import { POST as REVOKE_POST } from "@/app/api/licenses/revoke/route";
 import { POST as MAINTENANCE_POST } from "@/app/api/maintenance/request/route";
@@ -56,8 +72,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	await db.delete(maintenanceRequest).where(eq(maintenanceRequest.userId, userId)).run();
-	await db.delete(paymentRequest).where(eq(paymentRequest.userId, userId)).run();
+	await db
+		.delete(maintenanceRequest)
+		.where(eq(maintenanceRequest.userId, userId))
+		.run();
+	await db
+		.delete(paymentRequest)
+		.where(eq(paymentRequest.userId, userId))
+		.run();
 	await db.delete(license).where(eq(license.userId, userId)).run();
 	await db.delete(subProfile).where(eq(subProfile.userId, userId)).run();
 	await db.delete(notification).where(eq(notification.userId, userId)).run();
@@ -66,7 +88,9 @@ afterAll(async () => {
 
 describe("GET /api/profiles", () => {
 	it("returns user profiles", async () => {
-		const res = await PROFILES_GET(makeRequest("http://localhost/api/profiles", { token: userToken }));
+		const res = await PROFILES_GET(
+			makeRequest("http://localhost/api/profiles", { token: userToken }),
+		);
 		const data = await res.json();
 		expect(res.status).toBe(200);
 		expect(Array.isArray(data)).toBe(true);
@@ -78,7 +102,9 @@ describe("GET /api/profiles", () => {
 	it("returns 401 without auth", async () => {
 		const saved = userToken;
 		userToken = "";
-		const res = await PROFILES_GET(makeRequest("http://localhost/api/profiles"));
+		const res = await PROFILES_GET(
+			makeRequest("http://localhost/api/profiles"),
+		);
 		expect(res.status).toBe(401);
 		userToken = saved;
 	});
@@ -236,7 +262,10 @@ describe("POST /api/maintenance/request", () => {
 		expect(data.description).toBe("Camera not working");
 		expect(data.hasPaidLicense).toBe(false);
 
-		await db.delete(maintenanceRequest).where(eq(maintenanceRequest.id, data.id)).run();
+		await db
+			.delete(maintenanceRequest)
+			.where(eq(maintenanceRequest.id, data.id))
+			.run();
 		await db.delete(license).where(eq(license.id, licId)).run();
 	});
 
@@ -302,7 +331,10 @@ describe("POST /api/payments/submit", () => {
 	});
 
 	afterAll(async () => {
-		await db.delete(paymentRequest).where(eq(paymentRequest.userId, userId)).run();
+		await db
+			.delete(paymentRequest)
+			.where(eq(paymentRequest.userId, userId))
+			.run();
 		await db.delete(paymentInfo).where(eq(paymentInfo.id, piId)).run();
 		await db.delete(plan).where(eq(plan.id, planId)).run();
 	});

@@ -219,10 +219,7 @@ describe("POST /api/auth/check-email", () => {
 
 	it("returns 404 for nonexistent email", async () => {
 		const res = await CHECK_EMAIL_POST(
-			req(
-				{ email: "nonexistent_check@test.com" },
-				"/api/auth/check-email",
-			),
+			req({ email: "nonexistent_check@test.com" }, "/api/auth/check-email"),
 		);
 		expect(res.status).toBe(404);
 	});
