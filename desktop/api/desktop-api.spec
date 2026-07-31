@@ -58,6 +58,12 @@ datas += [
 if (api_root / "ed25519_public.pem").exists():
     datas.append((str(api_root / "ed25519_public.pem"), "."))
 
+# Runtime env (DATABASE_URL, WEB_URL, ED25519_PUBLIC_KEY, ...). Created by
+# the release workflow from the API_ENV_FILE secret; read via env_file in
+# core/config.py.
+if (api_root / ".env").exists():
+    datas.append((str(api_root / ".env"), "."))
+
 
 a = Analysis(
     ["desktop_entry.py"],

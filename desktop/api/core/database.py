@@ -84,6 +84,12 @@ async def init_db():
 
         start_embedded_postgres()
 
+    if not settings.EMBEDDED_DB and not settings.DATABASE_URL:
+        raise RuntimeError(
+            "DATABASE_URL is not configured. Provide it via env/.env "
+            "(e.g. the API_ENV_FILE secret during CI builds) or enable EMBEDDED_DB."
+        )
+
     config = _tortoise_config()
     try:
         await Tortoise.init(config=config, _enable_global_fallback=True)

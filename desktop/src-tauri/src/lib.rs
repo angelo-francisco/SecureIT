@@ -57,15 +57,7 @@ fn spawn_api(state: &ApiState, resource_dir: &Path) -> Option<u16> {
     }
     cmd.env("PORT", port.to_string())
         .env("EMBEDDED_DB", "1")
-        .env("DEBUG", "0")
-        .env(
-            "WEB_URL",
-            option_env!("SECUREIT_WEB_URL").unwrap_or("http://localhost:3000"),
-        )
-        .env("SECRET_KEY", option_env!("SECUREIT_SECRET_KEY").unwrap_or(""));
-    if let Some(pub_key) = option_env!("SECUREIT_ED25519_PUBLIC_KEY") {
-        cmd.env("ED25519_PUBLIC_KEY", pub_key);
-    }
+        .env("DEBUG", "0");
     cmd.stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());

@@ -93,6 +93,18 @@ jobs:
           if not exist models\20180402-114759-vggface2.pt curl -L -o models\20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
         working-directory: desktop/api
 
+      - name: Write API env file
+        shell: bash
+        env:
+          API_ENV_FILE: ${{ secrets.API_ENV_FILE }}
+        run: |
+          if [ -z "$API_ENV_FILE" ]; then
+            echo "::error::Secret API_ENV_FILE is not configured. Add it under repo Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "$API_ENV_FILE" > .env
+        working-directory: desktop/api
+
       - name: Build API bundle (PyInstaller)
         run: pyinstaller desktop-api.spec
         working-directory: desktop/api
@@ -104,10 +116,6 @@ jobs:
           del ..\src-tauri\resources\api\PLACEHOLDER.txt
 
       - name: Build Tauri app
-        env:
-          SECUREIT_WEB_URL: ${{ secrets.SECUREIT_WEB_URL }}
-          SECUREIT_SECRET_KEY: ${{ secrets.SECUREIT_SECRET_KEY }}
-          SECUREIT_ED25519_PUBLIC_KEY: ${{ secrets.SECUREIT_ED25519_PUBLIC_KEY }}
         run: pnpm tauri build
 
       - name: Upload Windows artifacts
@@ -180,6 +188,18 @@ jobs:
           test -f models/20180402-114759-vggface2.pt || curl -L -o models/20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
         working-directory: desktop/api
 
+      - name: Write API env file
+        shell: bash
+        env:
+          API_ENV_FILE: ${{ secrets.API_ENV_FILE }}
+        run: |
+          if [ -z "$API_ENV_FILE" ]; then
+            echo "::error::Secret API_ENV_FILE is not configured. Add it under repo Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "$API_ENV_FILE" > .env
+        working-directory: desktop/api
+
       - name: Build API bundle (PyInstaller)
         run: pyinstaller desktop-api.spec
         working-directory: desktop/api
@@ -189,12 +209,10 @@ jobs:
           cp -r dist/desktop-api ../src-tauri/resources/api/
           rm -f ../src-tauri/resources/api/PLACEHOLDER.txt
 
+      # AppImage is excluded: linuxdeploy cannot resolve the libs bundled by
+      # PyInstaller (_internal/*.libs), so only the .deb is produced in CI.
       - name: Build Tauri app
-        env:
-          SECUREIT_WEB_URL: ${{ secrets.SECUREIT_WEB_URL }}
-          SECUREIT_SECRET_KEY: ${{ secrets.SECUREIT_SECRET_KEY }}
-          SECUREIT_ED25519_PUBLIC_KEY: ${{ secrets.SECUREIT_ED25519_PUBLIC_KEY }}
-        run: pnpm tauri build
+        run: pnpm tauri build --bundles deb
 
       - name: Upload Linux artifacts
         uses: softprops/action-gh-release@v2
@@ -202,7 +220,6 @@ jobs:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
             desktop/src-tauri/target/release/bundle/deb/*.deb
-            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
 
   publish-release:
     name: Publish Release
