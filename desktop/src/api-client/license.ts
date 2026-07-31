@@ -1,5 +1,6 @@
-const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { getApiBaseUrl, getWebBaseUrl } from "./api-base";
+
+const WEB_BASE = getWebBaseUrl();
 
 async function webFetch<T>(
   path: string,
@@ -26,7 +27,7 @@ async function apiFetch<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${getApiBaseUrl()}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",

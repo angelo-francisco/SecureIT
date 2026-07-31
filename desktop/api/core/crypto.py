@@ -9,6 +9,7 @@ using the public key loaded from the configured PEM file.
 import base64
 import json
 import logging
+from pathlib import Path
 from typing import Optional
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -28,7 +29,12 @@ def _get_public_key() -> Ed25519PublicKey:
         return _cached_public_key
 
     pem_path = settings.ED25519_PUBLIC_KEY_PATH
-    logger.info("Loading Ed25519 public key from: %s (exists=%s)", pem_path, __import__("pathlib").Path(pem_path).exists())
+    logger.info(
+        "Loading Ed25519 public key (inline=%s, path=%s, exists=%s)",
+        bool(settings.ED25519_PUBLIC_KEY),
+        pem_path,
+        Path(pem_path).exists(),
+    )
 
     pem_data = settings.get_ed25519_public_key().encode("utf-8")
     key = load_pem_public_key(pem_data)

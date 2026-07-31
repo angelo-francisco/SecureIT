@@ -22,6 +22,7 @@ dependencies = [
     "asyncpg>=0.30.0",
     "pgvector>=0.3.0",
     "tortoise-vector>=0.2.0",
+    "pgserver>=0.1.4",
     "torch",
     "torchvision",
     "facenet-pytorch>=2.5.3",

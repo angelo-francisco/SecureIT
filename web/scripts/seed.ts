@@ -1,8 +1,8 @@
-import { createId } from "@paralleldrive/cuid2";
 import { Database } from "bun:sqlite";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { createId } from "@paralleldrive/cuid2";
 import { hashSync } from "bcryptjs";
-import { readFileSync } from "fs";
-import { resolve } from "path";
 
 const DB_PATH = resolve(import.meta.dir, "..", "secureit.db");
 const MIGRATIONS = [
@@ -62,7 +62,12 @@ async function main() {
 
 	for (const m of MIGRATIONS) {
 		console.log(`Applying ${m.split("/").pop()}...`);
-		db.exec(readFileSync(m, "utf-8"));
+		const sql = readFileSync(m, "utf-8")
+			.split("\n")
+			.filter((l) => !l.trim().startsWith("--"))
+			.join("\n")
+			.trim();
+		if (sql) db.exec(sql);
 	}
 	console.log("Migrations applied.\n");
 

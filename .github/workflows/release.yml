@@ -73,7 +73,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: desktop/api/requirements-desktop.txt
+
+      - name: Install API dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.3.1+cpu torchvision==0.18.1+cpu --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-desktop.txt pyinstaller
+        working-directory: desktop/api
+
+      - name: Download facenet weights
+        run: |
+          mkdir -p models
+          if not exist models\20180402-114759-vggface2.pt curl -L -o models\20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+        working-directory: desktop/api
+
+      - name: Build API bundle (PyInstaller)
+        run: pyinstaller desktop-api.spec
+        working-directory: desktop/api
+
+      - name: Stage API bundle for Tauri
+        run: |
+          robocopy dist\desktop-api ..\src-tauri\resources\api\desktop-api /E /NFL /NDL /NJH /NJS /NC /NS
+          if %ERRORLEVEL% GEQ 8 exit /b 1
+          del ..\src-tauri\resources\api\PLACEHOLDER.txt
+
       - name: Build Tauri app
+        env:
+          SECUREIT_WEB_URL: ${{ secrets.SECUREIT_WEB_URL }}
+          SECUREIT_SECRET_KEY: ${{ secrets.SECUREIT_SECRET_KEY }}
+          SECUREIT_ED25519_PUBLIC_KEY: ${{ secrets.SECUREIT_ED25519_PUBLIC_KEY }}
         run: pnpm tauri build
 
       - name: Upload Windows artifacts
@@ -126,7 +160,40 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: desktop/api/requirements-desktop.txt
+
+      - name: Install API dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.3.1+cpu torchvision==0.18.1+cpu --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-desktop.txt pyinstaller
+        working-directory: desktop/api
+
+      - name: Download facenet weights
+        run: |
+          mkdir -p models
+          test -f models/20180402-114759-vggface2.pt || curl -L -o models/20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+        working-directory: desktop/api
+
+      - name: Build API bundle (PyInstaller)
+        run: pyinstaller desktop-api.spec
+        working-directory: desktop/api
+
+      - name: Stage API bundle for Tauri
+        run: |
+          cp -r dist/desktop-api ../src-tauri/resources/api/
+          rm -f ../src-tauri/resources/api/PLACEHOLDER.txt
+
       - name: Build Tauri app
+        env:
+          SECUREIT_WEB_URL: ${{ secrets.SECUREIT_WEB_URL }}
+          SECUREIT_SECRET_KEY: ${{ secrets.SECUREIT_SECRET_KEY }}
+          SECUREIT_ED25519_PUBLIC_KEY: ${{ secrets.SECUREIT_ED25519_PUBLIC_KEY }}
         run: pnpm tauri build
 
       - name: Upload Linux artifacts

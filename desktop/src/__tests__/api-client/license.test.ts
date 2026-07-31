@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { licenseApi } from "@/api-client/license";
 
-const WEB_BASE = "http://localhost:3000";
+const WEB_BASE = (
+  import.meta.env.VITE_WEB_URL ?? "http://localhost:3000"
+).replace(/\/+$/, "");
 const API_BASE = "http://localhost:8000";
 
 describe("licenseApi", () => {

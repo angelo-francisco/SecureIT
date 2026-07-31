@@ -1,3 +1,7 @@
+import { getApiBaseUrl, getWebBaseUrl } from "./api-base";
+
+export { getApiBaseUrl, getWsBaseUrl } from "./api-base";
+
 const log = (...args: unknown[]) => console.log("[ApiClient]", ...args);
 const err = (...args: unknown[]) => console.error("[ApiClient]", ...args);
 
@@ -17,7 +21,7 @@ let globalRefreshPromise: Promise<string | null> | null = null;
 
 async function tryRefresh(): Promise<string | null> {
   try {
-    const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
+    const WEB_BASE = getWebBaseUrl();
     const res = await fetch(`${WEB_BASE}/api/auth/refresh`, {
       method: "POST",
       credentials: "include",
@@ -36,14 +40,8 @@ async function tryRefresh(): Promise<string | null> {
 }
 
 class ApiClient {
-  private baseUrl: string;
-
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
-  }
-
   private async request<T>(path: string, config: RequestConfig = {}): Promise<T> {
-    const url = new URL(`${this.baseUrl}${path}`);
+    const url = new URL(`${getApiBaseUrl()}${path}`);
     if (config.params) {
       Object.entries(config.params).forEach(([k, v]) =>
         url.searchParams.set(k, v)
@@ -183,14 +181,4 @@ class ApiClient {
   }
 }
 
-const API_BASE = "http://localhost:8000";
-
-export const apiClient = new ApiClient(API_BASE);
-
-export function getApiBaseUrl(): string {
-  return API_BASE;
-}
-
-export function getWsBaseUrl(): string {
-  return API_BASE.replace(/^http/, "ws");
-}
+export const apiClient = new ApiClient();

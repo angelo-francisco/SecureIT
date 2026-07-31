@@ -1,0 +1,1 @@
+The PyInstaller bundle (desktop-api/) is copied here by the release workflow before "tauri build".

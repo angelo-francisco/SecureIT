@@ -5,8 +5,9 @@ import type {
   TOTPVerifyData,
   AuthResponse,
 } from "../types";
+import { getWebBaseUrl } from "./api-base";
 
-const WEB_BASE = import.meta.env.VITE_WEB_URL ?? "http://localhost:3000";
+const WEB_BASE = getWebBaseUrl();
 
 async function webFetch<T>(
   path: string,

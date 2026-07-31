@@ -1,14 +1,35 @@
 import base64
+import shutil
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 import torch
 from PIL import Image, ImageOps
 
+from core.config import settings
 from core.exceptions import ValidationError_
 
 _mtcnn = None
 _resnet = None
+
+VGG_FACE2_WEIGHTS = "20180402-114759-vggface2.pt"
+
+
+def _torch_hub_checkpoints_dir() -> Path:
+    return Path.home() / ".cache" / "torch" / "hub" / "checkpoints"
+
+
+def ensure_model_assets() -> None:
+    """Seed the torch hub cache from bundled weights so model loading works offline."""
+    target = _torch_hub_checkpoints_dir() / VGG_FACE2_WEIGHTS
+    if target.exists():
+        return
+    bundled = Path(settings.BASE_DIR) / "models" / VGG_FACE2_WEIGHTS
+    if not bundled.exists():
+        return
+    _torch_hub_checkpoints_dir().mkdir(parents=True, exist_ok=True)
+    shutil.copy2(bundled, target)
 
 
 def _get_models():
@@ -16,6 +37,7 @@ def _get_models():
     if _mtcnn is None:
         from facenet_pytorch import MTCNN, InceptionResnetV1
 
+        ensure_model_assets()
         _mtcnn = MTCNN(
             image_size=320,
             margin=0,

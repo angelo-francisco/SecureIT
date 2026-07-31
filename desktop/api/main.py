@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 
+import os
+
 import uvicorn
 from apps.control.router import router as control_router
 from apps.cameras.router import router as cameras_router
@@ -11,6 +13,7 @@ from apps.audit.router import router as audit_router
 from apps.license.router import router as license_router
 from core.config import settings
 from core.database import close_db, init_db
+from core.embedded_db import stop_embedded_postgres
 from core.middleware import ControlMiddleware
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,8 +26,11 @@ from websocket.behaviour_analysis import BehaviourAnalysisManager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    yield
-    await close_db()
+    try:
+        yield
+    finally:
+        await close_db()
+        stop_embedded_postgres()
 
 
 app = FastAPI(
@@ -78,4 +84,5 @@ async def behaviour_analysis_ws(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = settings.PORT or int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
