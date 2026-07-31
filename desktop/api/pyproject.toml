@@ -36,8 +36,8 @@ dependencies = [
 run = "uvicorn main:app --reload"
 
 [tool.uv.sources]
-torch = { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp312-cp312-linux_x86_64.whl" }
-torchvision = { url = "https://download-r2.pytorch.org/whl/cpu/torchvision-0.18.1%2Bcpu-cp312-cp312-linux_x86_64.whl" }
+torch = { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp312-cp312-linux_x86_64.whl", marker = "sys_platform == 'linux'" }
+torchvision = { url = "https://download-r2.pytorch.org/whl/cpu/torchvision-0.18.1%2Bcpu-cp312-cp312-linux_x86_64.whl", marker = "sys_platform == 'linux'" }
 
 [project.optional-dependencies]
 test = [
