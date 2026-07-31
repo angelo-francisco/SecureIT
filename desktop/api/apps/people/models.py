@@ -3,7 +3,7 @@ from tortoise_vector.field import VectorField
 
 
 class Role(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     name = fields.CharField(max_length=60)
     description = fields.TextField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
@@ -16,7 +16,7 @@ class Role(models.Model):
 
 
 class RoleField(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     role = fields.ForeignKeyField("models.Role", related_name="fields")
     label = fields.CharField(max_length=60)
     field_type = fields.CharField(max_length=20)
@@ -32,7 +32,7 @@ class RoleField(models.Model):
 
 
 class Person(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     first_name = fields.CharField(max_length=30)
     last_name = fields.CharField(max_length=30)
     photo = fields.CharField(max_length=255, null=True)
@@ -52,7 +52,7 @@ class Person(models.Model):
 
 
 class PersonEmbedding(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     person = fields.ForeignKeyField("models.Person", related_name="embeddings")
     embedding = VectorField(vector_size=512)
 
@@ -64,7 +64,7 @@ class PersonEmbedding(models.Model):
 
 
 class PersonRole(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     person = fields.ForeignKeyField("models.Person", related_name="person_roles")
     role = fields.ForeignKeyField("models.Role", related_name="person_roles")
     field_values = fields.JSONField(null=True)

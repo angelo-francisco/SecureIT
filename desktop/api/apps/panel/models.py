@@ -2,7 +2,7 @@ from tortoise import fields, models
 
 
 class Configuration(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     profile = fields.OneToOneField("models.Profile", related_name="settings")
     fps = fields.IntField(default=15)
     monitoring_start_time = fields.CharField(max_length=8, null=True)

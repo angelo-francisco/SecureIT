@@ -2,9 +2,9 @@ from tortoise import fields, models
 
 
 class License(models.Model):
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(primary_key=True)
     license_id = fields.CharField(max_length=255, unique=True)
-    user_id = fields.CharField(max_length=255, index=True)
+    user_id = fields.CharField(max_length=255, db_index=True)
     license_key = fields.CharField(max_length=30)
     license_type = fields.CharField(max_length=20)
     activated_at = fields.DatetimeField()

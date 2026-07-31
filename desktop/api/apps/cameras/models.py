@@ -23,7 +23,7 @@ class CameraTask(StrEnum):
 
 
 class Camera(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     profile = fields.ForeignKeyField("models.Profile", related_name="cameras")
     name = fields.CharField(max_length=30, null=True)
     location = fields.CharField(max_length=150, null=True)

@@ -2,8 +2,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
     NoEncryption,
-    PrivateFormat,
-    PublicFormat,
+    PrivateFormat
 )
 
 from core.crypto import extract_license_payload, verify_license_token
