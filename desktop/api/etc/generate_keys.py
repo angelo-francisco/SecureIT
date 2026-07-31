@@ -3,7 +3,7 @@
 Generate Ed25519 keypair for SecureIT license signing.
 
 Usage:
-    python scripts/generate_keys.py
+    python etc/generate_keys.py
 
 Outputs:
     - ed25519_private.pem (for web server)
@@ -60,8 +60,8 @@ def main():
     print(f"  ED25519_PRIVATE_KEY={private_pem.strip()}")
     print()
     print("The public key is not secret. Keep the desktop API in sync by")
-    print("either setting ED25519_PUBLIC_KEY in its env/.env, or updating")
-    print("the default in desktop/api/core/config.py.")
+    print("setting ED25519_PUBLIC_KEY (inline PEM) in its env/.env or as an")
+    print("environment variable.")
     print(f"  ED25519_PUBLIC_KEY={public_pem.strip()}")
     print()
 

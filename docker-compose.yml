@@ -22,7 +22,6 @@ services:
     environment:
       - DEBUG=1
       - PYTHONDONTWRITEBYTECODE=1
-      - ED25519_PUBLIC_KEY_PATH=/app/ed25519_public.pem
     depends_on:
       db:
         condition: service_healthy

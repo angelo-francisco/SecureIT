@@ -7,7 +7,6 @@ import numpy as np
 import torch
 from core.config import settings
 from core.exceptions import NotFound, ValidationError_
-from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image, ImageOps
 from tortoise import Tortoise
 from tortoise.expressions import Q, RawSQL
@@ -17,32 +16,9 @@ from apps.people.schemas import (
     PersonRoleCreate,
 )
 from apps.audit.service import log_action
-
-_mtcnn = None
-_resnet = None
+from services.facenet import get_mtcnn, get_resnet
 
 logger = logging.getLogger(__name__)
-
-
-def _get_mtcnn():
-    global _mtcnn
-    if _mtcnn is None:
-        _mtcnn = MTCNN(
-            image_size=320,
-            margin=0,
-            select_largest=True,
-            post_process=True,
-            device="cpu",
-        )
-    return _mtcnn
-
-
-def _get_resnet():
-    global _resnet
-    if _resnet is None:
-        _resnet = InceptionResnetV1(pretrained="vggface2").eval().to("cpu")
-    return _resnet
-
 
 def base64_to_bytes(photo_b64: str) -> bytes:
     if "," in photo_b64:
@@ -66,13 +42,13 @@ def generate_face_embedding(
         raise ValueError("É necessário fornecer base64 ou uma imagem PIL")
 
     if detect_face:
-        face = _get_mtcnn()(image)
+        face = get_mtcnn()(image)
         if face is None:
             raise ValidationError_(
                 "Nenhum rosto detectado. Tente novamente com melhor iluminação e o rosto visível."
             )
     else:
-        mtcnn_instance = _get_mtcnn()
+        mtcnn_instance = get_mtcnn()
         img_size = (
             mtcnn_instance.image_size if hasattr(mtcnn_instance, "image_size") else 160
         )
@@ -82,7 +58,7 @@ def generate_face_embedding(
         face = face.to("cpu")
 
     with torch.no_grad():
-        embedding = _get_resnet()(face.unsqueeze(0))
+        embedding = get_resnet()(face.unsqueeze(0))
 
     return embedding.cpu().flatten().tolist()
 

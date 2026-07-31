@@ -6,5 +6,5 @@
 # will have schema files for capabilities auto-completion
 /gen/schemas
 
-# Staged local API bundle (built by desktop/api/desktop-api.spec)
-/resources/api/desktop-api/
+# Staged local API bundle (built by desktop/api/build.spec)
+/resources/api/

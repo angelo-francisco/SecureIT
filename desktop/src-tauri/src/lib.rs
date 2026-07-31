@@ -155,6 +155,11 @@ fn greet(name: &str) -> String {
 pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+            }
+        }))
         .manage(ApiState::default())
         .invoke_handler(tauri::generate_handler![greet, get_api_url])
         .setup(|_app| {
@@ -166,6 +171,16 @@ pub fn run() {
                     spawn_api(&state, &resource_dir);
                 }
             }
+            // Safety net: the window starts hidden (frontend calls show() once
+            // the loader is rendered). If the webview never signals, reveal it
+            // anyway so the app is never stuck invisible.
+            let handle = _app.handle().clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(20));
+                if let Some(window) = handle.get_webview_window("main") {
+                    let _ = window.show();
+                }
+            });
             Ok(())
         })
         .build(tauri::generate_context!())

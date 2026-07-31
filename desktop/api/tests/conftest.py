@@ -73,21 +73,10 @@ def sample_keys():
 
 @pytest.fixture(scope="session")
 def _setup_public_key(sample_keys):
-    tmp_dir = tempfile.mkdtemp()
-    pub_path = Path(tmp_dir) / "test_public.pem"
-    pub_path.write_bytes(sample_keys[1])
-
-    settings.ED25519_PUBLIC_KEY_PATH = str(pub_path)
-    settings.ED25519_PUBLIC_KEY = ""
+    settings.ED25519_PUBLIC_KEY = sample_keys[1].decode()
     crypto_module._cached_public_key = None
 
     yield
-
-    pub_path.unlink(missing_ok=True)
-    try:
-        Path(tmp_dir).rmdir()
-    except OSError:
-        pass
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")

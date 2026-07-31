@@ -13,7 +13,7 @@ class YOLOService:
     @classmethod
     def get_model(cls):
         if cls._model is None:
-            yolo_model_path = settings.YOLO_PATH / "yolo11n.pt"
+            yolo_model_path = settings.YOLO_PATH
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
             cls._model = YOLO(yolo_model_path)

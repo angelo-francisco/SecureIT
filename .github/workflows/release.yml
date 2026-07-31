@@ -52,15 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11.9.0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: desktop/pnpm-lock.yaml
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -71,27 +63,28 @@ jobs:
           workspaces: desktop/src-tauri
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: desktop/api/requirements-desktop.txt
+          cache-dependency-path: desktop/api/requirements.txt
 
       - name: Install API dependencies
         run: |
           python -m pip install --upgrade pip
           pip install torch==2.3.1+cpu torchvision==0.18.1+cpu --index-url https://download.pytorch.org/whl/cpu
-          pip install -r requirements-desktop.txt pyinstaller
+          pip install -r requirements.txt pyinstaller
         working-directory: desktop/api
 
-      - name: Download facenet weights
+      - name: Download facenet and yolo
         shell: bash
         run: |
           mkdir -p models
-          test -f models/20180402-114759-vggface2.pt || curl -L -o models/20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+          test -f models/vggface2.pt || curl -L -o models/vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+          test -f models/yolo26n.pt || curl -L -o models/yolo26n.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt
         working-directory: desktop/api
 
       - name: Write API env file
@@ -107,18 +100,18 @@ jobs:
         working-directory: desktop/api
 
       - name: Build API bundle (PyInstaller)
-        run: pyinstaller desktop-api.spec
+        run: pyinstaller build.spec
         working-directory: desktop/api
 
       - name: Stage API bundle for Tauri
         working-directory: desktop/api
         run: |
-          robocopy dist\desktop-api ..\src-tauri\resources\api\desktop-api /E /NFL /NDL /NJH /NJS /NC /NS
+          robocopy dist\desktop-api ..\src-tauri\resources\api /E /NFL /NDL /NJH /NJS /NC /NS
           if %ERRORLEVEL% GEQ 8 exit /b 1
           del ..\src-tauri\resources\api\PLACEHOLDER.txt
 
       - name: Build Tauri app
-        run: pnpm tauri build
+        run: bun run tauri build
 
       - name: Upload Windows artifacts
         uses: softprops/action-gh-release@v2
@@ -149,15 +142,7 @@ jobs:
             patchelf \
             libgtk-3-dev
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11.9.0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: desktop/pnpm-lock.yaml
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -168,26 +153,27 @@ jobs:
           workspaces: desktop/src-tauri
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: desktop/api/requirements-desktop.txt
+          cache-dependency-path: desktop/api/requirements.txt
 
       - name: Install API dependencies
         run: |
           python -m pip install --upgrade pip
           pip install torch==2.3.1+cpu torchvision==0.18.1+cpu --index-url https://download.pytorch.org/whl/cpu
-          pip install -r requirements-desktop.txt pyinstaller
+          pip install -r requirements.txt pyinstaller
         working-directory: desktop/api
 
-      - name: Download facenet weights
+      - name: Download facenet and yolo
         run: |
           mkdir -p models
-          test -f models/20180402-114759-vggface2.pt || curl -L -o models/20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+          test -f models/vggface2.pt || curl -L -o models/vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+          test -f models/yolo26n.pt || curl -L -o models/yolo26n.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt
         working-directory: desktop/api
 
       - name: Write API env file
@@ -203,7 +189,7 @@ jobs:
         working-directory: desktop/api
 
       - name: Build API bundle (PyInstaller)
-        run: pyinstaller desktop-api.spec
+        run: pyinstaller build.spec
         working-directory: desktop/api
 
       - name: Stage API bundle for Tauri
@@ -212,10 +198,8 @@ jobs:
           cp -r dist/desktop-api ../src-tauri/resources/api/
           rm -f ../src-tauri/resources/api/PLACEHOLDER.txt
 
-      # AppImage is excluded: linuxdeploy cannot resolve the libs bundled by
-      # PyInstaller (_internal/*.libs), so only the .deb is produced in CI.
       - name: Build Tauri app
-        run: pnpm tauri build --bundles deb
+        run: bun run tauri build --bundles deb
 
       - name: Upload Linux artifacts
         uses: softprops/action-gh-release@v2

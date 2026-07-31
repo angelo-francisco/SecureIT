@@ -12,6 +12,6 @@ COPY . .
 
 EXPOSE 8000
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/etc/entrypoint.sh
 
-ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/etc/entrypoint.sh"]

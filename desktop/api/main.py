@@ -1,16 +1,15 @@
+import os
 from contextlib import asynccontextmanager
 
-import os
-
 import uvicorn
-from apps.control.router import router as control_router
+from apps.audit.router import router as audit_router
 from apps.cameras.router import router as cameras_router
+from apps.control.router import router as control_router
 from apps.face_detection.router import router as face_detection_router
+from apps.license.router import router as license_router
 from apps.notifications.router import router as notifications_router
 from apps.panel.router import router as panel_router
 from apps.people.router import router as people_router
-from apps.audit.router import router as audit_router
-from apps.license.router import router as license_router
 from core.config import settings
 from core.database import close_db, init_db
 from core.embedded_db import stop_embedded_postgres
@@ -19,8 +18,8 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from websocket.area_detection import AreaDetectionManager
-from websocket.face_recognition import FaceRecognitionManager
 from websocket.behaviour_analysis import BehaviourAnalysisManager
+from websocket.face_recognition import FaceRecognitionManager
 
 
 @asynccontextmanager
@@ -59,7 +58,9 @@ app.include_router(audit_router, prefix="/api")
 app.include_router(license_router, prefix="/api")
 
 settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-app.mount("/media", StaticFiles(directory=str(settings.MEDIA_ROOT), html=False), name="media")
+app.mount(
+    "/media", StaticFiles(directory=str(settings.MEDIA_ROOT), html=False), name="media"
+)
 
 
 @app.get("/api/health")
@@ -72,10 +73,12 @@ async def area_detection_ws(websocket: WebSocket):
     manager = AreaDetectionManager(websocket)
     await manager.handle()
 
+
 @app.websocket("/ws/face-recognition")
 async def face_recognition_ws(websocket: WebSocket):
     manager = FaceRecognitionManager(websocket)
     await manager.handle()
+
 
 @app.websocket("/ws/behaviour-analysis")
 async def behaviour_analysis_ws(websocket: WebSocket):
@@ -83,6 +86,16 @@ async def behaviour_analysis_ws(websocket: WebSocket):
     await manager.handle()
 
 
-if __name__ == "__main__":
+def main() -> None:
     port = settings.PORT or int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        reload=False,
+        log_level="info",
+    )
+
+
+if __name__ == "__main__":
+    main()

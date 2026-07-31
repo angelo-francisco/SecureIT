@@ -2,7 +2,7 @@
 """PyInstaller spec for the SecureIT desktop API.
 
 Builds a self-contained onedir bundle that the Tauri launcher spawns:
-  pyinstaller desktop-api.spec
+  pyinstaller build.spec
 
 The bundle ships a real PostgreSQL (via pgserver, which bundles the
 pgvector extension) so no external services are required at runtime.
@@ -50,13 +50,9 @@ if pg_install.exists():
 # Project data: YOLO weights, facenet weights, aerich migrations.
 api_root = Path.cwd()
 datas += [
-    (str(api_root / "yolo"), "yolo"),
     (str(api_root / "models"), "models"),
     (str(api_root / "migrations"), "migrations"),
 ]
-
-if (api_root / "ed25519_public.pem").exists():
-    datas.append((str(api_root / "ed25519_public.pem"), "."))
 
 # Runtime env (DATABASE_URL, WEB_URL, ED25519_PUBLIC_KEY, ...). Created by
 # the release workflow from the API_ENV_FILE secret; read via env_file in
@@ -66,7 +62,7 @@ if (api_root / ".env").exists():
 
 
 a = Analysis(
-    ["desktop_entry.py"],
+    ["main.py"],
     pathex=[str(api_root)],
     binaries=binaries,
     datas=datas,

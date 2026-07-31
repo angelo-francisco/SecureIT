@@ -1,52 +1,50 @@
 import base64
-import shutil
 from io import BytesIO
-from pathlib import Path
 
+import facenet_pytorch as facenet
 import numpy as np
 import torch
-from PIL import Image, ImageOps
-
 from core.config import settings
 from core.exceptions import ValidationError_
+from PIL import Image, ImageOps
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+def load_weights(mdl, name):
+    state_dict = torch.load(settings.VGGFACE2_PATH, map_location=device)
+    mdl.load_state_dict(state_dict)
+
+
+facenet.models.inception_resnet_v1.load_weights = load_weights  # type: ignore
+
 
 _mtcnn = None
 _resnet = None
 
-VGG_FACE2_WEIGHTS = "20180402-114759-vggface2.pt"
 
-
-def _torch_hub_checkpoints_dir() -> Path:
-    return Path.home() / ".cache" / "torch" / "hub" / "checkpoints"
-
-
-def ensure_model_assets() -> None:
-    """Seed the torch hub cache from bundled weights so model loading works offline."""
-    target = _torch_hub_checkpoints_dir() / VGG_FACE2_WEIGHTS
-    if target.exists():
-        return
-    bundled = Path(settings.BASE_DIR) / "models" / VGG_FACE2_WEIGHTS
-    if not bundled.exists():
-        return
-    _torch_hub_checkpoints_dir().mkdir(parents=True, exist_ok=True)
-    shutil.copy2(bundled, target)
-
-
-def _get_models():
-    global _mtcnn, _resnet
+def get_mtcnn():
+    global _mtcnn, device
     if _mtcnn is None:
-        from facenet_pytorch import MTCNN, InceptionResnetV1
-
-        ensure_model_assets()
-        _mtcnn = MTCNN(
+        _mtcnn = facenet.MTCNN(
             image_size=320,
             margin=0,
             select_largest=True,
             post_process=True,
-            device="cpu",
+            device=device,
         )
-        _resnet = InceptionResnetV1(pretrained="vggface2").eval().to(_mtcnn.device)
-    return _mtcnn, _resnet
+    return _mtcnn
+
+
+def get_resnet():
+    global _resnet
+    if _resnet is None:
+        _resnet = facenet.InceptionResnetV1(pretrained="vggface2").eval().to(device)
+    return _resnet
+
+
+def _get_models():
+    return get_mtcnn(), get_resnet()
 
 
 def base64_to_bytes(photo_b64: str) -> bytes:
@@ -58,7 +56,7 @@ def base64_to_bytes(photo_b64: str) -> bytes:
 def generate_face_embedding(
     base64_str: str | None = None,
     image: Image.Image | None = None,
-    detect_face: bool = True
+    detect_face: bool = True,
 ) -> bytes:
     if base64_str:
         image_data = base64_to_bytes(base64_str)
@@ -95,17 +93,19 @@ def treat_photo(base64_photo: str) -> tuple[bytes, Image.Image]:
         raise ValidationError_("Capture o rosto do indivíduo, por favor.")
     image = Image.open(BytesIO(image_data))
     image = ImageOps.exif_transpose(image)
-    
+
     buffer = BytesIO()
     image.save(buffer, format="JPEG")
     photo_bytes = buffer.getvalue()
-    
+
     return photo_bytes, image
 
 
-def detect_faces_in_frame(pil_img: Image.Image, confidence_threshold: float = 0.9) -> list[dict]:
+def detect_faces_in_frame(
+    pil_img: Image.Image, confidence_threshold: float = 0.9
+) -> list[dict]:
     """Detect faces and generate embeddings for all faces in an image (camera stream use)."""
-    mtcnn, _resnet = _get_models()
+    mtcnn, _ = _get_models()
     boxes, probs = mtcnn.detect(pil_img)
     if boxes is None:
         return []
@@ -119,9 +119,11 @@ def detect_faces_in_frame(pil_img: Image.Image, confidence_threshold: float = 0.
             emb = generate_face_embedding(image=face_patch, detect_face=False)
         except Exception:
             continue
-        results.append({
-            "bbox": [x1, y1, x2, y2],
-            "probability": float(prob),
-            "embedding": emb,
-        })
+        results.append(
+            {
+                "bbox": [x1, y1, x2, y2],
+                "probability": float(prob),
+                "embedding": emb,
+            }
+        )
     return results

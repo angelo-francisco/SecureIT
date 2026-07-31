@@ -3,7 +3,7 @@ Ed25519 license verification for the desktop API.
 
 The desktop API only VERIFIES signatures (the web server signs).
 This module handles JWT parsing and Ed25519 signature verification
-using the public key loaded from the configured PEM file.
+using the public key from settings (ED25519_PUBLIC_KEY).
 """
 
 import base64
@@ -27,14 +27,6 @@ def _get_public_key() -> Ed25519PublicKey:
     global _cached_public_key
     if _cached_public_key is not None:
         return _cached_public_key
-
-    pem_path = settings.ED25519_PUBLIC_KEY_PATH
-    logger.info(
-        "Loading Ed25519 public key (inline=%s, path=%s, exists=%s)",
-        bool(settings.ED25519_PUBLIC_KEY),
-        pem_path,
-        Path(pem_path).exists(),
-    )
 
     pem_data = settings.get_ed25519_public_key().encode("utf-8")
     key = load_pem_public_key(pem_data)

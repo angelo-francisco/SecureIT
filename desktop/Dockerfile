@@ -1,12 +1,5 @@
-FROM ghcr.io/pnpm/pnpm:11
+FROM oven/bun:1
 
-RUN pnpm runtime set node 22 -g
-
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Install Tauri system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libwebkit2gtk-4.1-dev \
     build-essential \
@@ -23,19 +16,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 WORKDIR /app
 
-COPY package.json pnpm-*.yaml .
+COPY package.json bun.lock .
 
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 COPY . .
 
 EXPOSE 1420
+
 EXPOSE 1421
 
 ENV TAURI_DEV_HOST=0.0.0.0
 
-RUN chmod +x /app/entrypoint.sh
-
-ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
+CMD ["bun", "run", "tauri", "dev"]
