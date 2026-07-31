@@ -88,9 +88,10 @@ jobs:
         working-directory: desktop/api
 
       - name: Download facenet weights
+        shell: bash
         run: |
           mkdir -p models
-          if not exist models\20180402-114759-vggface2.pt curl -L -o models\20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+          test -f models/20180402-114759-vggface2.pt || curl -L -o models/20180402-114759-vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
         working-directory: desktop/api
 
       - name: Write API env file
