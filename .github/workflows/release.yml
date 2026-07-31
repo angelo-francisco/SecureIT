@@ -110,6 +110,7 @@ jobs:
         working-directory: desktop/api
 
       - name: Stage API bundle for Tauri
+        working-directory: desktop/api
         run: |
           robocopy dist\desktop-api ..\src-tauri\resources\api\desktop-api /E /NFL /NDL /NJH /NJS /NC /NS
           if %ERRORLEVEL% GEQ 8 exit /b 1
@@ -205,6 +206,7 @@ jobs:
         working-directory: desktop/api
 
       - name: Stage API bundle for Tauri
+        working-directory: desktop/api
         run: |
           cp -r dist/desktop-api ../src-tauri/resources/api/
           rm -f ../src-tauri/resources/api/PLACEHOLDER.txt
