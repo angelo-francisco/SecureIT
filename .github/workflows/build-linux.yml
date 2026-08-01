@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     name: Build Linux
-    needs: create-release
     runs-on: ubuntu-22.04
     defaults:
       run:

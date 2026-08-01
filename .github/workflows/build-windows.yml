@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     name: Build Windows
-    needs: create-release
     runs-on: windows-latest
     defaults:
       run:
