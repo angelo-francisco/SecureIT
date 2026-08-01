@@ -106,10 +106,15 @@ jobs:
 
       - name: Stage API bundle for Tauri
         working-directory: desktop/api
+        shell: pwsh
         run: |
           robocopy dist\desktop-api ..\src-tauri\resources\api /E /NFL /NDL /NJH /NJS /NC /NS
-          if %ERRORLEVEL% GEQ 8 exit /b 1
-          del ..\src-tauri\resources\api\PLACEHOLDER.txt
+
+          if ($LASTEXITCODE -ge 8) {
+            exit 1
+          }
+
+          Remove-Item ..\src-tauri\resources\api\PLACEHOLDER.txt -Force -ErrorAction SilentlyContinue
 
       - name: Build Tauri app
         run: bun run tauri build
