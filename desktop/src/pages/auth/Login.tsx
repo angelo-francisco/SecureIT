@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { OutlinedInput } from "@/packages/ui";
 import * as Lucide from "lucide-react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useAuth } from "../../hooks";
 import { useToast } from "@/packages/ui";
+import { getWebBaseUrl, isRunningInTauri } from "../../api-client/api-base";
 import { Navbar } from "@/components/Navbar";
 
 export default function Login() {
@@ -27,6 +29,19 @@ export default function Login() {
       toast(err instanceof Error ? err.message : "Erro ao fazer login", "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateAccount = async () => {
+    const url = `${getWebBaseUrl()}/signup`;
+    try {
+      if (isRunningInTauri()) {
+        await openUrl(url);
+      } else {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -73,6 +88,18 @@ export default function Login() {
                   <>Avançar</>
                 )}
               </button>
+              <div className="text-center pt-1">
+                <p className="text-lg text-text-muted">
+                  Não tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={handleCreateAccount}
+                    className="text-primary font-bold hover:underline ml-1 cursor-pointer"
+                  >
+                    Criar Conta
+                  </button>
+                </p>
+              </div>
             </form>
           </div>
         </div>
