@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY pyproject.toml .python-version uv.lock .
 
 RUN pip install --upgrade pip
 

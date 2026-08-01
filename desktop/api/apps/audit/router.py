@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Request
 
-from apps.audit.schemas import AuditLogListResponse, AuditLogResponse, MarkSyncedRequest
+from apps.audit.schemas import AuditLogListResponse, MarkSyncedRequest
 from apps.audit.service import list_audit_logs, mark_as_synced
 
 router = APIRouter(prefix="/audit", tags=["audit"])
