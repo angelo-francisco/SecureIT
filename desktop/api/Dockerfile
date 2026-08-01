@@ -6,7 +6,9 @@ COPY requirements.txt .
 
 RUN pip install --upgrade pip
 
-RUN pip install -r pylock.toml --timeout 3600
+RUN pip install uv
+
+RUN uv sync --frozen --system
 
 COPY . .
 
