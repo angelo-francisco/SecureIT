@@ -4,6 +4,9 @@ import { useState } from "react";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import Image from "next/image";
 
+const getDownloadLink = (executableName: string) =>
+	"https://github.com/angelo-francisco/SecureIT/releases/latest/download/" + executableName
+
 const platforms = [
 	// {
 	// 	name: "macOS",
@@ -24,11 +27,11 @@ const platforms = [
 		arch: [
 			{
 				name: ".exe",
-				link: "https://github.com/angelo-francisco/SecureIT/releases/download/v0.0.2/SecureIT_0.1.0_x64-setup.exe",
+				link: getDownloadLink("SecureIT_x64-setup.exe"),
 			},
 			{
 				name: ".msi",
-				link: "https://github.com/angelo-francisco/SecureIT/releases/download/v0.0.2/SecureIT_0.1.0_x64_en-US.msi",
+				link: getDownloadLink("SecureIT_x64_en-US.msi"),
 			},
 		],
 		icon: <Image src={"/windows.png"} alt={"apple"} width={45} height={45} />,
@@ -39,12 +42,12 @@ const platforms = [
 		arch: [
 			{
 				name: ".deb",
-				link: "https://github.com/angelo-francisco/SecureIT/releases/download/v0.0.2/SecureIT_0.1.0_amd64.deb",
+				link: getDownloadLink("/SecureIT_amd64.deb"),
 			},
-			{
-				name: ".AppImage",
-				link: "https://github.com/angelo-francisco/SecureIT/releases/download/v0.0.2/SecureIT_0.1.0_amd64.AppImage",
-			},
+			// {
+			// 	name: ".AppImage",
+			// 	link: getDownloadLink("SecureIT_amd64.AppImage"),
+			// },
 		],
 		icon: <Image src={"/linux.png"} alt={"apple"} width={45} height={45} />,
 	},

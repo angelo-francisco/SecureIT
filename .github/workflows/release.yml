@@ -112,13 +112,22 @@ jobs:
       - name: Build Tauri app
         run: bun run tauri build
 
+      - name: Rename installers
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
+          Move-Item $exe.FullName "src-tauri/target/release/bundle/nsis/SecureIT.exe" -Force
+
+          $msi = Get-ChildItem "src-tauri/target/release/bundle/msi/*.msi" | Select-Object -First 1
+          Move-Item $msi.FullName "src-tauri/target/release/bundle/msi/SecureIT.msi" -Force
+
       - name: Upload Windows artifacts
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
-            desktop/src-tauri/target/release/bundle/msi/*.msi
-            desktop/src-tauri/target/release/bundle/nsis/*.exe
+            desktop/src-tauri/target/release/bundle/msi/SecureIT.msi
+            desktop/src-tauri/target/release/bundle/nsis/SecureIT.exe
 
   build-linux:
     name: Build Linux
@@ -199,12 +208,17 @@ jobs:
       - name: Build Tauri app
         run: bun run tauri build --bundles deb
 
+      - name: Rename package
+        run: |
+          mv src-tauri/target/release/bundle/deb/*.deb \
+            src-tauri/target/release/bundle/deb/SecureIT.deb
+
       - name: Upload Linux artifacts
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
-            desktop/src-tauri/target/release/bundle/deb/*.deb
+            desktop/src-tauri/target/release/bundle/deb/SecureIT.deb
 
   publish-release:
     name: Publish Release
