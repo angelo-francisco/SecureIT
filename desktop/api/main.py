@@ -3,36 +3,39 @@ from contextlib import asynccontextmanager
 
 import core.win_hidden  # noqa: F401  (Windows: hide child console windows)
 import uvicorn
-from apps.audit.router import router as audit_router
-from apps.cameras.router import router as cameras_router
+from apps import ROUTERS
 from apps.control.models import Profile
-from apps.control.router import router as control_router
-from apps.face_detection.router import router as face_detection_router
-from apps.license.router import router as license_router
-from apps.notifications.router import router as notifications_router
-from apps.panel.router import router as panel_router
-from apps.people.router import router as people_router
 from core.config import settings
 from core.context import current_profile_id
-from core.database import close_db, init_db
+from core.database import after_db_startup, get_tortoise_config
 from core.embedded_db import stop_embedded_postgres
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
-from websocket.area_detection import AreaDetectionManager
-from websocket.behaviour_analysis import BehaviourAnalysisManager
-from websocket.face_recognition import FaceRecognitionManager
+from tortoise.contrib.fastapi import RegisterTortoise
+from websocket import (
+    AreaDetectionManager,
+    BehaviourAnalysisManager,
+    FaceRecognitionManager,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    try:
+    if settings.EMBEDDED_DB:
+        from core.embedded_db import start_embedded_postgres
+
+        start_embedded_postgres()
+
+    async with RegisterTortoise(
+        app,
+        config=get_tortoise_config(),
+        generate_schemas=False,
+    ):
+        await after_db_startup()
         yield
-    finally:
-        await close_db()
-        stop_embedded_postgres()
+    stop_embedded_postgres()
 
 
 app = FastAPI(
@@ -74,14 +77,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(control_router, prefix="/api")
-app.include_router(cameras_router, prefix="/api")
-app.include_router(face_detection_router, prefix="/api")
-app.include_router(notifications_router, prefix="/api")
-app.include_router(panel_router, prefix="/api")
-app.include_router(people_router, prefix="/api")
-app.include_router(audit_router, prefix="/api")
-app.include_router(license_router, prefix="/api")
+
+for router in ROUTERS:
+    app.include_router(router, prefix="/api")
 
 settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 app.mount(
@@ -115,11 +113,7 @@ async def behaviour_analysis_ws(websocket: WebSocket):
 def main() -> None:
     port = settings.PORT or int(os.environ.get("PORT", 8000))
     uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=port,
-        reload=False,
-        log_level="info",
+        app, host="0.0.0.0", port=port, reload=False, log_level="info", lifespan="on"
     )
 
 

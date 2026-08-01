@@ -31,14 +31,15 @@ TORTOISE_ORM = {
 }
 
 
-def _tortoise_config() -> dict:
+def get_tortoise_config() -> dict:
     from core.embedded_db import embedded_credentials
 
-    if settings.EMBEDDED_DB and embedded_credentials():
+    credentials = embedded_credentials()
+    if settings.EMBEDDED_DB and credentials:
         connections = {
             "default": {
                 "engine": "tortoise.backends.asyncpg",
-                "credentials": embedded_credentials(),
+                "credentials": credentials,
             }
         }
     else:
@@ -54,65 +55,46 @@ def _tortoise_config() -> dict:
     }
 
 
-def _migrations_dir() -> Path:
+def migrations_dir() -> Path:
     return Path(settings.BASE_DIR) / "migrations"
 
 
-async def _run_migrations() -> None:
-    migrations_dir = _migrations_dir()
+async def run_migrations() -> None:
     cmd = Command(
-        tortoise_config=_tortoise_config(),
+        tortoise_config=get_tortoise_config(),
         app="models",
-        location=str(migrations_dir),
+        location=str(migrations_dir()),
     )
     await cmd.init()
     try:
         migrated = await cmd.upgrade()
         if migrated:
             logger.info("Applied aerich migrations: %s", migrated)
-    except Exception as exc:  # noqa: BLE001 - fresh DB without aerich table
+    except Exception as exc:  # NOQA
         logger.info("Aerich table missing (%s); bootstrapping fresh schema", exc)
         await Tortoise.generate_schemas()
         migrated = await cmd.upgrade()
         if migrated:
             logger.info("Registered aerich migrations on fresh DB: %s", migrated)
 
-
-async def init_db():
-    if settings.EMBEDDED_DB:
-        from core.embedded_db import start_embedded_postgres
-
-        start_embedded_postgres()
-
-    if not settings.EMBEDDED_DB and not settings.DATABASE_URL:
-        raise RuntimeError(
-            "DATABASE_URL is not configured. Provide it via env/.env "
-            "(e.g. the API_ENV_FILE secret during CI builds) or enable EMBEDDED_DB."
-        )
-
-    config = _tortoise_config()
-    try:
-        await Tortoise.init(config=config, _enable_global_fallback=True)
-    except TypeError:
-        await Tortoise.init(config=config)
-
+async def after_db_startup():
     conn = Tortoise.get_connection("default")
 
-    await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
+    await conn.execute_query(
+        "CREATE EXTENSION IF NOT EXISTS vector"
+    )
 
     if settings.EMBEDDED_DB or is_bundled():
-        await _run_migrations()
+        await run_migrations()
+
     elif settings.DEBUG:
         await Tortoise.generate_schemas()
 
     try:
         await conn.execute_query("""
             CREATE INDEX IF NOT EXISTS idx_person_embeddings_vector
-            ON person_embeddings USING hnsw (embedding vector_cosine_ops)
+            ON person_embeddings
+            USING hnsw (embedding vector_cosine_ops)
         """)
     except Exception:
         pass
-
-
-async def close_db():
-    await Tortoise.close_connections()
