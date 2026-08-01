@@ -20,6 +20,7 @@ jobs:
     outputs:
       release_id: ${{ steps.create_release.outputs.id }}
       tag: ${{ steps.get_tag.outputs.tag }}
+      models_sha: ${{ steps.package_models.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -40,6 +41,26 @@ jobs:
           name: "SecureIT ${{ steps.get_tag.outputs.tag }}"
           draft: true
           generate_release_notes: true
+
+      - name: Download facenet and yolo
+        run: |
+          mkdir -p /tmp/secureit-models
+          curl -L -o /tmp/secureit-models/vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
+          curl -L -o /tmp/secureit-models/yolo26n.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt
+
+      - name: Package models
+        id: package_models
+        run: |
+          cd /tmp/secureit-models
+          zip -r models-v1.zip .
+          echo "sha=$(sha256sum models-v1.zip | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+
+      - name: Upload models
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          files: /tmp/secureit-models/models-v1.zip
+          overwrite_files: true
 
   build-windows:
     name: Build Windows
@@ -80,14 +101,6 @@ jobs:
           uv add pyinstaller
         working-directory: desktop/api
 
-      - name: Download facenet and yolo
-        shell: bash
-        run: |
-          mkdir -p models
-          test -f models/vggface2.pt || curl -L -o models/vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
-          test -f models/yolo26n.pt || curl -L -o models/yolo26n.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt
-        working-directory: desktop/api
-
       - name: Write API env file
         shell: bash
         env:
@@ -111,22 +124,19 @@ jobs:
         env:
           TAG: ${{ needs.create-release.outputs.tag }}
 
-      - name: Package API and models payload
+      - name: Package API payload
         shell: pwsh
         working-directory: desktop/api
         env:
           VER: ${{ steps.version.outputs.ver }}
           TARGET: windows-x86_64
+          MODELS_SHA: ${{ needs.create-release.outputs.models_sha }}
         run: |
           $base = "https://github.com/angelo-francisco/SecureIT/releases/latest/download"
           Push-Location dist
           Compress-Archive -Path desktop-api -DestinationPath "../api-$env:TARGET-$env:VER.zip" -Force
           Pop-Location
-          Push-Location models
-          Compress-Archive -Path * -DestinationPath "../models-v1.zip" -Force
-          Pop-Location
           $apiSha = (Get-FileHash "api-$env:TARGET-$env:VER.zip" -Algorithm SHA256).Hash.ToLower()
-          $modelsSha = (Get-FileHash "models-v1.zip" -Algorithm SHA256).Hash.ToLower()
           $json = @{
             api = @{
               version = $env:VER
@@ -136,7 +146,7 @@ jobs:
             models = @{
               version = "v1"
               url     = "$base/models-v1.zip"
-              sha256  = $modelsSha
+              sha256  = $env:MODELS_SHA
             }
           } | ConvertTo-Json
           Set-Content -Path "payload-$env:TARGET.json" -Value $json
@@ -182,12 +192,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
-          overwrite: true
+          overwrite_files: true
           files: |
             desktop/src-tauri/target/release/bundle/msi/SecureIT.msi
             desktop/src-tauri/target/release/bundle/nsis/SecureIT.exe
             desktop/api/api-windows-x86_64-${{ steps.version.outputs.ver }}.zip
-            desktop/api/models-v1.zip
             desktop/api/payload-windows-x86_64.json
             desktop/latest-windows-x86_64.json
 
@@ -241,13 +250,6 @@ jobs:
           uv add pyinstaller
         working-directory: desktop/api
 
-      - name: Download facenet and yolo
-        run: |
-          mkdir -p models
-          test -f models/vggface2.pt || curl -L -o models/vggface2.pt https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt
-          test -f models/yolo26n.pt || curl -L -o models/yolo26n.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt
-        working-directory: desktop/api
-
       - name: Write API env file
         shell: bash
         env:
@@ -270,21 +272,19 @@ jobs:
         env:
           TAG: ${{ needs.create-release.outputs.tag }}
 
-      - name: Package API and models payload
+      - name: Package API payload
         working-directory: desktop/api
         env:
           VER: ${{ steps.version.outputs.ver }}
           TARGET: linux-x86_64
+          MODELS_SHA: ${{ needs.create-release.outputs.models_sha }}
         run: |
           set -euo pipefail
           BASE="https://github.com/angelo-francisco/SecureIT/releases/latest/download"
           cd dist
           zip -r "../api-${TARGET}-${VER}.zip" desktop-api
-          cd ../models
-          zip -r "../models-v1.zip" .
           cd ..
           API_SHA=$(sha256sum "api-${TARGET}-${VER}.zip" | awk '{print $1}')
-          MODELS_SHA=$(sha256sum models-v1.zip | awk '{print $1}')
           cat > "payload-${TARGET}.json" <<EOF
           {
             "api": {
@@ -334,12 +334,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
-          overwrite: true
+          overwrite_files: true
           files: |
             desktop/src-tauri/target/release/bundle/deb/SecureIT.deb
             desktop/src-tauri/target/release/bundle/appimage/SecureIT-x86_64.AppImage
             desktop/api/api-linux-x86_64-${{ steps.version.outputs.ver }}.zip
-            desktop/api/models-v1.zip
             desktop/api/payload-linux-x86_64.json
             desktop/latest-linux-x86_64.json
 
