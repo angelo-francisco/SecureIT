@@ -107,7 +107,7 @@ jobs:
       - name: Stage API bundle for Tauri
         working-directory: desktop/api
         run: |
-          python -c "import shutil, pathlib; src=pathlib.Path('dist')/'desktop-api'; dst=pathlib.Path('../src-tauri')/'resources'/'api'; shutil.rmtree(dst, ignore_errors=True); dst.mkdir(parents=True); shutil.copytree(src, dst/'desktop-api'); exe=dst/'desktop-api'/'desktop-api.exe'; assert exe.exists(), 'API nao embutida: '+str(exe); m=dst/'desktop-api'/'models'; assert (m/'vggface2.pt').exists() and (m/'yolo26n.pt').exists(), 'models ausentes no bundle'; print('OK - API + models embutidos em', dst)"
+          python -c "import shutil, pathlib; src=pathlib.Path('dist')/'desktop-api'; dst=pathlib.Path('../src-tauri')/'resources'/'api'; shutil.rmtree(dst, ignore_errors=True); dst.mkdir(parents=True); shutil.copytree(src, dst/'desktop-api'); exe=dst/'desktop-api'/'desktop-api.exe'; assert exe.exists(), 'API nao embutida: '+str(exe); names={p.name for p in dst.rglob('*')}; assert 'vggface2.pt' in names and 'yolo26n.pt' in names, 'models ausentes no bundle'; print('OK - API + models embutidos em', dst)"
 
       - name: Build Tauri app
         run: bun run tauri build
@@ -207,8 +207,10 @@ jobs:
           cp -r dist/desktop-api ../src-tauri/resources/api/
           rm -f ../src-tauri/resources/api/PLACEHOLDER.txt
           test -f ../src-tauri/resources/api/desktop-api/desktop-api \
-            && test -f ../src-tauri/resources/api/desktop-api/models/vggface2.pt \
-            && test -f ../src-tauri/resources/api/desktop-api/models/yolo26n.pt \
+            && (test -f ../src-tauri/resources/api/desktop-api/models/vggface2.pt \
+                || test -f ../src-tauri/resources/api/desktop-api/_internal/models/vggface2.pt) \
+            && (test -f ../src-tauri/resources/api/desktop-api/models/yolo26n.pt \
+                || test -f ../src-tauri/resources/api/desktop-api/_internal/models/yolo26n.pt) \
             && echo "OK - API + models embutidos"
 
       - name: Build Tauri app
