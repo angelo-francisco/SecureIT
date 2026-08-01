@@ -5,6 +5,7 @@ import core.win_hidden  # noqa: F401  (Windows: hide child console windows)
 import uvicorn
 from apps.audit.router import router as audit_router
 from apps.cameras.router import router as cameras_router
+from apps.control.models import Profile
 from apps.control.router import router as control_router
 from apps.face_detection.router import router as face_detection_router
 from apps.license.router import router as license_router
@@ -12,12 +13,13 @@ from apps.notifications.router import router as notifications_router
 from apps.panel.router import router as panel_router
 from apps.people.router import router as people_router
 from core.config import settings
+from core.context import current_profile_id
 from core.database import close_db, init_db
 from core.embedded_db import stop_embedded_postgres
-from core.middleware import ControlMiddleware
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.requests import Request
 from websocket.area_detection import AreaDetectionManager
 from websocket.behaviour_analysis import BehaviourAnalysisManager
 from websocket.face_recognition import FaceRecognitionManager
@@ -40,7 +42,30 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(ControlMiddleware)
+
+@app.middleware("http")
+async def control_middleware(request: Request, call_next):
+    profile_id = request.headers.get("PID", "")
+    user_id = request.headers.get("UID", "")
+
+    token = current_profile_id.set(None)
+
+    try:
+        if profile_id and user_id:
+            request.state.profile = await Profile.get_or_none(
+                user_id=user_id,
+                profile_id=profile_id,
+            )
+
+            if request.state.profile:
+                current_profile_id.set(profile_id)
+
+        return await call_next(request)
+
+    finally:
+        current_profile_id.reset(token)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
