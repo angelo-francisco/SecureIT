@@ -106,11 +106,11 @@ jobs:
 
       - name: Stage API bundle for Tauri
         working-directory: desktop/api
-        shell: pwsh
+        shell: bash
         run: |
-          robocopy dist\desktop-api ..\src-tauri\resources\api /E /NFL /NDL /NJH /NJS /NC /NS
-          Remove-Item ..\src-tauri\resources\api\PLACEHOLDER.txt -Force -ErrorAction SilentlyContinue
-
+          robocopy dist/desktop-api ../src-tauri/resources/api /E /NFL /NDL /NJH /NJS /NC /NS || true
+          rm -f ../src-tauri/resources/api/PLACEHOLDER.txt
+          
       - name: Build Tauri app
         run: bun run tauri build
 
