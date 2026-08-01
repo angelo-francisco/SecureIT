@@ -20,6 +20,8 @@ const ALLOWED_ORIGINS = [
 	"file://",
 	"electron://",
 	"tauri://",
+	"http://tauri.localhost",
+	"https://tauri.localhost",
 ];
 
 function getCorsHeaders(request: NextRequest) {

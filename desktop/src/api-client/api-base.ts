@@ -27,18 +27,38 @@ export async function initApiBase(): Promise<string> {
       if (isRunningInTauri()) {
         try {
           resolved = await invoke<string>("get_api_url");
-          cachedBase = resolved;
-          return resolved;
         } catch {
           // command unavailable (dev) — fall back to env
+          resolved = import.meta.env.VITE_API_URL ?? FALLBACK;
         }
+      } else {
+        resolved = import.meta.env.VITE_API_URL ?? FALLBACK;
       }
-      resolved = import.meta.env.VITE_API_URL ?? FALLBACK;
       cachedBase = resolved;
+      await logFrontendConfig();
       return resolved;
     })();
   }
   return resolving;
+}
+
+/**
+ * Log the baked VITE_* values and the resolved base URLs into the Tauri
+ * per-run log file, so they can be verified without opening devtools.
+ * Never throws: logging must not break the app.
+ */
+async function logFrontendConfig(): Promise<void> {
+  if (!isRunningInTauri()) return;
+  try {
+    await invoke("log_frontend_config", {
+      envApiUrl: import.meta.env.VITE_API_URL ?? "",
+      envWebUrl: import.meta.env.VITE_WEB_URL ?? "",
+      apiBase: getApiBaseUrl(),
+      webBase: getWebBaseUrl(),
+    });
+  } catch {
+    // ignore
+  }
 }
 
 export function getApiBaseUrl(): string {

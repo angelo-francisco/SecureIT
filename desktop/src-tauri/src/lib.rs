@@ -22,6 +22,7 @@ const MAX_KEPT_LOGS: usize = 10;
 struct ApiState {
     port: Mutex<Option<u16>>,
     child: Mutex<Option<Child>>,
+    log_path: Mutex<Option<PathBuf>>,
 }
 
 /// Ports to try for the local API. The first free one wins.
@@ -94,6 +95,31 @@ fn prune_old_logs(app: &AppHandle) {
     }
 }
 
+/// Path of the log file for this app execution, creating it (and recording it
+/// in state) on first use. Both the API's stdout/stderr and the Tauri-side
+/// log lines are written here, so one app run produces one log file.
+fn current_log_path(app: &AppHandle, state: &ApiState) -> PathBuf {
+    {
+        let guard = state.log_path.lock().unwrap();
+        if let Some(path) = guard.as_ref() {
+            return path.clone();
+        }
+    }
+    let dir = logs_dir(app);
+    let _ = fs::create_dir_all(&dir);
+    let path = api_log_path(app);
+    *state.log_path.lock().unwrap() = Some(path.clone());
+    path
+}
+
+/// Append a Tauri-side line to the current per-run log file.
+fn log_line(app: &AppHandle, state: &ApiState, line: &str) {
+    let path = current_log_path(app, state);
+    if let Ok(mut f) = OpenOptions::new().create(true).append(true).open(&path) {
+        let _ = writeln!(f, "[tauri] {}", line);
+    }
+}
+
 fn spawn_api(app: &AppHandle, state: &ApiState) -> Option<u16> {
     let resource_dir = app.path().resource_dir().ok()?;
     let bin = api_bin(&resource_dir)?;
@@ -119,10 +145,10 @@ fn spawn_api(app: &AppHandle, state: &ApiState) -> Option<u16> {
     // This also tells the user where the file lives via open_logs_folder.
     let log_dir = logs_dir(app);
     fs::create_dir_all(&log_dir).ok()?;
-    let log_path = api_log_path(app);
+    let log_path = current_log_path(app, state);
     let log_file = OpenOptions::new()
-        .create_new(true)
-        .write(true)
+        .create(true)
+        .append(true)
         .open(&log_path)
         .ok()?;
     let err_file = log_file.try_clone().ok()?;
@@ -209,13 +235,45 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
         }
     };
 
-    let _ = tauri::async_runtime::spawn_blocking(move || {
+    let healthy = tauri::async_runtime::spawn_blocking(move || {
         wait_for_api(port, Duration::from_secs(120))
     })
     .await
     .map_err(|e| e.to_string())?;
 
+    log_line(
+        &app,
+        &state,
+        &format!("API health check on port {}: {}", port, healthy),
+    );
+
     Ok(format!("http://127.0.0.1:{}", port))
+}
+
+/// Log the frontend's resolved API/WEB base URLs into the per-run log file so
+/// the baked VITE_* values can be verified at runtime.
+#[tauri::command]
+fn log_frontend_config(
+    app: AppHandle,
+    state: State<'_, ApiState>,
+    env_api_url: String,
+    env_web_url: String,
+    api_base: String,
+    web_base: String,
+) -> Result<(), String> {
+    log_line(
+        &app,
+        &state,
+        &format!("VITE_API_URL (build-time): {}", env_api_url),
+    );
+    log_line(
+        &app,
+        &state,
+        &format!("VITE_WEB_URL (build-time): {}", env_web_url),
+    );
+    log_line(&app, &state, &format!("frontend API base URL: {}", api_base));
+    log_line(&app, &state, &format!("frontend WEB base URL: {}", web_base));
+    Ok(())
 }
 
 #[tauri::command]
@@ -243,13 +301,27 @@ pub fn run() {
             }
         }))
         .manage(ApiState::default())
-        .invoke_handler(tauri::generate_handler![greet, get_api_url, open_logs_folder])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            get_api_url,
+            open_logs_folder,
+            log_frontend_config
+        ])
         .setup(|_app| {
             // Start warming up the bundled API as soon as the app boots.
             #[cfg(not(debug_assertions))]
             {
                 let state = _app.state::<ApiState>();
-                spawn_api(_app.handle(), &state);
+                match spawn_api(_app.handle(), &state) {
+                    Some(port) => {
+                        log_line(_app.handle(), &state, &format!("API spawned on port {}", port));
+                    }
+                    None => log_line(
+                        _app.handle(),
+                        &state,
+                        "API bundle not found (will retry on get_api_url)",
+                    ),
+                }
             }
             // Safety net: the window starts hidden (frontend calls show() once
             // the loader is rendered). If the webview never signals, reveal it
