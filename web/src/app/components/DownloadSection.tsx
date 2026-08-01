@@ -42,7 +42,7 @@ const platforms = [
 		arch: [
 			{
 				name: ".deb",
-				link: getDownloadLink("/SecureIT.deb"),
+				link: getDownloadLink("SecureIT.deb"),
 			},
 			// {
 			// 	name: ".AppImage",
