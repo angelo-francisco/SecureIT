@@ -1,3 +1,4 @@
+use std::fs::{self, OpenOptions};
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
@@ -5,7 +6,17 @@ use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
 
-use tauri::{Manager, RunEvent, State};
+use tauri::{AppHandle, Manager, RunEvent, State};
+use tauri_plugin_opener::OpenerExt;
+
+/// The child API's stdout/stderr are captured into a log file so it can be
+/// debugged without opening a terminal. A new timestamped file is written on
+/// every app execution so logs from different runs never mix.
+const API_LOG_PREFIX: &str = "api-";
+
+/// Maximum number of per-run API log files kept on disk; older ones are
+/// removed the next time the API is spawned.
+const MAX_KEPT_LOGS: usize = 10;
 
 #[derive(Default)]
 struct ApiState {
@@ -43,8 +54,49 @@ fn api_bin(resource_dir: &Path) -> Option<PathBuf> {
     .find(|p| p.exists())
 }
 
-fn spawn_api(state: &ApiState, resource_dir: &Path) -> Option<u16> {
-    let bin = api_bin(resource_dir)?;
+/// Directory where the API log files are stored (per-user, platform-appropriate).
+fn logs_dir(app: &AppHandle) -> PathBuf {
+    app.path()
+        .app_log_dir()
+        .or_else(|_| app.path().app_data_dir().map(|d| d.join("logs")))
+        .unwrap_or_else(|_| std::env::temp_dir())
+}
+
+/// Path of the log file for the current app execution (e.g. api-2026-08-01_14-30-05.log).
+fn api_log_path(app: &AppHandle) -> PathBuf {
+    let stamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+    logs_dir(app).join(format!("{API_LOG_PREFIX}{stamp}.log"))
+}
+
+/// Remove old per-run log files, keeping only the `MAX_KEPT_LOGS` most recent.
+fn prune_old_logs(app: &AppHandle) {
+    let dir = logs_dir(app);
+    let Ok(entries) = fs::read_dir(&dir) else {
+        return;
+    };
+    let mut files: Vec<PathBuf> = entries
+        .flatten()
+        .filter_map(|e| {
+            let name = e.file_name().to_string_lossy().into_owned();
+            e.path().is_file().then_some((name, e.path()))
+        })
+        .filter(|(name, _)| name.starts_with(API_LOG_PREFIX) && name.ends_with(".log"))
+        .map(|(_, path)| path)
+        .collect();
+    if files.len() <= MAX_KEPT_LOGS {
+        return;
+    }
+    // Oldest first so we can drop the first `excess` entries.
+    files.sort_by_key(|p| p.file_name().unwrap_or_default().to_os_string());
+    let excess = files.len() - MAX_KEPT_LOGS;
+    for path in files.into_iter().take(excess) {
+        let _ = fs::remove_file(path);
+    }
+}
+
+fn spawn_api(app: &AppHandle, state: &ApiState) -> Option<u16> {
+    let resource_dir = app.path().resource_dir().ok()?;
+    let bin = api_bin(&resource_dir)?;
     let port = find_free_port();
 
     let mut cmd = Command::new(bin);
@@ -55,12 +107,33 @@ fn spawn_api(state: &ApiState, resource_dir: &Path) -> Option<u16> {
         // PostgreSQL) can be terminated together on app exit.
         cmd.process_group(0);
     }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        // Run as a background process without any console window.
+        // CREATE_NO_WINDOW = 0x08000000
+        cmd.creation_flags(0x08000000);
+    }
+
+    // Capture stdout/stderr into a timestamped log file (one per app run).
+    // This also tells the user where the file lives via open_logs_folder.
+    let log_dir = logs_dir(app);
+    fs::create_dir_all(&log_dir).ok()?;
+    let log_path = api_log_path(app);
+    let log_file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(&log_path)
+        .ok()?;
+    let err_file = log_file.try_clone().ok()?;
+    prune_old_logs(app);
+
     cmd.env("PORT", port.to_string())
         .env("EMBEDDED_DB", "1")
         .env("DEBUG", "0");
     cmd.stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null());
+        .stdout(Stdio::from(log_file))
+        .stderr(Stdio::from(err_file));
 
     let child = cmd.spawn().ok()?;
     *state.port.lock().unwrap() = Some(port);
@@ -128,12 +201,11 @@ fn kill_process_tree(child: &mut Child) {
 }
 
 #[tauri::command]
-async fn get_api_url(app: tauri::AppHandle, state: State<'_, ApiState>) -> Result<String, String> {
+async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<String, String> {
     let port = match *state.port.lock().unwrap() {
         Some(p) => p,
         None => {
-            let resource_dir = app.path().resource_dir().map_err(|e| e.to_string())?;
-            spawn_api(&state, &resource_dir).ok_or_else(|| "desktop-api bundle not found".to_string())?
+            spawn_api(&app, &state).ok_or_else(|| "desktop-api bundle not found".to_string())?
         }
     };
 
@@ -151,6 +223,16 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+/// Open the folder that contains the per-run API log files in the OS file manager.
+#[tauri::command]
+fn open_logs_folder(app: AppHandle) -> Result<(), String> {
+    let dir = logs_dir(&app);
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    app.opener()
+        .open_path(dir.to_string_lossy().into_owned(), None::<&str>)
+        .map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -161,15 +243,13 @@ pub fn run() {
             }
         }))
         .manage(ApiState::default())
-        .invoke_handler(tauri::generate_handler![greet, get_api_url])
+        .invoke_handler(tauri::generate_handler![greet, get_api_url, open_logs_folder])
         .setup(|_app| {
             // Start warming up the bundled API as soon as the app boots.
             #[cfg(not(debug_assertions))]
             {
-                if let Ok(resource_dir) = _app.path().resource_dir() {
-                    let state = _app.state::<ApiState>();
-                    spawn_api(&state, &resource_dir);
-                }
+                let state = _app.state::<ApiState>();
+                spawn_api(_app.handle(), &state);
             }
             // Safety net: the window starts hidden (frontend calls show() once
             // the loader is rendered). If the webview never signals, reveal it

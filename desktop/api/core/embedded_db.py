@@ -1,4 +1,5 @@
 import logging
+import os
 import threading
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -67,6 +68,19 @@ def start_embedded_postgres() -> str:
         parsed = urlparse(uri)
         query = parse_qs(parsed.query)
         host = query.get("host", [parsed.hostname])[0]
+
+        if os.name == "nt" and "host" not in query and parsed.hostname:
+            # pgserver binds 127.0.0.1 on Windows but records the machine
+            # hostname (from postmaster.pid) in the URI. That hostname may
+            # not resolve on every machine, making asyncpg fail with
+            # "socket.gaierror: getaddrinfo failed", so always connect to
+            # the loopback address.
+            host = "127.0.0.1"
+            parsed = urlparse(
+                f"postgresql://{parsed.username or 'postgres'}@"
+                f"{host}:{parsed.port}/{parsed.path.lstrip('/') or 'postgres'}"
+            )
+
         credentials: dict = {
             "host": host,
             "user": parsed.username or "postgres",
@@ -75,7 +89,7 @@ def start_embedded_postgres() -> str:
         }
         if parsed.port:
             credentials["port"] = parsed.port
-        settings.DATABASE_URL = uri
+        settings.DATABASE_URL = parsed.geturl()
         _embedded_credentials = credentials
         _embedded_uri = uri
         logger.info("Embedded PostgreSQL started (data_dir=%s)", data_dir)

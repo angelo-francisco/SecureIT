@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 
+import core.win_hidden  # noqa: F401  (Windows: hide child console windows)
 import uvicorn
 from apps.audit.router import router as audit_router
 from apps.cameras.router import router as cameras_router
