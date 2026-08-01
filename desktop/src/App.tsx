@@ -4,75 +4,6 @@ import AppRoutes from "./routes";
 import { FullLoader, ToastProvider } from "@/packages/ui";
 import { authApi } from "./api-client";
 import { useAuthStore, loadRememberedCredentials } from "./hooks";
-import {
-  initAppRuntime,
-  getBootstrapState,
-  onBootstrapChange,
-  formatBytes,
-  type BootstrapState,
-} from "./api-client/init";
-
-
-function BootOverlay({ boot, onRetry }: { boot: BootstrapState; onRetry: () => void }) {
-  if (boot.error) {
-    return (
-      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center text-center bg-bg">
-        <div className="flex items-center gap-3 mb-6">
-          <img src="/logo.png" alt="SecureIT" className="w-8 h-auto" />
-          <h1 className="text-text text-3xl font-bold">SecureIT</h1>
-        </div>
-        <p className="text-text-muted mb-2 max-w-sm text-sm">
-          Não foi possível iniciar o motor de segurança.
-        </p>
-        <p className="text-red-400 text-xs max-w-sm mb-6 truncate w-full max-w-md">
-          {boot.error}
-        </p>
-        <button
-          onClick={onRetry}
-          className="cursor-pointer px-5 py-2.5 bg-primary text-white font-medium rounded transition-colors hover:opacity-90"
-        >
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  const p = boot.progress;
-  const label =
-    p?.message === "a descarregar"
-      ? `A descarregar ${p.component}…`
-      : p?.message === "a instalar"
-        ? `A instalar ${p.component}…`
-        : p
-          ? `A preparar ${p.component}…`
-          : "A preparar o motor de segurança…";
-
-  const pct =
-    p && p.total
-      ? Math.min(100, Math.round((p.downloaded / p.total) * 100))
-      : 0;
-
-  return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center text-center bg-bg">
-      <div className="flex items-center gap-3 mb-4">
-        <img src="/logo.png" alt="SecureIT" className="w-8 h-auto" />
-        <h1 className="text-text text-3xl font-bold">SecureIT</h1>
-      </div>
-      <p className="text-text-muted text-sm mb-3">{label}</p>
-      <div className="w-[300px] h-1 rounded-full bg-white/[0.08] overflow-hidden">
-        <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{ width: pct ? `${pct}%` : "30%" }}
-        />
-      </div>
-      {p && p.total ? (
-        <p className="text-text-muted text-xs mt-2">
-          {formatBytes(p.downloaded)} / {formatBytes(p.total)}
-        </p>
-      ) : null}
-    </div>
-  );
-}
 
 
 function App() {
@@ -80,7 +11,6 @@ function App() {
   const [destination, setDestination] = useState<string | null>(null);
   const [gifDone, setGifDone] = useState(false);
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
-  const [boot, setBoot] = useState<BootstrapState>(() => getBootstrapState());
   const location = useLocation();
   const navigate = useNavigate();
   const setAccounts = useAuthStore((s) => s.setAccounts);
@@ -132,31 +62,26 @@ function App() {
   }, [setAccounts]);
 
   useEffect(() => {
-    initAppRuntime();
-    return onBootstrapChange(() => setBoot(getBootstrapState()));
-  }, []);
-
-  useEffect(() => {
     const timer = setTimeout(() => setGifDone(true), 2800);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (!gifDone || phase !== "splash") return;
-    if (destination && boot.apiBase) {
+    if (destination) {
       readyRef.current = true;
       setPhase("fading");
     } else {
       setPhase("loader");
     }
-  }, [gifDone, destination, phase, boot.apiBase]);
+  }, [gifDone, destination, phase]);
 
   useEffect(() => {
-    if (phase === "loader" && destination && boot.apiBase && !readyRef.current) {
+    if (phase === "loader" && destination && !readyRef.current) {
       readyRef.current = true;
       setPhase("fading");
     }
-  }, [phase, destination, boot.apiBase]);
+  }, [phase, destination]);
 
   useEffect(() => {
     if (phase === "fading") {
@@ -180,14 +105,8 @@ function App() {
 
   return (
     <>
-      {phase === "splash" && <FullLoader show />}
-      {phase === "loader" && (
-        <BootOverlay
-          boot={boot}
-          onRetry={() => {
-            initAppRuntime();
-          }}
-        />
+      {phase !== "app" && (
+        <FullLoader show={phase !== "fading"} />
       )}
 
       <ToastProvider>

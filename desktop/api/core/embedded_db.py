@@ -1,6 +1,4 @@
-import json
 import logging
-import os
 import threading
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -20,67 +18,10 @@ def embedded_credentials() -> dict | None:
     return _embedded_credentials
 
 
-def _pgdata_dir() -> Path:
-    return Path(_user_data_dir()) / "pgdata"
-
-
-def _force_stop_leftovers() -> None:
-    """Kill any postgres still using our data dir.
-
-    pgserver only stops the server when the *last* registered handle cleans
-    up; handles left behind by processes that were hard-killed stay forever
-    in pgdata/.handle_pids.json, so server.cleanup() alone can leave the
-    database running. This safety net guarantees the DB dies together with
-    the API no matter how the process ends.
-    """
-    try:
-        import psutil
-    except Exception:
-        return
-    data_dir = str(_pgdata_dir().resolve())
-    for proc in psutil.process_iter(attrs=["pid", "cmdline"]):
-        try:
-            cmdline = proc.info["cmdline"] or []
-        except Exception:
-            continue
-        if not cmdline:
-            continue
-        if "postgres" not in os.path.basename(cmdline[0]):
-            continue
-        if f"-D {data_dir}" in " ".join(cmdline):
-            try:
-                proc.terminate()
-                proc.wait(3)
-            except psutil.TimeoutExpired:
-                proc.kill()
-
-
-def _prune_stale_handles(data_dir: Path) -> None:
-    """Drop dead pids from pgserver's handle list (.handle_pids.json).
-
-    pids of hard-killed processes accumulate there forever, which also keeps
-    pgserver's own cleanup from stopping the server. Removing pids that are
-    no longer alive restores that behaviour.
-    """
-    handle_file = data_dir / ".handle_pids.json"
-    if not handle_file.exists():
-        return
-    try:
-        import psutil
-
-        pids = json.loads(handle_file.read_text())
-        alive = [p for p in pids if isinstance(p, int) and psutil.pid_exists(p)]
-        handle_file.write_text(json.dumps(alive))
-    except Exception:
-        logger.exception("Failed to prune stale pgserver handles")
-
-
 def stop_embedded_postgres() -> None:
     """Stop the embedded PostgreSQL if it was started by this process.
 
-    Idempotent and safe to call from shutdown hooks and atexit. The leftover
-    sweep guarantees the server stops even if pgserver's own bookkeeping is
-    stale.
+    Idempotent and safe to call from shutdown hooks and atexit.
     """
     global _server
     server = _server
@@ -91,7 +32,6 @@ def stop_embedded_postgres() -> None:
             logger.info("Embedded PostgreSQL stopped")
         except Exception:
             logger.exception("Failed to stop embedded PostgreSQL cleanly")
-    _force_stop_leftovers()
 
 
 def start_embedded_postgres() -> str:
@@ -117,9 +57,8 @@ def start_embedded_postgres() -> str:
                 "pgserver not installed. Embedded database is unavailable."
             ) from exc
 
-        data_dir = _pgdata_dir()
+        data_dir = Path(_user_data_dir()) / "pgdata"
         data_dir.mkdir(parents=True, exist_ok=True)
-        _prune_stale_handles(data_dir)
 
         server = get_server(str(data_dir))
         _server = server

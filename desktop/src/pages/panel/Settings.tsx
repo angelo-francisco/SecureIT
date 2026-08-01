@@ -5,19 +5,17 @@ import { LucideInput } from "../../ui";
 import * as Lucide from "lucide-react";
 import DetectedFaces from "./DetectedFaces";
 import LicenseSettings from "./LicenseSettings";
-import UpdatesPanel from "./UpdatesPanel";
 
 interface SettingsProps {
   onClose?: () => void;
 }
 
-type Tab = "config" | "faces" | "license" | "updates";
+type Tab = "config" | "faces" | "license";
 
 const tabs: { id: Tab; label: string; icon: typeof Lucide.Settings }[] = [
   { id: "config", label: "Configurações", icon: Lucide.Settings },
   { id: "faces", label: "Rostos Detectados", icon: Lucide.ScanFace },
   { id: "license", label: "Licença", icon: Lucide.Key },
-  { id: "updates", label: "Actualizações", icon: Lucide.RefreshCw },
 ];
 
 function TabBar({
@@ -162,8 +160,6 @@ export default function Settings({ onClose }: SettingsProps) {
         {tab === "faces" && <DetectedFaces />}
 
         {tab === "license" && <LicenseSettings onClose={onClose} />}
-
-        {tab === "updates" && <UpdatesPanel />}
       </div>
     </div>
   );

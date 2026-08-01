@@ -7,9 +7,6 @@
   ],
   "permissions": [
     "core:default",
-    "core:event:default",
-    "opener:default",
-    "updater:default",
-    "process:default"
+    "opener:default"
   ]
 }

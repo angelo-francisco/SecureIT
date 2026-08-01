@@ -25,11 +25,13 @@ export async function initApiBase(): Promise<string> {
     resolving = (async (): Promise<string> => {
       let resolved: string;
       if (isRunningInTauri()) {
-        // Inside the shell the backend is managed by Rust: resolve it there
-        // (bootstrap + spawn) and surface failures so the UI can offer retry.
-        resolved = await invoke<string>("get_api_url");
-        cachedBase = resolved;
-        return resolved;
+        try {
+          resolved = await invoke<string>("get_api_url");
+          cachedBase = resolved;
+          return resolved;
+        } catch {
+          // command unavailable (dev) — fall back to env
+        }
       }
       resolved = import.meta.env.VITE_API_URL ?? FALLBACK;
       cachedBase = resolved;
