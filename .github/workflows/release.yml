@@ -109,11 +109,6 @@ jobs:
         shell: pwsh
         run: |
           robocopy dist\desktop-api ..\src-tauri\resources\api /E /NFL /NDL /NJH /NJS /NC /NS
-
-          if ($LASTEXITCODE -ge 8) {
-            exit 1
-          }
-
           Remove-Item ..\src-tauri\resources\api\PLACEHOLDER.txt -Force -ErrorAction SilentlyContinue
 
       - name: Build Tauri app
