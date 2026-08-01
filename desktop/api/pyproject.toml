@@ -62,6 +62,9 @@ location = "./migrations"
 src_folder = "./."
 
 [dependency-groups]
+build = [
+    "pyinstaller>=6.21.0",
+]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",
