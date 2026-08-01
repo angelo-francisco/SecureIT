@@ -26,7 +26,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "resources": ["resources/api/"],
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -34,5 +34,16 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZDQzQ3MzZDNTBEQTk5NDEKUldSQm1kcFFiSFBFL091ZTA4djAzSzRsOGthTlo4WW8vTmIyL013bHRpa1EzQlluNVFCL3I2cU4K",
+      "endpoints": [
+        "https://github.com/angelo-francisco/SecureIT/releases/latest/download/latest-{{target}}.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

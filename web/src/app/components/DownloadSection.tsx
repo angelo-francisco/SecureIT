@@ -42,12 +42,12 @@ const platforms = [
 		arch: [
 			{
 				name: ".deb",
-				link: getDownloadLink("/SecureIT.deb"),
+				link: getDownloadLink("SecureIT.deb"),
 			},
-			// {
-			// 	name: ".AppImage",
-			// 	link: getDownloadLink("SecureIT_amd64.AppImage"),
-			// },
+			{
+				name: ".AppImage",
+				link: getDownloadLink("SecureIT-x86_64.AppImage"),
+			},
 		],
 		icon: <Image src={"/linux.png"} alt={"apple"} width={45} height={45} />,
 	},

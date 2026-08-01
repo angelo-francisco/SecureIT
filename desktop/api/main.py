@@ -1,4 +1,7 @@
 import os
+import sys
+import threading
+import time
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -86,7 +89,70 @@ async def behaviour_analysis_ws(websocket: WebSocket):
     await manager.handle()
 
 
+def _start_parent_watchdog() -> None:
+    """Die together with the desktop launcher that spawned this API.
+
+    The launcher (Rust shell) passes its own PID in SECUREIT_PARENT_PID and
+    sets EMBEDDED_DB=1. When that process dies — including a hard kill, where
+    no cleanup can run on the launcher side — this API stops the embedded
+    PostgreSQL and exits. In docker (EMBEDDED_DB unset) the watchdog is off.
+    """
+    if os.environ.get("EMBEDDED_DB") != "1":
+        return
+    raw_parent = os.environ.get("SECUREIT_PARENT_PID")
+    if not raw_parent:
+        return
+    try:
+        parent_pid = int(raw_parent)
+    except ValueError:
+        return
+
+    def _die_with_parent() -> None:
+        try:
+            stop_embedded_postgres()
+        except Exception:
+            pass
+        os._exit(0)
+
+    if sys.platform == "win32":
+        def _watch_windows() -> None:
+            import ctypes
+
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            SYNCHRONIZE = 0x00100000
+            INFINITE = 0xFFFFFFFF
+            handle = kernel32.OpenProcess(SYNCHRONIZE, False, parent_pid)
+            if not handle:
+                return
+            try:
+                kernel32.WaitForSingleObject(handle, INFINITE)
+            finally:
+                kernel32.CloseHandle(handle)
+            _die_with_parent()
+
+        threading.Thread(
+            target=_watch_windows,
+            name="secureit-parent-watchdog",
+            daemon=True,
+        ).start()
+        return
+
+    if sys.platform == "linux":
+        def _watch_linux() -> None:
+            while True:
+                if not os.path.exists(f"/proc/{parent_pid}"):
+                    _die_with_parent()
+                time.sleep(2)
+
+        threading.Thread(
+            target=_watch_linux,
+            name="secureit-parent-watchdog",
+            daemon=True,
+        ).start()
+
+
 def main() -> None:
+    _start_parent_watchdog()
     port = settings.PORT or int(os.environ.get("PORT", 8000))
     uvicorn.run(
         app,

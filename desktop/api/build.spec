@@ -47,10 +47,11 @@ pg_install = Path(pgserver.__file__).parent / "pginstall"
 if pg_install.exists():
     datas.append((str(pg_install), "pgserver/pginstall"))
 
-# Project data: YOLO weights, facenet weights, aerich migrations.
+# Project data: aerich migrations. (Model weights ship separately: the
+# desktop shell downloads them to ~/.secureit/models and passes the paths
+# via VGGFACE2_PATH / YOLO_PATH, so the bundle stays small.)
 api_root = Path.cwd()
 datas += [
-    (str(api_root / "models"), "models"),
     (str(api_root / "migrations"), "migrations"),
 ]
 
