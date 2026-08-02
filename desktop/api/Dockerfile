@@ -4,13 +4,13 @@ WORKDIR /app
 
 COPY pyproject.toml .python-version uv.lock .
 
-RUN pip install --upgrade pip
-
-RUN pip install uv
-
-RUN uv sync --frozen --system
+RUN pip install --upgrade pip \
+    && pip install uv \
+    && uv sync --frozen
 
 COPY . .
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8000
 

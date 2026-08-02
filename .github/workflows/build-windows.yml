@@ -96,7 +96,7 @@ jobs:
           python -c "import shutil, pathlib; src=pathlib.Path('dist')/'desktop-api'; dst=pathlib.Path('../src-tauri')/'resources'/'api'; shutil.rmtree(dst, ignore_errors=True); dst.mkdir(parents=True); shutil.copytree(src, dst/'desktop-api'); exe=dst/'desktop-api'/'desktop-api.exe'; assert exe.exists(), 'API nao embutida: '+str(exe); names={p.name for p in dst.rglob('*')}; assert 'vggface2.pt' in names and 'yolo26n.pt' in names, 'models ausentes no bundle'; print('OK - API + models embutidos em', dst)"
 
       - name: Build Tauri app
-        run: bun run tauri build
+        run: bun run tauri build --bundles nsis
         env:
           RUSTC_WRAPPER: sccache
           VITE_API_URL: "http://localhost:8000"
@@ -108,13 +108,9 @@ jobs:
           $exe = Get-ChildItem "src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
           Move-Item $exe.FullName "src-tauri/target/release/bundle/nsis/SecureIT.exe" -Force
 
-          $msi = Get-ChildItem "src-tauri/target/release/bundle/msi/*.msi" | Select-Object -First 1
-          Move-Item $msi.FullName "src-tauri/target/release/bundle/msi/SecureIT.msi" -Force
-
       - name: Upload Windows artifacts
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
-            desktop/src-tauri/target/release/bundle/msi/SecureIT.msi
             desktop/src-tauri/target/release/bundle/nsis/SecureIT.exe

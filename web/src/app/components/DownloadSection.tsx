@@ -29,10 +29,6 @@ const platforms = [
 				name: ".exe",
 				link: getDownloadLink("SecureIT.exe"),
 			},
-			{
-				name: ".msi",
-				link: getDownloadLink("SecureIT.msi"),
-			},
 		],
 		icon: <Image src={"/windows.png"} alt={"apple"} width={45} height={45} />,
 		link: "",
@@ -44,10 +40,6 @@ const platforms = [
 				name: ".deb",
 				link: getDownloadLink("SecureIT.deb"),
 			},
-			// {
-			// 	name: ".AppImage",
-			// 	link: getDownloadLink("SecureIT_amd64.AppImage"),
-			// },
 		],
 		icon: <Image src={"/linux.png"} alt={"apple"} width={45} height={45} />,
 	},
