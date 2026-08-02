@@ -35,9 +35,10 @@ hiddenimports += collect_submodules("asyncpg")
 hiddenimports += collect_submodules("pgserver")
 
 # pgserver: collect code + native libs, but skip pginstall (handled by the
-# Tree below to preserve the full layout and executable bits of postgres).
+# directory copy below to preserve the full layout and executable bits of
+# postgres). Normalize separators so the exclusion also works on Windows.
 pgserver_datas = [
-    d for d in collect_data_files("pgserver") if "/pginstall" not in d[0]
+    d for d in collect_data_files("pgserver") if "pginstall" not in d[0].replace("\\", "/")
 ]
 datas += pgserver_datas
 binaries += collect_dynamic_libs("pgserver")
@@ -46,6 +47,14 @@ binaries += collect_dynamic_libs("pgserver")
 pg_install = Path(pgserver.__file__).parent / "pginstall"
 if pg_install.exists():
     datas.append((str(pg_install), "pgserver/pginstall"))
+    # Postgres loads timezone abbreviations (timezone_abbreviations='Default')
+    # from this directory at runtime. A bundle missing it makes every backend
+    # fail to start and the app boot hangs; fail the build loudly instead.
+    tz_sets = pg_install / "share" / "postgresql" / "timezonesets"
+    if not (tz_sets / "Default").exists():
+        raise SystemExit(
+            f"Incomplete pgserver install: missing {tz_sets / 'Default'}"
+        )
 
 # Project data: YOLO weights, facenet weights, aerich migrations.
 api_root = Path.cwd()

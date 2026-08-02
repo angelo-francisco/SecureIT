@@ -1,8 +1,12 @@
+import atexit
 import logging
 import os
 import threading
+import time
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+import psutil
 
 from core.config import _user_data_dir, settings
 
@@ -12,6 +16,13 @@ _URI_LOCK = threading.Lock()
 _embedded_uri: str | None = None
 _embedded_credentials: dict | None = None
 _server: object | None = None
+
+# pgserver waits at most 10s for a single pg_ctl start. On Windows a stale
+# handle on PGDATA/log can make the postmaster retry opening it for ~30s,
+# blowing past that timeout, so we retry after killing leftovers/rotating the
+# log.
+_START_ATTEMPTS = 3
+_START_RETRY_DELAY = 2.0
 
 
 def embedded_credentials() -> dict | None:
@@ -35,6 +46,103 @@ def stop_embedded_postgres() -> None:
             logger.exception("Failed to stop embedded PostgreSQL cleanly")
 
 
+def _pgdata_dir() -> Path:
+    data_dir = Path(_user_data_dir()) / "pgdata"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+
+def _is_our_postgres(proc: psutil.Process, data_dir: Path) -> bool:
+    """Match an embedded postgres process bound to our data dir."""
+    name = (proc.info.get("name") or "").lower()
+    if "postgres" not in name:
+        return False
+    cmdline = proc.info.get("cmdline") or []
+    if not cmdline:
+        return False
+    marker = str(data_dir).replace("\\", "/").lower()
+    return marker in " ".join(cmdline).replace("\\", "/").lower()
+
+
+def _cleanup_leftover_postgres(data_dir: Path) -> None:
+    """Kill postgres processes left over from an abnormally terminated run.
+
+    pgserver only reaps stale servers while initializing a brand-new data dir.
+    If the Tauri app is killed without its exit hook (taskkill, crash, forced
+    quit, reboot), postgres.exe survives and keeps PGDATA/log open. The next
+    launch then hits a Windows "sharing violation" while the postmaster retries
+    opening the log for ~30s - longer than pg_ctl's 10s wait - and the API
+    startup fails. Kill any process using our data dir before starting.
+    """
+    killed = []
+    for proc in psutil.process_iter(["name", "cmdline"]):
+        if proc.pid == os.getpid() or not _is_our_postgres(proc, data_dir):
+            continue
+        logger.warning(
+            "Killing leftover embedded postgres (pid=%s cmdline=%s)",
+            proc.pid,
+            " ".join(proc.info.get("cmdline") or []),
+        )
+        try:
+            proc.terminate()
+            try:
+                proc.wait(2)
+            except psutil.TimeoutExpired:
+                pass
+            if proc.is_running():
+                proc.kill()
+            killed.append(proc.pid)
+        except psutil.NoSuchProcess:
+            pass
+        except psutil.AccessDenied:
+            logger.warning("Cannot stop leftover embedded postgres pid=%s", proc.pid)
+    if killed:
+        logger.info("Stopped leftover embedded postgres processes: %s", killed)
+
+
+def _rotate_pg_log(data_dir: Path) -> None:
+    """Drop the previous server log before starting a fresh postmaster.
+
+    pgserver always opens PGDATA/log when launching postgres. On Windows an
+    open handle held by another process makes that open retry for ~30s while
+    pg_ctl only waits 10s, so the start times out. Removing the file up front
+    (when possible) sidesteps the lock.
+    """
+    log = data_dir / "log"
+    if not log.exists():
+        return
+    try:
+        log.unlink()
+        logger.info("Rotated stale embedded postgres log")
+    except OSError:
+        logger.warning("Could not remove %s (another process may hold it)", log)
+
+
+def _preflight(data_dir: Path) -> None:
+    """Clear anything that can wedge pg_ctl's start wait (Windows only).
+
+    Only Windows exhibits the log-open "sharing violation"; elsewhere the
+    server reuses or restarts cleanly, so POSIX behavior is left untouched.
+    """
+    if os.name != "nt":
+        return
+    _cleanup_leftover_postgres(data_dir)
+    _rotate_pg_log(data_dir)
+
+
+def _get_server_clean(data_dir: Path) -> object:
+    """get_server() for the data dir, dropping any half-initialized instance."""
+    from pgserver import get_server
+    from pgserver.postgres_server import PostgresServer
+
+    key = data_dir.expanduser().resolve()
+    stale = PostgresServer._instances.pop(key, None)
+    if stale is not None:
+        atexit.unregister(stale._cleanup)
+        logger.warning("Discarded stale pgserver instance for %s", key)
+    return get_server(str(data_dir))
+
+
 def start_embedded_postgres() -> str:
     """Start the bundled PostgreSQL (pgserver) and return its connection URI.
 
@@ -51,17 +159,33 @@ def start_embedded_postgres() -> str:
         if _embedded_uri is not None:
             return _embedded_uri
 
-        try:
-            from pgserver import get_server
-        except ImportError as exc:  # pragma: no cover
+        data_dir = _pgdata_dir()
+        _preflight(data_dir)
+
+        last_exc: Exception | None = None
+        server = None
+        for attempt in range(1, _START_ATTEMPTS + 1):
+            try:
+                server = _get_server_clean(data_dir)
+                break
+            except Exception as exc:  # noqa: BLE001 - surface any pgserver failure
+                last_exc = exc
+                logger.warning(
+                    "Embedded postgres start attempt %d/%d failed: %s",
+                    attempt,
+                    _START_ATTEMPTS,
+                    exc,
+                )
+                _preflight(data_dir)
+                if attempt < _START_ATTEMPTS:
+                    time.sleep(_START_RETRY_DELAY)
+
+        if server is None:
             raise RuntimeError(
-                "pgserver not installed. Embedded database is unavailable."
-            ) from exc
+                "Failed to start embedded PostgreSQL "
+                f"after {_START_ATTEMPTS} attempts"
+            ) from last_exc
 
-        data_dir = Path(_user_data_dir()) / "pgdata"
-        data_dir.mkdir(parents=True, exist_ok=True)
-
-        server = get_server(str(data_dir))
         _server = server
         uri = server.get_uri()
 

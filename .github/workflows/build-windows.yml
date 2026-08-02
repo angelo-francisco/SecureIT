@@ -93,7 +93,7 @@ jobs:
       - name: Stage API bundle for Tauri
         working-directory: desktop/api
         run: |
-          python -c "import shutil, pathlib; src=pathlib.Path('dist')/'desktop-api'; dst=pathlib.Path('../src-tauri')/'resources'/'api'; shutil.rmtree(dst, ignore_errors=True); dst.mkdir(parents=True); shutil.copytree(src, dst/'desktop-api'); exe=dst/'desktop-api'/'desktop-api.exe'; assert exe.exists(), 'API nao embutida: '+str(exe); names={p.name for p in dst.rglob('*')}; assert 'vggface2.pt' in names and 'yolo26n.pt' in names, 'models ausentes no bundle'; print('OK - API + models embutidos em', dst)"
+          python -c "import shutil, pathlib; src=pathlib.Path('dist')/'desktop-api'; dst=pathlib.Path('../src-tauri')/'resources'/'api'; shutil.rmtree(dst, ignore_errors=True); dst.mkdir(parents=True); shutil.copytree(src, dst/'desktop-api'); exe=dst/'desktop-api'/'desktop-api.exe'; assert exe.exists(), 'API nao embutida: '+str(exe); names={p.name for p in dst.rglob('*')}; assert 'vggface2.pt' in names and 'yolo26n.pt' in names, 'models ausentes no bundle'; tz=list(dst.rglob('timezonesets/Default')); assert tz, 'timezonesets ausente no bundle (postgres nao arranca)'; print('OK - API + models + timezonesets embutidos em', dst)"
 
       - name: Build Tauri app
         run: bun run tauri build --bundles nsis

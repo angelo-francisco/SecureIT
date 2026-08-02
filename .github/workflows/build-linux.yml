@@ -109,7 +109,9 @@ jobs:
                 || test -f ../src-tauri/resources/api/desktop-api/_internal/models/vggface2.pt) \
             && (test -f ../src-tauri/resources/api/desktop-api/models/yolo26n.pt \
                 || test -f ../src-tauri/resources/api/desktop-api/_internal/models/yolo26n.pt) \
-            && echo "OK - API + models embutidos"
+            && (test -f ../src-tauri/resources/api/desktop-api/pgserver/pginstall/share/postgresql/timezonesets/Default \
+                || test -f ../src-tauri/resources/api/desktop-api/_internal/pgserver/pginstall/share/postgresql/timezonesets/Default) \
+            && echo "OK - API + models + timezonesets embutidos"
 
       - name: Build Tauri app
         run: bun run tauri build --bundles deb

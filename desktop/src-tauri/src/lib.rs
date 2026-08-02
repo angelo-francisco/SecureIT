@@ -241,13 +241,43 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
     .await
     .map_err(|e| e.to_string())?;
 
+    if healthy {
+        log_line(
+            &app,
+            &state,
+            &format!("API health check on port {}: ok", port),
+        );
+        return Ok(format!("http://127.0.0.1:{}", port));
+    }
+
+    // The API failed to become healthy (e.g. the embedded PostgreSQL was
+    // blocked by a stale process or antivirus). Restart it once and retry.
     log_line(
         &app,
         &state,
-        &format!("API health check on port {}: {}", port, healthy),
+        &format!("API on port {} not healthy, restarting", port),
     );
+    if let Some(mut child) = state.child.lock().unwrap().take() {
+        kill_process_tree(&mut child);
+    }
+    *state.port.lock().unwrap() = None;
+    let port = spawn_api(&app, &state).ok_or_else(|| "desktop-api bundle not found".to_string())?;
+    let healthy = tauri::async_runtime::spawn_blocking(move || {
+        wait_for_api(port, Duration::from_secs(120))
+    })
+    .await
+    .map_err(|e| e.to_string())?;
 
-    Ok(format!("http://127.0.0.1:{}", port))
+    log_line(
+        &app,
+        &state,
+        &format!("API health check on port {} after restart: {}", port, healthy),
+    );
+    if healthy {
+        Ok(format!("http://127.0.0.1:{}", port))
+    } else {
+        Err(format!("API failed to become healthy on port {}", port))
+    }
 }
 
 /// Log the frontend's resolved API/WEB base URLs into the per-run log file so
