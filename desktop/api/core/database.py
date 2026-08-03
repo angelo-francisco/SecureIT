@@ -133,9 +133,7 @@ def ensure_global_fallback() -> None:
 async def after_db_startup():
     conn = Tortoise.get_connection("default")
 
-    await conn.execute_query(
-        "CREATE EXTENSION IF NOT EXISTS vector"
-    )
+    await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
 
     if settings.EMBEDDED_DB or is_bundled():
         await run_migrations()

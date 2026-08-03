@@ -21,19 +21,53 @@ from websocket.helpers import (
 logger = logging.getLogger(__name__)
 
 THEFT_CLASS_IDS = {
-    24: "mochila", 26: "guarda-chuva", 27: "bolsa", 28: "gravata",
-    29: "mala", 31: "skis", 32: "snowboard", 33: "bola",
-    34: "pipa", 35: "taco basebol", 36: "luva basebol",
-    37: "skate", 38: "prancha surf", 39: "garrafa",
-    40: "copo vinho", 41: "copo", 42: "garfo", 43: "faca",
-    44: "colher", 45: "tigela", 46: "banana", 47: "maçã",
-    48: "sanduíche", 49: "laranja", 50: "brócolis", 51: "cenoura",
-    52: "cachorro-quente", 53: "pizza", 54: "donut", 55: "bolo",
-    63: "laptop", 64: "rato", 65: "comando", 66: "teclado",
-    67: "celular", 68: "microondas", 69: "forno", 70: "torradeira",
-    71: "lava-loiça", 72: "frigorífico", 73: "livro",
-    74: "relógio", 75: "vaso", 76: "tesoura", 77: "ursinho",
-    78: "secador", 79: "escova dentes",
+    24: "mochila",
+    26: "guarda-chuva",
+    27: "bolsa",
+    28: "gravata",
+    29: "mala",
+    31: "skis",
+    32: "snowboard",
+    33: "bola",
+    34: "pipa",
+    35: "taco basebol",
+    36: "luva basebol",
+    37: "skate",
+    38: "prancha surf",
+    39: "garrafa",
+    40: "copo vinho",
+    41: "copo",
+    42: "garfo",
+    43: "faca",
+    44: "colher",
+    45: "tigela",
+    46: "banana",
+    47: "maçã",
+    48: "sanduíche",
+    49: "laranja",
+    50: "brócolis",
+    51: "cenoura",
+    52: "cachorro-quente",
+    53: "pizza",
+    54: "donut",
+    55: "bolo",
+    63: "laptop",
+    64: "rato",
+    65: "comando",
+    66: "teclado",
+    67: "celular",
+    68: "microondas",
+    69: "forno",
+    70: "torradeira",
+    71: "lava-loiça",
+    72: "frigorífico",
+    73: "livro",
+    74: "relógio",
+    75: "vaso",
+    76: "tesoura",
+    77: "ursinho",
+    78: "secador",
+    79: "escova dentes",
 }
 
 
@@ -66,9 +100,19 @@ def _centroid_dist(a, b):
 
 class TrackedObject:
     __slots__ = (
-        "id", "class_id", "class_name", "bbox", "centroid",
-        "positions", "missed_frames", "first_seen", "last_seen",
-        "stationary", "stationary_frames", "coupled", "coupled_frames",
+        "id",
+        "class_id",
+        "class_name",
+        "bbox",
+        "centroid",
+        "positions",
+        "missed_frames",
+        "first_seen",
+        "last_seen",
+        "stationary",
+        "stationary_frames",
+        "coupled",
+        "coupled_frames",
     )
 
     def __init__(self, obj_id, class_id, class_name, bbox, centroid):
@@ -97,8 +141,7 @@ class TrackedObject:
         if len(self.positions) >= 5:
             recent = list(self.positions)[-5:]
             total_dist = sum(
-                _centroid_dist(recent[i], recent[i - 1])
-                for i in range(1, len(recent))
+                _centroid_dist(recent[i], recent[i - 1]) for i in range(1, len(recent))
             )
             if total_dist < 20:
                 self.stationary_frames += 1
@@ -135,8 +178,11 @@ class ObjectTracker:
                 matched.add(best_id)
             else:
                 obj = TrackedObject(
-                    self.next_id, det["class_id"], det["class_name"],
-                    det["bbox"], cent,
+                    self.next_id,
+                    det["class_id"],
+                    det["class_name"],
+                    det["bbox"],
+                    cent,
                 )
                 self.objects[self.next_id] = obj
                 self.next_id += 1
@@ -147,17 +193,24 @@ class ObjectTracker:
                 obj.missed_frames += 1
 
     def get_active(self, max_missed=5):
-        return {oid: obj for oid, obj in self.objects.items()
-                if obj.missed_frames <= max_missed}
+        return {
+            oid: obj
+            for oid, obj in self.objects.items()
+            if obj.missed_frames <= max_missed
+        }
 
     def get_disappeared(self, max_missed=5, min_missed=3):
-        return {oid: obj for oid, obj in self.objects.items()
-                if min_missed <= obj.missed_frames <= max_missed}
+        return {
+            oid: obj
+            for oid, obj in self.objects.items()
+            if min_missed <= obj.missed_frames <= max_missed
+        }
 
     def clean(self, max_age=300):
         now = time()
         self.objects = {
-            oid: obj for oid, obj in self.objects.items()
+            oid: obj
+            for oid, obj in self.objects.items()
             if now - obj.last_seen < max_age
         }
 
@@ -181,7 +234,9 @@ class BehaviourAnalysisManager:
         self.suspicious_counter = 0
         self.prev_gray = None
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
-            history=500, varThreshold=50, detectShadows=False,
+            history=500,
+            varThreshold=50,
+            detectShadows=False,
         )
         self._motion_history: deque = deque(maxlen=30)
         self._object_tracker = ObjectTracker()
@@ -210,17 +265,25 @@ class BehaviourAnalysisManager:
             return 0.0
 
         flow = cv2.calcOpticalFlowFarneback(
-            self.prev_gray, gray, None,
-            pyr_scale=0.5, levels=3, winsize=15,
-            iterations=3, poly_n=5, poly_sigma=1.2, flags=0,
+            self.prev_gray,
+            gray,
+            None,
+            pyr_scale=0.5,
+            levels=3,
+            winsize=15,
+            iterations=3,
+            poly_n=5,
+            poly_sigma=1.2,
+            flags=0,
         )
         self.prev_gray = gray
 
         magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
         return float(np.mean(magnitude))
 
-    def _detect_theft(self, people: list, active: dict,
-                      disappeared: dict) -> dict | None:
+    def _detect_theft(
+        self, people: list, active: dict, disappeared: dict
+    ) -> dict | None:
         if not self._theft_cooldown_ok():
             return None
         if not people:
@@ -243,8 +306,11 @@ class BehaviourAnalysisManager:
                 "description": f"Possível furto: {obj.class_name} removido",
                 "object": {"class": obj.class_name, "class_id": obj.class_id},
                 "motion_intensity": round(
-                    sum(self._motion_history) / len(self._motion_history), 2,
-                ) if self._motion_history else 0,
+                    sum(self._motion_history) / len(self._motion_history),
+                    2,
+                )
+                if self._motion_history
+                else 0,
                 "camera_id": self.camera_id,
                 "camera_name": self.camera.name if self.camera else None,
             }
@@ -257,8 +323,7 @@ class BehaviourAnalysisManager:
 
             recent = list(obj.positions)[-5:]
             speed = sum(
-                _centroid_dist(recent[i], recent[i - 1])
-                for i in range(1, len(recent))
+                _centroid_dist(recent[i], recent[i - 1]) for i in range(1, len(recent))
             )
 
             if speed > 50:
@@ -275,7 +340,9 @@ class BehaviourAnalysisManager:
 
         return None
 
-    def _detect_suspicious_activity(self, frame: np.ndarray, people_count: int) -> dict | None:
+    def _detect_suspicious_activity(
+        self, frame: np.ndarray, people_count: int
+    ) -> dict | None:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray_small = cv2.resize(gray, (320, 240))
 
@@ -289,7 +356,8 @@ class BehaviourAnalysisManager:
 
         avg_motion = (
             sum(self._motion_history) / len(self._motion_history)
-            if self._motion_history else 0.0
+            if self._motion_history
+            else 0.0
         )
 
         suspicious = False
@@ -299,17 +367,28 @@ class BehaviourAnalysisManager:
             suspicious = True
             description = f"Movimento suspeito detetado (intensidade: {motion_mag:.1f})"
 
-        elif people_count > 0 and avg_motion > self.motion_threshold * 1.5 and len(self._motion_history) >= 10:
+        elif (
+            people_count > 0
+            and avg_motion > self.motion_threshold * 1.5
+            and len(self._motion_history) >= 10
+        ):
             suspicious = True
-            description = f"Movimento rápido e contínuo detetado (média: {avg_motion:.1f})"
+            description = (
+                f"Movimento rápido e contínuo detetado (média: {avg_motion:.1f})"
+            )
 
         elif people_count > 0 and fg_ratio > 0.15:
             suspicious = True
-            description = f"Grande área de movimento detetada ({fg_ratio*100:.0f}% do quadro)"
+            description = (
+                f"Grande área de movimento detetada ({fg_ratio * 100:.0f}% do quadro)"
+            )
 
         if suspicious:
             self.suspicious_counter += 1
-            if self.suspicious_counter >= self.suspicious_frames_needed and self._check_cooldown():
+            if (
+                self.suspicious_counter >= self.suspicious_frames_needed
+                and self._check_cooldown()
+            ):
                 self.suspicious_counter = 0
                 self.last_alert = time()
                 return {
@@ -435,7 +514,9 @@ class BehaviourAnalysisManager:
         self.profile_id = pid
 
         if not await check_license_feature(self.profile_id, "analise_comportamental"):
-            await self.ws.close(code=4001, reason="Licença não inclui Análise de Comportamento")
+            await self.ws.close(
+                code=4001, reason="Licença não inclui Análise de Comportamento"
+            )
             return
 
         await self.ws.accept()
@@ -451,7 +532,9 @@ class BehaviourAnalysisManager:
                 if not self.camera:
                     pass
 
-            self.camera_service = create_camera_service(video_source, fps=self.fps, allow_draw=False)
+            self.camera_service = create_camera_service(
+                video_source, fps=self.fps, allow_draw=False
+            )
             await set_camera_status(self.camera, True)
         except Exception:
             await set_camera_status(self.camera, False)

@@ -1,5 +1,7 @@
 import base64
 import json
+import os
+import shutil
 import tempfile
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -21,21 +23,35 @@ from cryptography.hazmat.primitives.serialization import (
 from tortoise import Tortoise
 
 import core.crypto as crypto_module
+from core import embedded_db
 from core.config import settings
+from core.database import after_db_startup, get_tortoise_config
 from main import app
 
-TEST_DATABASE_URL = "postgres://secureit:secureit@localhost:5432/secureit"
 
-TORTOISE_MODELS = [
-    "apps.control.models",
-    "apps.cameras.models",
-    "apps.face_detection.models",
-    "apps.notifications.models",
-    "apps.panel.models",
-    "apps.people.models",
-    "apps.audit.models",
-    "apps.license.models",
-]
+@pytest.fixture(scope="session", autouse=True)
+def _test_postgres():
+    """Boot an isolated embedded PostgreSQL for the whole test session.
+
+    pgserver ships a self-contained PostgreSQL (with the pgvector extension),
+    so no external service is required. Data + logs go to a fresh temp
+    directory (RAM-backed tmpfs when the OS provides it) and are removed after
+    the suite finishes.
+    """
+    data_root = Path(tempfile.mkdtemp(prefix="secureit-test-"))
+    os.environ["SECUREIT_DATA_DIR"] = str(data_root)
+
+    embedded_db._embedded_uri = None
+    embedded_db._server = None
+    embedded_db._embedded_credentials = None
+    settings.EMBEDDED_DB = True
+
+    try:
+        embedded_db.start_embedded_postgres()
+        yield
+    finally:
+        embedded_db.stop_embedded_postgres()
+        shutil.rmtree(data_root, ignore_errors=True)
 
 
 def _b64url_encode(data: bytes) -> str:
@@ -81,11 +97,8 @@ def _setup_public_key(sample_keys):
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def setup_db(_setup_public_key):
-    await Tortoise.init(
-        db_url=TEST_DATABASE_URL,
-        modules={"models": TORTOISE_MODELS},
-    )
-    await Tortoise.generate_schemas()
+    await Tortoise.init(config=get_tortoise_config())
+    await after_db_startup()
 
     yield
 

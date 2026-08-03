@@ -30,6 +30,7 @@ dependencies = [
     "orjson==3.11.9",
     "python-dotenv==1.2.2",
     "psutil==7.2.2",
+    "tzdata==2026.3",
 ]
 
 [tool.taskipy.tasks]

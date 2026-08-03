@@ -7,6 +7,29 @@ on:
     branches: [main, develop]
 
 jobs:
+  test-api:
+    name: API Tests (embedded Postgres)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: desktop/api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --group dev --frozen
+
+      - name: Run API tests
+        run: uv run pytest -q
+
   test-desktop:
     name: Desktop Tests
     runs-on: ubuntu-latest

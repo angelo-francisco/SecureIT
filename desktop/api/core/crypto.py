@@ -61,14 +61,20 @@ def verify_license_token(token: str) -> Optional[dict]:
 
         parts = token.split(".")
         if len(parts) != 3:
-            logger.warning("verify_license_token: expected 3 JWT parts, got %d", len(parts))
+            logger.warning(
+                "verify_license_token: expected 3 JWT parts, got %d", len(parts)
+            )
             return None
 
         header_b64, payload_b64, signature_b64 = parts
 
         header = json.loads(_base64url_decode(header_b64))
         alg = header.get("alg")
-        logger.info("verify_license_token: header alg=%s, keys_in_header=%s", alg, list(header.keys()))
+        logger.info(
+            "verify_license_token: header alg=%s, keys_in_header=%s",
+            alg,
+            list(header.keys()),
+        )
         if alg != "EdDSA":
             logger.warning("verify_license_token: expected alg=EdDSA, got %s", alg)
             return None
@@ -77,7 +83,11 @@ def verify_license_token(token: str) -> Optional[dict]:
         sign_input = f"{header_b64}.{payload_b64}".encode("utf-8")
         signature = _base64url_decode(signature_b64)
 
-        logger.info("verify_license_token: sign_input length=%d, signature length=%d", len(sign_input), len(signature))
+        logger.info(
+            "verify_license_token: sign_input length=%d, signature length=%d",
+            len(sign_input),
+            len(signature),
+        )
 
         public_key.verify(signature, sign_input)
 
@@ -85,7 +95,10 @@ def verify_license_token(token: str) -> Optional[dict]:
         logger.info("verify_license_token: payload iss=%s", payload.get("iss"))
 
         if payload.get("iss") != "secureit-web":
-            logger.warning("verify_license_token: expected iss=secureit-web, got %s", payload.get("iss"))
+            logger.warning(
+                "verify_license_token: expected iss=secureit-web, got %s",
+                payload.get("iss"),
+            )
             return None
 
         logger.info("verify_license_token: SUCCESS")

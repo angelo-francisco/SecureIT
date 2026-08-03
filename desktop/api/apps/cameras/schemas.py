@@ -63,7 +63,10 @@ class CameraCreate(BaseModel):
                 raise ValueError("URL inválida. Use HTTP, HTTPS ou RTSP.")
         if connection_type == "L":
             path = v.get("path", "")
-            if path and any(path.lower().endswith(ext) for ext in (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")):
+            if path and any(
+                path.lower().endswith(ext)
+                for ext in (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
+            ):
                 if not os.path.isfile(path):
                     logger.warning("demo video file not found on disk: %s", path)
         return v

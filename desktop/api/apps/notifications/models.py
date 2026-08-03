@@ -8,7 +8,9 @@ class Notification(models.Model):
     description = fields.TextField()
     level = fields.CharField(max_length=1)
     deleted = fields.BooleanField(default=False)
-    camera = fields.ForeignKeyField("models.Camera", related_name="notifications", null=True)
+    camera = fields.ForeignKeyField(
+        "models.Camera", related_name="notifications", null=True
+    )
     readed = fields.BooleanField(default=False)
     photo = fields.CharField(max_length=255, null=True)
     created_at = fields.DatetimeField(auto_now_add=True)

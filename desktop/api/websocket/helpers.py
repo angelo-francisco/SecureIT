@@ -20,9 +20,7 @@ async def check_license_feature(profile_id: str, *feature_slugs: str) -> bool:
     profile = await Profile.get_or_none(profile_id=profile_id)
     if not profile:
         return False
-    license_obj = await License.filter(
-        user_id=profile.user_id, status="ACTIVE"
-    ).first()
+    license_obj = await License.filter(user_id=profile.user_id, status="ACTIVE").first()
     if not license_obj:
         return False
     stored_features = license_obj.features or []
@@ -66,7 +64,14 @@ async def set_camera_status(camera, status: bool):
         await cam.save()
 
 
-async def create_notification(profile_id: str, camera_id: int, title: str, description: str, level: str, frame: bytes):
+async def create_notification(
+    profile_id: str,
+    camera_id: int,
+    title: str,
+    description: str,
+    level: str,
+    frame: bytes,
+):
     import uuid
     from pathlib import Path
 

@@ -4,15 +4,11 @@ from apps.audit.service import log_action
 
 
 async def list_roles() -> list[Role]:
-    return (
-        await Role.all().prefetch_related("fields").order_by("name")
-    )
+    return await Role.all().prefetch_related("fields").order_by("name")
 
 
 async def get_role(role_id: int) -> Role:
-    role = await Role.get_or_none(id=role_id).prefetch_related(
-        "fields"
-    )
+    role = await Role.get_or_none(id=role_id).prefetch_related("fields")
     if not role:
         raise NotFound("Cargo não encontrado")
     return role

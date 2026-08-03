@@ -92,9 +92,7 @@ async def store_license(data: LicenseStoreRequest):
 
 @router.post("/verify")
 async def verify_license(data: LicenseVerifyRequest):
-    license_obj = await License.filter(
-        user_id=data.user_id, status="ACTIVE"
-    ).first()
+    license_obj = await License.filter(user_id=data.user_id, status="ACTIVE").first()
 
     if not license_obj:
         return LicenseResponse(
@@ -156,9 +154,7 @@ async def verify_license(data: LicenseVerifyRequest):
 
 @router.post("/verify-online")
 async def verify_online(data: LicenseVerifyOnlineRequest):
-    license_obj = await License.filter(
-        user_id=data.user_id, status="ACTIVE"
-    ).first()
+    license_obj = await License.filter(user_id=data.user_id, status="ACTIVE").first()
 
     if not license_obj:
         return LicenseResponse(
@@ -177,7 +173,9 @@ async def verify_online(data: LicenseVerifyOnlineRequest):
             )
             web_data = resp.json()
     except Exception:
-        raise HTTPException(status_code=502, detail="Não foi possível contactar o servidor web")
+        raise HTTPException(
+            status_code=502, detail="Não foi possível contactar o servidor web"
+        )
 
     if web_data.get("revoked"):
         await license_obj.delete()
@@ -215,9 +213,7 @@ async def verify_online(data: LicenseVerifyOnlineRequest):
 
 @router.get("/current")
 async def get_current_license(user_id: str):
-    license_obj = await License.filter(
-        user_id=user_id, status="ACTIVE"
-    ).first()
+    license_obj = await License.filter(user_id=user_id, status="ACTIVE").first()
 
     if not license_obj:
         return {"exists": False}
@@ -251,9 +247,7 @@ async def clear_license(data: LicenseClearRequest):
 
 @router.post("/features")
 async def check_features(data: LicenseFeaturesRequest):
-    license_obj = await License.filter(
-        user_id=data.user_id, status="ACTIVE"
-    ).first()
+    license_obj = await License.filter(user_id=data.user_id, status="ACTIVE").first()
 
     if not license_obj:
         return LicenseFeaturesResponse(

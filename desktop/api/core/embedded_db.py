@@ -50,8 +50,20 @@ def stop_embedded_postgres() -> None:
             logger.exception("Failed to stop embedded PostgreSQL cleanly")
 
 
+def _data_root() -> Path:
+    """Base directory for embedded DB data and logs.
+
+    Production uses the per-user dir (~/.secureit); tests/CI override it via
+    SECUREIT_DATA_DIR to keep a throwaway, isolated database.
+    """
+    override = os.environ.get("SECUREIT_DATA_DIR")
+    root = Path(override) if override else _user_data_dir()
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
 def _pgdata_dir() -> Path:
-    data_dir = Path(_user_data_dir()) / "pgdata"
+    data_dir = _data_root() / "pgdata"
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
 
@@ -66,7 +78,7 @@ def _pg_log_path() -> Path:
     outside pgdata (the fix used by the fitz-pgserver fork) avoids the conflict
     entirely and recovery completes in ~1-2s.
     """
-    log = Path(_user_data_dir()) / "pgserver.log"
+    log = _data_root() / "pgserver.log"
     log.parent.mkdir(parents=True, exist_ok=True)
     return log
 
@@ -252,8 +264,7 @@ def start_embedded_postgres() -> str:
 
         if server is None:
             raise RuntimeError(
-                "Failed to start embedded PostgreSQL "
-                f"after {_START_ATTEMPTS} attempts"
+                f"Failed to start embedded PostgreSQL after {_START_ATTEMPTS} attempts"
             ) from last_exc
 
         _server = server

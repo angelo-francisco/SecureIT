@@ -41,11 +41,11 @@ async def _check_feature_access(profile_id: str, task: str) -> None:
     if not profile:
         raise ValidationError_("Perfil não encontrado")
 
-    license_obj = await License.filter(
-        user_id=profile.user_id, status="ACTIVE"
-    ).first()
+    license_obj = await License.filter(user_id=profile.user_id, status="ACTIVE").first()
     if not license_obj:
-        raise ValidationError_("Licença não encontrada. Ative uma licença para usar esta funcionalidade.")
+        raise ValidationError_(
+            "Licença não encontrada. Ative uma licença para usar esta funcionalidade."
+        )
 
     features = license_obj.features or []
     if not any(f in features for f in required_features):
@@ -118,13 +118,15 @@ async def get_available_cameras():
         registered = set()
         for idx, cam in enumerate(cameras):
             if cam.path not in registered:
-                cams.append({
-                    "id": idx,
-                    "name": cam.name,
-                    "path": cam.path,
-                    "backend": str(cam.backend),
-                    "index": cam.index,
-                })
+                cams.append(
+                    {
+                        "id": idx,
+                        "name": cam.name,
+                        "path": cam.path,
+                        "backend": str(cam.backend),
+                        "index": cam.index,
+                    }
+                )
                 registered.add(cam.path)
         return cams
     except Exception:

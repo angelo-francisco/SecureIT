@@ -30,7 +30,9 @@ class Camera(models.Model):
     status = fields.BooleanField(default=True, null=True)
     connection_type = fields.CharEnumField(CameraType, max_length=1, null=True)
     connection_info = fields.JSONField(default=dict, null=True)
-    task = fields.CharEnumField(CameraTask, max_length=2, default=CameraTask.DETECTION, null=True)
+    task = fields.CharEnumField(
+        CameraTask, max_length=2, default=CameraTask.DETECTION, null=True
+    )
     face_recognition = fields.BooleanField(default=False)
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)

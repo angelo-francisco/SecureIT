@@ -73,7 +73,13 @@ class AreaDetectionManager:
                 except Exception as e:
                     break
 
-                if detect and people and self._is_monitoring_time() and self._check_cooldown() and people != self.last_people_count:
+                if (
+                    detect
+                    and people
+                    and self._is_monitoring_time()
+                    and self._check_cooldown()
+                    and people != self.last_people_count
+                ):
                     create_task(
                         create_notification(
                             profile_id=self.profile_id,
@@ -85,7 +91,9 @@ class AreaDetectionManager:
                         )
                     )
                     await self.ws.send_text(
-                        __import__("json").dumps({"type": "notification", "people": people})
+                        __import__("json").dumps(
+                            {"type": "notification", "people": people}
+                        )
                     )
                     self.last_alert = time()
                     self.last_people_count = people
@@ -128,7 +136,9 @@ class AreaDetectionManager:
                 if not self.camera:
                     pass
 
-            self.camera_service = create_camera_service(video_source, fps=self.fps, allow_draw=self.allow_draw)
+            self.camera_service = create_camera_service(
+                video_source, fps=self.fps, allow_draw=self.allow_draw
+            )
             await set_camera_status(self.camera, True)
         except Exception as e:
             await set_camera_status(self.camera, False)

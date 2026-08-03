@@ -31,9 +31,13 @@ class CameraService:
         for attempt in range(3):
             self.video = cv2.VideoCapture(video_source)
             if self.video.isOpened():
-                logger.info("camera opened on attempt %d source=%s", attempt + 1, video_source)
+                logger.info(
+                    "camera opened on attempt %d source=%s", attempt + 1, video_source
+                )
                 break
-            logger.warning("camera NOT opened attempt %d source=%s", attempt + 1, video_source)
+            logger.warning(
+                "camera NOT opened attempt %d source=%s", attempt + 1, video_source
+            )
             self.video.release()
             sleep(0.5)
         else:

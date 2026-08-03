@@ -17,6 +17,7 @@ class Configuration(models.Model):
     @staticmethod
     def is_valid_time(value: str) -> bool:
         from time import strptime
+
         try:
             strptime(value, "%H:%M:%S")
             return True

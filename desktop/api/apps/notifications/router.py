@@ -17,7 +17,9 @@ async def list_notifications_endpoint(
     page: int = Query(1, ge=1),
     per_page: int = Query(5, ge=1, le=100),
 ):
-    notifications, total = await list_notifications(request.state.profile.profile_id, filter, page, per_page)
+    notifications, total = await list_notifications(
+        request.state.profile.profile_id, filter, page, per_page
+    )
     return {
         "results": [NotificationResponse.model_validate(n) for n in notifications],
         "has_next": total > page * per_page,

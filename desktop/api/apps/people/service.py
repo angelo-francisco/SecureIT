@@ -20,6 +20,7 @@ from services.facenet import get_mtcnn, get_resnet
 
 logger = logging.getLogger(__name__)
 
+
 def base64_to_bytes(photo_b64: str) -> bytes:
     if "," in photo_b64:
         photo_b64 = photo_b64.split(",")[1]

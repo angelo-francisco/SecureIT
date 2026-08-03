@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from core import embedded_db
 
 
@@ -9,7 +7,7 @@ def test_pg_log_path_is_outside_pgdata():
     assert log.name == "pgserver.log"
     assert log != pgdata / "log"
     assert not str(log).lower().startswith(str(pgdata.resolve()).lower())
-    assert log.parent == Path.home() / ".secureit"
+    assert log.parent == embedded_db._data_root()
 
 
 def test_pg_ctl_timeout_patch_applies_default():
@@ -20,6 +18,7 @@ def test_pg_ctl_timeout_patch_applies_default():
         def _fake(*args, **kwargs):
             return kwargs
 
+        embedded_db._pg_ctl_patched = False
         _ps.pg_ctl = _fake
         embedded_db._ensure_pg_ctl_timeout()
         wrapper = _ps.pg_ctl
@@ -32,4 +31,4 @@ def test_pg_ctl_timeout_patch_applies_default():
         assert explicit["timeout"] == 42
     finally:
         _ps.pg_ctl = original
-        embedded_db._pg_ctl_patched = False
+        embedded_db._pg_ctl_patched = True

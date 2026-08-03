@@ -68,19 +68,25 @@ class FaceRecognitionManager:
 
                 if detect:
                     try:
-                        pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                        detected = await asyncio.to_thread(detect_faces_in_frame, pil_img, 0.9)
+                        pil_img = Image.fromarray(
+                            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        )
+                        detected = await asyncio.to_thread(
+                            detect_faces_in_frame, pil_img, 0.9
+                        )
                         for d in detected:
                             person = await search_by_embedding(
                                 np.frombuffer(d["embedding"], dtype=np.float32).tolist()
                             )
-                            faces.append({
-                                "bbox": d["bbox"],
-                                "person_id": person.id if person else None,
-                                "name": person.full_name if person else None,
-                                "unknown": person is None,
-                                "confidence": d["probability"],
-                            })
+                            faces.append(
+                                {
+                                    "bbox": d["bbox"],
+                                    "person_id": person.id if person else None,
+                                    "name": person.full_name if person else None,
+                                    "unknown": person is None,
+                                    "confidence": d["probability"],
+                                }
+                            )
                         last_faces = faces
                     except Exception:
                         faces = last_faces
@@ -93,26 +99,45 @@ class FaceRecognitionManager:
                         color = (0, 255, 0) if f.get("person_id") else (0, 0, 255)
                         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                         label = f.get("name") or "Desconhecido"
-                        cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                        cv2.putText(
+                            frame,
+                            label,
+                            (x1, y1 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            color,
+                            2,
+                        )
 
                 _, jpeg = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
                 jpeg_bytes = jpeg.tobytes()
                 await self.ws.send_bytes(jpeg_bytes)
 
                 if detect and faces:
-                    await self.ws.send_text(json.dumps({"type": "faces", "faces": faces}))
+                    await self.ws.send_text(
+                        json.dumps({"type": "faces", "faces": faces})
+                    )
                     now = time()
                     for f in faces:
                         pid = f.get("person_id")
-                        if pid and (pid not in self._notified or now - self._notified[pid] > self._match_cooldown):
+                        if pid and (
+                            pid not in self._notified
+                            or now - self._notified[pid] > self._match_cooldown
+                        ):
                             self._notified[pid] = now
-                            await self.ws.send_text(json.dumps({
-                                "type": "face_match",
-                                "person_id": pid,
-                                "name": f.get("name"),
-                                "camera_id": self.camera_id,
-                                "camera_name": self.camera.name if self.camera else None,
-                            }))
+                            await self.ws.send_text(
+                                json.dumps(
+                                    {
+                                        "type": "face_match",
+                                        "person_id": pid,
+                                        "name": f.get("name"),
+                                        "camera_id": self.camera_id,
+                                        "camera_name": self.camera.name
+                                        if self.camera
+                                        else None,
+                                    }
+                                )
+                            )
                             await save_face_detection(
                                 profile_id=self.profile_id,
                                 person_id=pid,
@@ -123,7 +148,11 @@ class FaceRecognitionManager:
                                 camera_name=self.camera.name if self.camera else None,
                                 frame_bytes=jpeg_bytes,
                             )
-                        elif not pid and now - self._last_unknown_save > self._unknown_save_cooldown:
+                        elif (
+                            not pid
+                            and now - self._last_unknown_save
+                            > self._unknown_save_cooldown
+                        ):
                             self._last_unknown_save = now
                             await save_face_detection(
                                 profile_id=self.profile_id,
@@ -157,7 +186,9 @@ class FaceRecognitionManager:
         self.profile_id = pid
 
         if not await check_license_feature(self.profile_id, "face_recognition"):
-            await self.ws.close(code=4001, reason="Licença não inclui Reconhecimento Facial")
+            await self.ws.close(
+                code=4001, reason="Licença não inclui Reconhecimento Facial"
+            )
             return
 
         await self.ws.accept()
@@ -173,7 +204,9 @@ class FaceRecognitionManager:
                 if not self.camera:
                     pass
 
-            self.camera_service = create_camera_service(video_source, fps=self.fps, allow_draw=False)
+            self.camera_service = create_camera_service(
+                video_source, fps=self.fps, allow_draw=False
+            )
             await set_camera_status(self.camera, True)
         except Exception as e:
             await set_camera_status(self.camera, False)
