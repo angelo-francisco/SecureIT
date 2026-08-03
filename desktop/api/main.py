@@ -1,3 +1,4 @@
+import logging
 import os
 import threading
 import time
@@ -9,7 +10,7 @@ from apps import ROUTERS
 from apps.control.models import Profile
 from core.config import settings
 from core.context import current_profile_id
-from core.database import after_db_startup, get_tortoise_config
+from core.database import after_db_startup, db_error_hint, get_tortoise_config
 from core.embedded_db import stop_embedded_postgres
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +23,8 @@ from websocket import (
     FaceRecognitionManager,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,14 +33,20 @@ async def lifespan(app: FastAPI):
 
         start_embedded_postgres()
 
-    async with RegisterTortoise(
-        app,
-        config=get_tortoise_config(),
-        generate_schemas=False,
-    ):
+    rt = RegisterTortoise(app, config=get_tortoise_config(), generate_schemas=False)
+    try:
+        await rt.init_orm()
         await after_db_startup()
+    except Exception as exc:  # noqa: BLE001 - surface a clear DB error, not a raw traceback
+        logger.exception("Database startup failed")
+        await rt.close_orm()
+        raise RuntimeError(db_error_hint(exc)) from exc
+
+    try:
         yield
-    stop_embedded_postgres()
+    finally:
+        await rt.close_orm()
+        stop_embedded_postgres()
 
 
 app = FastAPI(

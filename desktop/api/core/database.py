@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from urllib.parse import urlparse
 
 from aerich import Command
 from tortoise import Tortoise
@@ -53,6 +54,30 @@ def get_tortoise_config() -> dict:
             },
         },
     }
+
+
+def db_error_hint(exc: Exception) -> str:
+    """Human-readable guidance for a database connection failure.
+
+    The desktop bundle connects to the bundled PostgreSQL (EMBEDDED_DB) unless
+    a DATABASE_URL points at an external server. Outside Docker the sample
+    `db` host only exists inside the compose network, so a bare getaddrinfo
+    error leaves users with no clue what to do - this explains it.
+    """
+    if settings.EMBEDDED_DB:
+        return (
+            "The bundled PostgreSQL failed to start. Check the server log at "
+            f"{Path.home() / '.secureit' / 'pgserver.log'}. If the data "
+            "directory is corrupted, delete ~/.secureit/pgdata and retry, or "
+            "set EMBEDDED_DB=false and provide a reachable DATABASE_URL."
+        )
+    host = urlparse(settings.DATABASE_URL).hostname or "?"
+    return (
+        f"Cannot connect to PostgreSQL at '{host}' (from DATABASE_URL): {exc}. "
+        "That host may only be reachable inside the project's Docker network. "
+        "Run the desktop app normally (it enables the bundled database), or set "
+        "EMBEDDED_DB=true in the .env, or fix DATABASE_URL."
+    )
 
 
 def migrations_dir() -> Path:
