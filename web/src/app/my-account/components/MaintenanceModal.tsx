@@ -71,7 +71,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 					setLicense(l);
 				}
 			})
-			.catch(() => {})
+			.catch(() => { })
 			.finally(() => {
 				setLoadingLicense(false);
 			});
@@ -277,22 +277,25 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 									uploadPreset="secureit-payments"
 									options={{
 										maxFiles: 1,
-										resourceType: "image",
-										maxFileSize: 5000000,
+										resourceType: "auto",
+										clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "pdf"],
+										maxFileSize: 2000000,
+										multiple: false,
 										folder: "secureit/payments",
+										sources: ["local", "url", "camera"],
 									}}
-									onUpload={(error, result) => {
-										if (error) {
-											toast("Erro ao carregar comprovativo");
-											return;
-										}
-										if (result?.info) {
-											const info = result.info as CloudinaryResult;
-											setUploadedProof({
-												public_id: info.public_id,
-												secure_url: info.secure_url,
-											});
-										}
+									onError={() => {
+										toast("Erro ao carregar comprovativo");
+									}}
+									onQueuesStart={(result, { widget }) => {
+										widget.minimize();
+									}}
+									onSuccess={(result) => {
+										const info = result.info as CloudinaryResult;
+										setUploadedProof({
+											public_id: info.public_id,
+											secure_url: info.secure_url,
+										});
 									}}
 								>
 									{({ open }) => (

@@ -270,7 +270,7 @@ def start_embedded_postgres() -> str:
         _server = server
         uri = server.get_uri()
 
-        parsed = urlparse(uri)
+        parsed = urlparse   (uri)
         query = parse_qs(parsed.query)
         host = query.get("host", [parsed.hostname])[0]
 
