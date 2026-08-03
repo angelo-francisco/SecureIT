@@ -11,25 +11,25 @@ from core.config import is_bundled, settings
 
 logger = logging.getLogger("database")
 
-INSTALLED_APPS = [
-    "control",
-    "cameras",
-    "face_detection",
-    "notifications",
-    "panel",
-    "people",
-    "audit",
-    "license",
+TORTOISE_MODELS = [
+    "apps.control.models",
+    "apps.cameras.models",
+    "apps.face_detection.models",
+    "apps.notifications.models",
+    "apps.panel.models",
+    "apps.people.models",
+    "apps.audit.models",
+    "apps.license.models",
+    "aerich.models",
 ]
 
 TORTOISE_ORM = {
     "connections": {"default": settings.DATABASE_URL},
     "apps": {
-        app_name: {
-            "models": [f"apps.{app_name}.models"],
+        "models": {
+            "models": TORTOISE_MODELS,
             "default_connection": "default",
-        }
-        for app_name in INSTALLED_APPS
+        },
     },
 }
 
