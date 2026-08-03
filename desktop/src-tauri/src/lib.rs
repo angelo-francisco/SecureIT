@@ -200,10 +200,28 @@ fn wait_for_api(port: u16, timeout: Duration) -> bool {
     false
 }
 
+/// Ask the API to stop cleanly (POST /api/shutdown), ignoring failures.
+/// The API stops the embedded PostgreSQL gracefully before exiting, so the
+/// next launch does not need crash recovery. Only used on Windows, where a
+/// force kill of the process tree would leave the database "interrupted".
+#[cfg(windows)]
+fn request_shutdown(port: u16) {
+    use std::io::Write;
+    if let Ok(mut conn) = TcpStream::connect(("127.0.0.1", port)) {
+        let _ = conn.set_write_timeout(Some(Duration::from_secs(2)));
+        let _ = conn.write_all(
+            b"POST /api/shutdown HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\nContent-Length: 0\r\n\r\n",
+        );
+    }
+}
+
 /// Terminate the API and its whole process tree (the embedded PostgreSQL).
 /// On Unix the API runs as its own process-group leader, so a group kill
-/// reaches the database too; on Windows taskkill recurses the tree.
-fn kill_process_tree(child: &mut Child) {
+/// reaches the database too; on Windows it first asks the API to shut down
+/// cleanly (stopping PostgreSQL gracefully) and force-kills only if it does
+/// not exit in time.
+#[cfg_attr(unix, allow(unused_variables))]
+fn kill_process_tree(child: &mut Child, port: Option<u16>) {
     #[cfg(unix)]
     {
         let group = format!("-{}", child.id());
@@ -219,6 +237,15 @@ fn kill_process_tree(child: &mut Child) {
     }
     #[cfg(windows)]
     {
+        if let Some(port) = port {
+            request_shutdown(port);
+            for _ in 0..16 {
+                if child.try_wait().ok().flatten().is_some() {
+                    return;
+                }
+                std::thread::sleep(Duration::from_millis(500));
+            }
+        }
         let _ = Command::new("taskkill")
             .args(["/PID", &child.id().to_string(), "/T", "/F"])
             .status();
@@ -258,7 +285,8 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
         &format!("API on port {} not healthy, restarting", port),
     );
     if let Some(mut child) = state.child.lock().unwrap().take() {
-        kill_process_tree(&mut child);
+        let port = *state.port.lock().unwrap();
+        kill_process_tree(&mut child, port);
     }
     *state.port.lock().unwrap() = None;
     let port = spawn_api(&app, &state).ok_or_else(|| "desktop-api bundle not found".to_string())?;
@@ -370,14 +398,14 @@ pub fn run() {
 
     app.run(|app_handle, event| {
         if let RunEvent::Exit = event {
-            if let Some(mut child) = app_handle
-                .state::<ApiState>()
-                .child
-                .lock()
-                .unwrap()
-                .take()
-            {
-                kill_process_tree(&mut child);
+            let child_and_port = {
+                let api = app_handle.state::<ApiState>();
+                let child = api.child.lock().unwrap().take();
+                let port = *api.port.lock().unwrap();
+                (child, port)
+            };
+            if let Some(mut child) = child_and_port.0 {
+                kill_process_tree(&mut child, child_and_port.1);
             }
         }
     });

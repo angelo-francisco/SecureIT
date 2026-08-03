@@ -20,9 +20,11 @@ _server: object | None = None
 # pgserver waits at most 10s for a single pg_ctl start. On Windows a stale
 # handle on PGDATA/log can make the postmaster retry opening it for ~30s,
 # blowing past that timeout, so we retry after killing leftovers/rotating the
-# log.
+# log. We also patch pg_ctl's timeout up so a genuine recovery/init is never
+# cut short.
 _START_ATTEMPTS = 3
 _START_RETRY_DELAY = 2.0
+_PG_CTL_TIMEOUT = 120.0
 
 
 def embedded_credentials() -> dict | None:
@@ -50,6 +52,21 @@ def _pgdata_dir() -> Path:
     data_dir = Path(_user_data_dir()) / "pgdata"
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
+
+
+def _pg_log_path() -> Path:
+    """Server log kept OUTSIDE pgdata.
+
+    On Windows, PostgreSQL crash recovery fsyncs every file under pgdata,
+    including the server log that `pg_ctl -l` holds open (pg_ctl's own handle).
+    That raises a Windows "sharing violation" that stalls recovery for ~30s and
+    blows past pg_ctl's 10s wait, so the API fails to start. Pointing the log
+    outside pgdata (the fix used by the fitz-pgserver fork) avoids the conflict
+    entirely and recovery completes in ~1-2s.
+    """
+    log = Path(_user_data_dir()) / "pgserver.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    return log
 
 
 def _is_our_postgres(proc: psutil.Process, data_dir: Path) -> bool:
@@ -130,16 +147,67 @@ def _preflight(data_dir: Path) -> None:
     _rotate_pg_log(data_dir)
 
 
+_pg_ctl_patched = False
+
+
+def _ensure_pg_ctl_timeout() -> None:
+    """Raise pg_ctl's start timeout above pgserver's hardcoded 10s.
+
+    pgserver runs `pg_ctl -w start` with timeout=10. Crash recovery and first
+    initdb can take longer on slow machines, so default the timeout to a more
+    generous value. Applied once by wrapping the `pg_ctl` name bound in
+    pgserver.postgres_server (a module-global lookup at call time).
+    """
+    global _pg_ctl_patched
+    if _pg_ctl_patched:
+        return
+    import pgserver.postgres_server as _ps
+
+    _orig_pg_ctl = _ps.pg_ctl
+
+    def _pg_ctl_with_timeout(*args, **kwargs):
+        kwargs.setdefault("timeout", _PG_CTL_TIMEOUT)
+        return _orig_pg_ctl(*args, **kwargs)
+
+    _ps.pg_ctl = _pg_ctl_with_timeout
+    _pg_ctl_patched = True
+
+
 def _get_server_clean(data_dir: Path) -> object:
     """get_server() for the data dir, dropping any half-initialized instance."""
     from pgserver import get_server
     from pgserver.postgres_server import PostgresServer
+
+    class ExternalLogPostgresServer(PostgresServer):
+        """pgserver instance whose log file lives outside pgdata.
+
+        PostgresServer.__init__ assigns ``self.log = pgdata / "log"``; the
+        no-op setter swallows that and the getter returns the external path,
+        so ``pg_ctl -l`` writes to a file outside pgdata (see _pg_log_path).
+        """
+
+        _log_path = _pg_log_path()
+
+        @property
+        def log(self) -> Path:
+            return self._log_path
+
+        @log.setter
+        def log(self, value: Path) -> None:
+            pass
 
     key = data_dir.expanduser().resolve()
     stale = PostgresServer._instances.pop(key, None)
     if stale is not None:
         atexit.unregister(stale._cleanup)
         logger.warning("Discarded stale pgserver instance for %s", key)
+
+    _ensure_pg_ctl_timeout()
+
+    # On Windows use the external-log variant (see _pg_log_path); POSIX keeps
+    # the stock behavior, matching the preflight gating.
+    if os.name == "nt":
+        return ExternalLogPostgresServer(data_dir, cleanup_mode="stop")
     return get_server(str(data_dir))
 
 

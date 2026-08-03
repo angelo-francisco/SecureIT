@@ -1,4 +1,6 @@
 import os
+import threading
+import time
 from contextlib import asynccontextmanager
 
 import core.win_hidden  # noqa: F401  (Windows: hide child console windows)
@@ -90,6 +92,21 @@ app.mount(
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.post("/api/shutdown")
+async def api_shutdown():
+    """Stop cleanly on request so the embedded PostgreSQL is not left needing
+    crash recovery on the next launch (a force-kill would leave it "interrupted"
+    and every following boot would stall on Windows log recovery)."""
+
+    def _shutdown() -> None:
+        time.sleep(0.5)  # let the HTTP response flush before exiting
+        stop_embedded_postgres()
+        os._exit(0)
+
+    threading.Thread(target=_shutdown, daemon=True).start()
+    return {"status": "shutting_down"}
 
 
 @app.websocket("/ws/area-detection")
