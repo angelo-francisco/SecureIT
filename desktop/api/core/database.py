@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 
 from aerich import Command
 from tortoise import Tortoise
+from tortoise.context import TortoiseContext, set_global_context
+from tortoise.exceptions import ConfigurationError
 
 from core.config import is_bundled, settings
 
@@ -85,22 +87,48 @@ def migrations_dir() -> Path:
 
 
 async def run_migrations() -> None:
+    config = get_tortoise_config()
     cmd = Command(
-        tortoise_config=get_tortoise_config(),
+        tortoise_config=config,
         app="models",
         location=str(migrations_dir()),
     )
-    await cmd.init()
+    # aerich calls Tortoise.init() internally, which would re-initialise (and
+    # close) the app's TortoiseContext and wipe the global fallback that lets
+    # requests/websockets/background tasks reach the DB. Run it inside its own
+    # isolated context so the app's global context stays intact.
+    async with TortoiseContext():
+        await cmd.init()
+        try:
+            migrated = await cmd.upgrade()
+            if migrated:
+                logger.info("Applied aerich migrations: %s", migrated)
+        except Exception as exc:  # NOQA
+            logger.info("Aerich table missing (%s); bootstrapping fresh schema", exc)
+            await Tortoise.generate_schemas()
+            migrated = await cmd.upgrade()
+            if migrated:
+                logger.info("Registered aerich migrations on fresh DB: %s", migrated)
+
+
+def ensure_global_fallback() -> None:
+    """Re-establish the global TortoiseContext fallback if it was lost.
+
+    Tortoise 1.x clears the global fallback whenever close_connections() runs
+    on the active context (e.g. aerich's internal Tortoise.init() re-init path).
+    Requests, websockets and background tasks rely on that fallback, so restore
+    it if startup ever leaves it missing.
+    """
+    ctx = Tortoise._get_context()
+    if ctx is None:
+        return
     try:
-        migrated = await cmd.upgrade()
-        if migrated:
-            logger.info("Applied aerich migrations: %s", migrated)
-    except Exception as exc:  # NOQA
-        logger.info("Aerich table missing (%s); bootstrapping fresh schema", exc)
-        await Tortoise.generate_schemas()
-        migrated = await cmd.upgrade()
-        if migrated:
-            logger.info("Registered aerich migrations on fresh DB: %s", migrated)
+        set_global_context(ctx)
+    except ConfigurationError:
+        pass  # already active - nothing to do
+    else:
+        logger.warning("Global Tortoise context fallback was missing; re-established")
+
 
 async def after_db_startup():
     conn = Tortoise.get_connection("default")
@@ -123,3 +151,5 @@ async def after_db_startup():
         """)
     except Exception:
         pass
+    finally:
+        ensure_global_fallback()

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import threading
@@ -16,7 +17,8 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
-from tortoise.contrib.fastapi import RegisterTortoise
+from tortoise import Tortoise
+from tortoise.contrib.fastapi import register_tortoise
 from websocket import (
     AreaDetectionManager,
     BehaviourAnalysisManager,
@@ -33,19 +35,18 @@ async def lifespan(app: FastAPI):
 
         start_embedded_postgres()
 
-    rt = RegisterTortoise(app, config=get_tortoise_config(), generate_schemas=False)
     try:
-        await rt.init_orm()
         await after_db_startup()
     except Exception as exc:  # noqa: BLE001 - surface a clear DB error, not a raw traceback
         logger.exception("Database startup failed")
-        await rt.close_orm()
+        await Tortoise.close_connections()
+        stop_embedded_postgres()
         raise RuntimeError(db_error_hint(exc)) from exc
 
     try:
         yield
     finally:
-        await rt.close_orm()
+        await Tortoise.close_connections()
         stop_embedded_postgres()
 
 
@@ -134,6 +135,18 @@ async def face_recognition_ws(websocket: WebSocket):
 async def behaviour_analysis_ws(websocket: WebSocket):
     manager = BehaviourAnalysisManager(websocket)
     await manager.handle()
+
+
+if settings.EMBEDDED_DB:
+    from core.embedded_db import (
+        start_embedded_postgres,
+        wait_for_embedded_postgres,
+    )
+
+    start_embedded_postgres()
+    asyncio.run(wait_for_embedded_postgres())
+
+register_tortoise(app, config=get_tortoise_config(), generate_schemas=False)
 
 
 def main() -> None:

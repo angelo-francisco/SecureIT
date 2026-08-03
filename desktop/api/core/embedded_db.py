@@ -1,3 +1,4 @@
+import asyncio
 import atexit
 import logging
 import os
@@ -6,6 +7,7 @@ import time
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import asyncpg
 import psutil
 
 from core.config import _user_data_dir, settings
@@ -281,3 +283,39 @@ def start_embedded_postgres() -> str:
         _embedded_uri = uri
         logger.info("Embedded PostgreSQL started (data_dir=%s)", data_dir)
         return uri
+
+
+async def wait_for_embedded_postgres(
+    timeout: float = 30.0, interval: float = 0.5
+) -> None:
+    """Block until the embedded PostgreSQL answers ``SELECT 1``.
+
+    pgserver already waits for the postmaster to report "ready", but this is
+    the definitive positive signal the app gates its startup on: only when a
+    real SQL round-trip succeeds do we let the app continue booting.
+    """
+    credentials = _embedded_credentials
+    if not credentials:
+        raise RuntimeError("Embedded PostgreSQL was not started")
+
+    deadline = time.monotonic() + timeout
+    last_exc: Exception | None = None
+    while time.monotonic() < deadline:
+        try:
+            conn = await asyncpg.connect(**credentials, timeout=3)
+            try:
+                await conn.execute("SELECT 1")
+            finally:
+                await conn.close()
+            logger.info("Embedded PostgreSQL healthcheck passed")
+            return
+        except Exception as exc:  # noqa: BLE001 - server may still be booting
+            last_exc = exc
+            await asyncio.sleep(interval)
+
+    raise RuntimeError(
+        "Embedded PostgreSQL did not answer a healthcheck within "
+        f"{timeout:g}s. Check the server log at {_pg_log_path()}. If the data "
+        "directory is corrupted, delete ~/.secureit/pgdata and retry, or set "
+        "EMBEDDED_DB=false and provide a reachable DATABASE_URL."
+    ) from last_exc
