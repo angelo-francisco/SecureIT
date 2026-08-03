@@ -195,24 +195,20 @@ export async function POST(request: Request) {
 		const publicKey = await getPublicKeyPemString();
 
 		const licId = generateId();
-		(db.transaction as any)((tx: any) => {
-			tx.insert(license)
-				.values({
-					id: licId,
-					keyId: licenseKeyRecord.id,
-					userId: foundUser.id,
-					activatedAt: nowStr,
-					expiresAt: expiresAtStr,
-					hardwareFp: hardwareFp || null,
-					signedPayload,
-				})
-				.run();
-
-			tx.update(licenseKey)
-				.set({ status: "ACTIVE" })
-				.where(eq(licenseKey.id, licenseKeyRecord.id))
-				.run();
-		});
+		await db.insert(license).values({
+			id: licId,
+			keyId: licenseKeyRecord.id,
+			userId: foundUser.id,
+			activatedAt: nowStr,
+			expiresAt: expiresAtStr,
+			hardwareFp: hardwareFp || null,
+			signedPayload,
+		}).run();
+		await db
+			.update(licenseKey)
+			.set({ status: "ACTIVE" })
+			.where(eq(licenseKey.id, licenseKeyRecord.id))
+			.run();
 
 		return NextResponse.json({
 			valid: true,
