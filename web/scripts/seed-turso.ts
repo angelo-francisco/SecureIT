@@ -3,11 +3,12 @@ import { createId } from "@paralleldrive/cuid2";
 import { hashSync } from "bcryptjs";
 import { normalizeTursoUrl } from "../src/lib/turso";
 
-const url = process.env.TURSO_DATABASE_URL;
-if (!url) {
+const rawUrl = process.env.TURSO_DATABASE_URL;
+if (!rawUrl) {
 	console.error("TURSO_DATABASE_URL is not set.");
 	process.exit(1);
 }
+const url: string = rawUrl;
 
 const client = createClient({
 	url: normalizeTursoUrl(url),

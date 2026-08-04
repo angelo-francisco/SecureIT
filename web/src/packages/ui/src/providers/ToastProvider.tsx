@@ -1,97 +1,93 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from "react";
 import { X } from "lucide-react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useRef,
+	useState,
+} from "react";
 
 export type ToastType = "error" | "success" | "info";
 
 export interface Toast {
-  id: number;
-  message: string;
-  type: ToastType;
-  visible: boolean;
+	id: number;
+	message: string;
+	type: ToastType;
+	visible: boolean;
 }
 
 export interface ToastContextValue {
-  toast: (message: string, type?: ToastType) => void;
+	toast: (message: string, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function useToast() {
-  const ctx = useContext(ToastContext);
+	const ctx = useContext(ToastContext);
 
-  if (!ctx) {
-    throw new Error("useToast must be used within ToastProvider");
-  }
+	if (!ctx) {
+		throw new Error("useToast must be used within ToastProvider");
+	}
 
-  return ctx;
+	return ctx;
 }
 
-export function ToastProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const counter = useRef(0);
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+	const [toasts, setToasts] = useState<Toast[]>([]);
+	const counter = useRef(0);
 
-  const dismiss = useCallback((id: number) => {
-    setToasts((prev) =>
-      prev.map((toast) =>
-        toast.id === id ? { ...toast, visible: false } : toast
-      )
-    );
+	const dismiss = useCallback((id: number) => {
+		setToasts((prev) =>
+			prev.map((toast) =>
+				toast.id === id ? { ...toast, visible: false } : toast,
+			),
+		);
 
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 250);
-  }, []);
+		setTimeout(() => {
+			setToasts((prev) => prev.filter((toast) => toast.id !== id));
+		}, 250);
+	}, []);
 
-  const toast = useCallback(
-    (message: string, type: ToastType = "error") => {
-      const id = ++counter.current;
+	const toast = useCallback(
+		(message: string, type: ToastType = "error") => {
+			const id = ++counter.current;
 
-      setToasts((prev) =>
-        [
-          {
-            id,
-            message,
-            type,
-            visible: false,
-          },
-          ...prev,
-        ].slice(0, 5)
-      );
+			setToasts((prev) =>
+				[
+					{
+						id,
+						message,
+						type,
+						visible: false,
+					},
+					...prev,
+				].slice(0, 5),
+			);
 
-      requestAnimationFrame(() => {
-        setToasts((prev) =>
-          prev.map((toast) =>
-            toast.id === id ? { ...toast, visible: true } : toast
-          )
-        );
-      });
+			requestAnimationFrame(() => {
+				setToasts((prev) =>
+					prev.map((toast) =>
+						toast.id === id ? { ...toast, visible: true } : toast,
+					),
+				);
+			});
 
-      setTimeout(() => dismiss(id), 5000);
-    },
-    [dismiss]
-  );
+			setTimeout(() => dismiss(id), 5000);
+		},
+		[dismiss],
+	);
 
-  return (
-    <ToastContext.Provider value={{ toast }}>
-      {children}
+	return (
+		<ToastContext.Provider value={{ toast }}>
+			{children}
 
-      <div className="pointer-events-none fixed right-5 top-5 z-[9999] flex w-full max-w-sm flex-col gap-3">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`
+			<div className="pointer-events-none fixed right-5 top-5 z-[9999] flex w-full max-w-sm flex-col gap-3">
+				{toasts.map((toast) => (
+					<div
+						key={toast.id}
+						className={`
     pointer-events-auto
     relative
     overflow-hidden
@@ -103,37 +99,38 @@ export function ToastProvider({
     transition-all
     duration-300
     ease-out
-    ${toast.visible
-                ? "translate-x-0 opacity-100 scale-100"
-                : "translate-x-10 opacity-0 scale-95"
-              }
+    ${
+			toast.visible
+				? "translate-x-0 opacity-100 scale-100"
+				: "translate-x-10 opacity-0 scale-95"
+		}
   `}
-          >
-            <div className="flex items-center gap-3 px-4 py-3">
-              <span className="flex-1 text-base font-medium leading-6">
-                {toast.message}
-              </span>
+					>
+						<div className="flex items-center gap-3 px-4 py-3">
+							<span className="flex-1 text-base font-medium leading-6">
+								{toast.message}
+							</span>
 
-              <button
-                type="button"
-                onClick={() => dismiss(toast.id)}
-                className="cursor-pointer text-text/60 transition-colors hover:text-text"
-              >
-                <X size={18} />
-              </button>
-            </div>
+							<button
+								type="button"
+								onClick={() => dismiss(toast.id)}
+								className="cursor-pointer text-text/60 transition-colors hover:text-text"
+							>
+								<X size={18} />
+							</button>
+						</div>
 
-            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-text/10">
-              <div
-                className="h-full bg-text/40 animate-[toast-progress_5s_linear_forwards]"
-                style={{ transformOrigin: "left" }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+						<div className="absolute bottom-0 left-0 h-[2px] w-full bg-text/10">
+							<div
+								className="h-full bg-text/40 animate-[toast-progress_5s_linear_forwards]"
+								style={{ transformOrigin: "left" }}
+							/>
+						</div>
+					</div>
+				))}
+			</div>
 
-      <style jsx global>{`
+			<style jsx global>{`
         @keyframes toast-progress {
           from {
             width: 100%;
@@ -143,6 +140,6 @@ export function ToastProvider({
           }
         }
       `}</style>
-    </ToastContext.Provider>
-  );
+		</ToastContext.Provider>
+	);
 }

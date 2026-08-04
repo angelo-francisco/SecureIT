@@ -1,12 +1,12 @@
 {
-  "name": "@/packages/ui",
-  "version": "1.0.0",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "dependencies": {
-    "lucide-react": "^1.24.0",
-    "react-phone-input": "^1.2.1",
-    "react-phone-number-input": "^3.4.17",
-    "zustand": "^5.0.14"
-  }
+	"name": "@/packages/ui",
+	"version": "1.0.0",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"dependencies": {
+		"lucide-react": "^1.24.0",
+		"react-phone-input": "^1.2.1",
+		"react-phone-number-input": "^3.4.17",
+		"zustand": "^5.0.14"
+	}
 }
