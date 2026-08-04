@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
+	formatLicenseKeyDisplay,
 	generateLicenseKey,
 	isValidLicenseKeyFormat,
-	formatLicenseKeyDisplay,
 } from "@/lib/license-key";
 
 describe("lib/license-key", () => {

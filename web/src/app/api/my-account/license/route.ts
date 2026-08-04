@@ -1,8 +1,8 @@
+import { desc, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { license, licenseKey, paymentRequest, plan } from "@/db/schema";
-import { eq, desc, or } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
 export async function GET() {
 	const session = await getSession();

@@ -1,8 +1,8 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { ChevronRight, Key } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 
 interface PlanFeature {
@@ -28,7 +28,7 @@ interface Plan {
 	services: PlanService[];
 }
 
-const ANNUAL_DISCOUNT = 0;
+const _ANNUAL_DISCOUNT = 0;
 
 export function PricingSection() {
 	const { convert } = useExchangeRate();
@@ -71,7 +71,7 @@ export function PricingSection() {
 							>
 								Mensal
 							</span>
-							<button
+							<button type="button"
 								onClick={() => setAnnual(!annual)}
 								className={`relative w-12 h-6 transition-colors ${annual ? "bg-primary" : "bg-border"}`}
 							>

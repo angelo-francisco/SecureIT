@@ -1,7 +1,7 @@
+import { desc, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { licenseKey, license } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { license, licenseKey } from "@/db/schema";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET(request: Request) {
@@ -11,8 +11,8 @@ export async function GET(request: Request) {
 	}
 	try {
 		const { searchParams } = new URL(request.url);
-		const page = parseInt(searchParams.get("page") || "1");
-		const limit = parseInt(searchParams.get("limit") || "20");
+		const page = parseInt(searchParams.get("page") || "1", 10);
+		const limit = parseInt(searchParams.get("limit") || "20", 10);
 		const status = searchParams.get("status") || undefined;
 
 		const conditions = status ? eq(licenseKey.status, status) : undefined;

@@ -1,7 +1,7 @@
+import { asc, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { planFeature } from "@/db/schema";
-import { eq, asc } from "drizzle-orm";
-import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET(
@@ -38,7 +38,11 @@ export async function POST(
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	const { id } = await params;
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			name?: string;
+			description?: string;
+			price?: number;
+		};
 		const { name, description, price } = body;
 		if (!name)
 			return NextResponse.json({ error: "Nome em falta" }, { status: 400 });
@@ -49,8 +53,8 @@ export async function POST(
 			.returning()
 			.get();
 		return NextResponse.json(feature);
-	} catch (error: any) {
-		if (error?.message?.includes("UNIQUE constraint")) {
+	} catch (error) {
+		if (error instanceof Error && error.message.includes("UNIQUE constraint")) {
 			return NextResponse.json(
 				{ error: "Feature já existe neste plano" },
 				{ status: 409 },
@@ -73,7 +77,13 @@ export async function PUT(
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	await params;
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			featureId?: string;
+			name?: string;
+			description?: string;
+			price?: number;
+			isActive?: boolean;
+		};
 		const { featureId, name, description, price, isActive } = body;
 		if (!featureId)
 			return NextResponse.json(

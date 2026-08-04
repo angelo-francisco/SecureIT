@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle } from "react";
-import { Bell, CheckCheck, ShieldCheck, ShieldX, Info } from "lucide-react";
+import { Bell, CheckCheck, Info, ShieldCheck, ShieldX } from "lucide-react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 
 interface Notification {
 	id: string;
@@ -93,7 +93,7 @@ export const NotificationsSection = forwardRef<
 		<div className="space-y-3">
 			{unreadCount > 0 && (
 				<div className="flex justify-end">
-					<button
+					<button type="button"
 						onClick={handleMarkAllRead}
 						className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
 					>
@@ -114,7 +114,7 @@ export const NotificationsSection = forwardRef<
 						const Icon = TYPE_ICONS[n.type] ?? Bell;
 						const iconColor = TYPE_COLORS[n.type] ?? "text-text-muted";
 						return (
-							<button
+							<button type="button"
 								key={n.id}
 								onClick={() => !n.read && handleMarkAsRead(n.id)}
 								className={`w-full text-left flex items-start gap-3 p-3 rounded-lg transition-colors ${

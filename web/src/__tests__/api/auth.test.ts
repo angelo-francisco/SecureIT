@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import { db } from "@/db";
-import { user, subProfile } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { POST } from "@/app/api/auth/signup/route";
-import { POST as LOGIN_POST } from "@/app/api/auth/login/route";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { POST as CHECK_EMAIL_POST } from "@/app/api/auth/check-email/route";
+import { POST as LOGIN_POST } from "@/app/api/auth/login/route";
+import { POST } from "@/app/api/auth/signup/route";
+import { db } from "@/db";
+import { subProfile, user } from "@/db/schema";
 import { createTestUser } from "../helpers/auth";
 
 const TEST = "test_auth";
@@ -41,7 +41,7 @@ afterAll(async () => {
 	await db.delete(user).where(eq(user.id, userId)).run();
 });
 
-function req(body: any, path = "/api/auth/signup") {
+function req(body: unknown, path = "/api/auth/signup") {
 	return new Request(`http://localhost${path}`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

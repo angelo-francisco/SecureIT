@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
-import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 
 cloudinary.config({
 	cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -14,12 +14,12 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as { paramsToSign: Record<string, string> };
 		const { paramsToSign } = body;
 
 		const signature = cloudinary.utils.api_sign_request(
 			paramsToSign,
-			process.env.CLOUDINARY_API_SECRET!,
+			process.env.CLOUDINARY_API_SECRET ?? "",
 		);
 
 		return NextResponse.json({ signature });

@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { verifyTOTP } from "@/lib/totp";
 
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 		}
 
-		const { code } = (await request.json()) as any;
+		const { code } = (await request.json()) as { code?: string };
 
 		if (!code) {
 			return NextResponse.json(

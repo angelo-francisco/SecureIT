@@ -1,10 +1,9 @@
+import type { DrizzleDB } from "@/db";
+import { generateId, license, licenseKey, subProfile, user } from "@/db/schema";
 import { createToken } from "@/lib/auth";
-import { generateId } from "@/db/schema";
 import { hashPassword } from "@/lib/password";
-import { user, subProfile, licenseKey, license } from "@/db/schema";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
-type TestDB = BetterSQLite3Database<Record<string, never>>;
+type TestDB = DrizzleDB;
 
 export async function createTestToken(
 	sub: string,
@@ -108,7 +107,7 @@ export function makeRequest(
 	url: string,
 	options: {
 		method?: string;
-		body?: any;
+		body?: unknown;
 		token?: string;
 		headers?: Record<string, string>;
 	} = {},
@@ -119,7 +118,7 @@ export function makeRequest(
 	};
 
 	if (options.token) {
-		headers["Authorization"] = `Bearer ${options.token}`;
+		headers.Authorization = `Bearer ${options.token}`;
 	}
 
 	return new Request(url, {

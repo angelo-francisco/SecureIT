@@ -1,7 +1,7 @@
+import { desc, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { plan, planFeature, planService } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET() {
@@ -48,7 +48,13 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			name?: string;
+			description?: string;
+			basePrice?: number;
+			currency?: string;
+			durationDays?: number;
+		};
 		const { name, description, basePrice, currency, durationDays } = body;
 
 		if (!name || basePrice === undefined || !durationDays) {
@@ -84,7 +90,16 @@ export async function PUT(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			id?: string;
+			name?: string;
+			description?: string;
+			basePrice?: number;
+			currency?: string;
+			durationDays?: number;
+			isActive?: boolean;
+			isDefault?: boolean;
+		};
 		const {
 			id,
 			name,

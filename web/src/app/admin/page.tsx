@@ -1,36 +1,34 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
+import {
+	ArrowLeft,
+	ArrowRight,
+	Check,
+	CheckCircle2,
+	ChevronRight,
+	Clock,
+	Copy,
+	CreditCard,
+	ExternalLink,
+	FileCheck,
+	Key,
+	Landmark,
+	LayoutDashboard,
+	Loader,
+	Loader2,
+	Lock,
+	Pencil,
+	Plus,
+	Save,
+	Shield,
+	Wrench,
+	X,
+	XCircle,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { FloatingLabelInput } from "@/components/FloatingLabelInput";
 import { Alert } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import {
-	Shield,
-	LayoutDashboard,
-	Key,
-	Plus,
-	CreditCard,
-	FileCheck,
-	Landmark,
-	Loader,
-	Loader2,
-	Copy,
-	Check,
-	X,
-	Pencil,
-	Save,
-	ExternalLink,
-	ArrowRight,
-	ArrowLeft,
-	Lock,
-	CheckCircle2,
-	Clock,
-	XCircle,
-	TrendingUp,
-	Wrench,
-	ChevronRight,
-} from "lucide-react";
 
 type Tab =
 	| "dashboard"
@@ -85,7 +83,7 @@ export default function AdminPage() {
 				</div>
 				<nav className="space-y-0.5">
 					{TABS.map((tab) => (
-						<button
+						<button type="button"
 							key={tab.id}
 							onClick={() => setActiveTab(tab.id)}
 							className={cn(
@@ -101,11 +99,13 @@ export default function AdminPage() {
 					))}
 				</nav>
 				<div className="mt-auto pt-4 border-t border-border">
-					<button
-						onClick={() => {
-							document.cookie = "admin_token=; path=/; max-age=0";
-							setAuthenticated(false);
-						}}
+					<button type="button"
+					onClick={async () => {
+						await fetch("/api/auth/logout", { method: "POST" }).catch(
+							() => {},
+						);
+						setAuthenticated(false);
+					}}
 						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-text-muted hover:text-error hover:bg-error/10 transition-all"
 					>
 						<X size={16} />
@@ -148,7 +148,7 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email, password }),
 			});
-			const data = (await res.json()) as any;
+			const data = (await res.json()) as { error?: string };
 			if (!res.ok) throw new Error(data.error || "Erro ao fazer login");
 			onSuccess();
 		} catch (err) {
@@ -205,14 +205,13 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 						</p>
 						{error && <Alert variant="error">{error}</Alert>}
 						<div>
-							<label className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
+							<span className="text-xs tracking-widest text-text-muted flex items-center gap-2 uppercase mb-2">
 								<Lock size={12} /> Palavra-passe
-							</label>
+							</span>
 							<input
 								type="password"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								autoFocus
 								placeholder="••••••••"
 								className="w-full h-12 px-4 bg-transparent border-b-2 border-border text-text font-bold focus:border-primary focus:outline-none transition-colors caret-primary"
 							/>
@@ -364,7 +363,15 @@ function LicensesTab({ onGenerate }: { onGenerate: () => void }) {
 		try {
 			const res = await fetch("/api/admin/licenses");
 			if (res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as {
+					id: string;
+					key: string;
+					type: string;
+					durationDays: number;
+					status: string;
+					createdAt: string;
+					license?: { user?: { email: string } };
+				}[];
 				if (Array.isArray(data)) setLicenses(data);
 			}
 		} catch {
@@ -394,7 +401,7 @@ function LicensesTab({ onGenerate }: { onGenerate: () => void }) {
 					<Key className="w-5 h-5 text-primary" />
 					<h1 className="text-xl font-display font-bold text-text">Licenças</h1>
 				</div>
-				<button
+				<button type="button"
 					onClick={onGenerate}
 					className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:brightness-110 flex items-center gap-1.5"
 				>
@@ -404,7 +411,7 @@ function LicensesTab({ onGenerate }: { onGenerate: () => void }) {
 
 			<div className="flex gap-1.5 mb-4">
 				{[null, "PENDING", "ACTIVE", "REVOKED"].map((f) => (
-					<button
+					<button type="button"
 						key={f ?? "all"}
 						onClick={() => setFilter(f)}
 						className={cn(
@@ -516,9 +523,12 @@ function GenerateTab() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ type, durationDays, quantity, batchName }),
 			});
-			const data = (await res.json()) as any;
+			const data = (await res.json()) as {
+				error?: string;
+				licenses?: { key: string }[];
+			};
 			if (!res.ok) throw new Error(data.error);
-			setGenerated(data.licenses.map((l: { key: string }) => l.key));
+			setGenerated(data.licenses?.map((l) => l.key) ?? []);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erro");
 		} finally {
@@ -550,7 +560,7 @@ function GenerateTab() {
 				<form onSubmit={handleSubmit} className="space-y-4">
 					{error && <Alert variant="error">{error}</Alert>}
 					<div>
-						<label className="text-xs text-text-muted mb-1.5 block">Tipo</label>
+						<span className="text-xs text-text-muted mb-1.5 block">Tipo</span>
 						<select
 							value={type}
 							onChange={(e) => setType(e.target.value as "B2C" | "B2B")}
@@ -562,25 +572,25 @@ function GenerateTab() {
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<label className="text-xs text-text-muted mb-1.5 block">
+							<span className="text-xs text-text-muted mb-1.5 block">
 								Duração (dias)
-							</label>
+							</span>
 							<input
 								type="number"
 								value={durationDays}
-								onChange={(e) => setDurationDays(parseInt(e.target.value))}
+								onChange={(e) => setDurationDays(parseInt(e.target.value, 10))}
 								min={1}
 								className="h-10 w-full rounded-lg border border-border bg-bg px-3 text-sm text-text focus:outline-none focus:border-primary"
 							/>
 						</div>
 						<div>
-							<label className="text-xs text-text-muted mb-1.5 block">
+							<span className="text-xs text-text-muted mb-1.5 block">
 								Quantidade
-							</label>
+							</span>
 							<input
 								type="number"
 								value={quantity}
-								onChange={(e) => setQuantity(parseInt(e.target.value))}
+								onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
 								min={1}
 								max={100}
 								className="h-10 w-full rounded-lg border border-border bg-bg px-3 text-sm text-text focus:outline-none focus:border-primary"
@@ -588,9 +598,9 @@ function GenerateTab() {
 						</div>
 					</div>
 					<div>
-						<label className="text-xs text-text-muted mb-1.5 block">
+						<span className="text-xs text-text-muted mb-1.5 block">
 							Nome do Lote (opcional)
-						</label>
+						</span>
 						<input
 							type="text"
 							value={batchName}
@@ -622,7 +632,7 @@ function GenerateTab() {
 							Geradas ({generated.length})
 						</h2>
 						<div className="flex gap-2">
-							<button
+							<button type="button"
 								onClick={copyAll}
 								className="text-xs text-text-muted hover:text-text flex items-center gap-1 px-2 py-1 rounded hover:bg-surface-hover transition-all"
 							>
@@ -633,7 +643,7 @@ function GenerateTab() {
 								)}{" "}
 								Copiar todas
 							</button>
-							<button
+							<button type="button"
 								onClick={() => setGenerated([])}
 								className="text-xs text-text-muted hover:text-text px-2 py-1 rounded hover:bg-surface-hover transition-all"
 							>
@@ -648,7 +658,7 @@ function GenerateTab() {
 								className="flex items-center justify-between p-2.5 bg-bg rounded-lg border border-border"
 							>
 								<code className="text-primary font-mono text-xs">{k}</code>
-								<button
+								<button type="button"
 									onClick={() => copyOne(k)}
 									className="text-text-muted hover:text-text p-1"
 								>
@@ -718,7 +728,7 @@ function PlansTab() {
 			const r = await fetch("/api/admin/plans");
 			if (r.ok) {
 				const d = await r.json();
-				if (Array.isArray(d)) setPlans(d as any);
+				if (Array.isArray(d)) setPlans(d as Plan[]);
 			}
 		} catch {
 		} finally {
@@ -830,7 +840,7 @@ function PlansTab() {
 					<CreditCard className="w-5 h-5 text-primary" />
 					<h1 className="text-xl font-display font-bold text-text">Planos</h1>
 				</div>
-				<button
+				<button type="button"
 					onClick={() => {
 						setEditing(null);
 						setName("");
@@ -850,7 +860,7 @@ function PlansTab() {
 						<h2 className="text-sm font-semibold text-text">
 							{editing ? "Editar" : "Novo"} Plano
 						</h2>
-						<button
+						<button type="button"
 							onClick={() => setEditing(null)}
 							className="text-text-muted hover:text-text"
 						>
@@ -888,7 +898,7 @@ function PlansTab() {
 							className="h-10 px-3 bg-bg border border-border rounded-lg text-sm text-text focus:outline-none focus:border-primary"
 						/>
 					</div>
-					<button
+					<button type="button"
 						onClick={handleSave}
 						disabled={!name || !basePrice || !durationDays || saving}
 						className="bg-primary text-white px-5 py-2 rounded-lg text-xs font-bold hover:brightness-110 flex items-center gap-1.5 disabled:opacity-50"
@@ -916,7 +926,7 @@ function PlansTab() {
 						>
 							<div className="flex items-center justify-between p-4">
 								<div className="flex items-center gap-4">
-									<button
+									<button type="button"
 										onClick={() =>
 											setExpandedPlan(expandedPlan === p.id ? null : p.id)
 										}
@@ -944,7 +954,7 @@ function PlansTab() {
 									<span className="text-text-muted text-xs">
 										{p.durationDays}d
 									</span>
-									<button
+									<button type="button"
 										onClick={() => toggleActive(p)}
 										className={cn(
 											"px-2 py-0.5 rounded text-xs font-medium",
@@ -955,7 +965,7 @@ function PlansTab() {
 									>
 										{p.isActive ? "Ativo" : "Inativo"}
 									</button>
-									<button
+									<button type="button"
 										onClick={() => {
 											setEditing(p);
 											setName(p.name);
@@ -991,7 +1001,7 @@ function PlansTab() {
 																${f.price.toFixed(2)}
 															</span>
 														</div>
-														<button
+														<button type="button"
 															onClick={() => deleteFeature(p.id, f.id)}
 															className="text-text-muted hover:text-error"
 														>
@@ -1028,7 +1038,7 @@ function PlansTab() {
 												placeholder="$"
 												className="h-8 w-20 px-2 bg-bg border border-border rounded text-xs text-text focus:outline-none focus:border-primary"
 											/>
-											<button
+											<button type="button"
 												onClick={() => addFeature(p.id)}
 												disabled={!featName}
 												className="h-8 px-3 bg-primary/15 text-primary rounded text-xs font-medium hover:bg-primary/25 disabled:opacity-50"
@@ -1057,7 +1067,7 @@ function PlansTab() {
 																${s.price.toFixed(2)}
 															</span>
 														</div>
-														<button
+														<button type="button"
 															onClick={() => deleteService(p.id, s.id)}
 															className="text-text-muted hover:text-error"
 														>
@@ -1094,7 +1104,7 @@ function PlansTab() {
 												placeholder="$"
 												className="h-8 w-20 px-2 bg-bg border border-border rounded text-xs text-text focus:outline-none focus:border-primary"
 											/>
-											<button
+											<button type="button"
 												onClick={() => addService(p.id)}
 												disabled={!svcName}
 												className="h-8 px-3 bg-primary/15 text-primary rounded text-xs font-medium hover:bg-primary/25 disabled:opacity-50"
@@ -1136,7 +1146,7 @@ function MaintenanceTab() {
 			const r = await fetch("/api/admin/maintenance");
 			if (r.ok) {
 				const d = await r.json();
-				if (Array.isArray(d)) setRequests(d as any);
+				if (Array.isArray(d)) setRequests(d as MaintenanceRequest[]);
 			}
 		} catch {
 		} finally {
@@ -1233,7 +1243,7 @@ function MaintenanceTab() {
 														<ExternalLink size={11} /> Ver
 													</a>
 												)}
-												<button
+												<button type="button"
 													onClick={() => handleAction(r.id, "IN_PROGRESS")}
 													disabled={processing === r.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1245,14 +1255,14 @@ function MaintenanceTab() {
 													)}{" "}
 													Iniciar
 												</button>
-												<button
+												<button type="button"
 													onClick={() => handleAction(r.id, "RESOLVED")}
 													disabled={processing === r.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-success rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
 												>
 													<CheckCircle2 size={11} /> Resolvido
 												</button>
-												<button
+												<button type="button"
 													onClick={() => handleAction(r.id, "REJECTED")}
 													disabled={processing === r.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-error rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1369,7 +1379,7 @@ function PaymentsTab() {
 			const r = await fetch("/api/admin/payments");
 			if (r.ok) {
 				const d = await r.json();
-				if (Array.isArray(d)) setPayments(d as any);
+				if (Array.isArray(d)) setPayments(d as PaymentRequest[]);
 			}
 		} catch {
 		} finally {
@@ -1455,7 +1465,7 @@ function PaymentsTab() {
 												>
 													<ExternalLink size={11} /> Ver
 												</a>
-												<button
+												<button type="button"
 													onClick={() => handleAction(p.id, "APPROVED")}
 													disabled={processing === p.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-success rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1467,7 +1477,7 @@ function PaymentsTab() {
 													)}{" "}
 													Aprovar
 												</button>
-												<button
+												<button type="button"
 													onClick={() => handleAction(p.id, "REJECTED")}
 													disabled={processing === p.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-error rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1557,14 +1567,16 @@ function PaymentsTab() {
 
 /* ─── Payment Info ─── */
 
+interface PaymentInfoRow {
+	id: string;
+	iban: string;
+	accountName: string;
+	bankName: string | null;
+	reference: string | null;
+}
+
 function PaymentInfoTab() {
-	const [info, setInfo] = useState<{
-		id: string;
-		iban: string;
-		accountName: string;
-		bankName: string | null;
-		reference: string | null;
-	} | null>(null);
+	const [_info, setInfo] = useState<PaymentInfoRow | null>(null);
 	const [iban, setIban] = useState("");
 	const [accountName, setAccountName] = useState("");
 	const [bankName, setBankName] = useState("");
@@ -1576,7 +1588,7 @@ function PaymentInfoTab() {
 	useEffect(() => {
 		fetch("/api/admin/payment-info")
 			.then((r) => r.json())
-			.then((data: any) => {
+			.then((data: PaymentInfoRow | null) => {
 				if (data) {
 					setInfo(data);
 					setIban(data.iban);
@@ -1600,7 +1612,7 @@ function PaymentInfoTab() {
 			});
 			if (r.ok) {
 				const d = await r.json();
-				setInfo(d as any);
+				setInfo(d as PaymentInfoRow);
 				setSaved(true);
 				setTimeout(() => setSaved(false), 3000);
 			}
@@ -1628,7 +1640,7 @@ function PaymentInfoTab() {
 			<div className="border border-border bg-surface rounded-xl p-6 space-y-4">
 				<div className="space-y-3">
 					<div>
-						<label className="text-xs text-text-muted mb-1 block">IBAN</label>
+						<span className="text-xs text-text-muted mb-1 block">IBAN</span>
 						<input
 							type="text"
 							value={iban}
@@ -1638,9 +1650,9 @@ function PaymentInfoTab() {
 						/>
 					</div>
 					<div>
-						<label className="text-xs text-text-muted mb-1 block">
+						<span className="text-xs text-text-muted mb-1 block">
 							Nome da Conta
-						</label>
+						</span>
 						<input
 							type="text"
 							value={accountName}
@@ -1650,9 +1662,9 @@ function PaymentInfoTab() {
 						/>
 					</div>
 					<div>
-						<label className="text-xs text-text-muted mb-1 block">
+						<span className="text-xs text-text-muted mb-1 block">
 							Banco (opcional)
-						</label>
+						</span>
 						<input
 							type="text"
 							value={bankName}
@@ -1662,9 +1674,9 @@ function PaymentInfoTab() {
 						/>
 					</div>
 					<div>
-						<label className="text-xs text-text-muted mb-1 block">
+						<span className="text-xs text-text-muted mb-1 block">
 							Referência (opcional)
-						</label>
+						</span>
 						<input
 							type="text"
 							value={reference}
@@ -1674,7 +1686,7 @@ function PaymentInfoTab() {
 						/>
 					</div>
 				</div>
-				<button
+				<button type="button"
 					onClick={handleSave}
 					disabled={!iban || !accountName || saving}
 					className="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold hover:brightness-110 flex items-center gap-2 disabled:opacity-50"

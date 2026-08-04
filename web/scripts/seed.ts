@@ -13,7 +13,7 @@ const MIGRATIONS = [
 const db = new Database(DB_PATH);
 db.run("PRAGMA journal_mode=WAL");
 
-function run(sql: string, params?: any[]) {
+function run(sql: string, params?: string[]) {
 	if (params) {
 		db.prepare(sql).run(...params);
 	} else {
@@ -21,7 +21,7 @@ function run(sql: string, params?: any[]) {
 	}
 }
 
-function query(sql: string, params?: any[]): any[] {
+function query(sql: string, params?: string[]): unknown[] {
 	return params ? db.prepare(sql).all(...params) : db.prepare(sql).all();
 }
 
@@ -91,7 +91,7 @@ async function main() {
 	const existingPlans = query("SELECT id, name FROM Plan");
 	if (existingPlans.length > 0) {
 		console.log(
-			`Plans exist (${existingPlans.map((p: any) => p.name).join(", ")}), skipping.`,
+			`Plans exist (${existingPlans.map((p) => (p as { name: string }).name).join(", ")}), skipping.`,
 		);
 	} else {
 		const planId = createId();

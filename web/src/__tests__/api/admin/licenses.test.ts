@@ -1,11 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import { db } from "@/db";
-import { adminUser, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { db } from "@/db";
+import { adminUser, generateId, licenseKey } from "@/db/schema";
 import { createToken } from "@/lib/auth";
-import { hashPassword } from "@/lib/password";
 import { generateLicenseKey } from "@/lib/license-key";
-import { generateId } from "@/db/schema";
+import { hashPassword } from "@/lib/password";
 
 let adminToken = "";
 let adminUserId = "";
@@ -24,7 +23,7 @@ vi.mock("next/headers", () => ({
 
 function makeAdminRequest(
 	url: string,
-	options?: { method?: string; body?: any },
+	options?: { method?: string; body?: unknown },
 ) {
 	const method = options?.method || "GET";
 	const init: RequestInit = {
@@ -76,7 +75,7 @@ describe("POST /api/admin/licenses/generate", () => {
 		expect(data.count).toBe(2);
 		expect(data.licenses).toHaveLength(2);
 		expect(data.licenses[0].type).toBe("B2C");
-		testLicenseKeys.push(...data.licenses.map((l: any) => l.id));
+		testLicenseKeys.push(...data.licenses.map((l: { id: string }) => l.id));
 	});
 
 	it("generate B2B x1 returns type=B2B", async () => {
@@ -247,7 +246,7 @@ describe("DELETE /api/admin/licenses/[id]", () => {
 				.from(licenseKey)
 				.where(eq(licenseKey.id, createdId))
 				.get();
-			expect(updated!.status).toBe("REVOKED");
+			expect(updated?.status).toBe("REVOKED");
 		} finally {
 			await db.delete(licenseKey).where(eq(licenseKey.id, createdId)).run();
 		}

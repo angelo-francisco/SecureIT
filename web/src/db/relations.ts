@@ -1,16 +1,16 @@
 import { relations } from "drizzle-orm";
 import {
-	user,
 	license,
 	licenseKey,
-	paymentRequest,
-	paymentInfo,
-	plan,
-	subProfile,
-	planFeature,
-	planService,
 	maintenanceRequest,
 	notification,
+	paymentInfo,
+	paymentRequest,
+	plan,
+	planFeature,
+	planService,
+	subProfile,
+	user,
 } from "./schema";
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -21,7 +21,7 @@ export const userRelations = relations(user, ({ many }) => ({
 	notifications: many(notification),
 }));
 
-export const licenseKeyRelations = relations(licenseKey, ({ one, many }) => ({
+export const licenseKeyRelations = relations(licenseKey, ({ one }) => ({
 	license: one(license, {
 		fields: [licenseKey.id],
 		references: [license.keyId],

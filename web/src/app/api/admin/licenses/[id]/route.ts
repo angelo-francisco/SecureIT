@@ -1,11 +1,11 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { licenseKey, license, user } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { license, licenseKey, user } from "@/db/schema";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET(
-	request: Request,
+	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const session = await getAdminSession();
@@ -64,7 +64,7 @@ export async function GET(
 }
 
 export async function DELETE(
-	request: Request,
+	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const session = await getAdminSession();

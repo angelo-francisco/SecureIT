@@ -1,22 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Modal, useToast } from "@/packages/ui";
 import {
-	X,
-	Check,
-	Upload,
-	Loader,
-	Landmark,
-	CreditCard,
-	ChevronRight,
 	ArrowLeft,
+	Check,
 	Copy,
+	CreditCard,
+	Loader,
 	ShieldCheck,
+	Upload,
+	X,
 } from "lucide-react";
 import { CldUploadWidget } from "next-cloudinary";
-import type { Plan } from "./PlansSection";
+import { useEffect, useState } from "react";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { Modal, useToast } from "@/packages/ui";
+import type { Plan } from "./PlansSection";
 
 interface PaymentInfo {
 	id: string;
@@ -89,10 +87,18 @@ export function NewLicenseModal({
 			setActiveLicense(null);
 			setLoading(true);
 			Promise.all([
-				fetch("/api/plans").then((r) => (r.ok ? r.json() : []) as any),
-				fetch("/api/payment-info").then((r) => (r.ok ? r.json() : null) as any),
+				fetch("/api/plans").then(
+					(r) => (r.ok ? r.json() : []) as Promise<Plan[]>,
+				),
+				fetch("/api/payment-info").then(
+					(r) =>
+						(r.ok ? r.json() : null) as Promise<PaymentInfo | null>,
+				),
 				fetch("/api/my-account/license").then(
-					(r) => (r.ok ? r.json() : null) as any,
+					(r) =>
+						(r.ok ? r.json() : null) as Promise<{
+							license: LicenseData;
+						} | null>,
 				),
 			])
 				.then(([p, info, lic]) => {
@@ -100,7 +106,7 @@ export function NewLicenseModal({
 					setPaymentInfo(info);
 					if (lic?.license) setActiveLicense(lic.license);
 				})
-				.catch(() => { })
+				.catch(() => {})
 				.finally(() => setLoading(false));
 		}
 	}, [open]);
@@ -124,7 +130,7 @@ export function NewLicenseModal({
 				}),
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error);
 			}
 			toast("Pagamento submetido com sucesso! Será validado em instantes.");
@@ -160,8 +166,7 @@ export function NewLicenseModal({
 						</div>
 					</div>
 					<div className="flex gap-2 items-center justify-center">
-
-						<button
+						<button type="button"
 							onClick={onClose}
 							className="p-1.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 						>
@@ -185,7 +190,7 @@ export function NewLicenseModal({
 								</p>
 								<p className="text-base">
 									Válida até{" "}
-									{new Date(activeLicense!.expiresAt).toLocaleDateString(
+									{new Date(activeLicense?.expiresAt).toLocaleDateString(
 										"pt-PT",
 									)}
 								</p>
@@ -202,6 +207,7 @@ export function NewLicenseModal({
 								) : (
 									plans.map((plan) => (
 										<div
+											key={plan.id}
 											className="w-full space-y-6 text-left group flex items-center flex-col justify-between"
 										>
 											<div className="flex-1 min-w-0">
@@ -215,14 +221,18 @@ export function NewLicenseModal({
 												</div>
 												{plan.description && (
 													<p className="max-w-md text-base text-text-muted mt-0.5 text-wrap">
-														{plan.description} (<span className="text-primary font-bold">Duração de {plan.durationDays} dias</span>).
+														{plan.description} (
+														<span className="text-primary font-bold">
+															Duração de {plan.durationDays} dias
+														</span>
+														).
 													</p>
 												)}
 											</div>
-											<button
-												key={plan.id}
+											<button type="button"
 												onClick={() => handleSelectPlan(plan)}
-												className="bg-primary w-full py-2 text-base md:text-lg font-semibold">
+												className="bg-primary w-full py-2 text-base md:text-lg font-semibold"
+											>
 												Comprar
 											</button>
 										</div>
@@ -238,11 +248,12 @@ export function NewLicenseModal({
 										Transferência Bancária
 									</span>
 									<div className="mt-1 space-y-3">
-										<div className="flex items-center gap-2 mb-1">
-										</div>
+										<div className="flex items-center gap-2 mb-1"></div>
 										<div className="space-y-1">
 											<div className="flex items-center justify-between gap-8">
-												<span className="text-base md:text-lg text-text font-bold">IBAN</span>
+												<span className="text-base md:text-lg text-text font-bold">
+													IBAN
+												</span>
 												<div className="flex items-center gap-2">
 													<span className="text-base md:text-lg text-text">
 														{paymentInfo.iban}
@@ -264,14 +275,18 @@ export function NewLicenseModal({
 												</div>
 											</div>
 											<div className="flex items-center justify-between">
-												<span className="text-base md:text-lg text-text font-bold">Titular</span>
+												<span className="text-base md:text-lg text-text font-bold">
+													Titular
+												</span>
 												<span className="text-base md:text-lg font-medium text-text">
 													{paymentInfo.accountName}
 												</span>
 											</div>
 											{paymentInfo.bankName && (
 												<div className="flex items-center justify-between">
-													<span className="text-base md:text-lg text-text font-bold">Banco</span>
+													<span className="text-base md:text-lg text-text font-bold">
+														Banco
+													</span>
 													<span className="text-base md:text-lg font-medium text-text">
 														{paymentInfo.bankName}
 													</span>
@@ -288,12 +303,9 @@ export function NewLicenseModal({
 														</span>
 														<button
 															type="button"
-															onClick={() =>
-																copyToClipboard(
-																	paymentInfo.reference!,
-																	"reference",
-																)
-															}
+														onClick={() =>
+															copyToClipboard(paymentInfo.reference ?? "", "reference")
+														}
 															className="cursor-pointer text-text-muted hover:text-primary transition-colors"
 															title="Copiar Referência"
 														>
@@ -307,7 +319,9 @@ export function NewLicenseModal({
 												</div>
 											)}
 											<div className="flex items-center justify-between pt-2 border-t border-border">
-												<span className="text-base text-text text-base md:text-lg">Montante</span>
+												<span className="text-base text-text text-base md:text-lg">
+													Montante
+												</span>
 												<span className="text-base md:text-lg font-bold ">
 													{convert(selectedPlan?.basePrice || 0)} Kz
 												</span>
@@ -322,9 +336,9 @@ export function NewLicenseModal({
 							)}
 
 							<div>
-								<label className="text-base md:text-lg font-semibold text-text mb-2 block">
+								<span className="text-base md:text-lg font-semibold text-text mb-2 block">
 									Comprovativo de Pagamento
-								</label>
+								</span>
 								{uploadedProof ? (
 									<div className="flex items-center gap-3 bg-success/10 border border-success/30 p-3">
 										<Check size={18} className="text-success shrink-0" />
@@ -341,7 +355,7 @@ export function NewLicenseModal({
 												Ver comprovativo
 											</a>
 										</div>
-										<button
+										<button type="button"
 											onClick={() => setUploadedProof(null)}
 											className="text-base text-text-muted hover:text-error transition-colors"
 										>
@@ -355,7 +369,13 @@ export function NewLicenseModal({
 										options={{
 											maxFiles: 1,
 											resourceType: "auto",
-											clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "pdf"],
+											clientAllowedFormats: [
+												"png",
+												"jpeg",
+												"jpg",
+												"webp",
+												"pdf",
+											],
 											maxFileSize: 2000000,
 											multiple: false,
 											folder: "secureit/payments",
@@ -364,7 +384,7 @@ export function NewLicenseModal({
 										onError={() => {
 											toast("Erro ao carregar comprovativo");
 										}}
-										onQueuesStart={(result, { widget }) => {
+										onQueuesStart={(_result, { widget }) => {
 											widget.minimize();
 										}}
 										onSuccess={(result) => {
@@ -395,14 +415,14 @@ export function NewLicenseModal({
 							</div>
 
 							<div className="flex items-center gap-2 w-full justify-between">
-								<button
+								<button type="button"
 									onClick={() => setStep(1)}
 									className="p-3 px-3.5 border"
 								>
 									<ArrowLeft size={18} />
 								</button>
 
-								<button
+								<button type="button"
 									onClick={handleSubmit}
 									disabled={!uploadedProof || submitting}
 									className="w-full bg-primary text-white text-base font-bold py-2.5 cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"

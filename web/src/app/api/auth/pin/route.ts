@@ -1,13 +1,16 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { createToken } from "@/lib/auth";
 import { verifyPassword } from "@/lib/password";
 
 export async function POST(request: Request) {
 	try {
-		const { email, pin } = (await request.json()) as any;
+		const { email, pin } = (await request.json()) as {
+			email?: string;
+			pin?: string;
+		};
 
 		if (!email || !pin) {
 			return NextResponse.json(
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
 			.from(user)
 			.where(eq(user.email, email))
 			.get();
-		if (!foundUser || !foundUser.pinHash) {
+		if (!foundUser?.pinHash) {
 			return NextResponse.json({ error: "PIN incorrecto" }, { status: 401 });
 		}
 

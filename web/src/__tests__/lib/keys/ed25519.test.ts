@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { signLicensePayload, verifyLicensePayload } from "@/lib/keys/ed25519";
 
 beforeAll(() => {
@@ -35,10 +35,10 @@ describe("lib/keys/ed25519", () => {
 		const token = await signLicensePayload(payload);
 		const verified = await verifyLicensePayload(token);
 		expect(verified).not.toBeNull();
-		expect(verified!.key).toBe(payload.key);
-		expect(verified!.type).toBe(payload.type);
-		expect(verified!.userId).toBe(payload.userId);
-		expect(verified!.email).toBe(payload.email);
+		expect(verified?.key).toBe(payload.key);
+		expect(verified?.type).toBe(payload.type);
+		expect(verified?.userId).toBe(payload.userId);
+		expect(verified?.email).toBe(payload.email);
 	});
 
 	it("verifyLicensePayload with tampered payload returns null", async () => {

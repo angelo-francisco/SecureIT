@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Menu, User, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-import { Menu, X, User } from "lucide-react";
 
 const navLinks = [
 	{ label: "Início", href: "/#home" },
@@ -126,7 +126,7 @@ export function Navbar({
 
 				<div className="flex md:hidden items-center gap-2">
 					<ThemeToggle />
-					<button
+					<button type="button"
 						onClick={() => setMobileOpen(!mobileOpen)}
 						className="p-2 text-text-muted hover:text-text"
 					>

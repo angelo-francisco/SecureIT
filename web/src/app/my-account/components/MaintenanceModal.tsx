@@ -1,18 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-	Loader,
-	Check,
-	Upload,
-	Wrench,
-	ArrowLeft,
-	ArrowRight,
-	X,
-	Shield,
-} from "lucide-react";
+import { ArrowLeft, Check, Loader, Shield, Upload, X } from "lucide-react";
 import { CldUploadWidget } from "next-cloudinary";
-import { useToast, Modal } from "@/packages/ui";
+import { useEffect, useState } from "react";
+import { Modal, useToast } from "@/packages/ui";
 
 interface LicenseData {
 	id: string;
@@ -24,14 +15,6 @@ interface LicenseData {
 		type: string;
 		durationDays: number;
 	};
-}
-
-interface PaymentInfo {
-	id: string;
-	iban: string;
-	accountName: string;
-	bankName: string | null;
-	reference: string | null;
 }
 
 interface CloudinaryResult {
@@ -66,12 +49,12 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 				return res.json();
 			})
 			.then((data) => {
-				const l = (data as any)?.license as LicenseData | null;
+				const l = (data as { license?: LicenseData } | null)?.license ?? null;
 				if (l && l.status === "ACTIVE" && new Date(l.expiresAt) > new Date()) {
 					setLicense(l);
 				}
 			})
-			.catch(() => { })
+			.catch(() => {})
 			.finally(() => {
 				setLoadingLicense(false);
 			});
@@ -105,7 +88,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 				}),
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error);
 			}
 			toast("Pedido de manutenção submetido com sucesso!");
@@ -188,13 +171,13 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 						)}
 
 						<div className="flex justify-center items-center gap-3 pt-2">
-							<button
+							<button type="button"
 								onClick={handleClose}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<X />
 							</button>
-							<button
+							<button type="button"
 								onClick={() => license && setStep(2)}
 								disabled={!license}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-lg font-bold hover:brightness-110 transition-all disabled:opacity-50"
@@ -220,13 +203,13 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							/>
 						</div>
 						<div className="flex justify-between items-center gap-3 pt-4">
-							<button
+							<button type="button"
 								onClick={() => setStep(1)}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<ArrowLeft />
 							</button>
-							<button
+							<button type="button"
 								onClick={() => description && setStep(3)}
 								disabled={!description}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-lg font-bold hover:brightness-110 transition-all disabled:opacity-50"
@@ -245,9 +228,9 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 						</h3>
 
 						<div>
-							<label className="text-sm font-medium text-text mb-2 block">
+							<span className="text-sm font-medium text-text mb-2 block">
 								Comprovativo (opcional)
-							</label>
+							</span>
 							{uploadedProof ? (
 								<div className="flex items-center gap-3 bg-success/10 border border-success/30 rounded-lg p-3">
 									<Check size={18} className="text-success shrink-0" />
@@ -264,7 +247,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 											Ver comprovativo
 										</a>
 									</div>
-									<button
+									<button type="button"
 										onClick={() => setUploadedProof(null)}
 										className="text-xs text-text-muted hover:text-error transition-colors"
 									>
@@ -287,7 +270,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 									onError={() => {
 										toast("Erro ao carregar comprovativo");
 									}}
-									onQueuesStart={(result, { widget }) => {
+									onQueuesStart={(_result, { widget }) => {
 										widget.minimize();
 									}}
 									onSuccess={(result) => {
@@ -318,14 +301,14 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 						</div>
 
 						<div className="flex justify-between items-center w-full gap-3">
-							<button
+							<button type="button"
 								onClick={() => setStep(2)}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<ArrowLeft />
 							</button>
 
-							<button
+							<button type="button"
 								onClick={handleSubmit}
 								disabled={submitting}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-base font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50"

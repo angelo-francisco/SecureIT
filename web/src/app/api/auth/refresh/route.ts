@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { verifyRefreshToken, createToken } from "@/lib/auth";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { createToken, verifyRefreshToken } from "@/lib/auth";
 
 export async function POST() {
 	try {
@@ -43,7 +43,7 @@ export async function POST() {
 			.from(user)
 			.where(eq(user.id, payload.sub))
 			.get();
-		if (!foundUser || !foundUser.isActive) {
+		if (!foundUser?.isActive) {
 			return NextResponse.json({ error: "Conta desativada" }, { status: 401 });
 		}
 

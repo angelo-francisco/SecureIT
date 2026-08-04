@@ -1,13 +1,16 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { createToken } from "@/lib/auth";
 import { db } from "@/db";
 import { adminUser } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { createToken } from "@/lib/auth";
 import { verifyPassword } from "@/lib/password";
 
 export async function POST(request: Request) {
 	try {
-		const { email, password } = (await request.json()) as any;
+		const { email, password } = (await request.json()) as {
+			email?: string;
+			password?: string;
+		};
 
 		if (!email || !password) {
 			return NextResponse.json(

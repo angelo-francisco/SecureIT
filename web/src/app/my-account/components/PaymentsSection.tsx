@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle } from "react";
 import { Receipt } from "lucide-react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 
 export interface Payment {
 	id: string;
@@ -34,7 +34,7 @@ export const PaymentsSection = forwardRef<
 		fetchData: async () => {
 			const res = await fetch("/api/payments");
 			if (res.ok) {
-				const d = (await res.json()) as any;
+				const d = (await res.json()) as Payment[];
 				const arr = Array.isArray(d) ? d : [];
 				setPayments(arr);
 				return arr;

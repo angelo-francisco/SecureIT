@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { X, Loader } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { Loader, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface TurnstileModalProps {
 	open: boolean;
@@ -47,14 +47,15 @@ export function TurnstileModal({
 	if (!open) return null;
 
 	return (
-		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-			onClick={(e) => {
-				if (e.target === e.currentTarget) onClose();
-			}}
-		>
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+			<button
+				type="button"
+				aria-label="Fechar"
+				onClick={onClose}
+				className="absolute inset-0"
+			/>
 			<div className="relative w-full max-w-md mx-4 bg-surface border border-border p-8 text-center">
-				<button
+				<button type="button"
 					onClick={onClose}
 					className="absolute top-4 right-4 text-text-muted hover:text-text transition-colors"
 				>
@@ -83,7 +84,7 @@ export function TurnstileModal({
 							</div>
 						) : (
 							<Turnstile
-								siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+								siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
 								onSuccess={handleSuccess}
 								options={{
 									theme: "dark",

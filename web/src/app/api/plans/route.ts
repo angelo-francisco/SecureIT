@@ -1,7 +1,7 @@
-import { db } from "@/db";
-import { plan, planFeature, planService } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { plan, planFeature, planService } from "@/db/schema";
 
 export async function GET() {
 	try {

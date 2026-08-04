@@ -1,8 +1,8 @@
+import { and, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { notification } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
 export async function PUT() {
 	const session = await getSession();

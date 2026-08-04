@@ -1,14 +1,14 @@
+import { and, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import {
-	paymentRequest,
-	plan,
-	paymentInfo,
 	license,
 	licenseKey,
+	paymentInfo,
+	paymentRequest,
+	plan,
 } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
 	const session = await getSession();
@@ -16,7 +16,15 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			planId?: string;
+			proofPublicId?: string;
+			proofUrl?: string;
+			selectedFeatures?: unknown;
+			selectedServices?: unknown;
+			totalPrice?: number;
+			durationDays?: number;
+		};
 		const {
 			planId,
 			proofPublicId,
@@ -58,7 +66,7 @@ export async function POST(request: Request) {
 			.from(plan)
 			.where(eq(plan.id, planId))
 			.get();
-		if (!planRecord || !planRecord.isActive) {
+		if (!planRecord?.isActive) {
 			return NextResponse.json(
 				{ error: "Plano não encontrado" },
 				{ status: 404 },
@@ -86,12 +94,12 @@ export async function POST(request: Request) {
 				paymentInfoId: paymentInfoRecord.id,
 				proofPublicId,
 				proofUrl,
-				...(selectedFeatures && {
-					selectedFeatures: JSON.stringify(selectedFeatures),
-				}),
-				...(selectedServices && {
-					selectedServices: JSON.stringify(selectedServices),
-				}),
+				...(selectedFeatures
+					? { selectedFeatures: JSON.stringify(selectedFeatures) }
+					: {}),
+				...(selectedServices
+					? { selectedServices: JSON.stringify(selectedServices) }
+					: {}),
 				...(totalPrice !== undefined && { totalPrice }),
 				...(durationDays !== undefined && { durationDays }),
 			})

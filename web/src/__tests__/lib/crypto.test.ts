@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-	encryptText,
+	decryptPaymentInfo,
 	decryptText,
 	encryptPaymentInfo,
-	decryptPaymentInfo,
+	encryptText,
 } from "@/lib/crypto";
 
 describe("lib/crypto", () => {

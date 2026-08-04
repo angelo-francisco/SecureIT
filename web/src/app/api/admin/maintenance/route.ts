@@ -1,7 +1,7 @@
+import { desc, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { maintenanceRequest, user } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET() {

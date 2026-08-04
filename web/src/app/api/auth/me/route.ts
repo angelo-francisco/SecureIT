@@ -1,8 +1,8 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { user, license, licenseKey } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { getSession, createToken } from "@/lib/auth";
+import { license, licenseKey, user } from "@/db/schema";
+import { createToken, getSession } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
 
 export async function GET() {
@@ -71,11 +71,11 @@ export async function GET() {
 							activatedAt: userLicense.activatedAt,
 							expiresAt: userLicense.expiresAt,
 							lastChecked: userLicense.lastChecked,
-							isActive: expiresAtDate! > new Date(),
+							isActive: expiresAtDate !== null && expiresAtDate > new Date(),
 							daysRemaining: Math.max(
 								0,
 								Math.ceil(
-									(expiresAtDate!.getTime() - Date.now()) /
+									((expiresAtDate?.getTime() ?? 0) - Date.now()) /
 										(1000 * 60 * 60 * 24),
 								),
 							),
@@ -98,7 +98,12 @@ export async function PUT(request: Request) {
 			return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 		}
 
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			firstName?: string;
+			lastName?: string;
+			phone?: string;
+			pin?: unknown;
+		};
 		const { firstName, lastName, phone, pin } = body;
 
 		if (!firstName?.trim() || !lastName?.trim()) {

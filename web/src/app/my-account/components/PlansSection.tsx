@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle, useCallback } from "react";
-import { CldUploadWidget } from "next-cloudinary";
 import {
-	CreditCard,
-	Check,
-	Upload,
-	Loader,
-	Copy,
 	ArrowLeft,
-	MessageCircle,
+	Check,
+	Copy,
+	CreditCard,
+	Loader,
 	Mail,
+	MessageCircle,
 	Phone,
+	Upload,
 } from "lucide-react";
-import { useToast } from "@/packages/ui";
+import { CldUploadWidget } from "next-cloudinary";
+import { forwardRef, useCallback, useImperativeHandle, useState } from "react";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { useToast } from "@/packages/ui";
 
 export interface PlanFeature {
 	id: string;
@@ -75,7 +75,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 	({ data: initialData, onClose }, ref) => {
 		const { toast } = useToast();
 		const { convert } = useExchangeRate();
-		const [plans, setPlans] = useState<Plan[]>(initialData.plans);
+		const [_plans, setPlans] = useState<Plan[]>(initialData.plans);
 		const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(
 			initialData.paymentInfo,
 		);
@@ -106,8 +106,10 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					fetch("/api/plans"),
 					fetch("/api/payment-info"),
 				]);
-				const p = (plansRes.ok ? await plansRes.json() : []) as any;
-				const info = (infoRes.ok ? await infoRes.json() : null) as any;
+				const p = (plansRes.ok ? await plansRes.json() : []) as Plan[];
+				const info = (infoRes.ok ? await infoRes.json() : null) as
+					| PaymentInfo
+					| null;
 				setPlans(p);
 				setPaymentInfo(info);
 				if (p.length > 0) setSelectedPlan(p[0]);
@@ -131,8 +133,8 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					}),
 				});
 				if (!res.ok) {
-					const data = (await res.json()) as any;
-					throw new Error(data.error);
+				const data = (await res.json()) as { error?: string };
+				throw new Error(data.error);
 				}
 				toast(
 					"Pagamento submetido com sucesso! Aguarde a validação em alguns instantes.",
@@ -182,7 +184,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						>
 							Mensal
 						</span>
-						<button
+						<button type="button"
 							onClick={() => setAnnual(!annual)}
 							className={`relative w-10 h-5 transition-colors ${annual ? "bg-primary" : "bg-border"}`}
 						>
@@ -211,9 +213,9 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 				</div>
 
 				<div>
-					<label className="text-base md:text-xl mb-2 text-text block">
+					<span className="text-base md:text-xl mb-2 text-text block">
 						Dados para Pagamento
-					</label>
+					</span>
 					{paymentInfo ? (
 						<div className="border bg-surface p-4 space-y-2">
 							<div className="flex items-center justify-between">
@@ -266,7 +268,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 										<button
 											type="button"
 											onClick={() =>
-												copyToClipboard(paymentInfo.reference!, "reference")
+												copyToClipboard(paymentInfo.reference ?? "", "reference")
 											}
 											className="cursor-pointer text-text-muted hover:text-primary transition-colors"
 											title="Copiar Referência"
@@ -324,9 +326,9 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 				</div>
 
 				<div>
-					<label className="text-base md:text-lg text-text mb-2 block">
+					<span className="text-base md:text-lg text-text mb-2 block">
 						Comprovativo de Pagamento
-					</label>
+					</span>
 					{uploadedProof ? (
 						<div className="flex items-center gap-3 bg-success/10 border border-success/30 p-3">
 							<Check size={18} className="text-success shrink-0" />
@@ -343,7 +345,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 									Ver comprovativo
 								</a>
 							</div>
-							<button
+							<button type="button"
 								onClick={() => setUploadedProof(null)}
 								className="text-xs text-text-muted hover:text-error transition-colors"
 							>
@@ -366,7 +368,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							onError={() => {
 								toast("Erro ao carregar comprovativo");
 							}}
-							onQueuesStart={(result, { widget }) => {
+							onQueuesStart={(_result, { widget }) => {
 								widget.minimize();
 							}}
 							onSuccess={(result) => {
@@ -420,13 +422,13 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 				</div>
 
 				<div className="flex items-center gap-3">
-					<button
+					<button type="button"
 						onClick={onClose}
 						className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 					>
 						<ArrowLeft />
 					</button>
-					<button
+					<button type="button"
 						onClick={handleSubmit}
 						disabled={!uploadedProof || submitting}
 						className="w-full cursor-pointer bg-primary text-white text-base md:text-lg font-bold py-3 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"

@@ -1,10 +1,10 @@
 "use client";
 
+import { Check, KeyRound, Loader, Save } from "lucide-react";
 import { useState } from "react";
-import { Save, Loader, KeyRound, Check } from "lucide-react";
-import { useToast } from "@/packages/ui";
-import { OutlinedInput } from "@/components/OutlinedInput";
 import { MaterialPhoneInput } from "@/components/MaterialPhoneInput";
+import { OutlinedInput } from "@/components/OutlinedInput";
+import { useToast } from "@/packages/ui";
 
 interface ProfileSectionProps {
 	user: {
@@ -12,6 +12,7 @@ interface ProfileSectionProps {
 		lastName: string;
 		email: string;
 		phone: string;
+		hasPin: boolean;
 	};
 	onSaved?: () => void;
 }
@@ -44,7 +45,7 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 				body: JSON.stringify({ pin }),
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error || "Erro ao guardar PIN");
 			}
 			toast("PIN definido com sucesso");
@@ -75,7 +76,7 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 				}),
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error || "Erro ao guardar");
 			}
 			toast("Definições guardadas com sucesso");
@@ -114,18 +115,18 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 				<MaterialPhoneInput value={phone} onChange={(v) => setPhone(v ?? "")} />
 			</div>
 			<div className="border-t border-border pt-4">
-				<button
+				<button type="button"
 					onClick={() => setPinOpen((v) => !v)}
 					className="w-full flex items-center justify-between px-4 py-3 bg-bg border border-border hover:bg-surface-hover transition-all"
 				>
 					<div className="flex items-center gap-3">
 						<KeyRound size={18} className="text-primary" />
 						<span className="text-sm font-medium text-text">
-							{(user as any).hasPin ? "Alterar PIN" : "Definir PIN"}
+							{user.hasPin ? "Alterar PIN" : "Definir PIN"}
 						</span>
 					</div>
 					<span className="text-xs text-text-muted">
-						{(user as any).hasPin ? "● ● ● ●" : "---"}
+						{user.hasPin ? "● ● ● ●" : "---"}
 					</span>
 				</button>
 				{pinOpen && (
@@ -141,7 +142,7 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 								setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
 							}
 						/>
-						<button
+						<button type="button"
 							onClick={handlePinSave}
 							disabled={pinSaving || pin.length !== 4}
 							className="w-full text-center bg-primary px-4 py-2 text-white text-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
@@ -149,15 +150,15 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 							{pinSaving ? (
 								<Loader size={16} className="animate-spin" />
 							) : (
-								<Check size={16} />
-							)}
-							{(user as any).hasPin ? "Alterar PIN" : "Definir PIN"}
+							<Check size={16} />
+						)}
+							{user.hasPin ? "Alterar PIN" : "Definir PIN"}
 						</button>
 					</div>
 				)}
 			</div>
 			<div className="w-full flex items-center">
-				<button
+				<button type="button"
 					onClick={handleSave}
 					disabled={
 						loading || !firstName.trim() || !lastName.trim() || !isDirty

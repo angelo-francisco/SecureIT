@@ -1,11 +1,11 @@
 "use client";
 
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
-import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
-import { DownloadSection } from "@/app/components/DownloadSection";
 import { useEffect, useState } from "react";
+import { DownloadSection } from "@/app/components/DownloadSection";
+import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
+import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
+import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 
 function useIsDesktop() {
 	const [isDesktop, setIsDesktop] = useState(false);
@@ -30,25 +30,19 @@ function useIsDesktop() {
 
 	return isDesktop;
 }
+
 import {
-	Shield,
-	Eye,
-	Bell,
-	Phone,
-	Laptop,
-	Smartphone,
-	Monitor,
-	Fingerprint,
-	Brain,
-	Globe,
-	Rocket,
-	Lock,
-	Zap,
-	ChevronRight,
-	MessageCircle,
-	Mail,
 	ArrowRight,
-	Quote,
+	Bell,
+	Brain,
+	Eye,
+	Laptop,
+	Lock,
+	Mail,
+	MessageCircle,
+	Phone,
+	Shield,
+	Zap,
 } from "lucide-react";
 
 const features = [

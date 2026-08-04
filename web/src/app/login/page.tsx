@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Loader, Lock, Mail } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
-import { useToast, OutlinedInput } from "@/packages/ui";
+import { OutlinedInput, useToast } from "@/packages/ui";
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -27,7 +27,7 @@ export default function LoginPage() {
 			});
 			const data = await res.json();
 			if (!res.ok)
-				throw new Error((data as any).error || "Erro ao fazer login");
+				throw new Error((data as { error?: string }).error || "Erro ao fazer login");
 			router.push("/my-account");
 		} catch (err) {
 			toast(err instanceof Error ? err.message : "Erro ao fazer login");

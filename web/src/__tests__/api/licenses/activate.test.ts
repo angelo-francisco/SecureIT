@@ -1,15 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import { db } from "@/db";
-import { user, license, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { POST } from "@/app/api/licenses/activate/route";
+import { db } from "@/db";
+import { generateId, license, licenseKey, user } from "@/db/schema";
 import { generateLicenseKey } from "@/lib/license-key";
 import { hashPassword } from "@/lib/password";
-import { generateId } from "@/db/schema";
 
 const TEST_PREFIX = "test_activate";
 
-function makeRequest(body: any) {
+function makeRequest(body: unknown) {
 	return new Request("http://localhost/api/licenses/activate", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -17,7 +16,7 @@ function makeRequest(body: any) {
 	});
 }
 
-let testUserEmail = `${TEST_PREFIX}_user_${Date.now()}@example.com`;
+const testUserEmail = `${TEST_PREFIX}_user_${Date.now()}@example.com`;
 let testKey = "";
 let testUserId = "";
 let testKeyId = "";

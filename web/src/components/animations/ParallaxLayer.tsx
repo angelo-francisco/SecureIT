@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 interface ParallaxLayerProps {
 	children?: ReactNode;
@@ -28,11 +28,12 @@ export function ParallaxLayer({
 		const maxShift = speed === "slow" ? 40 : 80;
 
 		function onScroll() {
-			const rect = el!.getBoundingClientRect();
+			if (!el) return;
+			const rect = el.getBoundingClientRect();
 			const windowH = window.innerHeight;
 			const progress = (windowH - rect.top) / (windowH + rect.height);
 			const offset = (progress - 0.5) * maxShift;
-			el!.style.transform = `translateY(${offset}px)`;
+			el.style.transform = `translateY(${offset}px)`;
 		}
 
 		window.addEventListener("scroll", onScroll, { passive: true });

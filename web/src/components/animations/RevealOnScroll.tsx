@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 interface RevealOnScrollProps {
 	children: ReactNode;

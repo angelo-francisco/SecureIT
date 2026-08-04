@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2, Loader, Lock, X } from "lucide-react";
+import { Loader, Lock, Plus, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { OutlinedInput } from "@/components/OutlinedInput";
 import { Modal, PinInput, useToast } from "@/packages/ui";
 
@@ -30,7 +30,7 @@ const COLORS = [
 export function ProfilesSection() {
 	const { toast } = useToast();
 	const [profiles, setProfiles] = useState<SubProfile[]>([]);
-	const [loading, setLoading] = useState(true);
+	const [_loading, setLoading] = useState(true);
 
 	const [modalOpen, setModalOpen] = useState(false);
 	const [editing, setEditing] = useState<SubProfile | null>(null);
@@ -45,7 +45,7 @@ export function ProfilesSection() {
 		try {
 			const res = await fetch("/api/profiles");
 			if (res.ok) {
-				const d = (await res.json()) as any;
+				const d = (await res.json()) as SubProfile[];
 				if (Array.isArray(d)) setProfiles(d);
 			}
 		} catch {
@@ -100,10 +100,10 @@ export function ProfilesSection() {
 				}),
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
-				throw new Error(data.error);
-			}
-			toast("Perfil criado com sucesso");
+			const data = (await res.json()) as { error?: string };
+			throw new Error(data.error);
+		}
+		toast("Perfil criado com sucesso");
 			closeModal();
 			fetchData();
 		} catch (err) {
@@ -132,7 +132,7 @@ export function ProfilesSection() {
 				body: JSON.stringify(body),
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error || "Erro ao atualizar perfil");
 			}
 			toast("Perfil atualizado");
@@ -152,7 +152,7 @@ export function ProfilesSection() {
 				method: "DELETE",
 			});
 			if (!res.ok) {
-				const data = (await res.json()) as any;
+				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error);
 			}
 			toast("Perfil eliminado");
@@ -165,7 +165,7 @@ export function ProfilesSection() {
 	return (
 		<>
 			<div className="flex gap-4 overflow-x-auto scrollbar-thin">
-				<button onClick={openCreate} className="shrink-0 group animate-tile">
+				<button type="button" onClick={openCreate} className="shrink-0 group animate-tile">
 					<div className="w-20 h-20 md:w-24 md:h-24 bg-surface-hover border-2 border-dashed border-border flex items-center justify-center group-hover:border-primary group-hover:bg-primary/5 transition-all">
 						<Plus
 							size={28}
@@ -178,7 +178,7 @@ export function ProfilesSection() {
 				</button>
 
 				{profiles.map((p, i) => (
-					<button
+					<button type="button"
 						key={p.id}
 						onClick={() => openEdit(p)}
 						className="shrink-0 group relative animate-tile"
@@ -215,7 +215,7 @@ export function ProfilesSection() {
 							{editing ? "Editar Perfil" : "Novo Perfil"}
 						</h3>
 						{editing && !editing.isDefault && (
-							<button
+							<button type="button"
 								onClick={() => {
 									if (editing) {
 										closeModal();
@@ -241,10 +241,10 @@ export function ProfilesSection() {
 					</div>
 
 					<div>
-						<label className="text-lg text-text-muted mb-2 block">Cor</label>
+						<span className="text-lg text-text-muted mb-2 block">Cor</span>
 						<div className="flex gap-2 flex-wrap">
 							{COLORS.map((c) => (
-								<button
+								<button type="button"
 									key={c}
 									onClick={() => setColor(c)}
 									className={`w-7 h-7 rounded-sm transition-all duration-200 ${
@@ -263,11 +263,11 @@ export function ProfilesSection() {
 
 					<div>
 						<div className="flex w-full justify-between items-center">
-							<label className="text-lg text-text-muted mb-3 block">
+							<span className="text-lg text-text-muted mb-3 block">
 								Código de Acesso
-							</label>
+							</span>
 							{editing?.hasPin && !changingPin && (
-								<button
+								<button type="button"
 									onClick={() => setChangingPin(true)}
 									className="text-sm font-semibold text-primary hover:brightness-110 transition-all"
 								>
@@ -282,13 +282,13 @@ export function ProfilesSection() {
 
 					<div className="flex items-center gap-3 pt-2">
 						<div className="flex-1 flex w-full gap-2">
-							<button
+							<button type="button"
 								onClick={closeModal}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<X />
 							</button>
-							<button
+							<button type="button"
 								onClick={editing ? handleUpdate : handleCreate}
 								disabled={!name.trim() || saving}
 								className="w-full bg-primary text-center text-white px-6 py-2.5 text-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"

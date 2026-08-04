@@ -89,36 +89,35 @@ export async function decryptText(
 	}
 }
 
-export async function encryptPaymentInfo<T extends Record<string, any>>(
-	info: T,
-): Promise<T> {
+export async function encryptPaymentInfo<T extends object>(info: T): Promise<T> {
 	if (!info) return info;
-	const encrypted: Record<string, any> = { ...info };
-	if (encrypted.iban) encrypted.iban = await encryptText(encrypted.iban);
+	const encrypted = { ...info } as Record<string, unknown>;
+	if (encrypted.iban)
+		encrypted.iban = await encryptText(encrypted.iban as string);
 	if (encrypted.accountName)
-		encrypted.accountName = await encryptText(encrypted.accountName);
+		encrypted.accountName = await encryptText(encrypted.accountName as string);
 	if (encrypted.bankName)
-		encrypted.bankName = await encryptText(encrypted.bankName);
+		encrypted.bankName = await encryptText(encrypted.bankName as string);
 	if (encrypted.reference)
-		encrypted.reference = await encryptText(encrypted.reference);
+		encrypted.reference = await encryptText(encrypted.reference as string);
 	return encrypted as T;
 }
 
-export async function decryptPaymentInfo<T extends Record<string, any>>(
-	info: T,
-): Promise<T> {
+export async function decryptPaymentInfo<T extends object>(info: T): Promise<T> {
 	if (!info) return info;
-	const decrypted: Record<string, any> = { ...info };
+	const decrypted = { ...info } as Record<string, unknown>;
 	if (decrypted.iban)
-		decrypted.iban = (await decryptText(decrypted.iban)) || decrypted.iban;
+		decrypted.iban = (await decryptText(decrypted.iban as string)) || decrypted.iban;
 	if (decrypted.accountName)
 		decrypted.accountName =
-			(await decryptText(decrypted.accountName)) || decrypted.accountName;
+			(await decryptText(decrypted.accountName as string)) ||
+			decrypted.accountName;
 	if (decrypted.bankName)
 		decrypted.bankName =
-			(await decryptText(decrypted.bankName)) || decrypted.bankName;
+			(await decryptText(decrypted.bankName as string)) || decrypted.bankName;
 	if (decrypted.reference)
 		decrypted.reference =
-			(await decryptText(decrypted.reference)) || decrypted.reference;
+			(await decryptText(decrypted.reference as string)) ||
+			decrypted.reference;
 	return decrypted as T;
 }

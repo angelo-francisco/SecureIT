@@ -1,48 +1,47 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import { db } from "@/db";
-import {
-	plan,
-	planFeature,
-	planService,
-	adminUser,
-	paymentInfo,
-	paymentRequest,
-	user,
-	licenseKey,
-	license,
-	maintenanceRequest,
-	notification,
-} from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { createTestUser, createTestToken, makeRequest } from "../helpers/auth";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { PUT as MAINT_PUT } from "@/app/api/admin/maintenance/[id]/route";
+import { GET as MAINT_GET } from "@/app/api/admin/maintenance/route";
+import {
+	GET as PI_GET,
+	PUT as PI_PUT,
+} from "@/app/api/admin/payment-info/route";
+import { PUT as PAYMENT_PUT } from "@/app/api/admin/payments/[id]/route";
+import { GET as PAYMENTS_GET } from "@/app/api/admin/payments/route";
+import {
+	DELETE as FEATURES_DELETE,
+	GET as FEATURES_GET,
+	POST as FEATURES_POST,
+	PUT as FEATURES_PUT,
+} from "@/app/api/admin/plans/[id]/features/route";
+import {
+	DELETE as SERVICES_DELETE,
+	GET as SERVICES_GET,
+	POST as SERVICES_POST,
+	PUT as SERVICES_PUT,
+} from "@/app/api/admin/plans/[id]/services/route";
 import {
 	GET as PLANS_GET,
 	POST as PLANS_POST,
 	PUT as PLANS_PUT,
 } from "@/app/api/admin/plans/route";
-import {
-	GET as FEATURES_GET,
-	POST as FEATURES_POST,
-	PUT as FEATURES_PUT,
-	DELETE as FEATURES_DELETE,
-} from "@/app/api/admin/plans/[id]/features/route";
-import {
-	GET as SERVICES_GET,
-	POST as SERVICES_POST,
-	PUT as SERVICES_PUT,
-	DELETE as SERVICES_DELETE,
-} from "@/app/api/admin/plans/[id]/services/route";
-import {
-	GET as PI_GET,
-	PUT as PI_PUT,
-} from "@/app/api/admin/payment-info/route";
-import { GET as PAYMENTS_GET } from "@/app/api/admin/payments/route";
-import { PUT as PAYMENT_PUT } from "@/app/api/admin/payments/[id]/route";
-import { GET as MAINT_GET } from "@/app/api/admin/maintenance/route";
-import { PUT as MAINT_PUT } from "@/app/api/admin/maintenance/[id]/route";
 import { POST as SEED_POST } from "@/app/api/admin/seed-plans/route";
+import { db } from "@/db";
+import {
+	adminUser,
+	generateId,
+	license,
+	maintenanceRequest,
+	notification,
+	paymentInfo,
+	paymentRequest,
+	plan,
+	planFeature,
+	planService,
+	user,
+} from "@/db/schema";
 import { hashPassword } from "@/lib/password";
-import { generateId } from "@/db/schema";
+import { createTestToken, makeRequest } from "../helpers/auth";
 
 let adminToken = "";
 let adminId = "";
@@ -127,7 +126,7 @@ describe("Admin Plans CRUD", () => {
 		const data = await res.json();
 		expect(res.status).toBe(200);
 		expect(Array.isArray(data)).toBe(true);
-		const found = data.find((p: any) => p.id === testPlanId);
+		const found = data.find((p: { id: string }) => p.id === testPlanId);
 		expect(found).toBeDefined();
 	});
 
@@ -184,7 +183,7 @@ describe("Admin Plan Features CRUD", () => {
 		);
 		const data = await res.json();
 		expect(res.status).toBe(200);
-		expect(data.some((f: any) => f.id === testFeatureId)).toBe(true);
+		expect(data.some((f: { id: string }) => f.id === testFeatureId)).toBe(true);
 	});
 
 	it("PUT - updates feature", async () => {
@@ -257,7 +256,7 @@ describe("Admin Plan Services CRUD", () => {
 		);
 		const data = await res.json();
 		expect(res.status).toBe(200);
-		expect(data.some((s: any) => s.id === testServiceId)).toBe(true);
+		expect(data.some((s: { id: string }) => s.id === testServiceId)).toBe(true);
 	});
 
 	it("PUT - updates service", async () => {
@@ -487,7 +486,7 @@ describe("Admin Maintenance", () => {
 		const data = await res.json();
 		expect(res.status).toBe(200);
 		expect(Array.isArray(data)).toBe(true);
-		const found = data.find((r: any) => r.id === maintId);
+		const found = data.find((r: { id: string }) => r.id === maintId);
 		expect(found).toBeDefined();
 		expect(found.description).toBe("Camera broken");
 	});

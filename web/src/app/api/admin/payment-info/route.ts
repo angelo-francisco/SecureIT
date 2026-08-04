@@ -1,9 +1,9 @@
-import { db } from "@/db";
-import { paymentInfo } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { paymentInfo } from "@/db/schema";
 import { getAdminSession } from "@/lib/auth";
-import { encryptText, decryptPaymentInfo } from "@/lib/crypto";
+import { decryptPaymentInfo, encryptText } from "@/lib/crypto";
 
 export async function GET() {
 	const session = await getAdminSession();
@@ -33,7 +33,12 @@ export async function PUT(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			iban?: string;
+			accountName?: string;
+			bankName?: string;
+			reference?: string;
+		};
 		const { iban, accountName, bankName, reference } = body;
 
 		if (!iban || !accountName) {
@@ -43,8 +48,8 @@ export async function PUT(request: Request) {
 			);
 		}
 
-		const encIban = (await encryptText(iban))!;
-		const encAccountName = (await encryptText(accountName))!;
+		const encIban = (await encryptText(iban)) as string;
+		const encAccountName = (await encryptText(accountName)) as string;
 		const encBankName = bankName ? await encryptText(bankName) : null;
 		const encReference = reference ? await encryptText(reference) : null;
 

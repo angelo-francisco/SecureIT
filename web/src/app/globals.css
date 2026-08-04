@@ -264,7 +264,7 @@ body {
 	.reveal-scale,
 	.parallax-layer,
 	.parallax-layer-slow {
-		animation: none !important;
+		animation: none;
 		opacity: 1;
 		transform: none;
 	}
@@ -274,7 +274,7 @@ body {
 	.animate-glow,
 	.animate-border-glow,
 	.animate-hero-gradient {
-		animation: none !important;
+		animation: none;
 	}
 }
 

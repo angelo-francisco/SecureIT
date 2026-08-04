@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { ArrowLeft, Loader, Mail } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft, Eye, EyeOff, Loader, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 
-import { useToast, OutlinedInput, MaterialPhoneInput } from "@/packages/ui";
+import { MaterialPhoneInput, OutlinedInput, useToast } from "@/packages/ui";
 
 export default function SignupPage() {
 	const router = useRouter();
@@ -58,7 +58,7 @@ export default function SignupPage() {
 			});
 			const data = await res.json();
 			if (!res.ok)
-				throw new Error((data as any).error || "Erro ao criar conta");
+				throw new Error((data as { error?: string }).error || "Erro ao criar conta");
 			router.push("/my-account");
 		} catch (err) {
 			toast(err instanceof Error ? err.message : "Erro ao criar conta");

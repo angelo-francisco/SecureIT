@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
-import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
-import { PricingSection } from "@/app/components/PricingSection";
 import { ChevronDown, Mail } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { PricingSection } from "@/app/components/PricingSection";
+import { ParallaxLayer } from "@/components/animations/ParallaxLayer";
+import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
+import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 
 const faqs = [
 	{
@@ -48,7 +48,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 	const [open, setOpen] = useState(false);
 	return (
 		<div className="border border-border bg-bg">
-			<button
+			<button type="button"
 				onClick={() => setOpen(!open)}
 				className="w-full flex items-center justify-between p-6 text-left"
 			>

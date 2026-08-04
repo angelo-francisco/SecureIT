@@ -1,13 +1,12 @@
+import { createId } from "@paralleldrive/cuid2";
 import {
-	sqliteTable,
-	text,
+	index,
 	integer,
 	real,
+	sqliteTable,
+	text,
 	uniqueIndex,
-	index,
 } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 export function generateId(): string {
 	return createId();

@@ -1,8 +1,8 @@
+import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { paymentInfo } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { decryptPaymentInfo } from "@/lib/crypto";
-import { NextResponse } from "next/server";
 
 export async function GET() {
 	try {

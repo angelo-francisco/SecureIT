@@ -1,13 +1,16 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { verifyEmailCode } from "@/lib/email";
 import { createToken, setTokenCookies } from "@/lib/auth";
+import { verifyEmailCode } from "@/lib/email";
 
 export async function POST(request: Request) {
 	try {
-		const { email, code } = (await request.json()) as any;
+		const { email, code } = (await request.json()) as {
+			email?: string;
+			code?: string;
+		};
 
 		if (!email || !code) {
 			return NextResponse.json(

@@ -1,41 +1,33 @@
-import {
-	describe,
-	it,
-	expect,
-	beforeAll,
-	afterAll,
-	vi,
-	beforeEach,
-} from "vitest";
-import { db } from "@/db";
-import {
-	user,
-	subProfile,
-	notification,
-	license,
-	licenseKey,
-	paymentRequest,
-	plan,
-	paymentInfo,
-	maintenanceRequest,
-} from "@/db/schema";
 import { eq } from "drizzle-orm";
-import {
-	createTestUser,
-	createTestToken,
-	createTestLicense,
-	makeRequest,
-} from "../helpers/auth";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { POST as REVOKE_POST } from "@/app/api/licenses/revoke/route";
+import { POST as MAINTENANCE_POST } from "@/app/api/maintenance/request/route";
+import { GET as MY_LICENSE_GET } from "@/app/api/my-account/license/route";
+import { GET as NOTIFICATIONS_GET } from "@/app/api/notifications/route";
+import { POST as PAYMENTS_POST } from "@/app/api/payments/submit/route";
 import {
 	GET as PROFILES_GET,
 	POST as PROFILES_POST,
 } from "@/app/api/profiles/route";
-import { GET as NOTIFICATIONS_GET } from "@/app/api/notifications/route";
-import { POST as REVOKE_POST } from "@/app/api/licenses/revoke/route";
-import { POST as MAINTENANCE_POST } from "@/app/api/maintenance/request/route";
-import { GET as MY_LICENSE_GET } from "@/app/api/my-account/license/route";
-import { POST as PAYMENTS_POST } from "@/app/api/payments/submit/route";
-import { generateId } from "@/db/schema";
+import { db } from "@/db";
+import {
+	generateId,
+	license,
+	licenseKey,
+	maintenanceRequest,
+	notification,
+	paymentInfo,
+	paymentRequest,
+	plan,
+	subProfile,
+	user,
+} from "@/db/schema";
+import {
+	createTestLicense,
+	createTestToken,
+	createTestUser,
+	makeRequest,
+} from "../helpers/auth";
 
 let userId = "";
 let userEmail = "";
@@ -198,9 +190,7 @@ describe("POST /api/licenses/revoke", () => {
 	it("revokes an active license", async () => {
 		const { licId, keyId } = await createTestLicense(db, userId);
 
-		const res = await REVOKE_POST(
-			makeRequest("http://localhost/api/licenses/revoke", { token: userToken }),
-		);
+		const res = await REVOKE_POST();
 		const data = await res.json();
 		expect(res.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -210,9 +200,7 @@ describe("POST /api/licenses/revoke", () => {
 	});
 
 	it("returns 404 when no active license", async () => {
-		const res = await REVOKE_POST(
-			makeRequest("http://localhost/api/licenses/revoke", { token: userToken }),
-		);
+		const res = await REVOKE_POST();
 		expect(res.status).toBe(404);
 	});
 });

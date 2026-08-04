@@ -1,14 +1,18 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { license, licenseKey, user } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
 	try {
-		const { licenseId, email, hardwareFp } = (await request.json()) as any;
+		const { licenseId, email, hardwareFp } = (await request.json()) as {
+			licenseId?: string;
+			email?: string;
+			hardwareFp?: string;
+		};
 
-		let lic: typeof license.$inferSelect | undefined = undefined;
-		let keyData: typeof licenseKey.$inferSelect | undefined = undefined;
+		let lic: typeof license.$inferSelect | undefined;
+		let keyData: typeof licenseKey.$inferSelect | undefined;
 
 		if (licenseId) {
 			lic = await db

@@ -1,12 +1,12 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { createEmailCode, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
 	try {
-		const { email } = (await request.json()) as any;
+		const { email } = (await request.json()) as { email?: string };
 
 		if (!email) {
 			return NextResponse.json(

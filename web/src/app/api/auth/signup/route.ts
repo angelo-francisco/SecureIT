@@ -1,15 +1,21 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { generateId, user } from "@/db/schema";
 import { createToken, setTokenCookies } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
-import { generateId } from "@/db/schema";
 
 export async function POST(request: Request) {
 	try {
 		const { email, password, pin, firstName, lastName, phone } =
-			(await request.json()) as any;
+			(await request.json()) as {
+				email?: string;
+				password?: string;
+				pin?: string;
+				firstName?: string;
+				lastName?: string;
+				phone?: string;
+			};
 
 		if (!email || !password || !firstName || !lastName) {
 			return NextResponse.json(

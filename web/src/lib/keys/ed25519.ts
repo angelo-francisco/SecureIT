@@ -1,7 +1,7 @@
-import { SignJWT, jwtVerify, importPKCS8, importSPKI } from "jose";
+import { importPKCS8, importSPKI, jwtVerify, SignJWT } from "jose";
 
 const ALG = "EdDSA";
-const CURVE = "Ed25519";
+const _CURVE = "Ed25519";
 
 let cachedPrivateKey: CryptoKey | null = null;
 let cachedPublicKey: CryptoKey | null = null;

@@ -1,9 +1,9 @@
+import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { subProfile } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
-import { NextResponse } from "next/server";
 
 export async function PUT(
 	request: Request,
@@ -15,7 +15,11 @@ export async function PUT(
 	}
 	try {
 		const { id } = await params;
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			name?: string;
+			avatarColor?: string;
+			pin?: unknown;
+		};
 
 		const profile = await db
 			.select()

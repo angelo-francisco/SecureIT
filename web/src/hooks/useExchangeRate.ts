@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useExchangeRate() {
 	const [rate, setRate] = useState<number | null>(null);
@@ -9,7 +9,7 @@ export function useExchangeRate() {
 	useEffect(() => {
 		fetch("/api/exchange-rate")
 			.then((r) => r.json())
-			.then((data: any) => {
+			.then((data: { rate?: number }) => {
 				if (data.rate) setRate(data.rate);
 			})
 			.catch(() => {})

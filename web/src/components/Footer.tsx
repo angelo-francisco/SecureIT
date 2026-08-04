@@ -1,15 +1,13 @@
 import Link from "next/link";
-import Image from "next/image";
-import { MessageCircle, Mail, Phone } from "lucide-react";
 
-const productLinks = [
+const _productLinks = [
 	{ label: "Funcionalidades", href: "/#features" },
 	{ label: "Licenças", href: "/pricing" },
 	{ label: "Plataformas", href: "/#platform" },
 	{ label: "Reconhecimento Facial", href: "/#features" },
 ];
 
-const companyLinks = [
+const _companyLinks = [
 	{ label: "Contacto", href: "/#contact" },
 	{ label: "Termos de Uso", href: "#" },
 	{ label: "Política de Privacidade", href: "#" },

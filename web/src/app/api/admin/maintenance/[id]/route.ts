@@ -1,7 +1,7 @@
-import { db } from "@/db";
-import { maintenanceRequest } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { maintenanceRequest } from "@/db/schema";
 import { getAdminSession } from "@/lib/auth";
 
 export async function PUT(
@@ -13,7 +13,10 @@ export async function PUT(
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	const { id } = await params;
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			status?: string;
+			adminNote?: string;
+		};
 		const { status, adminNote } = body;
 
 		const updates: Record<string, unknown> = {};

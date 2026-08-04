@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { licenseKey } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { getAdminSession } from "@/lib/auth";
 import { generateLicenseKey } from "@/lib/license-key";
 
@@ -18,7 +18,14 @@ export async function POST(request: Request) {
 	}
 	try {
 		const { type, durationDays, quantity, batchName, maxCameras, maxPeople } =
-			(await request.json()) as any;
+			(await request.json()) as {
+				type?: string;
+				durationDays?: number;
+				quantity?: number;
+				batchName?: string;
+				maxCameras?: number;
+				maxPeople?: number;
+			};
 
 		if (!type || !durationDays || !quantity) {
 			return NextResponse.json(

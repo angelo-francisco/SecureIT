@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { db } from "@/db";
-import { plan, planFeature, planService } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { GET } from "@/app/api/plans/route";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { GET as PAYMENT_INFO_GET } from "@/app/api/payment-info/route";
-import { generateId } from "@/db/schema";
+import { GET } from "@/app/api/plans/route";
+import { db } from "@/db";
+import { generateId, plan, planFeature, planService } from "@/db/schema";
 
 let planId = "";
 
@@ -65,7 +64,7 @@ describe("GET /api/plans", () => {
 		const data = await res.json();
 		expect(res.status).toBe(200);
 		expect(Array.isArray(data)).toBe(true);
-		const found = data.find((p: any) => p.id === planId);
+		const found = data.find((p: { id: string }) => p.id === planId);
 		expect(found).toBeDefined();
 		expect(found.name).toBe("TestPlan");
 		expect(found.basePrice).toBe(29.99);
@@ -86,9 +85,9 @@ describe("GET /api/plans", () => {
 	it("excludes inactive features", async () => {
 		const res = await GET();
 		const data = await res.json();
-		const found = data.find((p: any) => p.id === planId);
+		const found = data.find((p: { id: string }) => p.id === planId);
 		const inactive = found.features.find(
-			(f: any) => f.name === "Inactive Feature",
+			(f: { name: string }) => f.name === "Inactive Feature",
 		);
 		expect(inactive).toBeUndefined();
 	});

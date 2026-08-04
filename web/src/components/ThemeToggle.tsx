@@ -1,7 +1,7 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
 
 function getInitialTheme(): "light" | "dark" {
 	if (typeof window === "undefined") return "dark";
@@ -35,7 +35,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 	if (!mounted) return null;
 
 	return (
-		<button
+		<button type="button"
 			onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
 			className={`text-text-muted hover:text-primary transition-colors ${className ?? ""}`}
 			aria-label="Mudar tema"

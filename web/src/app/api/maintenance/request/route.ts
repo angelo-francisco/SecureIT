@@ -1,8 +1,8 @@
-import { db } from "@/db";
-import { maintenanceRequest, license, paymentRequest } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { license, maintenanceRequest, paymentRequest } from "@/db/schema";
+import { getSession } from "@/lib/auth";
 
 export async function POST(request: Request) {
 	const session = await getSession();
@@ -10,7 +10,12 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			licenseId?: string;
+			description?: string;
+			proofPublicId?: string;
+			proofUrl?: string;
+		};
 		const { licenseId, description, proofPublicId, proofUrl } = body;
 
 		if (!licenseId) {
@@ -24,7 +29,7 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const now = new Date().toISOString();
+		const _now = new Date().toISOString();
 		const lic = await db
 			.select()
 			.from(license)

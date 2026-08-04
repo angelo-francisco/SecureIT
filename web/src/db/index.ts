@@ -1,8 +1,8 @@
-import { drizzle as drizzleD1 } from "drizzle-orm/d1";
+import { drizzle as drizzleLibsql } from "drizzle-orm/libsql/http";
 import * as schema from "./schema";
 
-type D1DB = ReturnType<typeof drizzleD1<typeof schema>>;
-type DrizzleDB = D1DB;
+type LibsqlDB = ReturnType<typeof drizzleLibsql<typeof schema>>;
+export type DrizzleDB = LibsqlDB;
 
 let _db: DrizzleDB | undefined;
 
@@ -33,7 +33,7 @@ function getDb(): DrizzleDB {
 			try {
 				const prColumns = sqlite
 					.query("PRAGMA table_info(PaymentRequest)")
-					.all() as any[];
+					.all() as { name: string }[];
 				const hasDurationDays = prColumns.some(
 					(col) => col.name === "durationDays",
 				);
@@ -47,9 +47,19 @@ function getDb(): DrizzleDB {
 
 		_db = drizzle(sqlite, { schema }) as DrizzleDB;
 	} else {
-		const { getCloudflareContext } = require("@opennextjs/cloudflare");
-		const { env } = getCloudflareContext();
-		_db = drizzleD1(env.DATABASE_URL_SQLITE, { schema });
+		const url = process.env.TURSO_DATABASE_URL;
+		if (!url) {
+			throw new Error(
+				"TURSO_DATABASE_URL is not set. Configure it in your environment.",
+			);
+		}
+		_db = drizzleLibsql({
+			connection: {
+				url,
+				authToken: process.env.TURSO_AUTH_TOKEN,
+			},
+			schema,
+		}) as DrizzleDB;
 	}
 
 	return _db;
@@ -57,6 +67,6 @@ function getDb(): DrizzleDB {
 
 export const db = new Proxy({} as DrizzleDB, {
 	get(_, prop) {
-		return (_db ?? getDb())[prop as keyof DrizzleDB] as any;
+		return (_db ?? getDb())[prop as keyof DrizzleDB];
 	},
 });

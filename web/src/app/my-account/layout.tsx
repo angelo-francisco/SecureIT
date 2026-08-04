@@ -1,9 +1,9 @@
-import { getSession } from "@/lib/auth";
-import { db } from "@/db";
-import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { getSession } from "@/lib/auth";
 
 export default async function MyAccountLayout({
 	children,

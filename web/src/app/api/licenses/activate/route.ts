@@ -1,10 +1,16 @@
+import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { license, licenseKey, user, plan, planFeature } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import {
+	generateId,
+	license,
+	licenseKey,
+	plan,
+	planFeature,
+	user,
+} from "@/db/schema";
+import { getPublicKeyPemString, signLicensePayload } from "@/lib/keys/ed25519";
 import { isValidLicenseKeyFormat } from "@/lib/license-key";
-import { signLicensePayload, getPublicKeyPemString } from "@/lib/keys/ed25519";
-import { generateId } from "@/db/schema";
 
 function buildFeatureSlug(name: string): string {
 	return name
@@ -13,7 +19,7 @@ function buildFeatureSlug(name: string): string {
 		.replace(/[^a-z0-9_]/g, "");
 }
 
-async function getPlanFeatures(type: string): Promise<string[]> {
+async function _getPlanFeatures(type: string): Promise<string[]> {
 	const features: string[] = ["face_recognition"];
 	try {
 		const planRow = await db
@@ -45,7 +51,11 @@ async function getPlanFeatures(type: string): Promise<string[]> {
 
 export async function POST(request: Request) {
 	try {
-		const { key, email, hardwareFp } = (await request.json()) as any;
+		const { key, email, hardwareFp } = (await request.json()) as {
+			key?: string;
+			email?: string;
+			hardwareFp?: string;
+		};
 
 		if (!key || !email) {
 			return NextResponse.json(
@@ -195,15 +205,18 @@ export async function POST(request: Request) {
 		const publicKey = await getPublicKeyPemString();
 
 		const licId = generateId();
-		await db.insert(license).values({
-			id: licId,
-			keyId: licenseKeyRecord.id,
-			userId: foundUser.id,
-			activatedAt: nowStr,
-			expiresAt: expiresAtStr,
-			hardwareFp: hardwareFp || null,
-			signedPayload,
-		}).run();
+		await db
+			.insert(license)
+			.values({
+				id: licId,
+				keyId: licenseKeyRecord.id,
+				userId: foundUser.id,
+				activatedAt: nowStr,
+				expiresAt: expiresAtStr,
+				hardwareFp: hardwareFp || null,
+				signedPayload,
+			})
+			.run();
 		await db
 			.update(licenseKey)
 			.set({ status: "ACTIVE" })

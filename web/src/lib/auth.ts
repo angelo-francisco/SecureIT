@@ -1,6 +1,6 @@
-import { SignJWT, jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 
 function getAccessSecret() {
 	const secret = process.env.JWT_SECRET;

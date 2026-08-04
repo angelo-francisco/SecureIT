@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 const PUBLIC_PATHS = [
 	"/",
@@ -83,7 +83,7 @@ export async function middleware(request: NextRequest) {
 	if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
 		const REDIRECT_WHEN_AUTHED = ["/", "/login", "/signup"];
 		if (
-			REDIRECT_WHEN_AUTHED.some((p) => pathname === p || pathname === p + "/")
+			REDIRECT_WHEN_AUTHED.some((p) => pathname === p || pathname === `${p}/`)
 		) {
 			const token = request.cookies.get("token")?.value;
 			if (token) {

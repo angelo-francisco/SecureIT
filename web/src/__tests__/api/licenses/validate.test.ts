@@ -1,15 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { db } from "@/db";
-import { user, license, licenseKey } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { POST } from "@/app/api/licenses/validate/route";
+import { db } from "@/db";
+import { generateId, license, licenseKey, user } from "@/db/schema";
 import { generateLicenseKey } from "@/lib/license-key";
 import { hashPassword } from "@/lib/password";
-import { generateId } from "@/db/schema";
 
 const TEST_PREFIX = "test_validate";
 
-function makeRequest(body: any) {
+function makeRequest(body: unknown) {
 	return new Request("http://localhost/api/licenses/validate", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

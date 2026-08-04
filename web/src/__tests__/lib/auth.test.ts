@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createToken, verifyAccessToken, verifyRefreshToken } from "@/lib/auth";
 
 describe("lib/auth", () => {
@@ -17,9 +17,9 @@ describe("lib/auth", () => {
 		const token = await createToken(testPayload, "access");
 		const result = await verifyAccessToken(token);
 		expect(result).not.toBeNull();
-		expect(result!.sub).toBe(testPayload.sub);
-		expect(result!.email).toBe(testPayload.email);
-		expect(result!.type).toBe("access");
+		expect(result?.sub).toBe(testPayload.sub);
+		expect(result?.email).toBe(testPayload.email);
+		expect(result?.type).toBe("access");
 	});
 
 	it("verifyAccessToken with invalid token returns null", async () => {
@@ -37,9 +37,9 @@ describe("lib/auth", () => {
 		const token = await createToken(testPayload, "refresh");
 		const result = await verifyRefreshToken(token);
 		expect(result).not.toBeNull();
-		expect(result!.sub).toBe(testPayload.sub);
-		expect(result!.email).toBe(testPayload.email);
-		expect(result!.type).toBe("refresh");
+		expect(result?.sub).toBe(testPayload.sub);
+		expect(result?.email).toBe(testPayload.email);
+		expect(result?.type).toBe("refresh");
 	});
 
 	it("verifyRefreshToken with invalid token returns null", async () => {

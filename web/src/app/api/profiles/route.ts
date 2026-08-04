@@ -1,9 +1,9 @@
-import { db } from "@/db";
-import { subProfile, license, licenseKey } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { license, licenseKey, subProfile } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
-import { NextResponse } from "next/server";
 
 const PROFILE_LIMITS: Record<string, number> = {
 	basic: 2,
@@ -48,7 +48,11 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			name?: string;
+			avatarColor?: string;
+			pin?: string;
+		};
 		const { name, avatarColor, pin } = body;
 
 		if (!name?.trim()) {

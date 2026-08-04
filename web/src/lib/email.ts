@@ -1,7 +1,7 @@
+import { and, eq, gt } from "drizzle-orm";
+import { customAlphabet } from "nanoid";
 import { db } from "@/db";
 import { emailCode } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
-import { customAlphabet } from "nanoid";
 
 const generateCode = customAlphabet("0123456789", 6);
 

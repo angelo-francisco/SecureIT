@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle } from "react";
-import { Shield, Key, X } from "lucide-react";
+import { Key, X } from "lucide-react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { Modal } from "@/packages/ui";
 
 interface LicenseData {
@@ -133,7 +133,7 @@ export const LicensesSection = forwardRef<
 				</h1>
 				<div className="flex gap-2 items-center justify-center">
 					{isActive && (
-						<button
+						<button type="button"
 							onClick={() => setConfirmRevoke(true)}
 							className=" px-2 py-1 border text-base font-medium bg-red-500 text-white hover:text-error/80 transition-colors"
 						>
@@ -185,7 +185,7 @@ export const LicensesSection = forwardRef<
 				<div className="bg-surface border border-border p-6">
 					<div className="flex items-center justify-between mb-4">
 						<h3 className="text-lg font-bold text-text">Revogar Licença</h3>
-						<button
+						<button type="button"
 							onClick={() => setConfirmRevoke(false)}
 							className="p-1.5 border text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 						>
@@ -197,13 +197,13 @@ export const LicensesSection = forwardRef<
 						desfeita. Precisará de uma nova chave para reactivar.
 					</p>
 					<div className="flex gap-3">
-						<button
+						<button type="button"
 							onClick={() => setConfirmRevoke(false)}
 							className="flex-1 py-2.5 text-sm font-medium text-text-muted border border-border hover:bg-surface-hover transition-all"
 						>
 							Cancelar
 						</button>
-						<button
+						<button type="button"
 							onClick={handleRevoke}
 							disabled={revoking}
 							className="flex-1 py-2.5 text-sm font-medium text-white bg-error hover:bg-error/80 transition-all disabled:opacity-50"

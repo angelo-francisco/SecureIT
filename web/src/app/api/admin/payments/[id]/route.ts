@@ -1,18 +1,18 @@
+import { eq, inArray } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import {
+	license,
+	licenseKey,
+	notification,
 	paymentRequest,
 	plan,
 	planFeature,
-	licenseKey,
-	license,
 	user,
-	notification,
 } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
-import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
-import { generateLicenseKey } from "@/lib/license-key";
 import { signLicensePayload } from "@/lib/keys/ed25519";
+import { generateLicenseKey } from "@/lib/license-key";
 
 export async function PUT(
 	request: Request,
@@ -24,7 +24,10 @@ export async function PUT(
 	}
 	try {
 		const { id } = await params;
-		const body = (await request.json()) as any;
+		const body = (await request.json()) as {
+			status?: string;
+			adminNote?: string;
+		};
 		const { status, adminNote } = body;
 
 		if (!status || !["APPROVED", "REJECTED"].includes(status)) {

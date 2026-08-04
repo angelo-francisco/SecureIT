@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
-process.env.DATABASE_URL_SQLITE =
-	process.env.DATABASE_URL_SQLITE || "file:./dev.db";
+process.env.TURSO_DATABASE_URL =
+	process.env.TURSO_DATABASE_URL || "libsql://secureit.turso.io";
 process.env.JWT_SECRET =
 	process.env.JWT_SECRET ||
 	"x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-";

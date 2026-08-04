@@ -1,9 +1,9 @@
+import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { subProfile } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { verifyPassword } from "@/lib/password";
-import { NextResponse } from "next/server";
 
 export async function POST(
 	request: Request,
