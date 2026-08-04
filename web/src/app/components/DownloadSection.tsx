@@ -64,7 +64,10 @@ export function DownloadSection() {
 				<div className="w-full flex items-center justify-center flex-col md:flex-row gap-6 max-w-4xl mx-auto">
 					{platforms.map((platform) => (
 						<RevealOnScroll key={platform.name} variant="scale">
-							<button type="button" className="w-full card-sharp p-8 px-12 flex items-center gap-4 cursor-default">
+							<button
+								type="button"
+								className="w-full card-sharp p-8 px-12 flex items-center gap-4 cursor-default"
+							>
 								<div className="text-primary/80">{platform.icon}</div>
 								<div className="text-left">
 									<p className="text-lg font-bold text-text">{platform.name}</p>

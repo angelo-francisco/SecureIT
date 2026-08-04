@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { CheckCircle2, Info, AlertCircle, X } from "lucide-react";
+import { X } from "lucide-react";
 
 export type ToastType = "error" | "success" | "info";
 
@@ -83,28 +83,6 @@ export function ToastProvider({
     [dismiss]
   );
 
-  const getAccentColor = (type: ToastType) => {
-    switch (type) {
-      case "success":
-        return "bg-success";
-      case "error":
-        return "bg-error";
-      case "info":
-        return "bg-blue-500";
-    }
-  };
-
-  const getIcon = (type: ToastType) => {
-    switch (type) {
-      case "success":
-        return <CheckCircle2 size={18} className="text-success" />;
-      case "error":
-        return <AlertCircle size={18} className="text-error" />;
-      case "info":
-        return <Info size={18} className="text-blue-500" />;
-    }
-  };
-
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
@@ -137,6 +115,7 @@ export function ToastProvider({
               </span>
 
               <button
+                type="button"
                 onClick={() => dismiss(toast.id)}
                 className="cursor-pointer text-text/60 transition-colors hover:text-text"
               >

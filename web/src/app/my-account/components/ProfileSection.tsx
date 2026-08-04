@@ -115,7 +115,8 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 				<MaterialPhoneInput value={phone} onChange={(v) => setPhone(v ?? "")} />
 			</div>
 			<div className="border-t border-border pt-4">
-				<button type="button"
+				<button
+					type="button"
 					onClick={() => setPinOpen((v) => !v)}
 					className="w-full flex items-center justify-between px-4 py-3 bg-bg border border-border hover:bg-surface-hover transition-all"
 				>
@@ -142,7 +143,8 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 								setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
 							}
 						/>
-						<button type="button"
+						<button
+							type="button"
 							onClick={handlePinSave}
 							disabled={pinSaving || pin.length !== 4}
 							className="w-full text-center bg-primary px-4 py-2 text-white text-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
@@ -150,15 +152,16 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 							{pinSaving ? (
 								<Loader size={16} className="animate-spin" />
 							) : (
-							<Check size={16} />
-						)}
+								<Check size={16} />
+							)}
 							{user.hasPin ? "Alterar PIN" : "Definir PIN"}
 						</button>
 					</div>
 				)}
 			</div>
 			<div className="w-full flex items-center">
-				<button type="button"
+				<button
+					type="button"
 					onClick={handleSave}
 					disabled={
 						loading || !firstName.trim() || !lastName.trim() || !isDirty

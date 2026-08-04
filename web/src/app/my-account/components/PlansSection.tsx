@@ -107,9 +107,9 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					fetch("/api/payment-info"),
 				]);
 				const p = (plansRes.ok ? await plansRes.json() : []) as Plan[];
-				const info = (infoRes.ok ? await infoRes.json() : null) as
-					| PaymentInfo
-					| null;
+				const info = (
+					infoRes.ok ? await infoRes.json() : null
+				) as PaymentInfo | null;
 				setPlans(p);
 				setPaymentInfo(info);
 				if (p.length > 0) setSelectedPlan(p[0]);
@@ -133,8 +133,8 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					}),
 				});
 				if (!res.ok) {
-				const data = (await res.json()) as { error?: string };
-				throw new Error(data.error);
+					const data = (await res.json()) as { error?: string };
+					throw new Error(data.error);
 				}
 				toast(
 					"Pagamento submetido com sucesso! Aguarde a validação em alguns instantes.",
@@ -184,7 +184,8 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						>
 							Mensal
 						</span>
-						<button type="button"
+						<button
+							type="button"
 							onClick={() => setAnnual(!annual)}
 							className={`relative w-10 h-5 transition-colors ${annual ? "bg-primary" : "bg-border"}`}
 						>
@@ -268,7 +269,10 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 										<button
 											type="button"
 											onClick={() =>
-												copyToClipboard(paymentInfo.reference ?? "", "reference")
+												copyToClipboard(
+													paymentInfo.reference ?? "",
+													"reference",
+												)
 											}
 											className="cursor-pointer text-text-muted hover:text-primary transition-colors"
 											title="Copiar Referência"
@@ -345,7 +349,8 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 									Ver comprovativo
 								</a>
 							</div>
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => setUploadedProof(null)}
 								className="text-xs text-text-muted hover:text-error transition-colors"
 							>
@@ -422,13 +427,15 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 				</div>
 
 				<div className="flex items-center gap-3">
-					<button type="button"
+					<button
+						type="button"
 						onClick={onClose}
 						className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 					>
 						<ArrowLeft />
 					</button>
-					<button type="button"
+					<button
+						type="button"
 						onClick={handleSubmit}
 						disabled={!uploadedProof || submitting}
 						className="w-full cursor-pointer bg-primary text-white text-base md:text-lg font-bold py-3 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"

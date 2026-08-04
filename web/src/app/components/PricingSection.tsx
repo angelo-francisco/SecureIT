@@ -71,7 +71,8 @@ export function PricingSection() {
 							>
 								Mensal
 							</span>
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => setAnnual(!annual)}
 								className={`relative w-12 h-6 transition-colors ${annual ? "bg-primary" : "bg-border"}`}
 							>

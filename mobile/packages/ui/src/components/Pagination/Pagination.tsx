@@ -20,6 +20,7 @@ export function Pagination({
       <span className="flex items-center gap-2 justify-center">
         {hasPrevious && (
           <button
+            type="button"
             onClick={() => onPageChange(page - 1)}
             className="text-text-muted hover:text-text transition-colors"
             aria-label="Página anterior"
@@ -32,6 +33,7 @@ export function Pagination({
         </span>
         {hasNext && (
           <button
+            type="button"
             onClick={() => onPageChange(page + 1)}
             className="text-text-muted hover:text-text transition-colors"
             aria-label="Próxima página"

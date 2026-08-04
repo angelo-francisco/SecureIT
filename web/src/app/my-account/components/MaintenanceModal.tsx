@@ -171,13 +171,15 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 						)}
 
 						<div className="flex justify-center items-center gap-3 pt-2">
-							<button type="button"
+							<button
+								type="button"
 								onClick={handleClose}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<X />
 							</button>
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => license && setStep(2)}
 								disabled={!license}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-lg font-bold hover:brightness-110 transition-all disabled:opacity-50"
@@ -203,13 +205,15 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							/>
 						</div>
 						<div className="flex justify-between items-center gap-3 pt-4">
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => setStep(1)}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<ArrowLeft />
 							</button>
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => description && setStep(3)}
 								disabled={!description}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-lg font-bold hover:brightness-110 transition-all disabled:opacity-50"
@@ -247,7 +251,8 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 											Ver comprovativo
 										</a>
 									</div>
-									<button type="button"
+									<button
+										type="button"
 										onClick={() => setUploadedProof(null)}
 										className="text-xs text-text-muted hover:text-error transition-colors"
 									>
@@ -301,14 +306,16 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 						</div>
 
 						<div className="flex justify-between items-center w-full gap-3">
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => setStep(2)}
 								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<ArrowLeft />
 							</button>
 
-							<button type="button"
+							<button
+								type="button"
 								onClick={handleSubmit}
 								disabled={submitting}
 								className="w-full text-center bg-primary text-white px-6 py-2.5 text-base font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50"

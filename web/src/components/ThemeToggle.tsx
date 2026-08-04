@@ -35,7 +35,8 @@ export function ThemeToggle({ className }: { className?: string }) {
 	if (!mounted) return null;
 
 	return (
-		<button type="button"
+		<button
+			type="button"
 			onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
 			className={`text-text-muted hover:text-primary transition-colors ${className ?? ""}`}
 			aria-label="Mudar tema"

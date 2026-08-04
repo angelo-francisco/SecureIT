@@ -27,7 +27,9 @@ export default function LoginPage() {
 			});
 			const data = await res.json();
 			if (!res.ok)
-				throw new Error((data as { error?: string }).error || "Erro ao fazer login");
+				throw new Error(
+					(data as { error?: string }).error || "Erro ao fazer login",
+				);
 			router.push("/my-account");
 		} catch (err) {
 			toast(err instanceof Error ? err.message : "Erro ao fazer login");

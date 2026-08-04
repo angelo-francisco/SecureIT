@@ -91,8 +91,7 @@ export function NewLicenseModal({
 					(r) => (r.ok ? r.json() : []) as Promise<Plan[]>,
 				),
 				fetch("/api/payment-info").then(
-					(r) =>
-						(r.ok ? r.json() : null) as Promise<PaymentInfo | null>,
+					(r) => (r.ok ? r.json() : null) as Promise<PaymentInfo | null>,
 				),
 				fetch("/api/my-account/license").then(
 					(r) =>
@@ -166,7 +165,8 @@ export function NewLicenseModal({
 						</div>
 					</div>
 					<div className="flex gap-2 items-center justify-center">
-						<button type="button"
+						<button
+							type="button"
 							onClick={onClose}
 							className="p-1.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 						>
@@ -229,7 +229,8 @@ export function NewLicenseModal({
 													</p>
 												)}
 											</div>
-											<button type="button"
+											<button
+												type="button"
 												onClick={() => handleSelectPlan(plan)}
 												className="bg-primary w-full py-2 text-base md:text-lg font-semibold"
 											>
@@ -303,9 +304,12 @@ export function NewLicenseModal({
 														</span>
 														<button
 															type="button"
-														onClick={() =>
-															copyToClipboard(paymentInfo.reference ?? "", "reference")
-														}
+															onClick={() =>
+																copyToClipboard(
+																	paymentInfo.reference ?? "",
+																	"reference",
+																)
+															}
 															className="cursor-pointer text-text-muted hover:text-primary transition-colors"
 															title="Copiar Referência"
 														>
@@ -355,7 +359,8 @@ export function NewLicenseModal({
 												Ver comprovativo
 											</a>
 										</div>
-										<button type="button"
+										<button
+											type="button"
 											onClick={() => setUploadedProof(null)}
 											className="text-base text-text-muted hover:text-error transition-colors"
 										>
@@ -415,14 +420,16 @@ export function NewLicenseModal({
 							</div>
 
 							<div className="flex items-center gap-2 w-full justify-between">
-								<button type="button"
+								<button
+									type="button"
 									onClick={() => setStep(1)}
 									className="p-3 px-3.5 border"
 								>
 									<ArrowLeft size={18} />
 								</button>
 
-								<button type="button"
+								<button
+									type="button"
 									onClick={handleSubmit}
 									disabled={!uploadedProof || submitting}
 									className="w-full bg-primary text-white text-base font-bold py-2.5 cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"

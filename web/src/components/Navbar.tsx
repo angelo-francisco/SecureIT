@@ -126,7 +126,8 @@ export function Navbar({
 
 				<div className="flex md:hidden items-center gap-2">
 					<ThemeToggle />
-					<button type="button"
+					<button
+						type="button"
 						onClick={() => setMobileOpen(!mobileOpen)}
 						className="p-2 text-text-muted hover:text-text"
 					>

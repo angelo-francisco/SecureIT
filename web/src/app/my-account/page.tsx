@@ -198,7 +198,8 @@ export default function MyAccountPage() {
 
 			<div className="flex justify-end gap-3 mt-5">
 				<div className="relative" ref={supportRef}>
-					<button type="button"
+					<button
+						type="button"
 						onClick={() => setSupportOpen((v) => !v)}
 						className="font-semibold text-lg md:text-xl px-3 py-2 cursor-pointer hover:text-primary transition-all flex items-center gap-1.5"
 					>
@@ -246,7 +247,8 @@ export default function MyAccountPage() {
 					)}
 				</div>
 				<div className="relative" ref={menuRef}>
-					<button type="button"
+					<button
+						type="button"
 						onClick={() => setMenuOpen((v) => !v)}
 						className="font-semibold text-lg md:text-xl px-3 py-2 cursor-pointer hover:text-primary transition-all flex items-center gap-1.5"
 					>
@@ -255,7 +257,8 @@ export default function MyAccountPage() {
 					</button>
 					{menuOpen && (
 						<div className="absolute bottom-full right-0 mb-2 bg-surface border border-border shadow-lg min-w-[250px] divide-y divide-gray-700 z-50 animate-slide-up">
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => {
 									setMenuOpen(false);
 									setPlansModalOpen(true);
@@ -265,7 +268,8 @@ export default function MyAccountPage() {
 								<CreditCard size={18} className="text-primary" />
 								Obter Licença
 							</button>
-							<button type="button"
+							<button
+								type="button"
 								disabled
 								onClick={() => {
 									setMenuOpen(false);
@@ -276,7 +280,8 @@ export default function MyAccountPage() {
 								<Wrench size={18} className="text-text-muted" />
 								Solicitar Manutenção
 							</button>
-							<button type="button"
+							<button
+								type="button"
 								onClick={async () => {
 									setLoggingOut(true);
 									await fetch("/api/auth/logout", { method: "POST" });

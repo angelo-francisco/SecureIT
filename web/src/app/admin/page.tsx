@@ -83,7 +83,8 @@ export default function AdminPage() {
 				</div>
 				<nav className="space-y-0.5">
 					{TABS.map((tab) => (
-						<button type="button"
+						<button
+							type="button"
 							key={tab.id}
 							onClick={() => setActiveTab(tab.id)}
 							className={cn(
@@ -99,13 +100,14 @@ export default function AdminPage() {
 					))}
 				</nav>
 				<div className="mt-auto pt-4 border-t border-border">
-					<button type="button"
-					onClick={async () => {
-						await fetch("/api/auth/logout", { method: "POST" }).catch(
-							() => {},
-						);
-						setAuthenticated(false);
-					}}
+					<button
+						type="button"
+						onClick={async () => {
+							await fetch("/api/auth/logout", { method: "POST" }).catch(
+								() => {},
+							);
+							setAuthenticated(false);
+						}}
 						className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-text-muted hover:text-error hover:bg-error/10 transition-all"
 					>
 						<X size={16} />
@@ -401,7 +403,8 @@ function LicensesTab({ onGenerate }: { onGenerate: () => void }) {
 					<Key className="w-5 h-5 text-primary" />
 					<h1 className="text-xl font-display font-bold text-text">Licenças</h1>
 				</div>
-				<button type="button"
+				<button
+					type="button"
 					onClick={onGenerate}
 					className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:brightness-110 flex items-center gap-1.5"
 				>
@@ -411,7 +414,8 @@ function LicensesTab({ onGenerate }: { onGenerate: () => void }) {
 
 			<div className="flex gap-1.5 mb-4">
 				{[null, "PENDING", "ACTIVE", "REVOKED"].map((f) => (
-					<button type="button"
+					<button
+						type="button"
 						key={f ?? "all"}
 						onClick={() => setFilter(f)}
 						className={cn(
@@ -632,7 +636,8 @@ function GenerateTab() {
 							Geradas ({generated.length})
 						</h2>
 						<div className="flex gap-2">
-							<button type="button"
+							<button
+								type="button"
 								onClick={copyAll}
 								className="text-xs text-text-muted hover:text-text flex items-center gap-1 px-2 py-1 rounded hover:bg-surface-hover transition-all"
 							>
@@ -643,7 +648,8 @@ function GenerateTab() {
 								)}{" "}
 								Copiar todas
 							</button>
-							<button type="button"
+							<button
+								type="button"
 								onClick={() => setGenerated([])}
 								className="text-xs text-text-muted hover:text-text px-2 py-1 rounded hover:bg-surface-hover transition-all"
 							>
@@ -658,7 +664,8 @@ function GenerateTab() {
 								className="flex items-center justify-between p-2.5 bg-bg rounded-lg border border-border"
 							>
 								<code className="text-primary font-mono text-xs">{k}</code>
-								<button type="button"
+								<button
+									type="button"
 									onClick={() => copyOne(k)}
 									className="text-text-muted hover:text-text p-1"
 								>
@@ -840,7 +847,8 @@ function PlansTab() {
 					<CreditCard className="w-5 h-5 text-primary" />
 					<h1 className="text-xl font-display font-bold text-text">Planos</h1>
 				</div>
-				<button type="button"
+				<button
+					type="button"
 					onClick={() => {
 						setEditing(null);
 						setName("");
@@ -860,7 +868,8 @@ function PlansTab() {
 						<h2 className="text-sm font-semibold text-text">
 							{editing ? "Editar" : "Novo"} Plano
 						</h2>
-						<button type="button"
+						<button
+							type="button"
 							onClick={() => setEditing(null)}
 							className="text-text-muted hover:text-text"
 						>
@@ -898,7 +907,8 @@ function PlansTab() {
 							className="h-10 px-3 bg-bg border border-border rounded-lg text-sm text-text focus:outline-none focus:border-primary"
 						/>
 					</div>
-					<button type="button"
+					<button
+						type="button"
 						onClick={handleSave}
 						disabled={!name || !basePrice || !durationDays || saving}
 						className="bg-primary text-white px-5 py-2 rounded-lg text-xs font-bold hover:brightness-110 flex items-center gap-1.5 disabled:opacity-50"
@@ -926,7 +936,8 @@ function PlansTab() {
 						>
 							<div className="flex items-center justify-between p-4">
 								<div className="flex items-center gap-4">
-									<button type="button"
+									<button
+										type="button"
 										onClick={() =>
 											setExpandedPlan(expandedPlan === p.id ? null : p.id)
 										}
@@ -954,7 +965,8 @@ function PlansTab() {
 									<span className="text-text-muted text-xs">
 										{p.durationDays}d
 									</span>
-									<button type="button"
+									<button
+										type="button"
 										onClick={() => toggleActive(p)}
 										className={cn(
 											"px-2 py-0.5 rounded text-xs font-medium",
@@ -965,7 +977,8 @@ function PlansTab() {
 									>
 										{p.isActive ? "Ativo" : "Inativo"}
 									</button>
-									<button type="button"
+									<button
+										type="button"
 										onClick={() => {
 											setEditing(p);
 											setName(p.name);
@@ -1001,7 +1014,8 @@ function PlansTab() {
 																${f.price.toFixed(2)}
 															</span>
 														</div>
-														<button type="button"
+														<button
+															type="button"
 															onClick={() => deleteFeature(p.id, f.id)}
 															className="text-text-muted hover:text-error"
 														>
@@ -1038,7 +1052,8 @@ function PlansTab() {
 												placeholder="$"
 												className="h-8 w-20 px-2 bg-bg border border-border rounded text-xs text-text focus:outline-none focus:border-primary"
 											/>
-											<button type="button"
+											<button
+												type="button"
 												onClick={() => addFeature(p.id)}
 												disabled={!featName}
 												className="h-8 px-3 bg-primary/15 text-primary rounded text-xs font-medium hover:bg-primary/25 disabled:opacity-50"
@@ -1067,7 +1082,8 @@ function PlansTab() {
 																${s.price.toFixed(2)}
 															</span>
 														</div>
-														<button type="button"
+														<button
+															type="button"
 															onClick={() => deleteService(p.id, s.id)}
 															className="text-text-muted hover:text-error"
 														>
@@ -1104,7 +1120,8 @@ function PlansTab() {
 												placeholder="$"
 												className="h-8 w-20 px-2 bg-bg border border-border rounded text-xs text-text focus:outline-none focus:border-primary"
 											/>
-											<button type="button"
+											<button
+												type="button"
 												onClick={() => addService(p.id)}
 												disabled={!svcName}
 												className="h-8 px-3 bg-primary/15 text-primary rounded text-xs font-medium hover:bg-primary/25 disabled:opacity-50"
@@ -1243,7 +1260,8 @@ function MaintenanceTab() {
 														<ExternalLink size={11} /> Ver
 													</a>
 												)}
-												<button type="button"
+												<button
+													type="button"
 													onClick={() => handleAction(r.id, "IN_PROGRESS")}
 													disabled={processing === r.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1255,14 +1273,16 @@ function MaintenanceTab() {
 													)}{" "}
 													Iniciar
 												</button>
-												<button type="button"
+												<button
+													type="button"
 													onClick={() => handleAction(r.id, "RESOLVED")}
 													disabled={processing === r.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-success rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
 												>
 													<CheckCircle2 size={11} /> Resolvido
 												</button>
-												<button type="button"
+												<button
+													type="button"
 													onClick={() => handleAction(r.id, "REJECTED")}
 													disabled={processing === r.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-error rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1465,7 +1485,8 @@ function PaymentsTab() {
 												>
 													<ExternalLink size={11} /> Ver
 												</a>
-												<button type="button"
+												<button
+													type="button"
 													onClick={() => handleAction(p.id, "APPROVED")}
 													disabled={processing === p.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-success rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1477,7 +1498,8 @@ function PaymentsTab() {
 													)}{" "}
 													Aprovar
 												</button>
-												<button type="button"
+												<button
+													type="button"
 													onClick={() => handleAction(p.id, "REJECTED")}
 													disabled={processing === p.id}
 													className="px-2.5 py-1.5 text-xs font-medium text-white bg-error rounded-lg hover:brightness-110 flex items-center gap-1 disabled:opacity-50"
@@ -1686,7 +1708,8 @@ function PaymentInfoTab() {
 						/>
 					</div>
 				</div>
-				<button type="button"
+				<button
+					type="button"
 					onClick={handleSave}
 					disabled={!iban || !accountName || saving}
 					className="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold hover:brightness-110 flex items-center gap-2 disabled:opacity-50"

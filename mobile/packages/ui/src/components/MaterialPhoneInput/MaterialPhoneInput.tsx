@@ -15,7 +15,7 @@ export interface MaterialPhoneInputProps {
 
 export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel" }: MaterialPhoneInputProps) {
   const [focused, setFocused] = useState(false);
-  const hasValue = !!value;
+  const _hasValue = !!value;
   const labelUp = true;
 
   return (
@@ -41,7 +41,7 @@ export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel
           className="w-full"
         />
       </div>
-      <label
+      <span
         className={cn(
           "absolute left-3 px-1 bg-bg cursor-text select-none truncate transition-all duration-200 pointer-events-none z-10",
           labelUp
@@ -55,7 +55,7 @@ export function MaterialPhoneInput({ value, onChange, error, label = "Telemóvel
         )}
       >
         {label}
-      </label>
+      </span>
     </div>
   );
 }
@@ -109,7 +109,7 @@ function CountrySelect({ value, onChange }: { value?: string; onChange: (v: stri
         className="flex items-center gap-1.5 px-1 h-8 text-text hover:bg-surface-hover transition-colors"
       >
         {Flag && <span className="inline-flex w-5 h-4 shrink-0 overflow-hidden"><Flag title={country.label} /></span>}
-        <svg className={cn("w-3 h-3 text-text-muted transition-transform shrink-0", open && "rotate-180")} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg aria-hidden="true" className={cn("w-3 h-3 text-text-muted transition-transform shrink-0", open && "rotate-180")} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M2 4.5L6 8.5L10 4.5" />
         </svg>
       </button>

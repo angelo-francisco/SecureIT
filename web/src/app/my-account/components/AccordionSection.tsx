@@ -46,7 +46,8 @@ export function AccordionSection({
 	return (
 		<div className="bg-surface border border-border overflow-hidden">
 			<div className="flex items-center justify-between p-5">
-				<button type="button"
+				<button
+					type="button"
 					onClick={handleToggle}
 					disabled={opening}
 					className="flex items-center gap-3 flex-1 text-left"
@@ -60,7 +61,8 @@ export function AccordionSection({
 				<div className="flex items-center gap-1">
 					{headerActions}
 					{onRefresh && (
-						<button type="button"
+						<button
+							type="button"
 							onClick={(e) => {
 								e.stopPropagation();
 								onRefresh();
@@ -84,7 +86,8 @@ export function AccordionSection({
 							<Loader size={20} className="text-primary animate-spin" />
 						</div>
 					) : (
-						<button type="button"
+						<button
+							type="button"
 							onClick={handleToggle}
 							className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 						>

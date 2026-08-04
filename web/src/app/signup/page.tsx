@@ -58,7 +58,9 @@ export default function SignupPage() {
 			});
 			const data = await res.json();
 			if (!res.ok)
-				throw new Error((data as { error?: string }).error || "Erro ao criar conta");
+				throw new Error(
+					(data as { error?: string }).error || "Erro ao criar conta",
+				);
 			router.push("/my-account");
 		} catch (err) {
 			toast(err instanceof Error ? err.message : "Erro ao criar conta");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, type KeyboardEvent, type ClipboardEvent } from "react";
+import { useEffect, useRef, useState, useCallback, type KeyboardEvent, type ClipboardEvent } from "react";
 
 interface PinInputProps {
   value: string;
@@ -34,6 +34,10 @@ export function PinInput({
     },
     [length]
   );
+
+  useEffect(() => {
+    if (autoFocus && !disabled) focusInput(0);
+  }, [autoFocus, disabled, focusInput]);
 
   const handleChange = useCallback(
     (index: number, digit: string) => {
@@ -117,14 +121,12 @@ export function PinInput({
                   : "bg-surface-hover/60"
               }
             `}
-            onClick={() => focusInput(i)}
           >
             <input
               ref={(el) => { inputRefs.current[i] = el; }}
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              autoFocus={autoFocus && i === 0}
               disabled={disabled}
               value={digits[i]}
               onFocus={() => { setFocused(true); setActiveIndex(i); }}

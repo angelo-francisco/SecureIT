@@ -19,7 +19,7 @@ export function Modal({ open, onClose, children, className = "", disableBackdrop
     if (open) {
       setMounted(true);
       const raf = requestAnimationFrame(() => {
-        const raf2 = requestAnimationFrame(() => {
+        const _raf2 = requestAnimationFrame(() => {
           setVisible(true);
         });
       });
@@ -38,13 +38,13 @@ export function Modal({ open, onClose, children, className = "", disableBackdrop
   if (!mounted) return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 flex items-center justify-center z-[1000]"
-      onClick={(e) => {
-        if (!disableBackdropClose && e.target === e.currentTarget) handleClose();
-      }}
-    >
-      <div
+    <div className="fixed inset-0 flex items-center justify-center z-[1000]">
+      <button
+        type="button"
+        aria-label="Fechar"
+        onClick={() => {
+          if (!disableBackdropClose) handleClose();
+        }}
         className={`absolute inset-0 transition-all duration-200 ease-out ${
           visible
             ? "bg-black/15 backdrop-blur-sm"

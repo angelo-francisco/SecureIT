@@ -48,7 +48,8 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 	const [open, setOpen] = useState(false);
 	return (
 		<div className="border border-border bg-bg">
-			<button type="button"
+			<button
+				type="button"
 				onClick={() => setOpen(!open)}
 				className="w-full flex items-center justify-between p-6 text-left"
 			>

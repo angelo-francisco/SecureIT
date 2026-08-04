@@ -89,7 +89,9 @@ export async function decryptText(
 	}
 }
 
-export async function encryptPaymentInfo<T extends object>(info: T): Promise<T> {
+export async function encryptPaymentInfo<T extends object>(
+	info: T,
+): Promise<T> {
 	if (!info) return info;
 	const encrypted = { ...info } as Record<string, unknown>;
 	if (encrypted.iban)
@@ -103,11 +105,14 @@ export async function encryptPaymentInfo<T extends object>(info: T): Promise<T> 
 	return encrypted as T;
 }
 
-export async function decryptPaymentInfo<T extends object>(info: T): Promise<T> {
+export async function decryptPaymentInfo<T extends object>(
+	info: T,
+): Promise<T> {
 	if (!info) return info;
 	const decrypted = { ...info } as Record<string, unknown>;
 	if (decrypted.iban)
-		decrypted.iban = (await decryptText(decrypted.iban as string)) || decrypted.iban;
+		decrypted.iban =
+			(await decryptText(decrypted.iban as string)) || decrypted.iban;
 	if (decrypted.accountName)
 		decrypted.accountName =
 			(await decryptText(decrypted.accountName as string)) ||
@@ -117,7 +122,6 @@ export async function decryptPaymentInfo<T extends object>(info: T): Promise<T> 
 			(await decryptText(decrypted.bankName as string)) || decrypted.bankName;
 	if (decrypted.reference)
 		decrypted.reference =
-			(await decryptText(decrypted.reference as string)) ||
-			decrypted.reference;
+			(await decryptText(decrypted.reference as string)) || decrypted.reference;
 	return decrypted as T;
 }

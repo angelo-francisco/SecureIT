@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { createClient } from "@libsql/client/http";
 import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
+import { normalizeTursoUrl } from "../src/lib/turso";
 
 async function main() {
 	const url = process.env.TURSO_DATABASE_URL;
@@ -10,9 +11,10 @@ async function main() {
 		return;
 	}
 
-	console.log(`Applying drizzle migrations to ${url}...`);
+	const normalized = normalizeTursoUrl(url);
+	console.log(`Applying drizzle migrations to ${normalized}...`);
 	const client = createClient({
-		url,
+		url: normalized,
 		authToken: process.env.TURSO_AUTH_TOKEN,
 	});
 	const db = drizzle(client);

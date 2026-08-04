@@ -1,4 +1,5 @@
 import { drizzle as drizzleLibsql } from "drizzle-orm/libsql/http";
+import { normalizeTursoUrl } from "@/lib/turso";
 import * as schema from "./schema";
 
 type LibsqlDB = ReturnType<typeof drizzleLibsql<typeof schema>>;
@@ -55,7 +56,7 @@ function getDb(): DrizzleDB {
 		}
 		_db = drizzleLibsql({
 			connection: {
-				url,
+				url: normalizeTursoUrl(url),
 				authToken: process.env.TURSO_AUTH_TOKEN,
 			},
 			schema,

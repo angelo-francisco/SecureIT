@@ -5,6 +5,7 @@ interface LoaderProps {
 export function Loader({ w = 24 }: LoaderProps) {
   return (
     <svg
+      aria-hidden="true"
       fill="#FFFFFFFF"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
