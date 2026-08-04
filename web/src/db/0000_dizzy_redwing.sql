@@ -1,12 +1,12 @@
-CREATE TABLE IF NOT EXISTS `AdminUser` (
+CREATE TABLE IF NOT EXISTS `adminuser` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`passwordHash` text NOT NULL,
 	`createdAt` text NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `AdminUser_email_key` ON `AdminUser` (`email`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `EmailCode` (
+CREATE UNIQUE INDEX IF NOT EXISTS `AdminUser_email_key` ON `adminuser` (`email`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `emailcode` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`code` text NOT NULL,
@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS `EmailCode` (
 	`createdAt` text NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `EmailCode_email_code_idx` ON `EmailCode` (`email`,`code`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `License` (
+CREATE INDEX IF NOT EXISTS `EmailCode_email_code_idx` ON `emailcode` (`email`,`code`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `license` (
 	`id` text PRIMARY KEY NOT NULL,
 	`keyId` text NOT NULL,
 	`userId` text NOT NULL,
@@ -28,16 +28,16 @@ CREATE TABLE IF NOT EXISTS `License` (
 	`signedPayload` text,
 	`status` text DEFAULT 'ACTIVE' NOT NULL,
 	`createdAt` text NOT NULL,
-	FOREIGN KEY (`keyId`) REFERENCES `LicenseKey`(`id`) ON UPDATE cascade ON DELETE restrict,
-	FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON UPDATE cascade ON DELETE restrict,
-	FOREIGN KEY (`paymentRequestId`) REFERENCES `PaymentRequest`(`id`) ON UPDATE cascade ON DELETE set null
+	FOREIGN KEY (`keyId`) REFERENCES `licensekey`(`id`) ON UPDATE cascade ON DELETE restrict,
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE cascade ON DELETE restrict,
+	FOREIGN KEY (`paymentRequestId`) REFERENCES `paymentrequest`(`id`) ON UPDATE cascade ON DELETE set null
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `License_userId_idx` ON `License` (`userId`);--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `License_paymentRequestId_key` ON `License` (`paymentRequestId`);--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `License_userId_key` ON `License` (`userId`);--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `License_keyId_key` ON `License` (`keyId`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `LicenseKey` (
+CREATE INDEX IF NOT EXISTS `License_userId_idx` ON `license` (`userId`);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS `License_paymentRequestId_key` ON `license` (`paymentRequestId`);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS `License_userId_key` ON `license` (`userId`);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS `License_keyId_key` ON `license` (`keyId`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `licensekey` (
 	`id` text PRIMARY KEY NOT NULL,
 	`key` text NOT NULL,
 	`type` text NOT NULL,
@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS `LicenseKey` (
 	`createdAt` text NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `LicenseKey_key_idx` ON `LicenseKey` (`key`);--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `LicenseKey_key_key` ON `LicenseKey` (`key`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `MaintenanceRequest` (
+CREATE INDEX IF NOT EXISTS `LicenseKey_key_idx` ON `licensekey` (`key`);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS `LicenseKey_key_key` ON `licensekey` (`key`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `maintenancerequest` (
 	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`licenseId` text,
@@ -64,11 +64,11 @@ CREATE TABLE IF NOT EXISTS `MaintenanceRequest` (
 	`totalPrice` real,
 	`createdAt` text NOT NULL,
 	`updatedAt` text NOT NULL,
-	FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON UPDATE cascade ON DELETE restrict,
-	FOREIGN KEY (`licenseId`) REFERENCES `License`(`id`) ON UPDATE cascade ON DELETE set null
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE cascade ON DELETE restrict,
+	FOREIGN KEY (`licenseId`) REFERENCES `license`(`id`) ON UPDATE cascade ON DELETE set null
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `Notification` (
+CREATE TABLE IF NOT EXISTS `notification` (
 	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`type` text NOT NULL,
@@ -77,11 +77,11 @@ CREATE TABLE IF NOT EXISTS `Notification` (
 	`link` text,
 	`read` integer DEFAULT false NOT NULL,
 	`createdAt` text NOT NULL,
-	FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON UPDATE cascade ON DELETE restrict
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE cascade ON DELETE restrict
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `Notification_userId_read_idx` ON `Notification` (`userId`,`read`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `PaymentInfo` (
+CREATE INDEX IF NOT EXISTS `Notification_userId_read_idx` ON `notification` (`userId`,`read`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `paymentinfo` (
 	`id` text PRIMARY KEY NOT NULL,
 	`iban` text NOT NULL,
 	`accountName` text NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `PaymentInfo` (
 	`createdAt` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `PaymentRequest` (
+CREATE TABLE IF NOT EXISTS `paymentrequest` (
 	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`planId` text NOT NULL,
@@ -106,13 +106,13 @@ CREATE TABLE IF NOT EXISTS `PaymentRequest` (
 	`durationDays` integer DEFAULT 30 NOT NULL,
 	`createdAt` text NOT NULL,
 	`reviewedAt` text,
-	FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON UPDATE cascade ON DELETE restrict,
-	FOREIGN KEY (`planId`) REFERENCES `Plan`(`id`) ON UPDATE cascade ON DELETE restrict,
-	FOREIGN KEY (`paymentInfoId`) REFERENCES `PaymentInfo`(`id`) ON UPDATE cascade ON DELETE restrict
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE cascade ON DELETE restrict,
+	FOREIGN KEY (`planId`) REFERENCES `plan`(`id`) ON UPDATE cascade ON DELETE restrict,
+	FOREIGN KEY (`paymentInfoId`) REFERENCES `paymentinfo`(`id`) ON UPDATE cascade ON DELETE restrict
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `PaymentRequest_userId_idx` ON `PaymentRequest` (`userId`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `Plan` (
+CREATE INDEX IF NOT EXISTS `PaymentRequest_userId_idx` ON `paymentrequest` (`userId`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `plan` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `Plan` (
 	`updatedAt` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `PlanFeature` (
+CREATE TABLE IF NOT EXISTS `planfeature` (
 	`id` text PRIMARY KEY NOT NULL,
 	`planId` text NOT NULL,
 	`name` text NOT NULL,
@@ -133,11 +133,11 @@ CREATE TABLE IF NOT EXISTS `PlanFeature` (
 	`price` real DEFAULT 0 NOT NULL,
 	`isActive` integer DEFAULT true NOT NULL,
 	`createdAt` text NOT NULL,
-	FOREIGN KEY (`planId`) REFERENCES `Plan`(`id`) ON UPDATE cascade ON DELETE cascade
+	FOREIGN KEY (`planId`) REFERENCES `plan`(`id`) ON UPDATE cascade ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `PlanFeature_planId_name_key` ON `PlanFeature` (`planId`,`name`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `PlanService` (
+CREATE UNIQUE INDEX IF NOT EXISTS `PlanFeature_planId_name_key` ON `planfeature` (`planId`,`name`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `planservice` (
 	`id` text PRIMARY KEY NOT NULL,
 	`planId` text NOT NULL,
 	`name` text NOT NULL,
@@ -145,11 +145,11 @@ CREATE TABLE IF NOT EXISTS `PlanService` (
 	`price` real DEFAULT 0 NOT NULL,
 	`isActive` integer DEFAULT true NOT NULL,
 	`createdAt` text NOT NULL,
-	FOREIGN KEY (`planId`) REFERENCES `Plan`(`id`) ON UPDATE cascade ON DELETE cascade
+	FOREIGN KEY (`planId`) REFERENCES `plan`(`id`) ON UPDATE cascade ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `PlanService_planId_name_key` ON `PlanService` (`planId`,`name`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `SubProfile` (
+CREATE UNIQUE INDEX IF NOT EXISTS `PlanService_planId_name_key` ON `planservice` (`planId`,`name`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `subprofile` (
 	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`name` text NOT NULL,
@@ -157,11 +157,11 @@ CREATE TABLE IF NOT EXISTS `SubProfile` (
 	`pinHash` text,
 	`isDefault` integer DEFAULT false NOT NULL,
 	`createdAt` text NOT NULL,
-	FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON UPDATE cascade ON DELETE restrict
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE cascade ON DELETE restrict
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `SubProfile_userId_idx` ON `SubProfile` (`userId`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `User` (
+CREATE INDEX IF NOT EXISTS `SubProfile_userId_idx` ON `subprofile` (`userId`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `user` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`passwordHash` text NOT NULL,
@@ -175,4 +175,4 @@ CREATE TABLE IF NOT EXISTS `User` (
 	`createdAt` text NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `User_email_key` ON `User` (`email`);
+CREATE UNIQUE INDEX IF NOT EXISTS `User_email_key` ON `user` (`email`);

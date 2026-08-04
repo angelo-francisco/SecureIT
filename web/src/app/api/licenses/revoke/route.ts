@@ -27,7 +27,7 @@ export async function POST() {
 			);
 		}
 
-		const expiresAt = new Date(activeLicense.License.expiresAt);
+		const expiresAt = new Date(activeLicense.license.expiresAt);
 		if (expiresAt <= new Date()) {
 			return NextResponse.json(
 				{ error: "A licença já expirou" },
@@ -38,13 +38,13 @@ export async function POST() {
 		await db
 			.update(licenseKey)
 			.set({ status: "REVOKED" })
-			.where(eq(licenseKey.id, activeLicense.LicenseKey.id))
+			.where(eq(licenseKey.id, activeLicense.licensekey.id))
 			.run();
 
 		await db
 			.update(license)
 			.set({ status: "REVOKED" })
-			.where(eq(license.id, activeLicense.License.id))
+			.where(eq(license.id, activeLicense.license.id))
 			.run();
 
 		return NextResponse.json({ success: true });

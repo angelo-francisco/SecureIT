@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 			.get();
 
 		if (activeLicense) {
-			const expiresAt = new Date(activeLicense.License.expiresAt);
+			const expiresAt = new Date(activeLicense.license.expiresAt);
 			if (expiresAt > new Date()) {
 				return NextResponse.json(
 					{

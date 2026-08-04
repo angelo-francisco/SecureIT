@@ -13,7 +13,7 @@ export function generateId(): string {
 }
 
 export const user = sqliteTable(
-	"User",
+	"user",
 	{
 		id: text("id")
 			.primaryKey()
@@ -37,7 +37,7 @@ export const user = sqliteTable(
 );
 
 export const licenseKey = sqliteTable(
-	"LicenseKey",
+	"licensekey",
 	{
 		id: text("id")
 			.primaryKey()
@@ -60,7 +60,7 @@ export const licenseKey = sqliteTable(
 );
 
 export const license = sqliteTable(
-	"License",
+	"license",
 	{
 		id: text("id")
 			.primaryKey()
@@ -100,7 +100,7 @@ export const license = sqliteTable(
 );
 
 export const adminUser = sqliteTable(
-	"AdminUser",
+	"adminuser",
 	{
 		id: text("id")
 			.primaryKey()
@@ -115,7 +115,7 @@ export const adminUser = sqliteTable(
 );
 
 export const emailCode = sqliteTable(
-	"EmailCode",
+	"emailcode",
 	{
 		id: text("id")
 			.primaryKey()
@@ -131,7 +131,7 @@ export const emailCode = sqliteTable(
 	(t) => [index("EmailCode_email_code_idx").on(t.email, t.code)],
 );
 
-export const plan = sqliteTable("Plan", {
+export const plan = sqliteTable("plan", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => generateId()),
@@ -150,7 +150,7 @@ export const plan = sqliteTable("Plan", {
 		.$defaultFn(() => new Date().toISOString()),
 });
 
-export const paymentInfo = sqliteTable("PaymentInfo", {
+export const paymentInfo = sqliteTable("paymentinfo", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => generateId()),
@@ -165,7 +165,7 @@ export const paymentInfo = sqliteTable("PaymentInfo", {
 });
 
 export const paymentRequest = sqliteTable(
-	"PaymentRequest",
+	"paymentrequest",
 	{
 		id: text("id")
 			.primaryKey()
@@ -199,7 +199,7 @@ export const paymentRequest = sqliteTable(
 );
 
 export const subProfile = sqliteTable(
-	"SubProfile",
+	"subprofile",
 	{
 		id: text("id")
 			.primaryKey()
@@ -221,7 +221,7 @@ export const subProfile = sqliteTable(
 );
 
 export const planFeature = sqliteTable(
-	"PlanFeature",
+	"planfeature",
 	{
 		id: text("id")
 			.primaryKey()
@@ -241,7 +241,7 @@ export const planFeature = sqliteTable(
 );
 
 export const planService = sqliteTable(
-	"PlanService",
+	"planservice",
 	{
 		id: text("id")
 			.primaryKey()
@@ -260,7 +260,7 @@ export const planService = sqliteTable(
 	(t) => [uniqueIndex("PlanService_planId_name_key").on(t.planId, t.name)],
 );
 
-export const maintenanceRequest = sqliteTable("MaintenanceRequest", {
+export const maintenanceRequest = sqliteTable("maintenancerequest", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => generateId()),
@@ -289,7 +289,7 @@ export const maintenanceRequest = sqliteTable("MaintenanceRequest", {
 });
 
 export const notification = sqliteTable(
-	"Notification",
+	"notification",
 	{
 		id: text("id")
 			.primaryKey()
