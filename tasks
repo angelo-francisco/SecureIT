@@ -2,7 +2,7 @@ ao fazer release do app desktop vc precisa fzr primeiro o build da api desktop p
 precisa colocar as variaveis de ambiente certas para o build de cada um no tauri e no fastapi
 o fastapi (desktop precisa do postgres pgvector, coloca um versao lite para desktop mas funcional embutida para permitir a ele funcionar devidamente, fazer as migracoes no momento certo e dps ficar funcional)
 env vars do desktop: VITE_API_URL=http://localhost:8000 (deve ser a porta certa para qual o fastapi se vinculou)
-VITE_WEB_URL=https://secureit-web.ag-fran-dev.workers.dev/
+VITE_WEB_URL=https://secure-it-sigma.vercel.app/
 
 
 env vars do fastapi:
