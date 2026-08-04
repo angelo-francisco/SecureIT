@@ -117,8 +117,8 @@ jobs:
         run: bun run tauri build --bundles deb
         env:
           RUSTC_WRAPPER: sccache
-          VITE_API_URL: ${{ secrets.API_BASE_URL }}
-          VITE_WEB_URL: "https://secureit-web.ag-fran-dev.workers.dev/"
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_WEB_URL: ${{ secrets.VITE_WEB_URL }}
 
       - name: Rename package
         run: |
