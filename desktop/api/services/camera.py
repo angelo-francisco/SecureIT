@@ -1,11 +1,12 @@
 import logging
 from threading import Thread
 from time import sleep
-
+from platform import system
 import cv2
 
 logger = logging.getLogger(__name__)
 
+SYSTEM = system()
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
 
 
@@ -22,25 +23,23 @@ class CameraService:
         if not video_source:
             raise RuntimeError("Origem do vídeo não informada")
 
-        if isinstance(video_source, str) and video_source.isdigit():
-            video_source = int(video_source)
-        elif isinstance(video_source, str) and _is_video_file(video_source):
+        if isinstance(video_source, str) and _is_video_file(video_source):
             self.is_video_file = True
-
+        logger.critical(video_source)   
         for attempt in range(3):
             self.video = cv2.VideoCapture(video_source)
             if self.video.isOpened():
-                logger.info(
+                logger.critical(
                     "camera opened on attempt %d source=%s", attempt + 1, video_source
                 )
                 break
-            logger.warning(
+            logger.critical(
                 "camera NOT opened attempt %d source=%s", attempt + 1, video_source
             )
             self.video.release()
             sleep(0.5)
         else:
-            logger.error("camera failed after 3 attempts source=%s", video_source)
+            logger.critical("camera failed after 3 attempts source=%s", video_source)
             raise RuntimeError("Erro ao abrir câmara após várias tentativas")
 
         if self.is_video_file:

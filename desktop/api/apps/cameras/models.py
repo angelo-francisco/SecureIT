@@ -59,8 +59,10 @@ class Camera(models.Model):
             if _is_video_file(path):
                 return path
             if system() == "Linux":
-                return path.split("video")[-1] if "video" in path else path
-            return self.connection_info.get("id", path)
+                logger.critical("linux = " + path)
+                return path
+            logger.critical("win/mac=" + self.connection_info.get("index", path))
+            return int(self.connection_info.get("index", path))
         return None
 
     def effective_task(self) -> str:
