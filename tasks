@@ -1,14 +1,1 @@
-ao fazer release do app desktop vc precisa fzr primeiro o build da api desktop precisa garantir q ela está dentro com todas as dependencias e dps builda o desktop normal e ao rodar manda o tauri rodar o outro binario em paralelo (fastapi e tentar em até 3 portas geralmente livres)
-precisa colocar as variaveis de ambiente certas para o build de cada um no tauri e no fastapi
-o fastapi (desktop precisa do postgres pgvector, coloca um versao lite para desktop mas funcional embutida para permitir a ele funcionar devidamente, fazer as migracoes no momento certo e dps ficar funcional)
-env vars do desktop: VITE_API_URL=http://localhost:8000 (deve ser a porta certa para qual o fastapi se vinculou)
-VITE_WEB_URL=https://secure-it-sigma.vercel.app/
-
-
-env vars do fastapi:
-SECRET_KEY=x4$n!bnme4(khao6sy@8t*x&d1jn@#xk4^*u41-v20=5(2c55-
-DATABASE_URL=postgres://secureit:secureit@db:5432/secureit
-WEB_URL=http://web:3000
-DEBUG=true
-ED25519_PUBLIC_KEY_PATH=./ed25519_public.pem
-ao inves do path do ed25519 coloca a chave direto lá, O MESO COM A PRIVATE, CONSERTA ISSO, PARA EVITAR VAZAMENTOS DE SEGURANÇA EU POSSO COLOCAR AS ENVS NECESSARIAS NO GITHUB SECRETS E VC PEGA DURANTE O BUILD
+add a  better id camera resolution in windows and linux (save only the path and name); load all camera information
