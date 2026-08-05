@@ -61,7 +61,7 @@ class Camera(models.Model):
             if system() == "Linux":
                 logger.critical("linux = " + path)
                 return path
-            logger.critical("win/mac=" + self.connection_info.get("index", path))
+            logger.critical("win/mac=" + str(self.connection_info.get("index", path)))
             return int(self.connection_info.get("index", path))
         return None
 

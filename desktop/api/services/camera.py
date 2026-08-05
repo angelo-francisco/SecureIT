@@ -25,7 +25,7 @@ class CameraService:
 
         if isinstance(video_source, str) and _is_video_file(video_source):
             self.is_video_file = True
-        logger.critical(video_source)   
+        logger.critical(str(video_source))
         for attempt in range(3):
             self.video = cv2.VideoCapture(video_source)
             if self.video.isOpened():
