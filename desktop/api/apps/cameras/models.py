@@ -61,8 +61,8 @@ class Camera(models.Model):
             if system() == "Linux":
                 logger.critical("linux = " + path)
                 return path
-            logger.critical("win/mac=" + str(self.connection_info.get("index", path)))
-            return int(self.connection_info.get("index", path))
+            logger.critical("win/mac=" + str(self.connection_info.get("id", path)))
+            return int(self.connection_info.get("id", path))
         return None
 
     def effective_task(self) -> str:
