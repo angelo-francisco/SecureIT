@@ -3,7 +3,7 @@ import { useCreateCamera, useLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
 import { useLicense } from "../../hooks/useLicense";
-import { Input, Button, OutlinedInput  } from "@/packages/ui";
+import { Input, Button, OutlinedInput } from "@/packages/ui";
 import { LucideInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui";
 import type { CameraTask } from "../../types/camera";
 import * as Lucide from "lucide-react";
@@ -75,11 +75,25 @@ export default function CameraNew({ onClose }: CameraNewProps) {
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-    const connection_info: Record<string, unknown> = {};
-    if (connectionType === "W") {
-      connection_info.stream_url = streamUrl.trim();
-    } else if (connectionType === "L") {
-      connection_info.path = isDemo ? demoPath.trim() : localCamera;
+    let connection_info: Record<string, unknown> = {};
+
+    switch (connectionType) {
+      case "W":
+        connection_info = {
+          stream_url: streamUrl.trim(),
+        };
+        break;
+
+      case "L":
+        if (isDemo) {
+          connection_info = {
+            path: demoPath.trim(),
+          };
+        } else {
+          connection_info =
+            localDevices.find((camera: any) => camera.path === localCamera) ?? {};
+        }
+        break;
     }
     try {
       await createCamera.mutateAsync({
@@ -108,9 +122,9 @@ export default function CameraNew({ onClose }: CameraNewProps) {
         </div>
         {onClose && (
           <button
-              onClick={onClose}
-              className="cursor-pointer flex items-center justify-center w-13 h-12 border border-gray-400 transition-all duration-150"
-            >
+            onClick={onClose}
+            className="cursor-pointer flex items-center justify-center w-13 h-12 border border-gray-400 transition-all duration-150"
+          >
             <Lucide.X size={20} strokeWidth={2} />
           </button>
         )}
@@ -119,24 +133,24 @@ export default function CameraNew({ onClose }: CameraNewProps) {
       <div className="flex-1 overflow-y-auto mt-6 flex justify-center">
         <div className="w-full max-w-xl space-y-5">
           <div className="flex gap-2 items-center justify-between">
-          <div className="space-y-2 w-full py-2">
-            <OutlinedInput label="Nome" id="camera-name"
-              value={name}
-              labelSize={"xl"}
-              onChange={(e) => { setName(e.target.value); setErrors((prev) => ({ ...prev, name: undefined })); }}
-              className={(errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
-            />
-            {errors.name && <p className="text-base text-red-400">{errors.name}</p>}
-          </div>
+            <div className="space-y-2 w-full py-2">
+              <OutlinedInput label="Nome" id="camera-name"
+                value={name}
+                labelSize={"xl"}
+                onChange={(e) => { setName(e.target.value); setErrors((prev) => ({ ...prev, name: undefined })); }}
+                className={(errors.name ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
+              />
+              {errors.name && <p className="text-base text-red-400">{errors.name}</p>}
+            </div>
 
-          <div className="space-y-2 w-full">
-            <OutlinedInput label="Localização" id="camera-location" labelSize={"xl"}
-              value={location}
-              onChange={(e) => { setLocation(e.target.value); setErrors((prev) => ({ ...prev, location: undefined })); }}
-              className={(errors.location ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
-            />
-            {errors.location && <p className="text-base text-red-400">{errors.location}</p>}
-          </div>
+            <div className="space-y-2 w-full">
+              <OutlinedInput label="Localização" id="camera-location" labelSize={"xl"}
+                value={location}
+                onChange={(e) => { setLocation(e.target.value); setErrors((prev) => ({ ...prev, location: undefined })); }}
+                className={(errors.location ? "border-red-400 focus:border-red-400 focus:ring-red-400/50" : "") + "text-lg"}
+              />
+              {errors.location && <p className="text-base text-red-400">{errors.location}</p>}
+            </div>
           </div>
           <div className="space-y-3">
             <label className="text-base font-medium text-text">Tipo de Conexão</label>

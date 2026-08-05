@@ -17,5 +17,5 @@ export const camerasApi = {
     apiClient.delete<{ message: string }>(`/api/cameras/${id}`),
 
   getLocalDevices: () =>
-    apiClient.get<{ path: string; name: string }[]>("/api/cameras/available"),
+    apiClient.get<{ path: string; name: string, backend: string, index: number }[]>("/api/cameras/available"),
 };

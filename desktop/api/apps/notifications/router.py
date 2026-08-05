@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Depends
 
 from apps.notifications.schemas import NotificationResponse
 from apps.notifications.service import (
@@ -7,18 +7,20 @@ from apps.notifications.service import (
     list_notifications,
 )
 
+from core.deps import require_profile, Profile
+
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
 @router.get("")
 async def list_notifications_endpoint(
-    request: Request,
+    profile: Profile = Depends(require_profile),
     filter: str = Query("A", alias="search-query"),
     page: int = Query(1, ge=1),
     per_page: int = Query(5, ge=1, le=100),
 ):
     notifications, total = await list_notifications(
-        request.state.profile.profile_id, filter, page, per_page
+        profile.profile_id, filter, page, per_page
     )
     return {
         "results": [NotificationResponse.model_validate(n) for n in notifications],
@@ -31,15 +33,15 @@ async def list_notifications_endpoint(
 
 @router.delete("/{notification_id}", status_code=204)
 async def delete_notification_endpoint(
-    request: Request,
     notification_id: int,
+    profile: Profile = Depends(require_profile),
 ):
-    await delete_notification(notification_id, request.state.profile.profile_id)
+    await delete_notification(notification_id, profile.profile_id)
 
 
 @router.get("/unread-count")
 async def unread_count(
-    request: Request,
+    profile: Profile = Depends(require_profile),
 ):
-    count = await get_unread_count(request.state.profile.profile_id)
+    count = await get_unread_count(profile.profile_id)
     return {"count": count}

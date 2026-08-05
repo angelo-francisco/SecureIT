@@ -1,9 +1,10 @@
 #!/bin/sh
 
-aerich upgrade 2>/dev/null || {
+uv run aerich upgrade 2>/dev/null || {
   rm -rf migrations/models
-  aerich init -t core.database.TORTOISE_ORM
-  aerich init-db
-  echo "Aerich initialized for PostgreSQL"
+  uv run aerich init -t core.database.TORTOISE_ORM
+  uv run aerich init-db
+  uv run aerich upgrade
 }
-python -m main
+
+uv run main.py

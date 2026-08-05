@@ -6,7 +6,6 @@ from apps import ROUTERS
 from core.bootstrap import bootstrap_database
 from core.config import settings
 from core.lifespan import lifespan
-from core.middleware import control_middleware
 from core.routes import system_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,8 +19,6 @@ def create_app() -> FastAPI:
         version="0.0.1",
         lifespan=lifespan,
     )
-
-    app.middleware("http")(control_middleware)
 
     app.add_middleware(
         CORSMiddleware,

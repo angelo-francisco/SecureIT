@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
         start_embedded_postgres()
 
     try:
+        logger.critical("AFTER START UP EXEC")
         await after_db_startup()
     except Exception as exc:  # noqa
         logger.exception("Database startup failed")

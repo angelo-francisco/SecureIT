@@ -1,5 +1,4 @@
 import logging
-import re
 from threading import Thread
 from time import sleep
 
@@ -27,6 +26,8 @@ class CameraService:
             video_source = int(video_source)
         elif isinstance(video_source, str) and _is_video_file(video_source):
             self.is_video_file = True
+
+        logger.critical("vs=" + str(video_source))
 
         for attempt in range(3):
             self.video = cv2.VideoCapture(video_source)

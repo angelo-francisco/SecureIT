@@ -1,8 +1,10 @@
+import logging
+from enum import StrEnum
 from platform import system
 
 from tortoise import fields, models
 
-from enum import StrEnum
+logger = logging.getLogger(__name__)
 
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
 

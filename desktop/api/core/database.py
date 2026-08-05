@@ -134,6 +134,7 @@ async def after_db_startup():
     conn = Tortoise.get_connection("default")
 
     await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
+    logger.critical("extension created")
 
     if settings.EMBEDDED_DB or is_bundled():
         await run_migrations()

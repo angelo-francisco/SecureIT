@@ -126,12 +126,11 @@ export default function LicensePage({ onClose, onActivated }: LicensePageProps) 
           <div className="w-full max-w-md space-y-4">
             <div className="p-6 border border-border bg-surface">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-success/15 flex items-center justify-center">
-                  <Check size={20} className="text-success" />
+                <div className="w-6 h-6 bg-success/15 flex items-center justify-center">
+                  <Check size={14} className="text-success" />
                 </div>
                 <div>
-                  <p className="text-text font-semibold text-lg">Licença Activa</p>
-                  <p className="text-text-muted text-sm">{type === "B2B" ? "B2B" : "B2C"}</p>
+                  <p className="text-text font-semibold text-xl">Licença Activa</p>
                 </div>
               </div>
 

@@ -31,7 +31,7 @@ async def check_license_feature(profile_id: str, *feature_slugs: str) -> bool:
     return False
 
 
-async def authenticate(profile_id: str | None) -> int | None:
+async def authenticate(profile_id: str | None) -> str | None:
     if not profile_id:
         return None
     return (await Profile.get(profile_id=profile_id)).profile_id
