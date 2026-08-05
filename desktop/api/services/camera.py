@@ -30,7 +30,7 @@ class CameraService:
         logger.critical("opening video_source=%s type=%s", str(video_source), type(video_source))
         for attempt in range(3):
             if SYSTEM == "Linux":
-                self.video = cv2.VideoCapture(video_source, cv2.V4L2)
+                self.video = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
             elif SYSTEM == "Windows":
                 self.video = cv2.VideoCapture(video_source, cv2.CAP_DSHOW)
             else:
