@@ -25,14 +25,16 @@ class CameraService:
 
         if isinstance(video_source, str) and _is_video_file(video_source):
             self.is_video_file = True
-        logger.critical(str(video_source))
+        if SYSTEM == "Windows" and isinstance(video_source, str) and video_source.isdigit():
+            video_source = int(video_source)
+        logger.critical("opening video_source=%s type=%s", str(video_source), type(video_source))
         for attempt in range(3):
-            # if SYSTEM == "Linux":
-            #     self.video = cv2.VideoCapture(video_source, cv2.V4L2)
-            # elif SYSTEM == "Windows":
-            #     self.video = cv2.VideoCapture(video_source, cv2.CAP_DSHOW)
-            # else:
-            self.video = cv2.VideoCapture(video_source)
+            if SYSTEM == "Linux":
+                self.video = cv2.VideoCapture(video_source, cv2.V4L2)
+            elif SYSTEM == "Windows":
+                self.video = cv2.VideoCapture(video_source, cv2.CAP_DSHOW)
+            else:
+                self.video = cv2.VideoCapture(video_source)
             if self.video.isOpened():
                 logger.critical(
                     "camera opened on attempt %d source=%s", attempt + 1, video_source
