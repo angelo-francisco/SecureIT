@@ -48,70 +48,64 @@ export const PaymentsSection = forwardRef<
 
 	const statusColor = (s: string) =>
 		s === "APPROVED"
-			? "text-success bg-success/10"
+			? "text-success bg-success/10 border-success/30"
 			: s === "REJECTED"
-				? "text-error bg-error/10"
-				: "text-warning bg-warning/10";
+				? "text-error bg-error/10 border-error/30"
+				: "text-warning bg-warning/10 border-warning/30";
 
 	if (payments.length === 0) {
 		return (
 			<div className="text-center py-8 text-text-muted">
-				<Receipt size={40} className="mx-auto mb-3 opacity-50" />
-				<p>Ainda não submeteu nenhum pagamento</p>
+				<Receipt size={36} className="mx-auto mb-3 opacity-40 text-primary" />
+				<p className="text-sm font-medium">Ainda não submeteu nenhum pagamento</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-x-auto">
-			<table className="w-full">
+		<div className="overflow-x-auto border border-border bg-surface/50">
+			<table className="w-full text-left">
 				<thead>
-					<tr className="border-b border-border">
-						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
-							Nome
+					<tr className="border-b border-border bg-surface">
+						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+							Plano
 						</th>
-						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
+						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
 							Montante
 						</th>
-						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
+						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
 							Data
 						</th>
-						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
+						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
 							Estado
 						</th>
-						<th className="text-center py-4 text-base md:text-lg font-semibold text-text">
-							Outros
+						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+							Detalhes
 						</th>
 					</tr>
 				</thead>
 
-				<tbody>
+				<tbody className="divide-y divide-border/60">
 					{payments.map((p) => (
 						<tr
 							key={p.id}
-							className="border-b border-border/50 last:border-b-0 hover:bg-card/40 transition-colors"
+							className="hover:bg-surface-hover/60 transition-colors text-sm"
 						>
-							<td className="text-center py-4">
-								<p className="text-lg md:text-xl font-semibold text-text whitespace-nowrap">
-									{p.plan.name}
-								</p>
+							<td className="py-3.5 px-4 font-bold text-text">
+								{p.plan.name}
 							</td>
 
-							<td className="text-center py-4">
-								<p className="text-lg md:text-xl font-medium text-text whitespace-nowrap">
-									${(p.totalPrice || p.plan.basePrice).toFixed(2)}
-								</p>
+							<td className="py-3.5 px-4 font-mono font-semibold text-text">
+								${(p.totalPrice || p.plan.basePrice).toFixed(2)}
 							</td>
 
-							<td className="text-center py-4">
-								<p className="text-base md:text-lg text-text-muted whitespace-nowrap">
-									{new Date(p.createdAt).toLocaleDateString("pt-PT")}
-								</p>
+							<td className="py-3.5 px-4 font-mono text-xs text-text-muted">
+								{new Date(p.createdAt).toLocaleDateString("pt-PT")}
 							</td>
 
-							<td className="text-center py-4 whitespace-nowrap">
+							<td className="py-3.5 px-4 whitespace-nowrap">
 								<span
-									className={`inline-flex px-3 py-1 rounded-full text-sm md:text-base font-medium ${statusColor(
+									className={`inline-flex px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wider border ${statusColor(
 										p.status,
 									)}`}
 								>
@@ -119,21 +113,21 @@ export const PaymentsSection = forwardRef<
 								</span>
 							</td>
 
-							<td className="text-center py-4 min-w-[220px]">
-								<div className="flex flex-col gap-2">
+							<td className="py-3.5 px-4">
+								<div className="flex flex-col gap-1">
 									{p.proofUrl && (
 										<a
 											href={p.proofUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="text-base font-medium text-primary hover:underline"
+											className="text-xs font-semibold text-primary hover:underline"
 										>
-											Ver comprovativo
+											Ver comprovativo ↗
 										</a>
 									)}
 
 									{p.adminNote && (
-										<p className="text-sm md:text-base italic text-text-muted">
+										<p className="text-xs italic text-text-muted">
 											Nota: {p.adminNote}
 										</p>
 									)}

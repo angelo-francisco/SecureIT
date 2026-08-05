@@ -164,19 +164,19 @@ export function ProfilesSection() {
 
 	return (
 		<>
-			<div className="flex gap-4 overflow-x-auto scrollbar-thin">
+			<div className="flex gap-4 overflow-x-auto scrollbar-thin py-1">
 				<button
 					type="button"
 					onClick={openCreate}
-					className="shrink-0 group animate-tile"
+					className="shrink-0 group animate-tile cursor-pointer"
 				>
-					<div className="w-20 h-20 md:w-24 md:h-24 bg-surface-hover border-2 border-dashed border-border flex items-center justify-center group-hover:border-primary group-hover:bg-primary/5 transition-all">
+					<div className="w-16 h-16 sm:w-20 sm:h-20 bg-surface hover:bg-surface-hover border border-dashed border-border flex items-center justify-center group-hover:border-primary transition-all">
 						<Plus
-							size={28}
+							size={24}
 							className="text-text-muted group-hover:text-primary transition-colors"
 						/>
 					</div>
-					<span className="block text-center text-lg text-text-muted mt-2 group-hover:text-primary transition-colors">
+					<span className="block text-center text-xs font-mono text-text-muted mt-2 group-hover:text-primary transition-colors">
 						Adicionar
 					</span>
 				</button>
@@ -186,18 +186,18 @@ export function ProfilesSection() {
 						type="button"
 						key={p.id}
 						onClick={() => openEdit(p)}
-						className="shrink-0 group relative animate-tile"
+						className="shrink-0 group relative animate-tile cursor-pointer"
 						style={{ animationDelay: `${(i + 1) * 60}ms` }}
 					>
 						<div
-							className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center text-white text-2xl font-bold transition-transform"
+							className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-white text-xl sm:text-2xl font-bold font-display border border-border group-hover:border-primary/60 transition-all shadow-sm"
 							style={{ backgroundColor: p.avatarColor }}
 						>
 							{(p.name?.[0] || "?").toUpperCase()}
 						</div>
-						<span className="flex capitalize items-center gap-1 justify-center text-center text-lg text-text-muted mt-2 truncate w-20   md:w-24">
+						<span className="flex capitalize items-center gap-1 justify-center text-center text-xs font-mono font-medium text-text-muted mt-2 truncate w-16 sm:w-20">
 							{p.name}{" "}
-							{p.isDefault && <Lock size={14} className="text-text-muted" />}
+							{p.isDefault && <Lock size={12} className="text-primary" />}
 						</span>
 					</button>
 				))}
@@ -206,7 +206,7 @@ export function ProfilesSection() {
 			{profiles.length > 0 && (
 				<div className="flex gap-2 flex-wrap mt-1">
 					{profiles.filter((p) => !p.isDefault).length > 0 && (
-						<span className="text-[11px] text-text-muted/60">
+						<span className="text-[11px] font-mono text-text-muted/60">
 							Clique num perfil para editar
 						</span>
 					)}

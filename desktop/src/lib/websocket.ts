@@ -40,7 +40,7 @@ export function connectCamera(
   } catch {}
 
   const ws = new WebSocket(
-    `${getWsBaseUrl()}/ws/${consumerName}?token=${encodeURIComponent(token)}&camera_id=${cameraId}&vs=${videoSource}&pid=${encodeURIComponent(pid)}&uid=${encodeURIComponent(uid)}`
+    `${getWsBaseUrl()}/ws/${consumerName}?token=${encodeURIComponent(token)}&camera_id=${encodeURIComponent(String(cameraId))}&vs=${encodeURIComponent(String(videoSource))}&pid=${encodeURIComponent(pid)}&uid=${encodeURIComponent(uid)}`
   );
   ws.binaryType = "arraybuffer";
 

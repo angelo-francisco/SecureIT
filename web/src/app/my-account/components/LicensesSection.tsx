@@ -36,15 +36,15 @@ const LICENSE_STATUS: Record<
 	string,
 	{ label: string; color: string; bg: string }
 > = {
-	ACTIVE: { label: "Activa", color: "text-success", bg: "bg-success/10" },
-	APPROVED: { label: "Aprovada", color: "text-primary", bg: "bg-primary/10" },
-	REVOKED: { label: "Revogada", color: "text-error", bg: "bg-error/10" },
+	ACTIVE: { label: "Activa", color: "text-success border-success/30", bg: "bg-success/10" },
+	APPROVED: { label: "Aprovada", color: "text-primary border-primary/30", bg: "bg-primary/10" },
+	REVOKED: { label: "Revogada", color: "text-error border-error/30", bg: "bg-error/10" },
 	EXPIRED: {
 		label: "Expirada",
-		color: "text-text-muted",
-		bg: "bg-white/[0.06]",
+		color: "text-text-muted border-border",
+		bg: "bg-surface",
 	},
-	PENDING: { label: "Pendente", color: "text-warning", bg: "bg-warning/10" },
+	PENDING: { label: "Pendente", color: "text-warning border-warning/30", bg: "bg-warning/10" },
 };
 
 export const LicensesSection = forwardRef<
@@ -113,30 +113,31 @@ export const LicensesSection = forwardRef<
 	if (!license) {
 		return (
 			<div className="text-center py-8 text-text-muted">
-				<Key size={40} className="text-primary mx-auto mb-3" />
-				<p className="text-base md:text-lg">Nenhuma licença registada</p>
+				<Key size={36} className="text-primary mx-auto mb-3 opacity-40" />
+				<p className="text-sm font-medium">Nenhuma licença registada</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-3">
-			<div className="flex items-center justify-between">
-				<h1 className="text-lg font-bold text-text">
-					{license.key.type} [
+		<div className="space-y-4">
+			<div className="flex items-center justify-between pb-3 border-b border-border">
+				<div className="flex items-center gap-3">
+					<span className="text-base font-bold text-text font-display">
+						Plano {license.key.type}
+					</span>
 					<span
-						className={`px-2 py-1 text-base font-bold ${statusInfo?.color} ${statusInfo?.bg}`}
+						className={`px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-wider border ${statusInfo?.color} ${statusInfo?.bg}`}
 					>
 						{statusInfo?.label}
 					</span>
-					]
-				</h1>
-				<div className="flex gap-2 items-center justify-center">
+				</div>
+				<div className="flex gap-2 items-center">
 					{isActive && (
 						<button
 							type="button"
 							onClick={() => setConfirmRevoke(true)}
-							className=" px-2 py-1 border text-base font-medium bg-red-500 text-white hover:text-error/80 transition-colors"
+							className="px-3 py-1 text-xs font-semibold bg-error/10 hover:bg-error/20 text-error border border-error/30 transition-all cursor-pointer"
 						>
 							Revogar
 						</button>
@@ -144,33 +145,37 @@ export const LicensesSection = forwardRef<
 				</div>
 			</div>
 
-			<div className="border-t border-border/50 pt-3 space-y-1">
-				<DetailRow label="Chave" value={license.key.key} />
+			<div className="space-y-2 text-sm">
+				<DetailRow label="Chave" value={<code className="font-mono text-xs text-primary">{license.key.key}</code>} />
 				<DetailRow
 					label="Activada em"
-					value={new Date(license.activatedAt).toLocaleDateString("pt-PT")}
+					value={<span className="font-mono text-xs">{new Date(license.activatedAt).toLocaleDateString("pt-PT")}</span>}
 				/>
 				<DetailRow
 					label="Expira em"
-					value={new Date(license.expiresAt).toLocaleDateString("pt-PT")}
+					value={<span className="font-mono text-xs">{new Date(license.expiresAt).toLocaleDateString("pt-PT")}</span>}
 				/>
 				<DetailRow
 					label="Dias restantes"
-					value={String(
-						Math.max(
-							0,
-							Math.ceil(
-								(new Date(license.expiresAt).getTime() - Date.now()) /
-									(1000 * 60 * 60 * 24),
-							),
-						),
-					)}
+					value={
+						<span className="font-mono text-xs font-bold text-primary">
+							{String(
+								Math.max(
+									0,
+									Math.ceil(
+										(new Date(license.expiresAt).getTime() - Date.now()) /
+											(1000 * 60 * 60 * 24),
+									),
+								),
+							)} dias
+						</span>
+					}
 				/>
 				{license.machineHash && (
 					<DetailRow
 						label="Máquina"
 						value={
-							<code className="font-mono text-xs break-all">
+							<code className="font-mono text-xs text-text-muted break-all">
 								{license.machineHash}
 							</code>
 						}
@@ -183,18 +188,18 @@ export const LicensesSection = forwardRef<
 				onClose={() => setConfirmRevoke(false)}
 				className="w-full max-w-sm mx-4"
 			>
-				<div className="bg-surface border border-border p-6">
-					<div className="flex items-center justify-between mb-4">
-						<h3 className="text-lg font-bold text-text">Revogar Licença</h3>
+				<div className="bg-surface border border-border p-6 shadow-2xl">
+					<div className="flex items-center justify-between mb-4 pb-2 border-b border-border">
+						<h3 className="text-base font-bold text-text font-display">Revogar Licença</h3>
 						<button
 							type="button"
 							onClick={() => setConfirmRevoke(false)}
-							className="p-1.5 border text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+							className="p-1 border border-border text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 						>
-							<X size={18} />
+							<X size={16} />
 						</button>
 					</div>
-					<p className="text-base text-text-muted mb-6">
+					<p className="text-xs text-text-muted mb-6 leading-relaxed">
 						Tem certeza que deseja revogar a licença? Esta acção não pode ser
 						desfeita. Precisará de uma nova chave para reactivar.
 					</p>
@@ -202,7 +207,7 @@ export const LicensesSection = forwardRef<
 						<button
 							type="button"
 							onClick={() => setConfirmRevoke(false)}
-							className="flex-1 py-2.5 text-sm font-medium text-text-muted border border-border hover:bg-surface-hover transition-all"
+							className="flex-1 py-2 text-xs font-semibold text-text-muted border border-border hover:bg-surface-hover transition-all"
 						>
 							Cancelar
 						</button>
@@ -210,7 +215,7 @@ export const LicensesSection = forwardRef<
 							type="button"
 							onClick={handleRevoke}
 							disabled={revoking}
-							className="flex-1 py-2.5 text-sm font-medium text-white bg-error hover:bg-error/80 transition-all disabled:opacity-50"
+							className="flex-1 py-2 text-xs font-semibold text-white bg-error border border-error hover:bg-error/80 transition-all disabled:opacity-50"
 						>
 							{revoking ? "A revogar..." : "Revogar"}
 						</button>
@@ -231,9 +236,9 @@ function DetailRow({
 	value: React.ReactNode;
 }) {
 	return (
-		<div className="flex justify-between items-center">
-			<span className="text-base text-text-muted">{label}</span>
-			<span className="text-lg text-text">{value}</span>
+		<div className="flex justify-between items-center py-1 border-b border-border/40 last:border-b-0">
+			<span className="text-xs font-medium text-text-muted">{label}</span>
+			<div className="text-right">{value}</div>
 		</div>
 	);
 }

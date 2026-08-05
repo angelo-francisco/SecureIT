@@ -166,12 +166,12 @@ export function ProfileSection({ user, onSaved }: ProfileSectionProps) {
 					disabled={
 						loading || !firstName.trim() || !lastName.trim() || !isDirty
 					}
-					className="cursor-poi.nc w-full text-center bg-primary px-4 py-2 text-white text-lg font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
+					className="cursor-pointer w-full text-center bg-primary hover:bg-primary-hover border border-primary-hover text-white text-base font-bold py-3 transition-all flex justify-center items-center gap-2 disabled:opacity-50 shadow-sm"
 				>
 					{loading ? (
-						<Loader size={20} className="animate-spin" />
+						<Loader size={18} className="animate-spin" />
 					) : (
-						<Save size={20} />
+						<Save size={18} />
 					)}
 					Salvar Alterações
 				</button>

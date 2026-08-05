@@ -36,7 +36,7 @@ export function useWebSocket(
       }
     } catch {}
 
-    const url = `${getWsBaseUrl()}/ws/${consumerName}/${cameraId}/?vs=${videoSource}&pid=${encodeURIComponent(pid)}&uid=${encodeURIComponent(uid)}`;
+    const url = `${getWsBaseUrl()}/ws/${consumerName}/${cameraId}/?vs=${encodeURIComponent(String(videoSource))}&pid=${encodeURIComponent(pid)}&uid=${encodeURIComponent(uid)}`;
 
     try {
       const ws = new WebSocket(url);

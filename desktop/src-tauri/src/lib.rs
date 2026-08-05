@@ -257,9 +257,13 @@ fn kill_process_tree(child: &mut Child, port: Option<u16>) {
 async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<String, String> {
     let port = match *state.port.lock().unwrap() {
         Some(p) => p,
-        None => {
-            spawn_api(&app, &state).ok_or_else(|| "desktop-api bundle not found".to_string())?
-        }
+        None => match spawn_api(&app, &state) {
+            Some(p) => p,
+            None => {
+                log_line(&app, &state, "spawn_api failed: desktop-api bundle not found");
+                return Err("desktop-api bundle not found".to_string());
+            }
+        },
     };
 
     let healthy = tauri::async_runtime::spawn_blocking(move || {
@@ -289,7 +293,13 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
         kill_process_tree(&mut child, port);
     }
     *state.port.lock().unwrap() = None;
-    let port = spawn_api(&app, &state).ok_or_else(|| "desktop-api bundle not found".to_string())?;
+    let port = match spawn_api(&app, &state) {
+        Some(p) => p,
+        None => {
+            log_line(&app, &state, "spawn_api failed after restart: desktop-api bundle not found");
+            return Err("desktop-api bundle not found".to_string());
+        }
+    };
     let healthy = tauri::async_runtime::spawn_blocking(move || {
         wait_for_api(port, Duration::from_secs(120))
     })
@@ -306,6 +316,27 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
     } else {
         Err(format!("API failed to become healthy on port {}", port))
     }
+}
+
+/// Forward a log line produced by the frontend (webview) into the per-run log
+/// file, so JS console output, uncaught errors and React crashes are captured
+/// alongside the Tauri and API logs. Never blocks or fails the caller.
+#[tauri::command]
+fn log_frontend(
+    app: AppHandle,
+    state: State<'_, ApiState>,
+    level: String,
+    message: String,
+    stack: Option<String>,
+) -> Result<(), String> {
+    let line = match stack {
+        Some(stack) if !stack.trim().is_empty() => {
+            format!("[frontend:{level}] {message} | {stack}")
+        }
+        _ => format!("[frontend:{level}] {message}"),
+    };
+    log_line(&app, &state, &line);
+    Ok(())
 }
 
 /// Log the frontend's resolved API/WEB base URLs into the per-run log file so
@@ -363,13 +394,36 @@ pub fn run() {
             greet,
             get_api_url,
             open_logs_folder,
+            log_frontend,
             log_frontend_config
         ])
         .setup(|_app| {
+            // Always create the per-run log file and record run metadata, even
+            // in dev where the API is not bundled. This guarantees both the
+            // Tauri-side and (in release) API-side logs land in the same file.
+            let state = _app.state::<ApiState>();
+            log_line(
+                _app.handle(),
+                &state,
+                &format!(
+                    "==== SecureIT {} ({}) - {} ====",
+                    env!("CARGO_PKG_VERSION"),
+                    if cfg!(debug_assertions) { "dev" } else { "release" },
+                    chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
+                ),
+            );
+            log_line(
+                _app.handle(),
+                &state,
+                &format!(
+                    "log file: {}",
+                    current_log_path(_app.handle(), &state).display()
+                ),
+            );
+
             // Start warming up the bundled API as soon as the app boots.
             #[cfg(not(debug_assertions))]
             {
-                let state = _app.state::<ApiState>();
                 match spawn_api(_app.handle(), &state) {
                     Some(port) => {
                         log_line(_app.handle(), &state, &format!("API spawned on port {}", port));
@@ -398,8 +452,9 @@ pub fn run() {
 
     app.run(|app_handle, event| {
         if let RunEvent::Exit = event {
+            let api = app_handle.state::<ApiState>();
+            log_line(app_handle, &api, "app exiting, stopping API");
             let child_and_port = {
-                let api = app_handle.state::<ApiState>();
                 let child = api.child.lock().unwrap().take();
                 let port = *api.port.lock().unwrap();
                 (child, port)
