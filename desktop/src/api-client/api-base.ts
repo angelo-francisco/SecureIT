@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 const FALLBACK = "http://localhost:8000";
 
@@ -9,6 +10,19 @@ export function isRunningInTauri(): boolean {
   return (
     typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
   );
+}
+
+export const openExternally = async (path: string) => {
+  const url = `${getWebBaseUrl()}/${path}`;
+  try {
+    if (isRunningInTauri()) {
+      await openUrl(url);
+    } else {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  } catch {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
 }
 
 /**

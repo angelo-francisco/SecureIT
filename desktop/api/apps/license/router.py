@@ -6,6 +6,7 @@ from core.config import settings
 from core.hardware import get_hardware_fingerprint
 from fastapi import APIRouter, HTTPException
 import httpx
+from tortoise.exceptions import IntegrityError
 
 from .models import License
 from .schemas import (
@@ -61,28 +62,49 @@ async def get_fingerprint():
 
 @router.post("/store")
 async def store_license(data: LicenseStoreRequest):
-    existing = await License.filter(user_id=data.user_id).first()
-    if existing:
-        await existing.delete()
-
     now = datetime.now(timezone.utc)
-    license_obj = await License.create(
-        license_id=data.license_id,
-        user_id=data.user_id,
-        license_key=data.license_key,
-        license_type=data.license_type,
-        activated_at=_parse_datetime(data.activated_at),
-        expires_at=_parse_datetime(data.expires_at),
-        last_validated_at=now,
-        hardware_fingerprint=data.hardware_fingerprint,
-        signed_payload=data.signed_payload,
-        public_key=data.public_key,
-        signature=data.signature,
-        max_cameras=data.max_cameras,
-        max_people=data.max_people,
-        features=data.features,
-        status=data.status,
-    )
+    fields = {
+        "license_id": data.license_id,
+        "license_key": data.license_key,
+        "license_type": data.license_type,
+        "activated_at": _parse_datetime(data.activated_at),
+        "expires_at": _parse_datetime(data.expires_at),
+        "last_validated_at": now,
+        "hardware_fingerprint": data.hardware_fingerprint,
+        "signed_payload": data.signed_payload,
+        "public_key": data.public_key,
+        "signature": data.signature,
+        "max_cameras": data.max_cameras,
+        "max_people": data.max_people,
+        "features": data.features,
+        "status": data.status,
+    }
+
+    # Replace any license previously stored for this user.
+    existing_for_user = await License.filter(user_id=data.user_id).first()
+    if existing_for_user:
+        await existing_for_user.delete()
+
+    # If the same license_id was already stored (e.g. under another user),
+    # adopt it for this user instead of failing on the unique constraint.
+    existing_by_id = await License.filter(license_id=data.license_id).first()
+    if existing_by_id is not None:
+        existing_by_id.user_id = data.user_id
+        for key, value in fields.items():
+            setattr(existing_by_id, key, value)
+        await existing_by_id.save()
+        return {
+            "success": True,
+            "license_id": existing_by_id.license_id,
+        }
+
+    try:
+        license_obj = await License.create(user_id=data.user_id, **fields)
+    except IntegrityError:
+        # Concurrent store of the same license_id: re-read and report success.
+        license_obj = await License.filter(license_id=data.license_id).first()
+        if license_obj is None:
+            raise HTTPException(status_code=500, detail="failed to store license")
 
     return {
         "success": True,

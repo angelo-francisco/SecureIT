@@ -8,3 +8,5 @@ export * from "./face-detections";
 export * from "./license";
 export * from "./profiles";
 export * from "./audit";
+
+export { openExternally } from "./api-base"

@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks";
 import { useToast, PinInput, Loader } from "@/packages/ui";
 import { Navbar } from "@/components/Navbar";
 import { profilesApi, type ProfileData } from "../../api-client/profiles";
-import { apiClient } from "../../api-client";
+import { apiClient, openExternally } from "../../api-client";
 
 export default function ProfileSwitcher() {
   const navigate = useNavigate();
@@ -143,6 +143,21 @@ export default function ProfileSwitcher() {
           </button>
         </div>
 
+        <div className="fixed bottom-6 w-full flex justify-center items-center font-semibold text-xl mt-8">
+          <span
+            className="cursor-pointer text-primary"
+            onClick={async () => await openExternally("my-account")}
+          >
+            My Account
+          </span>
+
+          <div className="mx-3 h-6 w-px bg-gray-400" />
+
+          <span className="text-error cursor-pointer">
+            Terminar Sessão
+          </span>
+        </div>
+
         {pinModal && (
           <PinEntryModal
             onComplete={handlePinComplete}
@@ -207,7 +222,7 @@ function PinEntryModal({
             className="cursor-pointer w-full p-4 bg-primary flex justify-center text-lg text-white font-semibold transition-colors"
           >
             {loading ? (
-              <Lucide.Loader className="animate-spin infinite"/>
+              <Lucide.Loader className="animate-spin infinite" />
             ) : (
               <Lucide.ArrowRight />
             )}
