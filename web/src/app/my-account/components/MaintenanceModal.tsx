@@ -134,7 +134,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							</div>
 						) : (
 							<>
-								<p className="text-sm text-text-muted">
+								<p className="text-base text-text-muted">
 									Selecione a licença para a qual pretende solicitar manutenção:
 								</p>
 								<div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-2">
@@ -144,12 +144,9 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 											Licença {license.key.type}
 										</span>
 									</div>
-									<div className="text-sm text-text-muted space-y-1 ml-7">
+									<div className="text-base text-text-muted space-y-1 ml-7">
 										<p>
-											Chave:{" "}
-											<span className="font-mono text-xs">
-												{license.key.key}
-											</span>
+											Chave: <span className="text-sm">{license.key.key}</span>
 										</p>
 										<p>
 											Expira:{" "}
@@ -161,7 +158,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 										</p>
 										<div className="flex items-center gap-1.5">
 											<Check size={14} className="text-success" />
-											<span className="text-success text-xs font-medium">
+											<span className="text-success text-sm font-medium">
 												Activa
 											</span>
 										</div>
@@ -174,7 +171,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							<button
 								type="button"
 								onClick={handleClose}
-								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+								className="px-4 py-2.5 border text-base font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<X />
 							</button>
@@ -208,7 +205,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							<button
 								type="button"
 								onClick={() => setStep(1)}
-								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+								className="px-4 py-2.5 border text-base font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<ArrowLeft />
 							</button>
@@ -232,21 +229,21 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 						</h3>
 
 						<div>
-							<span className="text-sm font-medium text-text mb-2 block">
+							<span className="text-base font-medium text-text mb-2 block">
 								Comprovativo (opcional)
 							</span>
 							{uploadedProof ? (
 								<div className="flex items-center gap-3 bg-success/10 border border-success/30 rounded-lg p-3">
 									<Check size={18} className="text-success shrink-0" />
 									<div className="flex-1 min-w-0">
-										<p className="text-sm font-medium text-success">
+										<p className="text-base font-medium text-success">
 											Comprovativo carregado
 										</p>
 										<a
 											href={uploadedProof.secure_url}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="text-xs text-primary hover:underline truncate block"
+											className="text-sm text-primary hover:underline truncate block"
 										>
 											Ver comprovativo
 										</a>
@@ -254,7 +251,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 									<button
 										type="button"
 										onClick={() => setUploadedProof(null)}
-										className="text-xs text-text-muted hover:text-error transition-colors"
+										className="text-sm text-text-muted hover:text-error transition-colors"
 									>
 										Remover
 									</button>
@@ -293,10 +290,10 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 											className="w-full border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
 										>
 											<Upload size={22} className="text-text-muted" />
-											<span className="text-sm text-text-muted">
+											<span className="text-base text-text-muted">
 												Clique para carregar comprovativo
 											</span>
-											<span className="text-xs text-text-muted">
+											<span className="text-sm text-text-muted">
 												JPG, PNG ou WebP — máx. 5MB
 											</span>
 										</button>
@@ -309,7 +306,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
 							<button
 								type="button"
 								onClick={() => setStep(2)}
-								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+								className="px-4 py-2.5 border text-base font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<ArrowLeft />
 							</button>

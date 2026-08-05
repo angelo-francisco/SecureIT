@@ -85,6 +85,10 @@ body {
 	color: var(--text);
 }
 
+.bg-accordion {
+	background-color: color-mix(in srgb, var(--bg) 40%, var(--surface));
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
 	width: 8px;

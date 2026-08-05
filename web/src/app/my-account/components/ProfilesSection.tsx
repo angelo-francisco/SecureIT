@@ -170,13 +170,13 @@ export function ProfilesSection() {
 					onClick={openCreate}
 					className="shrink-0 group animate-tile cursor-pointer"
 				>
-					<div className="w-16 h-16 sm:w-20 sm:h-20 bg-surface hover:bg-surface-hover border border-dashed border-border flex items-center justify-center group-hover:border-primary transition-all">
+					<div className="w-20 h-20 bg-surface hover:bg-surface-hover border border-dashed border-border flex items-center justify-center group-hover:border-primary transition-all">
 						<Plus
 							size={24}
 							className="text-text-muted group-hover:text-primary transition-colors"
 						/>
 					</div>
-					<span className="block text-center text-xs font-mono text-text-muted mt-2 group-hover:text-primary transition-colors">
+					<span className="block text-center text-base md:text-lg text-text-muted mt-2 group-hover:text-primary transition-colors">
 						Adicionar
 					</span>
 				</button>
@@ -190,14 +190,13 @@ export function ProfilesSection() {
 						style={{ animationDelay: `${(i + 1) * 60}ms` }}
 					>
 						<div
-							className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-white text-xl sm:text-2xl font-bold font-display border border-border group-hover:border-primary/60 transition-all shadow-sm"
+							className="w-20 h-20 flex items-center justify-center text-white text-xl sm:text-2xl font-bold font-display border border-border group-hover:border-primary/60 transition-all shadow-sm"
 							style={{ backgroundColor: p.avatarColor }}
 						>
 							{(p.name?.[0] || "?").toUpperCase()}
 						</div>
-						<span className="flex capitalize items-center gap-1 justify-center text-center text-xs font-mono font-medium text-text-muted mt-2 truncate w-16 sm:w-20">
-							{p.name}{" "}
-							{p.isDefault && <Lock size={12} className="text-primary" />}
+						<span className="flex capitalize items-center gap-1 justify-center text-center text-base md:text-lg font-medium text-text-muted mt-2 truncate w-16 sm:w-20">
+							{p.name} {p.isDefault && <Lock size={16} />}
 						</span>
 					</button>
 				))}
@@ -206,7 +205,7 @@ export function ProfilesSection() {
 			{profiles.length > 0 && (
 				<div className="flex gap-2 flex-wrap mt-1">
 					{profiles.filter((p) => !p.isDefault).length > 0 && (
-						<span className="text-[11px] font-mono text-text-muted/60">
+						<span className="text-sm text-text-muted/60">
 							Clique num perfil para editar
 						</span>
 					)}
@@ -228,7 +227,7 @@ export function ProfilesSection() {
 										handleDelete(editing.id);
 									}
 								}}
-								className="px-3 py-2.5 rounded-lg text-sm font-medium text-error hover:bg-error/10 transition-all"
+								className="px-3 py-2.5 rounded-lg text-base font-medium text-error hover:bg-error/10 transition-all"
 							>
 								<Trash2 size={16} />
 							</button>
@@ -277,7 +276,7 @@ export function ProfilesSection() {
 								<button
 									type="button"
 									onClick={() => setChangingPin(true)}
-									className="text-sm font-semibold text-primary hover:brightness-110 transition-all"
+									className="text-base font-semibold text-primary hover:brightness-110 transition-all"
 								>
 									Alterar
 								</button>
@@ -293,7 +292,7 @@ export function ProfilesSection() {
 							<button
 								type="button"
 								onClick={closeModal}
-								className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+								className="px-4 py-2.5 border text-base font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 							>
 								<X />
 							</button>
@@ -301,7 +300,7 @@ export function ProfilesSection() {
 								type="button"
 								onClick={editing ? handleUpdate : handleCreate}
 								disabled={!name.trim() || saving}
-								className="w-full bg-primary text-center text-white px-6 py-2.5 text-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
+								className="w-full bg-primary text-center text-white px-6 py-2.5 text-base font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
 							>
 								{saving && <Loader size={14} className="animate-spin" />}
 								{editing ? "Salvar Alterações" : "Criar Perfil"}

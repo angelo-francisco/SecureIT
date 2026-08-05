@@ -52,7 +52,7 @@ export function AccordionSection({
 					disabled={opening}
 					className="flex items-center gap-3.5 flex-1 text-left group"
 				>
-					<div className="w-10 h-10 border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-primary/20 group-hover:border-primary/50">
+					<div className="w-10 h-10 flex items-center justify-center shrink-0 transition-colors">
 						<Icon size={19} className="text-primary" />
 					</div>
 					<h3 className="text-base sm:text-lg font-bold text-text tracking-tight group-hover:text-primary transition-colors">
@@ -106,7 +106,9 @@ export function AccordionSection({
 
 			<div className="accordion-grid" data-open={open}>
 				<div>
-					<div className="border-t border-border p-4 sm:p-6 bg-bg/40">{children}</div>
+					<div className="border-t border-border p-4 sm:p-6 bg-surface">
+						{children}
+					</div>
 				</div>
 			</div>
 		</div>

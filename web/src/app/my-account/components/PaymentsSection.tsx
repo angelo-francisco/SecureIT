@@ -57,30 +57,31 @@ export const PaymentsSection = forwardRef<
 		return (
 			<div className="text-center py-8 text-text-muted">
 				<Receipt size={36} className="mx-auto mb-3 opacity-40 text-primary" />
-				<p className="text-sm font-medium">Ainda não submeteu nenhum pagamento</p>
+				<p className="text-base font-medium">
+					Ainda não submeteu nenhum pagamento
+				</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="overflow-x-auto border border-border bg-surface/50">
+		<div className="  bg-surface/50">
 			<table className="w-full text-left">
 				<thead>
 					<tr className="border-b border-border bg-surface">
-						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
 							Plano
 						</th>
-						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
 							Montante
 						</th>
-						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
 							Data
 						</th>
-						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
 							Estado
 						</th>
-						<th className="py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
-							Detalhes
+						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
 						</th>
 					</tr>
 				</thead>
@@ -89,23 +90,21 @@ export const PaymentsSection = forwardRef<
 					{payments.map((p) => (
 						<tr
 							key={p.id}
-							className="hover:bg-surface-hover/60 transition-colors text-sm"
+							className="hover:bg-surface-hover/60 transition-colors text-base"
 						>
-							<td className="py-3.5 px-4 font-bold text-text">
-								{p.plan.name}
-							</td>
+							<td className="py-3.5 px-4 font-bold text-text text-center">{p.plan.name}</td>
 
-							<td className="py-3.5 px-4 font-mono font-semibold text-text">
+							<td className="py-3.5 px-4 font-semibold text-text  text-center">
 								${(p.totalPrice || p.plan.basePrice).toFixed(2)}
 							</td>
 
-							<td className="py-3.5 px-4 font-mono text-xs text-text-muted">
+							<td className="py-3.5 px-4 text-base text-text  text-center">
 								{new Date(p.createdAt).toLocaleDateString("pt-PT")}
 							</td>
 
-							<td className="py-3.5 px-4 whitespace-nowrap">
+							<td className="py-3.5 px-4 whitespace-nowrap  text-center">
 								<span
-									className={`inline-flex px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wider border ${statusColor(
+									className={`inline-flex px-2 py-0.5 text-base font-bold uppercase text-center ${statusColor(
 										p.status,
 									)}`}
 								>
@@ -113,21 +112,21 @@ export const PaymentsSection = forwardRef<
 								</span>
 							</td>
 
-							<td className="py-3.5 px-4">
+							<td className="py-3.5 px-4  text-center">
 								<div className="flex flex-col gap-1">
 									{p.proofUrl && (
 										<a
 											href={p.proofUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="text-xs font-semibold text-primary hover:underline"
+											className="text-base font-semibold text-primary hover:underline"
 										>
-											Ver comprovativo ↗
+											Comprovativo ↗
 										</a>
 									)}
 
 									{p.adminNote && (
-										<p className="text-xs italic text-text-muted">
+										<p className="text-base italic text-text-muted">
 											Nota: {p.adminNote}
 										</p>
 									)}

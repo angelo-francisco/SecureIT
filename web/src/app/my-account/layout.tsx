@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
+import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { getSession } from "@/lib/auth";
+import { HeaderActions } from "./components/HeaderActions";
 
 export default async function MyAccountLayout({
 	children,
@@ -27,8 +29,24 @@ export default async function MyAccountLayout({
 
 	return (
 		<div className="min-h-screen bg-bg text-text">
-			<Navbar inMyAccount={true} />
-			<main className="max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-6">
+			<header className="left-0 top-0 z-50 w-full p-4 md:fixed md:p-6">
+				<div className="flex items-center justify-between">
+					<Link href="/" className="flex items-center gap-2.5">
+						<Image
+							src="/logo.png"
+							alt="SecureIT"
+							width={40}
+							height={40}
+							className="h-7 w-auto md:h-9"
+						/>
+						<span className="text-3xl font-bold tracking-tight text-text md:text-4xl">
+							SecureIT
+						</span>
+					</Link>
+					<HeaderActions />
+				</div>
+			</header>
+			<main className="px-4 pt-8 pb-10 md:px-8 md:pt-32 md:pb-12">
 				{children}
 			</main>
 		</div>

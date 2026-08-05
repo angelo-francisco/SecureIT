@@ -17,6 +17,7 @@ export interface OutlinedInputProps
 	error?: boolean;
 	icon?: ReactNode;
 	labelSize?: LabelSize;
+	labelBg?: string;
 }
 
 export function OutlinedInput({
@@ -26,6 +27,7 @@ export function OutlinedInput({
 	error,
 	icon,
 	labelSize = "md",
+	labelBg = "bg-bg",
 	placeholder,
 	...props
 }: OutlinedInputProps) {
@@ -50,7 +52,7 @@ export function OutlinedInput({
 			<label
 				htmlFor={id}
 				className={cn(
-					"absolute left-3 px-1 bg-bg cursor-text select-none truncate transition-all duration-200",
+					`absolute left-3 px-1 ${labelBg} cursor-text select-none truncate transition-all duration-200`,
 					"peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2",
 					size.rest,
 					"peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2",

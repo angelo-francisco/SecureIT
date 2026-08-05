@@ -168,7 +168,7 @@ export function NewLicenseModal({
 						<button
 							type="button"
 							onClick={onClose}
-							className="p-1.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+							className="p-1.5 border text-base font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 						>
 							<X />
 						</button>
@@ -183,7 +183,7 @@ export function NewLicenseModal({
 						</div>
 					) : step === 1 ? (
 						hasActiveLicense ? (
-							<div className="text-center py-10 text-text-muted space-y-3">
+							<div className="text-center py-10 px-24 text-text-muted space-y-3">
 								<ShieldCheck size={48} className="mx-auto text-success" />
 								<p className="text-base md:text-lg font-medium text-text">
 									Já possui uma licença ativa
@@ -299,7 +299,7 @@ export function NewLicenseModal({
 														Referência
 													</span>
 													<div className="flex items-center gap-2">
-														<span className="text-base md:text-lg font-mono font-medium text-text">
+														<span className="text-base md:text-lg font-medium text-text">
 															{paymentInfo.reference}
 														</span>
 														<button

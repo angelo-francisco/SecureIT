@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader, Receipt, Shield, User } from "lucide-react";
+import { KeyRound, Loader, Receipt, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccordionSection } from "./components/AccordionSection";
@@ -71,16 +71,7 @@ export default function MyAccountPage() {
 		fetchUser();
 	}, [fetchUser]);
 
-	useEffect(() => {
-		const handleOpenPlans = () => setPlansModalOpen(true);
-		window.addEventListener("open-plans-modal", handleOpenPlans);
-
-		return () => {
-			window.removeEventListener("open-plans-modal", handleOpenPlans);
-		};
-	}, []);
-
-	const scrollToPlans = useCallback(async () => {
+	const scrollToPlans = useCallback(() => {
 		setPlansModalOpen(true);
 	}, []);
 
@@ -98,7 +89,7 @@ export default function MyAccountPage() {
 	if (loading) {
 		return (
 			<div className="fixed inset-0 flex items-center justify-center">
-				<Loader width={40} className="animate-spin infinite" />
+				<Loader width={60} className="animate-spin infinite" />
 			</div>
 		);
 	}
@@ -106,17 +97,29 @@ export default function MyAccountPage() {
 	return (
 		<div className="max-w-4xl mx-auto relative pb-12">
 			<div className="mb-6">
-				<h1 className="text-2xl sm:text-4xl font-display font-bold text-text tracking-tight">
-					Olá, {`${user?.firstName} ${user?.lastName}`}
+				<h1 className="text-3xl md:text-4xl font-display font-bold text-text">
+					Olá, {`${user?.firstName} ${user?.lastName}`}!
 				</h1>
-				<p className="text-text-muted mt-1 text-sm sm:text-base">
+				<p className="text-text-muted mt-1 text-base md:text-lg">
 					Gerencie os seus dados pessoais, perfis e assinaturas ativas.
 				</p>
 			</div>
 			<div className="flex justify-start">
 				<ProfilesSection />
 			</div>
-			<div className="mt-6 space-y-4">
+
+			<div className="mt-6 border border-border bg-surface">
+				<button
+					type="button"
+					onClick={scrollToPlans}
+					className="flex w-full items-center justify-center gap-2 px-4 py-3.5 text-base font-semibold text-text-muted transition-colors hover:bg-surface-hover hover:text-primary"
+				>
+					<KeyRound size={18} />
+					Obter Licença
+				</button>
+			</div>
+
+			<div className="mt-6">
 				<AccordionSection
 					title="Dados Pessoais"
 					icon={User}

@@ -13,7 +13,7 @@ interface Notification {
 	createdAt: string;
 }
 
-interface NotificationsResponse {
+export interface NotificationsResponse {
 	notifications: Notification[];
 	unreadCount: number;
 }
@@ -96,7 +96,7 @@ export const NotificationsSection = forwardRef<
 					<button
 						type="button"
 						onClick={handleMarkAllRead}
-						className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+						className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
 					>
 						<CheckCheck size={14} />
 						Marcar todas como lidas
@@ -131,7 +131,7 @@ export const NotificationsSection = forwardRef<
 								<div className="flex-1 min-w-0">
 									<div className="flex items-center gap-2">
 										<p
-											className={`text-sm font-medium ${n.read ? "text-text-muted" : "text-text"}`}
+											className={`text-base font-medium ${n.read ? "text-text-muted" : "text-text"}`}
 										>
 											{n.title}
 										</p>
@@ -140,11 +140,11 @@ export const NotificationsSection = forwardRef<
 										)}
 									</div>
 									<p
-										className={`text-sm mt-0.5 ${n.read ? "text-text-muted" : "text-text/70"}`}
+										className={`text-base mt-0.5 ${n.read ? "text-text-muted" : "text-text/70"}`}
 									>
 										{n.message}
 									</p>
-									<p className="text-xs text-text-muted mt-1">
+									<p className="text-sm text-text-muted mt-1">
 										{new Date(n.createdAt).toLocaleString("pt-PT")}
 									</p>
 								</div>

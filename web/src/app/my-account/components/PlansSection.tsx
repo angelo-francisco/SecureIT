@@ -173,14 +173,14 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						<span className="text-3xl font-bold text-text">
 							{convert(displayPrice)} Kz
 						</span>
-						<span className="text-sm text-text-muted">
+						<span className="text-base text-text-muted">
 							{annual ? "/ano" : "/ mês"}
 						</span>
 					</div>
 
 					<div className="mt-4 flex items-center justify-center gap-3">
 						<span
-							className={`text-xs font-medium ${!annual ? "text-text" : "text-text-muted"}`}
+							className={`text-sm font-medium ${!annual ? "text-text" : "text-text-muted"}`}
 						>
 							Mensal
 						</span>
@@ -194,7 +194,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							/>
 						</button>
 						<span
-							className={`text-xs font-medium ${annual ? "text-text" : "text-text-muted"}`}
+							className={`text-sm font-medium ${annual ? "text-text" : "text-text-muted"}`}
 						>
 							Anual
 						</span>
@@ -220,7 +220,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					{paymentInfo ? (
 						<div className="border bg-surface p-4 space-y-2">
 							<div className="flex items-center justify-between">
-								<span className="text-sm text-gray-200 font-bold">IBAN</span>
+								<span className="text-base text-gray-200 font-bold">IBAN</span>
 								<div className="flex items-center gap-2">
 									<span className="text-base text-text">
 										{paymentInfo.iban}
@@ -307,21 +307,21 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							href="https://wa.me/244926422462"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="flex items-center gap-2 px-4 py-2 border border-border text-xs font-medium text-text-muted hover:text-primary hover:border-primary/40 transition-all"
+							className="flex items-center gap-2 px-4 py-2 border border-border text-sm font-medium text-text-muted hover:text-primary hover:border-primary/40 transition-all"
 						>
 							<MessageCircle size={16} />
 							WhatsApp
 						</a>
 						<a
 							href="tel:+244926422462"
-							className="flex items-center gap-2 px-4 py-2 border border-border text-xs font-medium text-text-muted hover:text-primary hover:border-primary/40 transition-all"
+							className="flex items-center gap-2 px-4 py-2 border border-border text-sm font-medium text-text-muted hover:text-primary hover:border-primary/40 transition-all"
 						>
 							<Phone size={16} />
 							Telefone
 						</a>
 						<a
 							href="mailto:newstatesofficial@gmail.com"
-							className="flex items-center gap-2 px-4 py-2 border border-border text-xs font-medium text-text-muted hover:text-primary hover:border-primary/40 transition-all"
+							className="flex items-center gap-2 px-4 py-2 border border-border text-sm font-medium text-text-muted hover:text-primary hover:border-primary/40 transition-all"
 						>
 							<Mail size={16} />
 							Email
@@ -337,14 +337,14 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 						<div className="flex items-center gap-3 bg-success/10 border border-success/30 p-3">
 							<Check size={18} className="text-success shrink-0" />
 							<div className="flex-1 min-w-0">
-								<p className="text-sm font-medium text-success">
+								<p className="text-base font-medium text-success">
 									Comprovativo carregado com sucesso
 								</p>
 								<a
 									href={uploadedProof.secure_url}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="text-xs text-primary hover:underline truncate block"
+									className="text-sm text-primary hover:underline truncate block"
 								>
 									Ver comprovativo
 								</a>
@@ -352,7 +352,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 							<button
 								type="button"
 								onClick={() => setUploadedProof(null)}
-								className="text-xs text-text-muted hover:text-error transition-colors"
+								className="text-sm text-text-muted hover:text-error transition-colors"
 							>
 								Remover
 							</button>
@@ -430,7 +430,7 @@ export const PlansSection = forwardRef<PlansSectionHandle, PlansSectionProps>(
 					<button
 						type="button"
 						onClick={onClose}
-						className="px-4 py-2.5 border text-sm font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
+						className="px-4 py-2.5 border text-base font-medium text-text-muted hover:text-text hover:bg-surface-hover transition-all"
 					>
 						<ArrowLeft />
 					</button>
