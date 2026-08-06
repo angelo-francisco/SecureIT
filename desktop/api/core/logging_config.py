@@ -24,3 +24,4 @@ def configure_logging() -> None:
         stream=sys.stdout,
         force=True,
     )
+    logging.getLogger("tortoise").setLevel(logging.ERROR)
