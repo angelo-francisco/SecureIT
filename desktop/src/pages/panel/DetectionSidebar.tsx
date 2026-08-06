@@ -40,7 +40,7 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
   }
 
   return (
-    <div className="w-90 shrink-0 border-l border-white/[0.08] bg-[#0B0E14] flex flex-col h-[100vh]">
+    <div className="w-90 shrink-0 border-l border-white/[0.08] bg-bg flex flex-col h-[100vh]">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] shrink-0">
         <div className="flex items-center gap-2">
           <Lucide.Bell size={18} className="text-primary" />
