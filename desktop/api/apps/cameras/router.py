@@ -41,8 +41,10 @@ async def create_camera_endpoint(
 
 
 @router.get("/available", response_model=list[AvailableCamera])
-async def available_cameras():
-    return await get_available_cameras()
+async def available_cameras(
+    refresh: bool = Query(False),
+):
+    return await get_available_cameras(refresh)
 
 
 @router.get("/{camera_id}", response_model=CameraDetail)

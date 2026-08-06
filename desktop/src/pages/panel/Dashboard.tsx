@@ -8,7 +8,9 @@ import { connectCamera, disconnectCamera } from "../../lib/websocket";
 import { useCameras } from "../../hooks";
 import { useDetectionEventsStore } from "../../stores/detectionEvents";
 import { useCameraViewStore } from "../../stores";
+import { useCameraReloadStore } from "../../stores/cameraReload";
 import * as Lucide from "lucide-react";
+import type { Camera } from "../../types/camera";
 import CameraList from "../cameras/CameraList";
 import CameraNew from "../cameras/CameraNew";
 import CameraView from "../cameras/CameraView";
@@ -49,129 +51,173 @@ export default function Dashboard() {
   const { data: cameras, isLoading } = useCameras();
   const [connectingCameras, setConnectingCameras] = useState<Set<number>>(new Set());
   const wsKeysRef = useRef<string[]>([]);
+  const reloadAll = useCameraReloadStore((s) => s.all);
+  const reloadPerCamera = useCameraReloadStore((s) => s.perCamera);
   useLicenseValidation();
 
   const hasCameras = cameras && cameras.some((c) => c.video_source);
 
   const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
+  const reloadPerCameraKey = JSON.stringify(reloadPerCamera);
 
-  useEffect(() => {
-    if (!cameras || cameras.length === 0) return;
+  const connectDashboardCamera = useCallback((camera: Camera) => {
+    const videoSource = camera.video_source;
+    if (!videoSource) return;
 
-    wsKeysRef.current.forEach(disconnectCamera);
-    wsKeysRef.current = [];
-
-    const keys: string[] = [];
-
-    cameras.forEach((camera) => {
-      if (!camera.video_source) return;
-
-      let lastKey = "";
-      const onMessage = (data: Record<string, unknown>) => {
-        if (data.type === "notification" && typeof data.people === "number") {
-          const key = `people-${data.people}`;
-          if (key === lastKey) return;
-          lastKey = key;
-          useDetectionEventsStore.getState().addEvent({
-            type: "people",
-            person_id: null,
-            name: `${data.people} pessoa(s) detetada(s)`,
-            unknown: false,
-            confidence: null,
-            camera_id: camera.id,
-            camera_name: camera.name,
-            timestamp: Date.now(),
-          });
-        } else if (data.type === "face_match" && data.person_id) {
-          const key = `known-${data.person_id}`;
-          if (key === lastKey) return;
+    let lastKey = "";
+    const onMessage = (data: Record<string, unknown>) => {
+      if (data.type === "notification" && typeof data.people === "number") {
+        const key = `people-${data.people}`;
+        if (key === lastKey) return;
+        lastKey = key;
+        useDetectionEventsStore.getState().addEvent({
+          type: "people",
+          person_id: null,
+          name: `${data.people} pessoa(s) detetada(s)`,
+          unknown: false,
+          confidence: null,
+          camera_id: camera.id,
+          camera_name: camera.name,
+          timestamp: Date.now(),
+        });
+      } else if (data.type === "face_match" && data.person_id) {
+        const key = `known-${data.person_id}`;
+        if (key === lastKey) return;
+        lastKey = key;
+        useDetectionEventsStore.getState().addEvent({
+          type: "face",
+          person_id: data.person_id as number,
+          name: data.name as string | null,
+          unknown: false,
+          confidence: null,
+          camera_id: camera.id,
+          camera_name: camera.name,
+          timestamp: Date.now(),
+        });
+      } else if (data.type === "faces" && Array.isArray(data.faces)) {
+        const now = Date.now();
+        for (const f of data.faces as Record<string, unknown>[]) {
+          const pid = f.person_id as number | null;
+          const key = pid ? `known-${pid}` : "unknown";
+          if (key === lastKey) continue;
           lastKey = key;
           useDetectionEventsStore.getState().addEvent({
             type: "face",
-            person_id: data.person_id as number,
-            name: data.name as string | null,
+            person_id: pid,
+            name: f.name as string | null,
+            unknown: !pid,
+            confidence: f.confidence as number,
+            camera_id: camera.id,
+            camera_name: camera.name,
+            timestamp: now,
+          });
+        }
+      } else if (data.type === "behaviour_alert") {
+        const key = `behaviour-${Date.now()}`;
+        if (key !== lastKey) {
+          lastKey = key;
+          useDetectionEventsStore.getState().addEvent({
+            type: "behaviour",
+            person_id: null,
+            name: (data.description as string) || "Comportamento suspeito",
             unknown: false,
             confidence: null,
             camera_id: camera.id,
             camera_name: camera.name,
             timestamp: Date.now(),
           });
-        } else if (data.type === "faces" && Array.isArray(data.faces)) {
-          const now = Date.now();
-          for (const f of data.faces as Record<string, unknown>[]) {
-            const pid = f.person_id as number | null;
-            const key = pid ? `known-${pid}` : "unknown";
-            if (key === lastKey) continue;
-            lastKey = key;
-            useDetectionEventsStore.getState().addEvent({
-              type: "face",
-              person_id: pid,
-              name: f.name as string | null,
-              unknown: !pid,
-              confidence: f.confidence as number,
-              camera_id: camera.id,
-              camera_name: camera.name,
-              timestamp: now,
-            });
-          }
-        } else if (data.type === "behaviour_alert") {
-          const key = `behaviour-${Date.now()}`;
-          if (key !== lastKey) {
-            lastKey = key;
-            useDetectionEventsStore.getState().addEvent({
-              type: "behaviour",
-              person_id: null,
-              name: (data.description as string) || "Comportamento suspeito",
-              unknown: false,
-              confidence: null,
-              camera_id: camera.id,
-              camera_name: camera.name,
-              timestamp: Date.now(),
-            });
-            const sound = document.getElementById("soundEffect") as HTMLAudioElement;
-            if (sound) {
-              sound.currentTime = 0;
-              sound.play().catch(() => {});
-            }
+          const sound = document.getElementById("soundEffect") as HTMLAudioElement;
+          if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(() => {});
           }
         }
-      };
+      }
+    };
 
-      const key = connectCamera(
-        camera.id,
-        camera.video_source,
-        camera.task === "FR" ? "face-recognition" : camera.task === "BA" ? "behaviour-analysis" : "area-detection",
-        (blob) => {
-          const img = imageRefs.current.get(`cam-${camera.id}`);
-          if (img) {
-            const url = URL.createObjectURL(blob);
-            img.src = url;
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-          }
-          setConnectingCameras((prev) => {
-            if (!prev.has(camera.id)) return prev;
-            const next = new Set(prev);
-            next.delete(camera.id);
-            return next;
-          });
-        },
-        onMessage,
-        undefined,
-        `dash-${camera.id}`,
-      );
-      keys.push(key);
+    setConnectingCameras((prev) => {
+      if (prev.has(camera.id)) return prev;
+      const next = new Set(prev);
+      next.add(camera.id);
+      return next;
     });
 
-    wsKeysRef.current = keys;
+    const key = connectCamera(
+      camera.id,
+      videoSource,
+      camera.task === "FR" ? "face-recognition" : camera.task === "BA" ? "behaviour-analysis" : "area-detection",
+      (blob) => {
+        const img = imageRefs.current.get(`cam-${camera.id}`);
+        if (img) {
+          const url = URL.createObjectURL(blob);
+          img.src = url;
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        setConnectingCameras((prev) => {
+          if (!prev.has(camera.id)) return prev;
+          const next = new Set(prev);
+          next.delete(camera.id);
+          return next;
+        });
+      },
+      onMessage,
+      undefined,
+      `dash-${camera.id}`,
+    );
+    wsKeysRef.current = [...wsKeysRef.current, key];
+  }, []);
 
-    setConnectingCameras(
-      new Set(cameras.filter((c) => c.video_source).map((c) => c.id))
+  const lastSignalsRef = useRef<Record<number, number>>({});
+  const lastReloadAllRef = useRef(reloadAll);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (!cameras || cameras.length === 0) {
+      wsKeysRef.current.forEach(disconnectCamera);
+      wsKeysRef.current = [];
+      initializedRef.current = false;
+      lastReloadAllRef.current = reloadAll;
+      lastSignalsRef.current = { ...reloadPerCamera };
+      return;
+    }
+
+    const wanted = new Set(
+      cameras.filter((c) => c.video_source).map((c) => c.id)
     );
 
+    wsKeysRef.current = wsKeysRef.current.filter((key) => {
+      const m = key.match(/^dash-(\d+)$/);
+      if (m && !wanted.has(Number(m[1]))) {
+        disconnectCamera(key);
+        return false;
+      }
+      return true;
+    });
+
+    if (!initializedRef.current) {
+      cameras.forEach((camera) => {
+        if (camera.video_source) connectDashboardCamera(camera);
+      });
+      initializedRef.current = true;
+    } else {
+      cameras.forEach((camera) => {
+        if (!camera.video_source) return;
+        const prevSig = lastSignalsRef.current[camera.id] ?? 0;
+        const curSig = reloadPerCamera[camera.id] ?? 0;
+        if (reloadAll === lastReloadAllRef.current && curSig === prevSig) return;
+        connectDashboardCamera(camera);
+      });
+    }
+
+    lastReloadAllRef.current = reloadAll;
+    lastSignalsRef.current = { ...reloadPerCamera };
+
     return () => {
-      keys.forEach(disconnectCamera);
+      wsKeysRef.current.forEach(disconnectCamera);
+      wsKeysRef.current = [];
+      initializedRef.current = false;
     };
-  }, [cameraIds]);
+  }, [cameraIds, reloadAll, reloadPerCameraKey, connectDashboardCamera]);
 
   const close = useCallback(() => setActiveView(null), []);
 

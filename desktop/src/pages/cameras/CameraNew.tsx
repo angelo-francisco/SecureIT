@@ -90,8 +90,10 @@ export default function CameraNew({ onClose }: CameraNewProps) {
             path: demoPath.trim(),
           };
         } else {
-          connection_info =
-            localDevices.find((camera: any) => camera.path === localCamera) ?? {};
+          const selected = localDevices?.find((camera) => camera.path === localCamera);
+          connection_info = selected
+            ? { id: selected.id, name: selected.name, path: selected.path }
+            : {};
         }
         break;
     }

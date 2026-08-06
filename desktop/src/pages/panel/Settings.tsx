@@ -72,8 +72,8 @@ export default function Settings({ onClose }: SettingsProps) {
     e.preventDefault();
     await updateSettings.mutateAsync({
       fps: Number(fps),
-      mst,
-      met,
+      monitoring_start_time: mst,
+      monitoring_end_time: met,
       alert_cooldown: Number(alertCooldown),
       detect_every: Number(detectEvery),
       allow_draw: allowDraw,
@@ -119,8 +119,8 @@ export default function Settings({ onClose }: SettingsProps) {
               <div className="w-full max-w-xl space-y-4 mx-auto">
                 {[
                   { label: "Frames por segundo (FPS)", value: fps, setter: setFps, icon: "Eye" as const, type: "number" },
-                  { label: "Início do monitoramento", value: mst, setter: setMst, icon: "Timer" as const, type: "text" },
-                  { label: "Término do monitoramento", value: met, setter: setMet, icon: "Timer" as const, type: "text" },
+                  { label: "Início do monitoramento", value: mst, setter: setMst, icon: "Timer" as const, type: "time" },
+                  { label: "Término do monitoramento", value: met, setter: setMet, icon: "Timer" as const, type: "time" },
                   { label: "Tempo de espera extra (segundos)", value: alertCooldown, setter: setAlertCooldown, icon: "Timer" as const, type: "number" },
                   { label: "Nº de detecções por frames", value: detectEvery, setter: setDetectEvery, icon: "Timer" as const, type: "number" },
                 ].map((field) => (

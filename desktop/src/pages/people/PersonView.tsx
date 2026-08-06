@@ -393,6 +393,7 @@ export default function PersonView({ onClose }: PersonViewProps) {
       <Modal
         open={deleteConfirm}
         onClose={() => setDeleteConfirm(false)}
+        disableBackdropClose
         className="max-w-md bg-surface-dark border border-border-dark p-6"
       >
         <h3 className="text-xl font-bold text-text mb-4">Confirmar remoção</h3>
@@ -400,11 +401,11 @@ export default function PersonView({ onClose }: PersonViewProps) {
           Tem a certeza que deseja remover esta pessoa? Esta ação é irreversível.
         </p>
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" type="button" onClick={() => setDeleteConfirm(false)}>
+          <Button variant="secondary" type="button" disabled={deletePerson.isPending} onClick={() => setDeleteConfirm(false)}>
             Cancelar
           </Button>
-          <Button variant="danger" type="button" onClick={handleDelete}>
-            Remover
+          <Button variant="danger" type="button" disabled={deletePerson.isPending} onClick={handleDelete}>
+            {deletePerson.isPending ? <Loader w={16} /> : "Remover"}
           </Button>
         </div>
       </Modal>

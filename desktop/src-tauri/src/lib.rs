@@ -12,7 +12,7 @@ use tauri_plugin_opener::OpenerExt;
 /// The child API's stdout/stderr are captured into a log file so it can be
 /// debugged without opening a terminal. A new timestamped file is written on
 /// every app execution so logs from different runs never mix.
-const API_LOG_PREFIX: &str = "api-";
+const APP_LOG_PREFIX: &str = "app-";
 
 /// Maximum number of per-run API log files kept on disk; older ones are
 /// removed the next time the API is spawned.
@@ -66,7 +66,7 @@ fn logs_dir(app: &AppHandle) -> PathBuf {
 /// Path of the log file for the current app execution (e.g. api-2026-08-01_14-30-05.log).
 fn api_log_path(app: &AppHandle) -> PathBuf {
     let stamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-    logs_dir(app).join(format!("{API_LOG_PREFIX}{stamp}.log"))
+    logs_dir(app).join(format!("{APP_LOG_PREFIX}{stamp}.log"))
 }
 
 /// Remove old per-run log files, keeping only the `MAX_KEPT_LOGS` most recent.
@@ -81,7 +81,7 @@ fn prune_old_logs(app: &AppHandle) {
             let name = e.file_name().to_string_lossy().into_owned();
             e.path().is_file().then_some((name, e.path()))
         })
-        .filter(|(name, _)| name.starts_with(API_LOG_PREFIX) && name.ends_with(".log"))
+        .filter(|(name, _)| name.starts_with(APP_LOG_PREFIX) && name.ends_with(".log"))
         .map(|(_, path)| path)
         .collect();
     if files.len() <= MAX_KEPT_LOGS {

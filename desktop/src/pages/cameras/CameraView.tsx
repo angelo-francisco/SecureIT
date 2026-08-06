@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useCamera, useUpdateCamera, useDeleteCamera } from "../../hooks";
 import { useCameraViewStore } from "../../stores/cameraView";
+import { useCameraReloadStore } from "../../stores/cameraReload";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useToast } from "../../hooks/useToast";
 import { Button, Loader, Input, Modal } from "@/packages/ui";
@@ -19,12 +20,15 @@ export default function CameraView() {
   const [editingField, setEditingField] = useState<"name" | "location" | null>(null);
   const [editValue, setEditValue] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [pendingTask, setPendingTask] = useState<CameraTask | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingField) inputRef.current?.focus();
   }, [editingField]);
+
+  const taskChanged = pendingTask !== null && pendingTask !== (camera?.task ?? "D");
 
   function startEdit(field: "name" | "location") {
     if (!camera) return;
@@ -45,7 +49,8 @@ export default function CameraView() {
     });
     setEditingField(null);
     setEditValue("");
-    toast("As alterações apenas serão aplicadas após recarregar a página (F5)", "warning");
+    useCameraReloadStore.getState().requestReload(camera.id);
+    toast("Alterações guardadas. Conexão desta câmera reiniciada.", "success");
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -61,13 +66,15 @@ export default function CameraView() {
     panelNavigate?.("cameras");
   }
 
-  async function handleTaskChange(newTask: CameraTask) {
-    if (!camera) return;
+  async function saveTask() {
+    if (!camera || !pendingTask) return;
     await updateCamera.mutateAsync({
       id: camera.id,
-      data: { task: newTask, face_recognition: newTask === "FR" },
+      data: { task: pendingTask, face_recognition: pendingTask === "FR" },
     });
-    toast("As alterações apenas serão aplicadas após recarregar a página (F5)", "warning");
+    setPendingTask(null);
+    useCameraReloadStore.getState().requestReload(camera.id);
+    toast("Alterações guardadas. Conexão desta câmera reiniciada.", "success");
   }
 
   return (
@@ -173,8 +180,8 @@ export default function CameraView() {
               <div className="space-y-3">
                 <label className="text-sm font-medium text-text">Tarefa da Câmara</label>
                 <Select
-                  value={camera.task || "D"}
-                  onValueChange={(v) => handleTaskChange(v as CameraTask)}
+                  value={pendingTask ?? camera.task ?? "D"}
+                  onValueChange={(v) => setPendingTask(v as CameraTask)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -191,6 +198,21 @@ export default function CameraView() {
                   {camera.task === "BA" && "Analisar comportamento suspeito e gerar alertas"}
                   {!camera.task && "Detetar pessoas na área de monitoramento"}
                 </p>
+                {taskChanged && (
+                  <div className="mt-3 p-3 border border-primary/40 bg-primary/10">
+                    <p className="text-xs text-text mb-2">
+                      A conexão desta câmera será fechada e reaberta rapidamente. As outras câmeras não são afetadas.
+                    </p>
+                    <Button
+                      size="sm"
+                      icon={<Lucide.Save size={14} />}
+                      onClick={saveTask}
+                      disabled={updateCamera.isPending}
+                    >
+                      {updateCamera.isPending ? <Loader w={14} /> : "Salvar alterações"}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -205,6 +227,7 @@ export default function CameraView() {
       <Modal
         open={deleteConfirm}
         onClose={() => setDeleteConfirm(false)}
+        disableBackdropClose
         className="max-w-md bg-surface-dark border border-border-dark p-6"
       >
         <h3 className="text-xl font-bold text-text mb-4">Confirmar remoção</h3>
@@ -212,11 +235,11 @@ export default function CameraView() {
           Tem a certeza que deseja remover esta câmara?
         </p>
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => setDeleteConfirm(false)}>
+          <Button variant="secondary" type="button" disabled={deleteCamera.isPending} onClick={() => setDeleteConfirm(false)}>
             Cancelar
           </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Remover
+          <Button variant="danger" type="button" disabled={deleteCamera.isPending} onClick={handleDelete}>
+            {deleteCamera.isPending ? <Loader w={16} /> : "Remover"}
           </Button>
         </div>
       </Modal>

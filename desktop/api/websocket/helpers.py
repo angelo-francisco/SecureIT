@@ -1,4 +1,8 @@
+import asyncio
 import logging
+from asyncio import CancelledError
+
+from fastapi import WebSocket, WebSocketDisconnect
 
 from apps.control.models import Profile
 from apps.cameras.models import Camera
@@ -34,7 +38,10 @@ async def check_license_feature(profile_id: str, *feature_slugs: str) -> bool:
 async def authenticate(profile_id: str | None) -> str | None:
     if not profile_id:
         return None
-    return (await Profile.get(profile_id=profile_id)).profile_id
+    profile = await Profile.get_or_none(profile_id=profile_id)
+    if not profile:
+        return None
+    return profile.profile_id
 
 
 async def load_user_config(profile_id: str) -> dict:
@@ -92,3 +99,30 @@ async def create_notification(
 
 def create_camera_service(video_source, fps=15, allow_draw=True):
     return CameraService(video_source, fps=fps, allow_draw=allow_draw)
+
+
+async def websocket_watchdog(
+    websocket: WebSocket,
+    stop: asyncio.Event,
+    on_disconnect,
+    interval: float = 15.0,
+):
+    try:
+        while not stop.is_set():
+            try:
+                msg = await asyncio.wait_for(
+                    websocket.receive(), timeout=interval
+                )
+            except asyncio.TimeoutError:
+                try:
+                    await websocket.send({"type": "websocket.ping"})
+                except Exception:
+                    break
+                continue
+            if msg.get("type") == "websocket.disconnect":
+                break
+    except (CancelledError, WebSocketDisconnect, RuntimeError):
+        pass
+    if not stop.is_set():
+        stop.set()
+        await on_disconnect()

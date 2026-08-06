@@ -1,10 +1,13 @@
+import asyncio
 import logging
 from asyncio import CancelledError, create_task, sleep as async_sleep
-from datetime import datetime, timezone
+from datetime import datetime
 from time import time
+from zoneinfo import ZoneInfo
 
 from fastapi import WebSocket, WebSocketDisconnect
 
+from core.config import settings
 from websocket.helpers import (
     authenticate,
     create_camera_service,
@@ -12,7 +15,9 @@ from websocket.helpers import (
     get_user_camera,
     load_user_config,
     set_camera_status,
+    websocket_watchdog,
 )
+from websocket.registry import register_manager, unregister_manager
 
 logger = logging.getLogger(__name__)
 
@@ -35,19 +40,34 @@ class AreaDetectionManager:
         self.allow_draw = True
         self.mst = None
         self.met = None
+        self.frame_errors = 0
+        self._stop = asyncio.Event()
+        self._watchdog_task = None
+
+    async def close(self, reason: str = ""):
+        self._stop.set()
+        if self.task:
+            self.task.cancel()
+        try:
+            await self.ws.close(code=1000, reason=reason)
+        except Exception:
+            pass
 
     async def _cleanup(self, reason: str = ""):
         self.running = False
+        self._stop.set()
         if self.camera_service:
             self.camera_service.stop()
             self.camera_service = None
         if self.task:
             self.task.cancel()
             self.task = None
+        if self.camera_id:
+            await unregister_manager(self.camera_id, self)
         await set_camera_status(self.camera, False)
 
     def _is_monitoring_time(self) -> bool:
-        now = datetime.now(timezone.utc).time()
+        now = datetime.now(ZoneInfo(settings.TIME_ZONE)).time()
         if not self.mst or not self.met:
             return True
         try:
@@ -71,7 +91,19 @@ class AreaDetectionManager:
                 try:
                     frame, people = self.camera_service.get_frame(detect)
                 except Exception as e:
-                    break
+                    self.frame_errors += 1
+                    logger.warning(
+                        "frame error on camera %s (%d/%d): %s",
+                        self.camera_id,
+                        self.frame_errors,
+                        10,
+                        e,
+                    )
+                    if self.frame_errors >= 10:
+                        break
+                    await async_sleep(1 / self.fps)
+                    continue
+                self.frame_errors = 0
 
                 if (
                     detect
@@ -140,17 +172,25 @@ class AreaDetectionManager:
                 video_source, fps=self.fps, allow_draw=self.allow_draw
             )
             await set_camera_status(self.camera, True)
-        except Exception as e:
+        except Exception:
             await set_camera_status(self.camera, False)
             await self.ws.close(code=4001)
             return
 
         self.running = True
+        if self.camera_id:
+            await register_manager(self.camera_id, self)
         self.task = create_task(self.stream())
+        self._watchdog_task = create_task(
+            websocket_watchdog(self.ws, self._stop, self._cleanup)
+        )
 
         try:
             await self.task
         except (CancelledError, WebSocketDisconnect):
             pass
         finally:
+            self._stop.set()
+            if self._watchdog_task:
+                self._watchdog_task.cancel()
             await self._cleanup(reason="handle_end")

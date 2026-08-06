@@ -1,11 +1,20 @@
+import cv2
+from asyncio import to_thread
+from platform import system
+
+from cv2_enumerate_cameras import cameras_generator, supported_backends
 from tortoise.expressions import Q
 
+from apps.cameras.device_cache import load_camera_cache, save_camera_cache
 from apps.cameras.models import Camera
 from apps.cameras.schemas import CameraCreate
 from apps.audit.service import log_action
 from apps.control.models import Profile
 from apps.license.models import License
 from core.exceptions import NotFound, ValidationError_
+from websocket.registry import close_camera_connections
+
+SYSTEM = system()
 
 
 async def list_cameras(
@@ -106,28 +115,69 @@ async def delete_camera(camera_id: int, profile_id: str):
         raise NotFound("Câmara não encontrada")
     await camera.delete()
     await log_action("delete", "camera", camera_id)
+    await close_camera_connections(camera_id)
 
 
-async def get_available_cameras():
+def _camera_opens(backend: int, source) -> bool:
+    """Open a capture device and grab one frame to confirm it is usable."""
     try:
-        from cv2_enumerate_cameras import enumerate_cameras
-        from asyncio import to_thread
-
-        cameras = await to_thread(lambda: list(enumerate_cameras()))
-        cams = []
-        registered = set()
-        for idx, cam in enumerate(cameras):
-            if cam.path not in registered:
-                cams.append(
-                    {
-                        "id": idx,
-                        "name": cam.name,
-                        "path": cam.path,
-                        "backend": str(cam.backend),
-                        "index": cam.index,
-                    }
-                )
-                registered.add(cam.path)
-        return cams
+        cap = cv2.VideoCapture(source, backend)
+        if cap is None:
+            return False
+        try:
+            if not cap.isOpened():
+                return False
+            grabbed, _frame = cap.read()
+            return bool(grabbed)
+        finally:
+            cap.release()
     except Exception:
-        return []
+        return False
+
+
+def _discover_cameras() -> list[dict]:
+    cameras: list[dict] = []
+    seen: set[str] = set()
+    for backend in supported_backends:
+        for info in cameras_generator(backend):
+            key = info.path or f"{backend}:{info.index}"
+            if key in seen:
+                continue
+            seen.add(key)
+
+            if SYSTEM == "Windows":
+                usable = _camera_opens(backend, info.index)
+            elif info.path:
+                usable = _camera_opens(0, info.path)
+            else:
+                usable = _camera_opens(backend, info.index)
+
+            cameras.append(
+                {
+                    "id": backend + info.index,
+                    "name": info.name,
+                    "path": info.path or "",
+                    "backend": backend,
+                    "index": info.index,
+                    "vid": info.vid,
+                    "pid": info.pid,
+                    "usable": usable,
+                }
+            )
+    cameras.sort(key=lambda c: (not c["usable"], c["path"] or ""))
+    return cameras
+
+
+async def get_available_cameras(refresh: bool = False) -> list[dict]:
+    """List verified local capture devices, using a short-lived on-disk cache.
+
+    ``refresh=True`` forces re-enumeration (verification grabs one frame per
+    device) so dead or busy cameras can be detected by the user.
+    """
+    if not refresh:
+        cached = load_camera_cache()
+        if cached is not None:
+            return [c for c in cached if c.get("usable")]
+    cameras = await to_thread(_discover_cameras)
+    save_camera_cache(cameras)
+    return [c for c in cameras if c.get("usable")]

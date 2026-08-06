@@ -5,11 +5,14 @@ import uvicorn
 from apps import ROUTERS
 from core.bootstrap import bootstrap_database
 from core.config import settings
+from core.logging_config import configure_logging
 from core.lifespan import lifespan
 from core.routes import system_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+configure_logging()
 
 
 def create_app() -> FastAPI:

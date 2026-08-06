@@ -48,3 +48,11 @@ export function useLocalDevices() {
     queryFn: () => camerasApi.getLocalDevices(),
   });
 }
+
+export function useRefreshLocalDevices() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => camerasApi.getLocalDevices(true),
+    onSuccess: (devices) => qc.setQueryData(["local-devices"], devices),
+  });
+}

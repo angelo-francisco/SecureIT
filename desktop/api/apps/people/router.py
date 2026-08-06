@@ -21,13 +21,13 @@ from apps.people.schemas import (
 from apps.people.service import (
     create_person,
     delete_person,
-    generate_face_embedding,
+    embedding_to_list,
     get_person,
     list_people,
     search_by_face,
-    treat_photo,
     update_person,
 )
+from services.facenet import generate_face_embedding, treat_photo
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ async def create_person_endpoint(
     data: PersonCreate,
 ):
     photo_bytes, image = treat_photo(data.photo_base64)
-    embedding = generate_face_embedding(image=image)
+    embedding = embedding_to_list(generate_face_embedding(image=image))
 
     person = await create_person(
         first_name=data.first_name,
@@ -140,7 +140,9 @@ async def update_person_endpoint(
     photo_bytes, image = (
         treat_photo(data.photo_base64) if data.photo_base64 else (None, None)
     )
-    embedding = generate_face_embedding(image=image) if image else None
+    embedding = (
+        embedding_to_list(generate_face_embedding(image=image)) if image else None
+    )
 
     person = await update_person(
         person_id,

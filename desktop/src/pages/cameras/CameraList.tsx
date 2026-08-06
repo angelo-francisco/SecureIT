@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useCameras } from "../../hooks";
+import { useCameras, useRefreshLocalDevices } from "../../hooks";
 import { usePanelNavigate } from "../../hooks/usePanelNavigate";
 import { useCameraViewStore } from "../../stores/cameraView";
+import { useToast } from "../../hooks/useToast";
 import { Button, Table, Badge, Loader, Input } from "@/packages/ui";
 import * as Lucide from "lucide-react";
 import { formatDateTime } from "../../lib/utils";
@@ -13,7 +14,9 @@ interface CameraListProps {
 export default function CameraList({ onClose }: CameraListProps) {
   const [search, setSearch] = useState("");
   const { data: cameras, isLoading } = useCameras(search || undefined);
+  const refreshDevices = useRefreshLocalDevices();
   const panelNavigate = usePanelNavigate();
+  const { toast } = useToast();
 
   const columns = [
     {
@@ -76,6 +79,27 @@ export default function CameraList({ onClose }: CameraListProps) {
               className="pl-9 h-12 text-lg rounded-none"
             />
           </div>
+          <Button
+            size="lg"
+            variant="secondary"
+            icon={refreshDevices.isPending ? <Loader w={18} /> : <Lucide.RefreshCw size={18} />}
+            onClick={() =>
+              refreshDevices.mutate(undefined, {
+                onSuccess: (devices) =>
+                  toast(
+                    devices.length > 0
+                      ? `${devices.length} câmara(s) local(is) identificada(s)`
+                      : "Nenhuma câmara local identificada",
+                    "success"
+                  ),
+                onError: () => toast("Erro ao identificar câmaras locais", "error"),
+              })
+            }
+            disabled={refreshDevices.isPending}
+            className="rounded-none cursor-pointer"
+          >
+            Identificar
+          </Button>
           <Button
             size="lg"
             icon={<Lucide.Plus size={18} />}

@@ -76,5 +76,6 @@ class AvailableCamera(BaseModel):
     id: int
     name: str
     path: str
-    backend: str
+    backend: int
     index: int
+    usable: bool = True

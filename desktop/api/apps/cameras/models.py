@@ -4,6 +4,8 @@ from platform import system
 
 from tortoise import fields, models
 
+from apps.cameras.device_cache import resolve_windows_device_id
+
 logger = logging.getLogger(__name__)
 
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
@@ -11,6 +13,22 @@ VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
 
 def _is_video_file(path: str) -> bool:
     return any(path.lower().endswith(ext) for ext in VIDEO_EXTENSIONS)
+
+
+def _camera_device_id(raw) -> int | None:
+    """Coerce a camera device identifier to an int without raising.
+
+    The frontend may store ``id`` as an int, a digit string, or omit it
+    entirely (e.g. demo cameras saved with only a ``path``). Return None when
+    there is no usable id instead of crashing serialization/websockets.
+    """
+    if isinstance(raw, bool) or raw is None:
+        return None
+    if isinstance(raw, int):
+        return raw if raw >= 0 else None
+    if isinstance(raw, str) and raw.strip().isdigit():
+        return int(raw.strip())
+    return None
 
 
 class CameraType(StrEnum):
@@ -58,11 +76,13 @@ class Camera(models.Model):
             path = self.connection_info.get("path", "")
             if _is_video_file(path):
                 return path
-            if system() == "Linux":
-                logger.critical("linux = " + path)
+            if system() == "Linux" and path:
                 return path
-            logger.critical("win/mac=" + str(self.connection_info.get("id", path)))
-            return int(self.connection_info.get("id", path))
+            if system() == "Windows":
+                resolved = resolve_windows_device_id(path)
+                if resolved is not None:
+                    return resolved
+            return _camera_device_id(self.connection_info.get("id"))
         return None
 
     def effective_task(self) -> str:

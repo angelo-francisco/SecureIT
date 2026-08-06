@@ -1,5 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDetectionEventsStore } from "../../stores/detectionEvents";
+import { useCameraReloadStore } from "../../stores/cameraReload";
+import { useToast } from "../../hooks/useToast";
+import { Button, Modal } from "@/packages/ui";
 import * as Lucide from "lucide-react";
 
 interface DetectionSidebarProps {
@@ -21,12 +24,20 @@ function eventTitle(
 export default function DetectionSidebar({ onInspectPerson, navbarHidden, onToggleNavbar }: DetectionSidebarProps) {
   const events = useDetectionEventsStore((s) => s.events);
   const clearEvents = useDetectionEventsStore((s) => s.clearEvents);
+  const [reloadConfirm, setReloadConfirm] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [events.length]);
+
+  function confirmReload() {
+    useCameraReloadStore.getState().requestReloadAll();
+    setReloadConfirm(false);
+    toast("A recarregar câmeras...", "success");
+  }
 
   return (
     <div className="w-90 shrink-0 border-l border-white/[0.08] bg-[#0B0E14] flex flex-col h-[100vh]">
@@ -39,6 +50,13 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setReloadConfirm(true)}
+            className="cursor-pointer p-1.5 text-text-muted hover:text-white hover:bg-white/[0.06] transition-colors"
+            title="Recarregar câmeras"
+          >
+            <Lucide.RefreshCw size={16} />
+          </button>
           {onToggleNavbar && (
             <button
               onClick={onToggleNavbar}
@@ -143,6 +161,26 @@ export default function DetectionSidebar({ onInspectPerson, navbarHidden, onTogg
           </div>
         )}
       </div>
+
+      <Modal
+        open={reloadConfirm}
+        onClose={() => setReloadConfirm(false)}
+        disableBackdropClose
+        className="max-w-md bg-surface-dark border border-border-dark p-6"
+      >
+        <h3 className="text-xl font-bold text-text mb-4">Recarregar câmeras</h3>
+        <p className="text-text-muted mb-6">
+          Todas as câmeras pararão temporariamente para serem recarregadas.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" type="button" onClick={() => setReloadConfirm(false)}>
+            Cancelar
+          </Button>
+          <Button variant="primary" type="button" onClick={confirmReload}>
+            Recarregar
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

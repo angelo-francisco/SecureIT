@@ -14,6 +14,19 @@ def _is_video_file(path: str) -> bool:
     return any(path.lower().endswith(ext) for ext in VIDEO_EXTENSIONS)
 
 
+def _split_windows_id(source: int) -> tuple[int, int] | None:
+    """Split a combined capture id (``backend + index``) into its parts.
+
+    ``cv2_enumerate_cameras`` reports device ids as ``backend + index`` so a
+    single number is unique across backends. ``cv2.VideoCapture`` expects the
+    plain per-backend index, so the id must be split before opening.
+    """
+    for backend in (cv2.CAP_DSHOW, cv2.CAP_MSMF):
+        if backend <= source < backend + 100:
+            return source - backend, backend
+    return None
+
+
 class CameraService:
     def __init__(self, video_source, fps=15, allow_draw=True):
         self.allow_draw = allow_draw
@@ -25,28 +38,56 @@ class CameraService:
 
         if isinstance(video_source, str) and _is_video_file(video_source):
             self.is_video_file = True
-        if SYSTEM == "Windows" and isinstance(video_source, str) and video_source.isdigit():
+        if isinstance(video_source, str) and video_source.isdigit():
             video_source = int(video_source)
-        logger.critical("opening video_source=%s type=%s", str(video_source), type(video_source))
-        for attempt in range(3):
-            if SYSTEM == "Linux":
-                self.video = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
-            elif SYSTEM == "Windows":
-                self.video = cv2.VideoCapture(video_source, cv2.CAP_DSHOW)
+
+        # Forced backends are only useful for live devices. Video files and
+        # URLs (RTSP/HTTP) must use the default backend (FFMPEG), otherwise
+        # CAP_DSHOW/CAP_V4L2 fail to open them on Windows/Linux.
+        backends = [0]
+        if SYSTEM == "Linux":
+            backends = [cv2.CAP_V4L2, 0]
+        elif SYSTEM == "Windows" and isinstance(video_source, int):
+            split = _split_windows_id(video_source)
+            if split is not None:
+                index, backend = split
+                video_source = index
+                backends = [backend, 0]
             else:
-                self.video = cv2.VideoCapture(video_source)
-            if self.video.isOpened():
-                logger.critical(
-                    "camera opened on attempt %d source=%s", attempt + 1, video_source
-                )
+                backends = [cv2.CAP_DSHOW, 0]
+
+        logger.info(
+            "opening video_source=%s type=%s backends=%s",
+            str(video_source),
+            type(video_source),
+            backends,
+        )
+        self.video = None
+        for attempt in range(3):
+            for backend in backends:
+                try:
+                    video = cv2.VideoCapture(video_source, backend)
+                except Exception:
+                    video = None
+                if video is not None and video.isOpened():
+                    self.video = video
+                    logger.info(
+                        "camera opened on attempt %d source=%s backend=%s",
+                        attempt + 1,
+                        video_source,
+                        backend,
+                    )
+                    break
+                if video is not None:
+                    video.release()
+            if self.video is not None:
                 break
-            logger.critical(
+            logger.info(
                 "camera NOT opened attempt %d source=%s", attempt + 1, video_source
             )
-            self.video.release()
             sleep(0.5)
         else:
-            logger.critical("camera failed after 3 attempts source=%s", video_source)
+            logger.info("camera failed after 3 attempts source=%s", video_source)
             raise RuntimeError("Erro ao abrir câmara após várias tentativas")
 
         if self.is_video_file:
@@ -78,6 +119,10 @@ class CameraService:
         from services.yolo import YOLOService  # lazy import
 
         frame = self.frame
+        if frame is None:
+            grabbed, frame = self.video.read()
+            if not grabbed:
+                raise RuntimeError("camera frame unavailable")
         people_count = 0
 
         if detect:
@@ -94,6 +139,7 @@ class CameraService:
         return jpeg.tobytes(), people_count
 
     def update(self):
+        consecutive_errors = 0
         while self.running:
             grabbed, frame = self.video.read()
             if not grabbed:
@@ -103,6 +149,15 @@ class CameraService:
                     if not grabbed:
                         break
                 else:
-                    break
+                    consecutive_errors += 1
+                    if consecutive_errors >= 20:
+                        logger.warning(
+                            "camera read failed %d times, stopping capture thread",
+                            consecutive_errors,
+                        )
+                        break
+                    sleep(1 / self.fps)
+                    continue
+            consecutive_errors = 0
             self.frame = frame
             sleep(1 / self.fps)

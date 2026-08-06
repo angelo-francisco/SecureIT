@@ -19,7 +19,9 @@ from websocket.helpers import (
     get_user_camera,
     load_user_config,
     set_camera_status,
+    websocket_watchdog,
 )
+from websocket.registry import register_manager, unregister_manager
 
 logger = logging.getLogger(__name__)
 
@@ -36,19 +38,34 @@ class FaceRecognitionManager:
         self.frame_index = 0
         self.fps = 15
         self.detect_every = 10
+        self.frame_errors = 0
+        self._stop = asyncio.Event()
+        self._watchdog_task = None
         self._notified: dict[int, float] = {}
         self._match_cooldown = 30
         self._last_unknown_save: float = 0
         self._unknown_save_cooldown = 60
 
+    async def close(self, reason: str = ""):
+        self._stop.set()
+        if self.task:
+            self.task.cancel()
+        try:
+            await self.ws.close(code=1000, reason=reason)
+        except Exception:
+            pass
+
     async def _cleanup(self, reason: str = ""):
         self.running = False
+        self._stop.set()
         if self.camera_service:
             self.camera_service.stop()
             self.camera_service = None
         if self.task:
             self.task.cancel()
             self.task = None
+        if self.camera_id:
+            await unregister_manager(self.camera_id, self)
         await set_camera_status(self.camera, False)
 
     async def stream(self):
@@ -61,8 +78,17 @@ class FaceRecognitionManager:
 
                 frame = self.camera_service.frame
                 if frame is None:
+                    self.frame_errors += 1
+                    if self.frame_errors >= 10:
+                        logger.warning(
+                            "no frame for camera %s (%d consecutive)",
+                            self.camera_id,
+                            self.frame_errors,
+                        )
+                        break
                     await async_sleep(1 / self.fps)
                     continue
+                self.frame_errors = 0
 
                 faces: list[dict] = []
 
@@ -208,17 +234,25 @@ class FaceRecognitionManager:
                 video_source, fps=self.fps, allow_draw=False
             )
             await set_camera_status(self.camera, True)
-        except Exception as e:
+        except Exception:
             await set_camera_status(self.camera, False)
             await self.ws.close(code=4001)
             return
 
         self.running = True
+        if self.camera_id:
+            await register_manager(self.camera_id, self)
         self.task = create_task(self.stream())
+        self._watchdog_task = create_task(
+            websocket_watchdog(self.ws, self._stop, self._cleanup)
+        )
 
         try:
             await self.task
         except (CancelledError, WebSocketDisconnect):
             pass
         finally:
+            self._stop.set()
+            if self._watchdog_task:
+                self._watchdog_task.cancel()
             await self._cleanup(reason="handle_end")

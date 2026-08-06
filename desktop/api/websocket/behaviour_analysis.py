@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from asyncio import CancelledError, create_task, sleep as async_sleep
@@ -16,7 +17,9 @@ from websocket.helpers import (
     get_user_camera,
     load_user_config,
     set_camera_status,
+    websocket_watchdog,
 )
+from websocket.registry import register_manager, unregister_manager
 
 logger = logging.getLogger(__name__)
 
@@ -242,15 +245,30 @@ class BehaviourAnalysisManager:
         self._object_tracker = ObjectTracker()
         self._last_theft_alert = 0.0
         self._theft_cooldown = 15.0
+        self.frame_errors = 0
+        self._stop = asyncio.Event()
+        self._watchdog_task = None
+
+    async def close(self, reason: str = ""):
+        self._stop.set()
+        if self.task:
+            self.task.cancel()
+        try:
+            await self.ws.close(code=1000, reason=reason)
+        except Exception:
+            pass
 
     async def _cleanup(self, reason: str = ""):
         self.running = False
+        self._stop.set()
         if self.camera_service:
             self.camera_service.stop()
             self.camera_service = None
         if self.task:
             self.task.cancel()
             self.task = None
+        if self.camera_id:
+            await unregister_manager(self.camera_id, self)
         await set_camera_status(self.camera, False)
 
     def _check_cooldown(self) -> bool:
@@ -439,9 +457,23 @@ class BehaviourAnalysisManager:
 
                 try:
                     jpeg_bytes, _ = self.camera_service.get_frame(detect=False)
-                except Exception:
-                    break
+                except Exception as e:
+                    self.frame_errors += 1
+                    logger.warning(
+                        "frame error on camera %s (%d/%d): %s",
+                        self.camera_id,
+                        self.frame_errors,
+                        10,
+                        e,
+                    )
+                    if self.frame_errors >= 10:
+                        break
+                    await async_sleep(1 / self.fps)
+                    continue
+                self.frame_errors = 0
                 raw_frame = self.camera_service.frame
+                if raw_frame is None:
+                    continue
 
                 people_count = 0
                 if detect:
@@ -542,11 +574,19 @@ class BehaviourAnalysisManager:
             return
 
         self.running = True
+        if self.camera_id:
+            await register_manager(self.camera_id, self)
         self.task = create_task(self.stream())
+        self._watchdog_task = create_task(
+            websocket_watchdog(self.ws, self._stop, self._cleanup)
+        )
 
         try:
             await self.task
         except (CancelledError, WebSocketDisconnect):
             pass
         finally:
+            self._stop.set()
+            if self._watchdog_task:
+                self._watchdog_task.cancel()
             await self._cleanup(reason="handle_end")

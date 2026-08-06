@@ -62,7 +62,7 @@ function App() {
   }, [setAccounts]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setGifDone(true), 2800);
+    const timer = setTimeout(() => setGifDone(true), 1500);
     return () => clearTimeout(timer);
   }, []);
 

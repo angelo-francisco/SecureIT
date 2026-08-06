@@ -76,3 +76,9 @@ export function disconnectAll() {
   connections.forEach((conn) => conn.ws.close());
   connections.clear();
 }
+
+if (typeof window !== "undefined") {
+  const closeOnUnload = () => disconnectAll();
+  window.addEventListener("pagehide", closeOnUnload);
+  window.addEventListener("beforeunload", closeOnUnload);
+}
