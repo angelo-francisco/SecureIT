@@ -115,7 +115,7 @@ async def websocket_watchdog(
                 )
             except asyncio.TimeoutError:
                 try:
-                    await websocket.send({"type": "websocket.ping"})
+                    await websocket.send_text('{"type": "ping"}')
                 except Exception:
                     break
                 continue
