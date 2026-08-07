@@ -73,6 +73,11 @@ THEFT_CLASS_IDS = {
     79: "escova dentes",
 }
 
+WEAPON_CLASS_IDS = {
+    43: "faca",
+    76: "tesoura",
+}
+
 
 def _bbox_center(bbox):
     x1, y1, x2, y2 = bbox
@@ -245,6 +250,15 @@ class BehaviourAnalysisManager:
         self._object_tracker = ObjectTracker()
         self._last_theft_alert = 0.0
         self._theft_cooldown = 15.0
+        self._last_weapon_alert = 0.0
+        self._weapon_cooldown = 15.0
+        self._last_robbery_alert = 0.0
+        self._robbery_cooldown = 15.0
+        self._last_people: list = []
+        self._last_objects: list = []
+        self._last_weapons: list = []
+        self._active_banner: dict | None = None
+        self.allow_draw = True
         self.frame_errors = 0
         self._stop = asyncio.Event()
         self._watchdog_task = None
@@ -277,6 +291,19 @@ class BehaviourAnalysisManager:
     def _theft_cooldown_ok(self) -> bool:
         return time() - self._last_theft_alert > self._theft_cooldown
 
+    def _weapon_cooldown_ok(self) -> bool:
+        return time() - self._last_weapon_alert > self._weapon_cooldown
+
+    def _robbery_cooldown_ok(self) -> bool:
+        return time() - self._last_robbery_alert > self._robbery_cooldown
+
+    def _set_banner(self, text: str, color=(0, 0, 255), duration: float = 4.0):
+        self._active_banner = {
+            "text": text,
+            "color": color,
+            "until": time() + duration,
+        }
+
     def _compute_optical_flow_magnitude(self, gray: np.ndarray) -> float:
         if self.prev_gray is None:
             self.prev_gray = gray
@@ -300,7 +327,7 @@ class BehaviourAnalysisManager:
         return float(np.mean(magnitude))
 
     def _detect_theft(
-        self, people: list, active: dict, disappeared: dict
+        self, people: list, disappeared: dict
     ) -> dict | None:
         if not self._theft_cooldown_ok():
             return None
@@ -333,6 +360,46 @@ class BehaviourAnalysisManager:
                 "camera_name": self.camera.name if self.camera else None,
             }
 
+        return None
+
+    def _detect_weapon(self, people: list, weapons: list) -> dict | None:
+        if not self._weapon_cooldown_ok():
+            return None
+        if not people or not weapons:
+            return None
+
+        for person in people:
+            pb = person["bbox"]
+            for w in weapons:
+                if _bbox_overlap(pb, w["bbox"]) > 0.15:
+                    self._last_weapon_alert = time()
+                    return {
+                        "type": "weapon_alert",
+                        "severity": "critical",
+                        "description": (
+                            f"Pessoa com arma branca detetada: {w['class_name']}"
+                        ),
+                        "weapon": {
+                            "class": w["class_name"],
+                            "class_id": w["class_id"],
+                            "confidence": w["confidence"],
+                        },
+                        "camera_id": self.camera_id,
+                        "camera_name": self.camera.name if self.camera else None,
+                    }
+
+        return None
+
+    def _detect_robbery(
+        self, people: list, active: dict, weapons: list
+    ) -> dict | None:
+        if not self._robbery_cooldown_ok():
+            return None
+        if not people:
+            return None
+
+        weapon_ids = {w["class_id"] for w in weapons}
+
         for obj in active.values():
             if not obj.coupled or obj.coupled_frames < 3:
                 continue
@@ -344,17 +411,24 @@ class BehaviourAnalysisManager:
                 _centroid_dist(recent[i], recent[i - 1]) for i in range(1, len(recent))
             )
 
-            if speed > 50:
-                self._last_theft_alert = time()
-                return {
-                    "type": "theft_alert",
-                    "severity": "critical",
-                    "description": f"Corrida suspeita com {obj.class_name}",
-                    "object": {"class": obj.class_name, "class_id": obj.class_id},
-                    "motion_intensity": round(speed, 2),
-                    "camera_id": self.camera_id,
-                    "camera_name": self.camera.name if self.camera else None,
-                }
+            armed = obj.class_id in weapon_ids
+            if not armed and speed <= 50:
+                continue
+
+            self._last_robbery_alert = time()
+            return {
+                "type": "robbery_alert",
+                "severity": "critical",
+                "description": (
+                    f"Possível assalto/roubo: pessoa em fuga com "
+                    f"{'arma' if armed else 'objeto'} ({obj.class_name})"
+                ),
+                "object": {"class": obj.class_name, "class_id": obj.class_id},
+                "armed": armed,
+                "motion_intensity": round(speed, 2),
+                "camera_id": self.camera_id,
+                "camera_name": self.camera.name if self.camera else None,
+            }
 
         return None
 
@@ -422,7 +496,64 @@ class BehaviourAnalysisManager:
 
         return None
 
-    def _run_yolo(self, frame: np.ndarray) -> tuple[list, list, int]:
+    def _draw_overlay(self, frame: np.ndarray) -> None:
+        for p in self._last_people:
+            x1, y1, x2, y2 = p["bbox"]
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            cv2.putText(
+                frame,
+                "Pessoa",
+                (x1, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (255, 0, 0),
+                2,
+            )
+
+        for o in self._last_objects:
+            x1, y1, x2, y2 = o["bbox"]
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 165, 255), 2)
+            cv2.putText(
+                frame,
+                o["class_name"],
+                (x1, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 165, 255),
+                2,
+            )
+
+        for w in self._last_weapons:
+            x1, y1, x2, y2 = w["bbox"]
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 3)
+            cv2.putText(
+                frame,
+                f"ARMA: {w['class_name']}",
+                (x1, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 0, 255),
+                2,
+            )
+
+        if self._active_banner and time() < self._active_banner["until"]:
+            text = self._active_banner["text"]
+            color = self._active_banner["color"]
+            width = frame.shape[1]
+            cv2.rectangle(frame, (0, 0), (width, 40), (0, 0, 0), -1)
+            cv2.putText(
+                frame,
+                text,
+                (10, 27),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                color,
+                2,
+            )
+        else:
+            self._active_banner = None
+
+    def _run_yolo(self, frame: np.ndarray) -> tuple[list, list, list, int]:
         from services.yolo import YOLOService  # lazy import
 
         results = YOLOService.predict(frame, imgsz=320, conf=0.3)
@@ -431,6 +562,7 @@ class BehaviourAnalysisManager:
 
         people = []
         objects = []
+        weapons = []
         for b in boxes:
             cls_id = int(b.cls[0])
             bbox = tuple(map(int, b.xyxy[0]))
@@ -444,10 +576,13 @@ class BehaviourAnalysisManager:
             }
             if cls_id == 0:
                 people.append(entry)
+            elif cls_id in WEAPON_CLASS_IDS:
+                weapons.append(entry)
+                objects.append(entry)
             elif cls_id in THEFT_CLASS_IDS:
                 objects.append(entry)
 
-        return people, objects, len(people)
+        return people, objects, weapons, len(people)
 
     async def stream(self):
         try:
@@ -455,29 +590,27 @@ class BehaviourAnalysisManager:
                 self.frame_index += 1
                 detect = self.frame_index % self.detect_every == 0
 
-                try:
-                    jpeg_bytes, _ = self.camera_service.get_frame(detect=False)
-                except Exception as e:
+                raw_frame = self.camera_service.frame
+                if raw_frame is None:
                     self.frame_errors += 1
                     logger.warning(
-                        "frame error on camera %s (%d/%d): %s",
+                        "no frame for camera %s (%d/%d)",
                         self.camera_id,
                         self.frame_errors,
                         10,
-                        e,
                     )
                     if self.frame_errors >= 10:
                         break
                     await async_sleep(1 / self.fps)
                     continue
                 self.frame_errors = 0
-                raw_frame = self.camera_service.frame
-                if raw_frame is None:
-                    continue
 
                 people_count = 0
                 if detect:
-                    people, objects, people_count = self._run_yolo(raw_frame)
+                    people, objects, weapons, people_count = self._run_yolo(raw_frame)
+                    self._last_people = people
+                    self._last_objects = objects
+                    self._last_weapons = weapons
 
                     self._object_tracker.update(objects)
                     active = self._object_tracker.get_active()
@@ -498,6 +631,7 @@ class BehaviourAnalysisManager:
 
                     alert = self._detect_suspicious_activity(raw_frame, people_count)
                     if alert:
+                        self._set_banner(alert["description"])
                         create_task(
                             create_notification(
                                 profile_id=self.profile_id,
@@ -510,8 +644,24 @@ class BehaviourAnalysisManager:
                         )
                         await self.ws.send_text(json.dumps(alert))
 
-                    theft = self._detect_theft(people, active, disappeared)
+                    weapon = self._detect_weapon(people, weapons)
+                    if weapon:
+                        self._set_banner(weapon["description"])
+                        create_task(
+                            create_notification(
+                                profile_id=self.profile_id,
+                                camera_id=self.camera_id,
+                                title="Alerta de arma detetada",
+                                description=weapon["description"],
+                                level="C",
+                                frame=raw_frame,
+                            )
+                        )
+                        await self.ws.send_text(json.dumps(weapon))
+
+                    theft = self._detect_theft(people, disappeared)
                     if theft:
+                        self._set_banner(theft["description"])
                         create_task(
                             create_notification(
                                 profile_id=self.profile_id,
@@ -524,7 +674,28 @@ class BehaviourAnalysisManager:
                         )
                         await self.ws.send_text(json.dumps(theft))
 
-                await self.ws.send_bytes(jpeg_bytes)
+                    robbery = self._detect_robbery(people, active, weapons)
+                    if robbery:
+                        self._set_banner(robbery["description"])
+                        create_task(
+                            create_notification(
+                                profile_id=self.profile_id,
+                                camera_id=self.camera_id,
+                                title="Alerta de possível assalto/roubo",
+                                description=robbery["description"],
+                                level="C",
+                                frame=raw_frame,
+                            )
+                        )
+                        await self.ws.send_text(json.dumps(robbery))
+
+                if self.allow_draw:
+                    self._draw_overlay(raw_frame)
+
+                _, jpeg = cv2.imencode(
+                    ".jpg", raw_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+                )
+                await self.ws.send_bytes(jpeg.tobytes())
                 await async_sleep(1 / self.fps)
         except CancelledError:
             pass
@@ -556,6 +727,7 @@ class BehaviourAnalysisManager:
         config = await load_user_config(self.profile_id)
         self.fps = config.get("fps", self.fps)
         self.detect_every = config.get("detect_every", self.detect_every)
+        self.allow_draw = config.get("allow_draw", self.allow_draw)
 
         try:
             if camera_id:
@@ -565,7 +737,7 @@ class BehaviourAnalysisManager:
                     pass
 
             self.camera_service = create_camera_service(
-                video_source, fps=self.fps, allow_draw=False
+                video_source, fps=self.fps, allow_draw=self.allow_draw
             )
             await set_camera_status(self.camera, True)
         except Exception:

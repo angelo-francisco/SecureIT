@@ -112,7 +112,12 @@ export default function Dashboard() {
             timestamp: now,
           });
         }
-      } else if (data.type === "behaviour_alert") {
+      } else if (
+        data.type === "behaviour_alert" ||
+        data.type === "theft_alert" ||
+        data.type === "weapon_alert" ||
+        data.type === "robbery_alert"
+      ) {
         const key = `behaviour-${Date.now()}`;
         if (key !== lastKey) {
           lastKey = key;
