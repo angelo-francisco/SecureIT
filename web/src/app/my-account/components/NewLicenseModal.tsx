@@ -47,6 +47,59 @@ interface NewLicenseModalProps {
 	onComplete?: () => void;
 }
 
+interface AddonRowProps {
+	name: string;
+	description: string | null;
+	price: number;
+	selected: boolean;
+	onToggle: () => void;
+	convert: (usd: number) => string;
+}
+
+function AddonRow({
+	name,
+	description,
+	price,
+	selected,
+	onToggle,
+	convert,
+}: AddonRowProps) {
+	return (
+		<button
+			type="button"
+			onClick={onToggle}
+			className={`w-full flex items-start gap-3 p-3 border text-left transition-all ${
+				selected
+					? "border-primary/50 bg-primary/10"
+					: "border-border bg-surface hover:border-primary/30 hover:bg-surface-hover"
+			}`}
+		>
+			<span
+				className={`mt-0.5 shrink-0 w-5 h-5 border flex items-center justify-center ${
+					selected
+						? "bg-primary border-primary text-white"
+						: "border-border text-transparent"
+				}`}
+			>
+				<Check size={14} strokeWidth={3} />
+			</span>
+			<span className="flex-1 min-w-0">
+				<span className="flex items-center justify-between gap-3">
+					<span className="text-base font-medium text-text">{name}</span>
+					<span className="text-base font-bold text-text shrink-0">
+						{price > 0 ? `${convert(price)} Kz` : "Grátis"}
+					</span>
+				</span>
+				{description && (
+					<span className="block text-sm text-text-muted mt-0.5">
+						{description}
+					</span>
+				)}
+			</span>
+		</button>
+	);
+}
+
 export function NewLicenseModal({
 	open,
 	onClose,
@@ -65,6 +118,16 @@ export function NewLicenseModal({
 	const [submitting, setSubmitting] = useState(false);
 	const [copiedField, setCopiedField] = useState<string | null>(null);
 	const [activeLicense, setActiveLicense] = useState<LicenseData | null>(null);
+	const [selectedFeatureIds, setSelectedFeatureIds] = useState<string[]>([]);
+	const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
+
+	const plan = selectedPlan;
+	const addons = [
+		...(plan?.features ?? []).filter((f) => selectedFeatureIds.includes(f.id)),
+		...(plan?.services ?? []).filter((s) => selectedServiceIds.includes(s.id)),
+	];
+	const addonsTotal = addons.reduce((sum, a) => sum + (a.price || 0), 0);
+	const totalPrice = (plan?.basePrice ?? 0) + addonsTotal;
 
 	const copyToClipboard = (text: string, field: string) => {
 		navigator.clipboard.writeText(text).then(() => {
@@ -85,6 +148,8 @@ export function NewLicenseModal({
 			setSelectedPlan(null);
 			setUploadedProof(null);
 			setActiveLicense(null);
+			setSelectedFeatureIds([]);
+			setSelectedServiceIds([]);
 			setLoading(true);
 			Promise.all([
 				fetch("/api/plans").then(
@@ -112,7 +177,21 @@ export function NewLicenseModal({
 
 	const handleSelectPlan = (plan: Plan) => {
 		setSelectedPlan(plan);
+		setSelectedFeatureIds([]);
+		setSelectedServiceIds([]);
 		setStep(2);
+	};
+
+	const toggleFeature = (id: string) => {
+		setSelectedFeatureIds((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+		);
+	};
+
+	const toggleService = (id: string) => {
+		setSelectedServiceIds((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+		);
 	};
 
 	const handleSubmit = async () => {
@@ -126,6 +205,10 @@ export function NewLicenseModal({
 					planId: selectedPlan.id,
 					proofPublicId: uploadedProof.public_id,
 					proofUrl: uploadedProof.secure_url,
+					selectedFeatures: selectedFeatureIds,
+					selectedServices: selectedServiceIds,
+					totalPrice,
+					durationDays: selectedPlan.durationDays,
 				}),
 			});
 			if (!res.ok) {
@@ -144,7 +227,7 @@ export function NewLicenseModal({
 
 	return (
 		<Modal open={open} onClose={onClose}>
-			<div className="bg-surface backdrop-blur-sm p-8 w-full max-w-2xl space-y-4 border">
+			<div className="bg-surface backdrop-blur-sm p-8 w-full max-w-3xl space-y-4 border max-h-[90vh] overflow-y-auto">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-3">
 						<div>
@@ -243,6 +326,52 @@ export function NewLicenseModal({
 						)
 					) : (
 						<div className="space-y-5">
+							{plan &&
+								(plan.features?.length > 0 || plan.services?.length > 0) && (
+									<div className="space-y-4">
+										<div>
+											<span className="text-base md:text-lg font-semibold text-text block mb-1">
+												Funcionalidades adicionais
+											</span>
+										</div>
+
+										{plan.features?.length > 0 && (
+											<div className="space-y-2">
+												{plan.features.map((f) => (
+													<AddonRow
+														key={f.id}
+														name={f.name}
+														description={f.description}
+														price={f.price}
+														selected={selectedFeatureIds.includes(f.id)}
+														onToggle={() => toggleFeature(f.id)}
+														convert={convert}
+													/>
+												))}
+											</div>
+										)}
+
+										{plan.services?.length > 0 && (
+											<div className="space-y-2">
+												<span className="text-base font-semibold text-text-muted block">
+													Serviços
+												</span>
+												{plan.services.map((s) => (
+													<AddonRow
+														key={s.id}
+														name={s.name}
+														description={s.description}
+														price={s.price}
+														selected={selectedServiceIds.includes(s.id)}
+														onToggle={() => toggleService(s.id)}
+														convert={convert}
+													/>
+												))}
+											</div>
+										)}
+									</div>
+								)}
+
 							{paymentInfo ? (
 								<div className="divide-y divide-gray-600">
 									<span className="text-base md:text-lg font-semibold text-text mb-1">
@@ -251,12 +380,12 @@ export function NewLicenseModal({
 									<div className="mt-1 space-y-3">
 										<div className="flex items-center gap-2 mb-1"></div>
 										<div className="space-y-1">
-											<div className="flex items-center justify-between gap-8">
+											<div className="flex items-center justify-between gap-12">
 												<span className="text-base md:text-lg text-text font-bold">
 													IBAN
 												</span>
 												<div className="flex items-center gap-2">
-													<span className="text-base md:text-lg text-text">
+													<span className="text-base md:text-lg text-text truncate">
 														{paymentInfo.iban}
 													</span>
 													<button
@@ -322,13 +451,36 @@ export function NewLicenseModal({
 													</div>
 												</div>
 											)}
-											<div className="flex items-center justify-between pt-2 border-t border-border">
-												<span className="text-base text-text text-base md:text-lg">
-													Montante
-												</span>
-												<span className="text-base md:text-lg font-bold ">
-													{convert(selectedPlan?.basePrice || 0)} Kz
-												</span>
+											<div className="space-y-1 pt-2 border-t border-border">
+												<div className="flex items-center justify-between">
+													<span className="text-base md:text-lg text-text">
+														{selectedPlan?.name}
+													</span>
+													<span className="text-base md:text-lg font-medium text-text">
+														{convert(selectedPlan?.basePrice || 0)} Kz
+													</span>
+												</div>
+												{addons.map((a) => (
+													<div
+														key={a.id}
+														className="flex items-center justify-between"
+													>
+														<span className="text-base text-text">
+															{a.name}
+														</span>
+														<span className="text-base font-medium text-text">
+															{convert(a.price || 0)} Kz
+														</span>
+													</div>
+												))}
+												<div className="flex items-center justify-between pt-1">
+													<span className="text-base md:text-lg text-text">
+														Montante Total
+													</span>
+													<span className="text-base md:text-lg font-bold text-text">
+														{convert(totalPrice)} Kz
+													</span>
+												</div>
 											</div>
 										</div>
 									</div>

@@ -35,23 +35,35 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
     }));
   }, []);
 
-  const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
+  const cameraIds = cameras?.map((c) => `${c.id}:${c.task}`).sort().join(",") || "";
+
+  const consumerFor = (task: string) =>
+    task === "FR" ? "face-recognition" : task === "BA" ? "behaviour-analysis" : "area-detection";
 
   useEffect(() => {
     if (!cameras || !Array.isArray(cameras)) return;
 
-    wsKeysRef.current.forEach(disconnectCamera);
-    wsKeysRef.current = [];
+    const wantedKeys = new Set(
+      cameras.filter((c) => c.video_source).map((c) => `${consumerFor(c.task)}-${c.id}`)
+    );
 
-    const keys: string[] = [];
+    wsKeysRef.current = wsKeysRef.current.filter((key) => {
+      if (!wantedKeys.has(key)) {
+        disconnectCamera(key);
+        return false;
+      }
+      return true;
+    });
 
     cameras.forEach((cam) => {
       if (!cam.video_source) return;
+      const key = `${consumerFor(cam.task)}-${cam.id}`;
+      if (wsKeysRef.current.includes(key)) return;
 
-      const key = connectCamera(
+      connectCamera(
         cam.id,
         cam.video_source,
-        cam.task === "FR" ? "face-recognition" : cam.task === "BA" ? "behaviour-analysis" : "area-detection",
+        consumerFor(cam.task),
         (blob) => {
           const img = imageRefs.current.get(`cam-${cam.id}`);
           if (img) {
@@ -69,16 +81,17 @@ export default function CameraMonitor({ onClose }: CameraMonitorProps) {
           updateCamState(cam.id, { connected: false, error: "Desconectado" });
         }
       );
-      keys.push(key);
+      wsKeysRef.current = [...wsKeysRef.current, key];
       updateCamState(cam.id, { connected: true, faces: [] });
     });
-
-    wsKeysRef.current = keys;
-
-    return () => {
-      keys.forEach(disconnectCamera);
-    };
   }, [cameraIds, updateCamState]);
+
+  useEffect(() => {
+    return () => {
+      wsKeysRef.current.forEach(disconnectCamera);
+      wsKeysRef.current = [];
+    };
+  }, []);
 
   const selectedCam = cameras?.find((c) => c.id === selectedCamera);
   const regularCams = cameras?.filter((c) => c.task !== "FR") ?? [];

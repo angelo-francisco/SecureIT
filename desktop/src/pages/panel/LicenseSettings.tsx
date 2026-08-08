@@ -408,7 +408,19 @@ export default function LicenseSettings({ onClose }: LicenseSettingsProps) {
 
                 <span className="text-base font-semibold text-text text-right max-w-[250px]">
                   {apiLicense?.features?.length
-                    ? apiLicense.features.join(", ")
+                    ? apiLicense.features
+                        .map((f) => {
+                          const labelMap: Record<string, string> = {
+                            face_recognition: "Reconhecimento Facial",
+                            analise_comportamental: "Análise Comportamental",
+                            anlise_comportamental: "Análise Comportamental",
+                            tunnel_de_acesso_remoto: "Tunnel de Acesso Remoto",
+                            acesso_remoto: "Tunnel de Acesso Remoto",
+                            cloud_storage: "Cloud Storage",
+                          };
+                          return labelMap[f] || f.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                        })
+                        .join(", ")
                     : "—"}
                 </span>
               </div>

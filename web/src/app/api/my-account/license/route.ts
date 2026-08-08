@@ -1,7 +1,7 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and, gt } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { license, licenseKey, paymentRequest, plan } from "@/db/schema";
+import { license, licenseKey } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 
 export async function GET() {
@@ -10,54 +10,27 @@ export async function GET() {
 		return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 	}
 	try {
-		const userLicenses = await db
+		const now: string = new Date().toISOString();
+
+		const result = await db
 			.select()
 			.from(license)
-			.where(eq(license.userId, session.sub))
+			.innerJoin(licenseKey, eq(license.keyId, licenseKey.id))
+			.where(
+				and(
+					eq(license.userId, session.sub),
+					eq(license.status, "ACTIVE"),
+					eq(licenseKey.status, "ACTIVE"),
+					gt(license.expiresAt, now)
+				)
+			)
 			.orderBy(desc(license.createdAt))
-			.all();
-
-		const userLicense =
-			userLicenses.find((l) => l.status === "ACTIVE") ??
-			userLicenses[0] ??
-			null;
-
-		let licenseKeyData: typeof licenseKey.$inferSelect | undefined;
-		if (userLicense) {
-			licenseKeyData = await db
-				.select()
-				.from(licenseKey)
-				.where(eq(licenseKey.id, userLicense.keyId))
-				.get();
-		}
-
-		const payments = await db
-			.select()
-			.from(paymentRequest)
-			.where(eq(paymentRequest.userId, session.sub))
-			.orderBy(desc(paymentRequest.createdAt))
-			.all();
-
-		const paymentsWithPlans = await Promise.all(
-			payments.map(async (r) => {
-				const p = await db
-					.select()
-					.from(plan)
-					.where(eq(plan.id, r.planId))
-					.get();
-				return { ...r, plan: p ?? null };
-			}),
-		);
-
-		const licenseWithKey =
-			userLicense && licenseKeyData
-				? { ...userLicense, key: licenseKeyData }
-				: null;
-
-		return NextResponse.json({
-			license: licenseWithKey,
-			payments: paymentsWithPlans,
-		});
+			.limit(1)
+			.get();
+		const licenseWithKey = result
+			? { ...result.license, key: result.licensekey }
+			: null;
+		return NextResponse.json(licenseWithKey);
 	} catch (error) {
 		console.error("[License GET]", error);
 		return NextResponse.json(

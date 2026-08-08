@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     EMBEDDED_DB: bool = False
     PORT: int | None = None
     ED25519_PUBLIC_KEY: str = ""
+    HOST_VIDEO_DIR: str = ""
+    VIDEO_DIR: str = "/downloads"
 
     model_config = {"env_file": _env_file(), "extra": "ignore"}
 

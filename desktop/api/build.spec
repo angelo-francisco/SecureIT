@@ -23,7 +23,15 @@ binaries = []
 hiddenimports = []
 
 # Packages that load resources/plugins dynamically.
-for pkg in ("tortoise", "aerich", "facenet_pytorch", "ultralytics", "cv2", "tzdata"):
+for pkg in (
+    "tortoise",
+    "aerich",
+    "facenet_pytorch",
+    "ultralytics",
+    "cv2",
+    "av",
+    "tzdata",
+):
     d, b, h = collect_all(pkg)
     datas += d
     binaries += b

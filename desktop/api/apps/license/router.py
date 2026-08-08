@@ -130,6 +130,16 @@ async def verify_license(data: LicenseVerifyRequest):
             reason="invalid_signature",
         )
 
+    # Sync features and limits from verified JWT payload if available
+    payload_features = payload.get("features")
+    if payload_features is not None and isinstance(payload_features, list):
+        license_obj.features = payload_features
+
+    if "maxCameras" in payload and payload["maxCameras"] is not None:
+        license_obj.max_cameras = payload["maxCameras"]
+    if "maxPeople" in payload and payload["maxPeople"] is not None:
+        license_obj.max_people = payload["maxPeople"]
+
     # 2. Verify hardware fingerprint
     if license_obj.hardware_fingerprint != data.hardware_fingerprint:
         return LicenseResponse(

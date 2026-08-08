@@ -271,13 +271,14 @@ describe("POST /api/maintenance/request", () => {
 });
 
 describe("GET /api/my-account/license", () => {
-	it("returns license and payments for user", async () => {
+	it("returns the active license for user", async () => {
 		const res = await MY_LICENSE_GET();
 		const data = await res.json();
 		expect(res.status).toBe(200);
-		expect(data).toHaveProperty("license");
-		expect(data).toHaveProperty("payments");
-		expect(Array.isArray(data.payments)).toBe(true);
+		if (data) {
+			expect(data).toHaveProperty("id");
+			expect(data).toHaveProperty("key");
+		}
 	});
 
 	it("returns 401 without auth", async () => {

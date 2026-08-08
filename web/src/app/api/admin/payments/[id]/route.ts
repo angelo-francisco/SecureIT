@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import {
@@ -83,13 +83,12 @@ export async function PUT(
 				.where(eq(license.userId, payment.userId))
 				.get();
 
-			let existingKey: typeof licenseKey.$inferSelect | undefined;
 			if (existingLicense) {
-				existingKey = await db
-					.select()
-					.from(licenseKey)
+				await db
+					.update(licenseKey)
+					.set({ status: "REVOKED" })
 					.where(eq(licenseKey.id, existingLicense.keyId))
-					.get();
+					.run();
 			}
 
 			const payUser = await db
@@ -99,6 +98,24 @@ export async function PUT(
 				.get();
 
 			const features: string[] = ["face_recognition"];
+
+			const defaultPlanFeatures = await db
+				.select()
+				.from(planFeature)
+				.where(
+					and(
+						eq(planFeature.planId, planRow.id),
+						eq(planFeature.isActive, true),
+					),
+				)
+				.all();
+			for (const pf of defaultPlanFeatures) {
+				const slug = pf.name
+					.toLowerCase()
+					.replace(/\s+/g, "_")
+					.replace(/[^a-z0-9_]/g, "");
+				if (!features.includes(slug)) features.push(slug);
+			}
 
 			if (payment.selectedFeatures) {
 				try {
@@ -121,7 +138,20 @@ export async function PUT(
 				}
 			}
 
+			let key = generateLicenseKey();
+			let exists = true;
+			while (exists) {
+				const existing = await db
+					.select()
+					.from(licenseKey)
+					.where(eq(licenseKey.key, key))
+					.get();
+				if (!existing) exists = false;
+				else key = generateLicenseKey();
+			}
+
 			const basePayload = {
+				key,
 				type: planRow.name,
 				userId: payment.userId,
 				email: payUser?.email ?? "",
@@ -132,84 +162,46 @@ export async function PUT(
 				expiresAt: expiresAtStr,
 			};
 
-			if (!existingLicense || !existingKey) {
-				let key = generateLicenseKey();
-				let exists = true;
-				while (exists) {
-					const existing = await db
-						.select()
-						.from(licenseKey)
-						.where(eq(licenseKey.key, key))
-						.get();
-					if (!existing) exists = false;
-					else key = generateLicenseKey();
-				}
+			const signedPayload = await signLicensePayload(basePayload);
 
-				const signedPayload = await signLicensePayload({ ...basePayload, key });
+			const createdKey = await db
+				.insert(licenseKey)
+				.values({
+					key,
+					type: planRow.name,
+					durationDays: licenseDurationDays,
+					status: "ACTIVE",
+				})
+				.returning()
+				.get();
 
-				const createdKey = await db
-					.insert(licenseKey)
-					.values({
-						key,
-						type: planRow.name,
-						durationDays: licenseDurationDays,
+			if (existingLicense) {
+				await db
+					.update(license)
+					.set({
+						keyId: createdKey.id,
+						paymentRequestId: payment.id,
+						activatedAt: now,
+						expiresAt: expiresAtStr,
+						signedPayload,
 						status: "ACTIVE",
+						createdAt: now,
 					})
-					.returning()
-					.get();
-
+					.where(eq(license.id, existingLicense.id))
+					.run();
+			} else {
 				await db
 					.insert(license)
 					.values({
 						keyId: createdKey.id,
 						userId: payment.userId,
 						paymentRequestId: payment.id,
+						status: "ACTIVE",
 						activatedAt: now,
 						expiresAt: expiresAtStr,
 						signedPayload,
+						createdAt: now,
 					})
-					.run();
-			} else {
-				let key = generateLicenseKey();
-				let keyExists = true;
-				while (keyExists) {
-					const existing = await db
-						.select()
-						.from(licenseKey)
-						.where(eq(licenseKey.key, key))
-						.get();
-					if (!existing) keyExists = false;
-					else key = generateLicenseKey();
-				}
-
-				const signedPayload = await signLicensePayload({ ...basePayload, key });
-
-				await db
-					.update(licenseKey)
-					.set({ status: "REVOKED" })
-					.where(eq(licenseKey.id, existingKey.id))
-					.run();
-
-				const createdKey = await db
-					.insert(licenseKey)
-					.values({
-						key,
-						type: planRow.name,
-						durationDays: licenseDurationDays,
-						status: "ACTIVE",
-					})
-					.returning()
-					.get();
-
-				await db
-					.update(license)
-					.set({
-						keyId: createdKey.id,
-						expiresAt: expiresAtStr,
-						signedPayload,
-						status: "ACTIVE",
-					})
-					.where(eq(license.id, existingLicense.id))
 					.run();
 			}
 

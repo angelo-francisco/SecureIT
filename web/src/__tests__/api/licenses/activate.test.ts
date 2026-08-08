@@ -80,7 +80,7 @@ describe("POST /api/licenses/activate", () => {
 		expect(data.valid).toBe(true);
 		expect(data.signedPayload).toBeDefined();
 		expect(data.publicKey).toBeDefined();
-		expect(data.features).toEqual(["face_recognition"]);
+		expect(data.features).toContain("face_recognition");
 		expect(data.type).toBe("B2C");
 		expect(data.licenseId).toBeDefined();
 		expect(data.expiresAt).toBeDefined();
@@ -212,7 +212,7 @@ describe("POST /api/licenses/activate", () => {
 		}
 	});
 
-	it("B2C type has features=[face_recognition]", async () => {
+	it("B2C type has features including face_recognition", async () => {
 		const req = makeRequest({
 			key: testKey,
 			email: testUserEmail,
@@ -220,7 +220,7 @@ describe("POST /api/licenses/activate", () => {
 		});
 		const response = await POST(req);
 		const data = await response.json();
-		expect(data.features).toEqual(["face_recognition"]);
+		expect(data.features).toContain("face_recognition");
 		expect(data.type).toBe("B2C");
 	});
 
@@ -267,7 +267,7 @@ describe("POST /api/licenses/activate", () => {
 			expect(data.valid).toBe(true);
 			expect(data.maxCameras).toBe(-1);
 			expect(data.maxPeople).toBe(-1);
-			expect(data.features).toEqual(["face_recognition"]);
+			expect(data.features).toContain("face_recognition");
 		} finally {
 			await db.delete(license).where(eq(license.userId, b2bUserId)).run();
 			await db.delete(licenseKey).where(eq(licenseKey.id, b2bKeyId)).run();

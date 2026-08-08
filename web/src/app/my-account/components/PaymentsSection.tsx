@@ -1,6 +1,6 @@
 "use client";
 
-import { Receipt } from "lucide-react";
+import { Receipt, Info } from "lucide-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
 export interface Payment {
@@ -112,18 +112,25 @@ export const PaymentsSection = forwardRef<
 								</span>
 							</td>
 
-							<td className="py-3.5 px-4  text-center">
-								<div className="flex flex-col gap-1">
+							<td className="text-center">
+								<div className="flex flex-row gap-2">
 									{p.proofUrl && (
 										<a
 											href={p.proofUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="text-base font-semibold text-primary hover:underline"
+											className="text-primary hover:underline"
 										>
-											Comprovativo ↗
+											Recibo
 										</a>
 									)}
+
+									<button
+										rel="noopener noreferrer"
+										className="text-primary hover:underline"
+									>
+										Detalhes
+									</button>
 
 									{p.adminNote && (
 										<p className="text-base italic text-text-muted">

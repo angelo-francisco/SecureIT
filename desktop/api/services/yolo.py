@@ -1,3 +1,5 @@
+import threading
+
 import torch
 from ultralytics.models import YOLO
 from ultralytics.utils import LOGGER
@@ -5,6 +7,8 @@ from ultralytics.utils import LOGGER
 from core.config import settings
 
 LOGGER.setLevel("ERROR")
+
+INFERENCE_LOCK = threading.Lock()
 
 
 class YOLOService:
@@ -23,4 +27,5 @@ class YOLOService:
     @classmethod
     def predict(cls, frame, imgsz=320, conf=0.3):
         model = cls.get_model()
-        return model(frame, imgsz=imgsz, conf=conf)
+        with INFERENCE_LOCK:
+            return model(frame, imgsz=imgsz, conf=conf)

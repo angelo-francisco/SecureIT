@@ -5,6 +5,7 @@ from pydantic import BaseModel, field_validator
 from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 
 from .models import Camera
+from .paths import resolve_video_path
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +68,13 @@ class CameraCreate(BaseModel):
                 path.lower().endswith(ext)
                 for ext in (".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm")
             ):
-                if not os.path.isfile(path):
-                    logger.warning("demo video file not found on disk: %s", path)
+                resolved = resolve_video_path(path)
+                if not os.path.isfile(resolved):
+                    logger.warning(
+                        "demo video file not found on disk: %s (resolved: %s)",
+                        path,
+                        resolved,
+                    )
         return v
 
 

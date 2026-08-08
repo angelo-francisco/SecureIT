@@ -57,7 +57,7 @@ export default function Dashboard() {
 
   const hasCameras = cameras && cameras.some((c) => c.video_source);
 
-  const cameraIds = cameras?.map((c) => c.id).sort().join(",") || "";
+  const cameraIds = cameras?.map((c) => `${c.id}:${c.task}`).sort().join(",") || "";
   const reloadPerCameraKey = JSON.stringify(reloadPerCamera);
 
   const connectDashboardCamera = useCallback((camera: Camera) => {
@@ -169,20 +169,23 @@ export default function Dashboard() {
       undefined,
       `dash-${camera.id}`,
     );
-    wsKeysRef.current = [...wsKeysRef.current, key];
+    wsKeysRef.current = [...wsKeysRef.current.filter((k) => k !== key), key];
   }, []);
 
   const lastSignalsRef = useRef<Record<number, number>>({});
   const lastReloadAllRef = useRef(reloadAll);
-  const initializedRef = useRef(false);
+  const lastConsumerRef = useRef<Record<number, string>>({});
+
+  const consumerFor = (camera: Camera) =>
+    camera.task === "FR" ? "face-recognition" : camera.task === "BA" ? "behaviour-analysis" : "area-detection";
 
   useEffect(() => {
     if (!cameras || cameras.length === 0) {
       wsKeysRef.current.forEach(disconnectCamera);
       wsKeysRef.current = [];
-      initializedRef.current = false;
       lastReloadAllRef.current = reloadAll;
       lastSignalsRef.current = { ...reloadPerCamera };
+      lastConsumerRef.current = {};
       return;
     }
 
@@ -199,30 +202,32 @@ export default function Dashboard() {
       return true;
     });
 
-    if (!initializedRef.current) {
-      cameras.forEach((camera) => {
-        if (camera.video_source) connectDashboardCamera(camera);
-      });
-      initializedRef.current = true;
-    } else {
-      cameras.forEach((camera) => {
-        if (!camera.video_source) return;
-        const prevSig = lastSignalsRef.current[camera.id] ?? 0;
-        const curSig = reloadPerCamera[camera.id] ?? 0;
-        if (reloadAll === lastReloadAllRef.current && curSig === prevSig) return;
-        connectDashboardCamera(camera);
-      });
-    }
+    const reloadAllChanged = reloadAll !== lastReloadAllRef.current;
+
+    cameras.forEach((camera) => {
+      if (!camera.video_source) return;
+      const key = `dash-${camera.id}`;
+      const alreadyConnected = wsKeysRef.current.includes(key);
+      const reloadChanged =
+        (reloadPerCamera[camera.id] ?? 0) !== (lastSignalsRef.current[camera.id] ?? 0);
+      const consumerChanged =
+        lastConsumerRef.current[camera.id] !== undefined &&
+        lastConsumerRef.current[camera.id] !== consumerFor(camera);
+      if (alreadyConnected && !reloadAllChanged && !reloadChanged && !consumerChanged) return;
+      connectDashboardCamera(camera);
+      lastConsumerRef.current[camera.id] = consumerFor(camera);
+    });
 
     lastReloadAllRef.current = reloadAll;
     lastSignalsRef.current = { ...reloadPerCamera };
+  }, [cameraIds, reloadAll, reloadPerCameraKey, connectDashboardCamera]);
 
+  useEffect(() => {
     return () => {
       wsKeysRef.current.forEach(disconnectCamera);
       wsKeysRef.current = [];
-      initializedRef.current = false;
     };
-  }, [cameraIds, reloadAll, reloadPerCameraKey, connectDashboardCamera]);
+  }, []);
 
   const close = useCallback(() => setActiveView(null), []);
 

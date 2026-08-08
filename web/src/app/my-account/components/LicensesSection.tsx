@@ -18,18 +18,13 @@ interface LicenseData {
 	};
 }
 
-interface LicensesApiResponse {
-	license: LicenseData | null;
-	payments: unknown[];
-}
-
 interface LicensesSectionProps {
-	data: LicensesApiResponse | null;
+	data: LicenseData | null;
 	onNavigateToPlans?: () => void;
 }
 
 export interface LicensesSectionHandle {
-	fetchData: () => Promise<LicensesApiResponse | null>;
+	fetchData: () => Promise<LicenseData | null>;
 }
 
 const LICENSE_STATUS: Record<
@@ -68,7 +63,7 @@ export const LicensesSection = forwardRef<
 	LicensesSectionProps
 >(({ data }, ref) => {
 	const { toast } = useToast();
-	const [response, setResponse] = useState<LicensesApiResponse | null>(data);
+	const [response, setResponse] = useState<LicenseData | null>(data);
 	const [revoking, setRevoking] = useState(false);
 	const [confirmRevoke, setConfirmRevoke] = useState(false);
 	const [showKey, setShowKey] = useState(false);
@@ -87,7 +82,7 @@ export const LicensesSection = forwardRef<
 		fetchData: async () => {
 			const res = await fetch("/api/my-account/license");
 			if (res.ok) {
-				const d = (await res.json()) as LicensesApiResponse;
+				const d = (await res.json()) as LicenseData;
 				setResponse(d);
 				return d;
 			}
@@ -95,18 +90,21 @@ export const LicensesSection = forwardRef<
 		},
 	}));
 
-	const license = response?.license;
+	const license = response;
 	const isActive = license
-		? license.key.status === "ACTIVE" &&
+		? license.status === "ACTIVE" &&
+		license.key.status === "ACTIVE" &&
 		new Date(license.expiresAt) > new Date()
 		: false;
 
 	const statusInfo = license
 		? isActive
 			? LICENSE_STATUS.ACTIVE
-			: license.key.status === "REVOKED"
+			: license.status === "REVOKED" || license.key.status === "REVOKED"
 				? LICENSE_STATUS.REVOKED
-				: LICENSE_STATUS.EXPIRED
+				: new Date(license.expiresAt) <= new Date()
+					? LICENSE_STATUS.EXPIRED
+					: LICENSE_STATUS.PENDING
 		: null;
 
 	const handleRevoke = async () => {
@@ -117,21 +115,27 @@ export const LicensesSection = forwardRef<
 				const data = (await res.json()) as { error?: string };
 				throw new Error(data.error ?? "Erro ao revogar licença");
 			}
-			setResponse((prev) =>
-				prev
-					? {
-						...prev,
-						license: prev.license
-							? {
-								...prev.license,
-								key: { ...prev.license.key, status: "REVOKED" },
-							}
-							: null,
-					}
-					: null,
-			);
+
+			const refreshRes = await fetch("/api/my-account/license");
+			if (refreshRes.ok) {
+				const d = (await refreshRes.json()) as LicenseData;
+				setResponse(d);
+			} else {
+				setResponse((prev) =>
+					prev
+						? {
+							...prev,
+							status: "REVOKED",
+							key: { ...prev.key, status: "REVOKED" },
+						}
+						: null,
+				);
+			}
 			setConfirmRevoke(false);
+			toast("Licença revogada com sucesso", "success");
 		} catch (err) {
+			const message = err instanceof Error ? err.message : "Erro ao revogar licença";
+			toast(message, "error");
 			console.error(err);
 		} finally {
 			setRevoking(false);
@@ -142,7 +146,7 @@ export const LicensesSection = forwardRef<
 		return (
 			<div className="text-center py-8 text-text-muted">
 				<Key size={36} className="text-primary mx-auto mb-3 opacity-40" />
-				<p className="text-base font-medium">Nenhuma licença registada</p>
+				<p className="text-base font-medium">Nenhuma licença activa</p>
 			</div>
 		);
 	}

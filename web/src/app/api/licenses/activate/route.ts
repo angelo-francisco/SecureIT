@@ -1,10 +1,11 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import {
 	generateId,
 	license,
 	licenseKey,
+	paymentRequest,
 	plan,
 	planFeature,
 	user,
@@ -19,7 +20,7 @@ function buildFeatureSlug(name: string): string {
 		.replace(/[^a-z0-9_]/g, "");
 }
 
-async function _getPlanFeatures(type: string): Promise<string[]> {
+async function _getPlanFeatures(type: string, paymentRequestId?: string | null): Promise<string[]> {
 	const features: string[] = ["face_recognition"];
 	try {
 		const planRow = await db
@@ -41,6 +42,31 @@ async function _getPlanFeatures(type: string): Promise<string[]> {
 			for (const pf of planFeaturesList) {
 				const slug = buildFeatureSlug(pf.name);
 				if (!features.includes(slug)) features.push(slug);
+			}
+		}
+
+		if (paymentRequestId) {
+			const payReq = await db
+				.select()
+				.from(paymentRequest)
+				.where(eq(paymentRequest.id, paymentRequestId))
+				.get();
+			if (payReq?.selectedFeatures) {
+				try {
+					const featureIds: string[] = JSON.parse(payReq.selectedFeatures);
+					if (featureIds.length > 0) {
+						const selectedPFs = await db
+							.select()
+							.from(planFeature)
+							.where(inArray(planFeature.id, featureIds));
+						for (const pf of selectedPFs) {
+							const slug = buildFeatureSlug(pf.name);
+							if (!features.includes(slug)) features.push(slug);
+						}
+					}
+				} catch {
+					// ignore parse error
+				}
 			}
 		}
 	} catch {
@@ -104,7 +130,10 @@ export async function POST(request: Request) {
 						.where(eq(user.id, existingLicense.userId))
 						.get();
 
-					const features: string[] = ["face_recognition"];
+					const features = await _getPlanFeatures(
+						licenseKeyRecord.type,
+						existingLicense.paymentRequestId,
+					);
 					const publicKey = await getPublicKeyPemString();
 
 					let signedPayload = existingLicense.signedPayload;
@@ -187,7 +216,7 @@ export async function POST(request: Request) {
 		);
 		const expiresAtStr = expiresAt.toISOString();
 
-		const features: string[] = ["face_recognition"];
+		const features = await _getPlanFeatures(licenseKeyRecord.type);
 
 		const licensePayload = {
 			key: licenseKeyRecord.key,

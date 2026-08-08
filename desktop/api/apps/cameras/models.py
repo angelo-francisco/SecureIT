@@ -5,6 +5,7 @@ from platform import system
 from tortoise import fields, models
 
 from apps.cameras.device_cache import resolve_windows_device_id
+from apps.cameras.paths import resolve_video_path
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class Camera(models.Model):
         if self.connection_type == "L":
             path = self.connection_info.get("path", "")
             if _is_video_file(path):
-                return path
+                return resolve_video_path(path)
             if system() == "Linux" and path:
                 return path
             if system() == "Windows":

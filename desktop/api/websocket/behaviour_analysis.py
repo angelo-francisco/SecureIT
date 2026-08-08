@@ -102,6 +102,18 @@ def _bbox_overlap(box_a, box_b):
     return inter / min(area_a, area_b) if min(area_a, area_b) > 0 else 0.0
 
 
+def _bbox_iou(box_a, box_b):
+    x1 = max(box_a[0], box_b[0])
+    y1 = max(box_a[1], box_b[1])
+    x2 = min(box_a[2], box_b[2])
+    y2 = min(box_a[3], box_b[3])
+    if x2 <= x1 or y2 <= y1:
+        return 0.0
+    inter = (x2 - x1) * (y2 - y1)
+    union = _bbox_area(box_a) + _bbox_area(box_b) - inter
+    return inter / union if union > 0 else 0.0
+
+
 def _centroid_dist(a, b):
     return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
 
@@ -223,6 +235,181 @@ class ObjectTracker:
         }
 
 
+class _Dets:
+    """Minimal ``Results``-like wrapper feeding ``BYTETracker`` with numpy detections.
+
+    Ultralytics 8.4.x trackers expect an object exposing ``conf``/``cls``/``xywh``
+    and supporting boolean indexing; this adapter provides exactly that for plain
+    person detections, so tracking state stays per-manager instead of global.
+    """
+
+    def __init__(self, xyxy=None, conf=None, cls=None):
+        if xyxy is None:
+            xyxy = []
+        self.xyxy = np.asarray(xyxy, dtype=np.float32).reshape(-1, 4)
+        n = len(self.xyxy)
+        self.conf = (
+            np.asarray(conf, dtype=np.float32)
+            if conf is not None
+            else np.full(n, 1.0, dtype=np.float32)
+        )
+        self.cls = (
+            np.asarray(cls, dtype=np.float32)
+            if cls is not None
+            else np.zeros(n, dtype=np.float32)
+        )
+        self.xywh = np.concatenate(
+            [self.xyxy[:, :2], self.xyxy[:, 2:] - self.xyxy[:, :2]], axis=1
+        ).astype(np.float32)
+
+    def __len__(self) -> int:
+        return len(self.conf)
+
+    def __getitem__(self, mask):
+        return _Dets(self.xyxy[mask], self.conf[mask], self.cls[mask])
+
+
+class PersonTracker:
+    """ByteTrack wrapper that keeps per-person identity and speed history.
+
+    Uses the tracker shipped with ultralytics (no new dependency) to keep stable
+    ``track_id`` across detection frames, so people are followed instead of being
+    re-analysed independently every frame. Also records a scale-normalised speed
+    (body-heights per window) that is invariant to distance.
+    """
+
+    def __init__(self):
+        from types import SimpleNamespace
+
+        from ultralytics.trackers.byte_tracker import BYTETracker
+
+        args = SimpleNamespace(
+            track_high_thresh=0.25,
+            track_low_thresh=0.1,
+            new_track_thresh=0.35,
+            match_thresh=0.5,
+            track_buffer=30,
+            fuse_score=True,
+        )
+        self._tracker = BYTETracker(args)
+        self._seen: dict[int, int] = {}
+        self._history: dict[int, deque] = {}
+        self._heights: dict[int, deque] = {}
+        self._last_time: dict[int, float] = {}
+        self._last: list[dict] = []
+
+    def update(self, people: list[dict]) -> list[dict]:
+        """Feed one detection frame into ByteTrack and return per-person tracks.
+
+        Ultralytics' BYTETracker only activates (and thus reports) a new track on
+        a *subsequent* association frame, so it can return nothing for a frame
+        that clearly contains people. ``update`` therefore assigns stable,
+        distance-matched fallback ids itself (``_ensure_ids``) so every detection
+        frame still emits a track, then merges any real ByteTrack id back onto
+        the same identity so nothing double-counts.
+        """
+        if people:
+            dets = _Dets(
+                np.asarray([p["bbox"] for p in people], dtype=np.float32),
+                np.asarray([p["confidence"] for p in people], dtype=np.float32),
+                np.zeros(len(people), dtype=np.float32),
+            )
+        elif self._last:
+            dets = _Dets(
+                np.asarray([p["bbox"] for p in self._last], dtype=np.float32),
+                np.asarray([p["confidence"] for p in self._last], dtype=np.float32),
+                np.zeros(len(self._last), dtype=np.float32),
+            )
+        else:
+            dets = _Dets()
+
+        rows = self._tracker.update(dets)
+        if not people:
+            return []
+
+        fallback = self._ensure_ids(people)
+        if len(rows):
+            bt_map = {}
+            for row in rows:
+                bt_box = (float(row[0]), float(row[1]), float(row[2]), float(row[3]))
+                best_fb = None
+                best_iou = 0.0
+                for fb in fallback:
+                    iou = _bbox_iou(bt_box, fb["bbox"])
+                    if iou > best_iou:
+                        best_iou = iou
+                        best_fb = fb
+                if best_fb is not None and best_iou >= 0.3:
+                    bt_map[int(row[4])] = best_fb["track_id"]
+
+        fallback_ids = {fb["track_id"] for fb in fallback}
+        for row in rows:
+            tid = int(row[4])
+            merged = bt_map.get(tid, tid)
+            if merged not in fallback_ids:
+                self._seen[merged] = self._seen.get(merged, 0) + 1
+
+        self._last = fallback
+        return fallback
+
+    def _ensure_ids(self, people: list[dict]) -> list[dict]:
+        """Stable per-person ids, distance-matched to existing identities."""
+        now = time()
+        out = []
+        for p in people:
+            bbox = p["bbox"]
+            centroid = p.get("centroid") or _bbox_center(bbox)
+            height = max(1.0, float(bbox[3] - bbox[1]))
+            best_key = None
+            best_dist = 60.0
+            for key, hist in self._history.items():
+                if not hist:
+                    continue
+                if now - self._last_time.get(key, 0) > 4.0:
+                    continue
+                dist = _centroid_dist(hist[-1], centroid)
+                if dist < best_dist:
+                    best_dist = dist
+                    best_key = key
+            key = (
+                best_key
+                if best_key is not None
+                else max(self._seen.keys(), default=-1) + 1
+            )
+            self._seen[key] = self._seen.get(key, 0) + 1
+            self._history.setdefault(key, deque(maxlen=10)).append(centroid)
+            self._heights.setdefault(key, deque(maxlen=10)).append(height)
+            self._last_time[key] = now
+            out.append(
+                {
+                    "track_id": key,
+                    "bbox": bbox,
+                    "centroid": centroid,
+                    "confidence": p.get("confidence", 1.0),
+                    "confirmed": self._seen[key] >= 2,
+                }
+            )
+        return out
+
+    def _has_fresh(self, track_id: int, max_age: float = 4.0) -> bool:
+        return time() - self._last_time.get(track_id, 0) <= max_age
+
+    def speed_norm(self, track_id: int, window: int = 5) -> float | None:
+        """Body-heights travelled over the last ``window`` detections (distance-invariant)."""
+        hist = self._history.get(track_id)
+        heights = self._heights.get(track_id)
+        if not hist or not heights or len(hist) < window:
+            return None
+        recent = list(hist)[-window:]
+        dist = sum(
+            _centroid_dist(recent[i], recent[i - 1]) for i in range(1, len(recent))
+        )
+        avg_h = sum(heights) / len(heights)
+        if avg_h <= 1.0:
+            return None
+        return dist / avg_h
+
+
 class BehaviourAnalysisManager:
     def __init__(self, websocket: WebSocket):
         self.ws = websocket
@@ -234,7 +421,10 @@ class BehaviourAnalysisManager:
         self.camera_id = None
         self.frame_index = 0
         self.fps = 15
-        self.detect_every = 5
+        self.detect_every = 3
+        self.imgsz = 640
+        self.conf = 0.3
+        self.escape_threshold = 1.2
         self.alert_cooldown = 10
         self.last_alert = 0.0
         self.motion_threshold = 35.0
@@ -248,6 +438,7 @@ class BehaviourAnalysisManager:
         )
         self._motion_history: deque = deque(maxlen=30)
         self._object_tracker = ObjectTracker()
+        self.person_tracker = PersonTracker()
         self._last_theft_alert = 0.0
         self._theft_cooldown = 15.0
         self._last_weapon_alert = 0.0
@@ -326,9 +517,7 @@ class BehaviourAnalysisManager:
         magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
         return float(np.mean(magnitude))
 
-    def _detect_theft(
-        self, people: list, disappeared: dict
-    ) -> dict | None:
+    def _detect_theft(self, people: list, disappeared: dict) -> dict | None:
         if not self._theft_cooldown_ok():
             return None
         if not people:
@@ -390,9 +579,7 @@ class BehaviourAnalysisManager:
 
         return None
 
-    def _detect_robbery(
-        self, people: list, active: dict, weapons: list
-    ) -> dict | None:
+    def _detect_robbery(self, people: list, active: dict, weapons: list) -> dict | None:
         if not self._robbery_cooldown_ok():
             return None
         if not people:
@@ -431,6 +618,43 @@ class BehaviourAnalysisManager:
             }
 
         return None
+
+    def _detect_escape(self, people: list) -> dict | None:
+        """Assalto/roubo à distância: pessoa confirmada em corrida/fuga.
+
+        The speed is normalised by the person's bbox height (body-heights per
+        detection window), which is invariant to distance — a running person moves
+        roughly the same fraction of their body height whether near or far.
+        """
+        if not self._robbery_cooldown_ok():
+            return None
+
+        for p in people:
+            tid = p.get("track_id")
+            if tid is None or not p.get("confirmed"):
+                continue
+            speed = self.person_tracker.speed_norm(tid)
+            if speed is None or speed < self.escape_threshold:
+                continue
+            self._last_robbery_alert = time()
+            return self._escape_alert(speed)
+
+        return None
+
+    def _escape_alert(self, speed: float) -> dict:
+        return {
+            "type": "robbery_alert",
+            "severity": "critical",
+            "description": (
+                f"Possível assalto/roubo: pessoa em fuga a correr "
+                f"(velocidade {speed:.1f} alturas/ciclo)"
+            ),
+            "object": None,
+            "armed": False,
+            "motion_intensity": round(speed, 2),
+            "camera_id": self.camera_id,
+            "camera_name": self.camera.name if self.camera else None,
+        }
 
     def _detect_suspicious_activity(
         self, frame: np.ndarray, people_count: int
@@ -500,9 +724,11 @@ class BehaviourAnalysisManager:
         for p in self._last_people:
             x1, y1, x2, y2 = p["bbox"]
             cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            tid = p.get("track_id")
+            label = f"Pessoa #{tid}" if tid is not None else "Pessoa"
             cv2.putText(
                 frame,
-                "Pessoa",
+                label,
                 (x1, y1 - 5),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
@@ -553,10 +779,10 @@ class BehaviourAnalysisManager:
         else:
             self._active_banner = None
 
-    def _run_yolo(self, frame: np.ndarray) -> tuple[list, list, list, int]:
+    def _run_yolo(self, frame: np.ndarray) -> tuple[list, list, list]:
         from services.yolo import YOLOService  # lazy import
 
-        results = YOLOService.predict(frame, imgsz=320, conf=0.3)
+        results = YOLOService.predict(frame, imgsz=self.imgsz, conf=self.conf)
         boxes = results[0].boxes
         names = results[0].names
 
@@ -582,7 +808,7 @@ class BehaviourAnalysisManager:
             elif cls_id in THEFT_CLASS_IDS:
                 objects.append(entry)
 
-        return people, objects, weapons, len(people)
+        return people, objects, weapons
 
     async def stream(self):
         try:
@@ -607,17 +833,28 @@ class BehaviourAnalysisManager:
 
                 people_count = 0
                 if detect:
-                    people, objects, weapons, people_count = self._run_yolo(raw_frame)
-                    self._last_people = people
+                    try:
+                        people, objects, weapons = await asyncio.to_thread(
+                            self._run_yolo, raw_frame
+                        )
+                    except Exception:
+                        logger.exception(
+                            "yolo inference failed on camera %s", self.camera_id
+                        )
+                        people, objects, weapons = [], [], []
+
+                    tracked = self.person_tracker.update(people)
+                    self._last_people = tracked or people
                     self._last_objects = objects
                     self._last_weapons = weapons
+                    people_count = len(self._last_people)
 
                     self._object_tracker.update(objects)
                     active = self._object_tracker.get_active()
                     disappeared = self._object_tracker.get_disappeared()
                     self._object_tracker.clean()
 
-                    for person in people:
+                    for person in self._last_people:
                         pb = person["bbox"]
                         for obj in active.values():
                             if _bbox_overlap(pb, obj.bbox) > 0.15:
@@ -644,7 +881,7 @@ class BehaviourAnalysisManager:
                         )
                         await self.ws.send_text(json.dumps(alert))
 
-                    weapon = self._detect_weapon(people, weapons)
+                    weapon = self._detect_weapon(self._last_people, weapons)
                     if weapon:
                         self._set_banner(weapon["description"])
                         create_task(
@@ -659,7 +896,7 @@ class BehaviourAnalysisManager:
                         )
                         await self.ws.send_text(json.dumps(weapon))
 
-                    theft = self._detect_theft(people, disappeared)
+                    theft = self._detect_theft(self._last_people, disappeared)
                     if theft:
                         self._set_banner(theft["description"])
                         create_task(
@@ -674,7 +911,9 @@ class BehaviourAnalysisManager:
                         )
                         await self.ws.send_text(json.dumps(theft))
 
-                    robbery = self._detect_robbery(people, active, weapons)
+                    robbery = self._detect_robbery(self._last_people, active, weapons)
+                    if not robbery:
+                        robbery = self._detect_escape(self._last_people)
                     if robbery:
                         self._set_banner(robbery["description"])
                         create_task(
@@ -727,6 +966,8 @@ class BehaviourAnalysisManager:
         config = await load_user_config(self.profile_id)
         self.fps = config.get("fps", self.fps)
         self.detect_every = config.get("detect_every", self.detect_every)
+        self.imgsz = config.get("imgsz", self.imgsz)
+        self.conf = config.get("conf", self.conf)
         self.allow_draw = config.get("allow_draw", self.allow_draw)
 
         try:

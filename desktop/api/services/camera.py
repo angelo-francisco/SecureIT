@@ -90,6 +90,20 @@ class CameraService:
             logger.info("camera failed after 3 attempts source=%s", video_source)
             raise RuntimeError("Erro ao abrir câmara após várias tentativas")
 
+        self.grabbed, self.frame = self.video.read()
+
+        if self.is_video_file and not self.grabbed:
+            logger.info(
+                "OpenCV could not decode %s; falling back to PyAV reader",
+                video_source,
+            )
+            if self.video.isOpened():
+                self.video.release()
+            from services.av_reader import AVReader  # lazy import
+
+            self.video = AVReader(str(video_source))
+            self.grabbed, self.frame = self.video.read()
+
         if self.is_video_file:
             raw_fps = self.video.get(cv2.CAP_PROP_FPS)
             if raw_fps > 0:
@@ -99,7 +113,6 @@ class CameraService:
 
         self.fps = fps
 
-        self.grabbed, self.frame = self.video.read()
         if not self.grabbed:
             logger.warning("first frame not grabbed source=%s", video_source)
         self.thread = Thread(target=self.update, daemon=True)

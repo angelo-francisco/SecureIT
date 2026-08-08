@@ -1384,6 +1384,9 @@ interface PaymentRequest {
 	proofUrl: string;
 	adminNote: string | null;
 	totalPrice: number | null;
+	durationDays: number | null;
+	selectedFeatureNames?: string[];
+	selectedServiceNames?: string[];
 	createdAt: string;
 	plan: { name: string; basePrice: number };
 	user: { firstName: string; lastName: string; email: string };
@@ -1471,7 +1474,26 @@ function PaymentsTab() {
 													{p.totalPrice
 														? p.totalPrice.toFixed(2)
 														: p.plan.basePrice.toFixed(2)}
+													{p.durationDays
+														? ` · ${p.durationDays} dias`
+														: ""}
 												</p>
+												{(p.selectedFeatureNames?.length > 0 ||
+													p.selectedServiceNames?.length > 0) && (
+													<div className="flex flex-wrap gap-1.5 mt-1.5">
+														{[
+															...(p.selectedFeatureNames ?? []),
+															...(p.selectedServiceNames ?? []),
+														].map((name) => (
+															<span
+																key={name}
+																className="px-1.5 py-0.5 rounded text-[11px] font-medium bg-primary/15 text-primary"
+															>
+																{name}
+															</span>
+														))}
+													</div>
+												)}
 												<p className="text-xs text-text-muted">
 													{new Date(p.createdAt).toLocaleString("pt-PT")}
 												</p>
