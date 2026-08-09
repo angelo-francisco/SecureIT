@@ -91,7 +91,7 @@ export default function ProfileSwitcher() {
       <div className="min-h-screen w-full flex items-center justify-center flex-col">
 
         <h1 className="text-text text-4xl font-semibold mb-1">
-          Seja bem-vindo, <span className="capitalize">{user?.firstName}!</span>
+          Seja bem-vindo, <span className="capitalize">{"Manuel" ?? user?.firstName}!</span>
         </h1>
 
         <p className="text-text-muted text-2xl text-text mb-8">

@@ -27,7 +27,7 @@ import { useLicenseValidation } from "../../hooks/useLicenseValidation";
 interface ViewConfigEntry {
   title: string;
   icon: React.ReactNode;
-  component: ComponentType<{ onClose?: () => void }>;
+  component: ComponentType<{ onClose?: () => void; onInspectPerson?: (personId: number) => void }>;
 }
 
 const viewConfig: Partial<Record<ViewId, ViewConfigEntry>> = {
@@ -324,7 +324,16 @@ export default function Dashboard() {
         value={navContextValue}
       >
         <PanelSheet open={activeView !== null} onClose={close}>
-          {ViewComponent && <ViewComponent onClose={close} />}
+          {ViewComponent && (
+            <ViewComponent
+              onClose={close}
+              onInspectPerson={
+                activeView === "notifications"
+                  ? (pid) => setInspectedPersonId(pid)
+                  : undefined
+              }
+            />
+          )}
         </PanelSheet>
       </PanelNavContext.Provider>
 

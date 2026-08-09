@@ -7,25 +7,30 @@ import * as Lucide from "lucide-react";
 
 interface NotificationListProps {
   onClose?: () => void;
+  onInspectPerson?: (personId: number) => void;
 }
 
-const filters = [
-  { value: "A" as const, label: "Todas" },
-  { value: "NR" as const, label: "Não Lidas" },
-  { value: "R" as const, label: "Lidas" },
-];
+interface ImageModalData {
+  url: string;
+  personId?: number | null;
+}
 
-export default function NotificationList({ onClose }: NotificationListProps) {
-  const [filter, setFilter] = useState<"A" | "NR" | "R">("A");
+export default function NotificationList({ onClose, onInspectPerson }: NotificationListProps) {
   const [page, setPage] = useState(1);
-  const [imageModal, setImageModal] = useState<string | null>(null);
+  const [imageModal, setImageModal] = useState<ImageModalData | null>(null);
   const panelNavigate = usePanelNavigate();
 
-  const { data, isLoading } = useNotifications(
-    { search_query: filter },
-    page
-  );
+  const { data, isLoading } = useNotifications(page);
   const deleteNotification = useDeleteNotification();
+
+  function openImage(photo?: string | null, personId?: number | null) {
+    if (!photo) return;
+    setImageModal({ url: `${getApiBaseUrl()}/media/${photo}`, personId });
+  }
+
+  function inspectPerson(personId?: number | null) {
+    if (personId && onInspectPerson) onInspectPerson(personId);
+  }
 
   return (
     <div className="flex-1 h-full flex flex-col relative overflow-hidden">
@@ -35,24 +40,6 @@ export default function NotificationList({ onClose }: NotificationListProps) {
           <h2 className="text-xl font-bold text-text">Notificações</h2>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-white/[0.04] p-1">
-            {filters.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => {
-                  setFilter(opt.value);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 text-sm font-medium transition-all ${
-                  filter === opt.value
-                    ? "bg-primary/15 text-primary shadow-sm"
-                    : "text-text-muted hover:text-text"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
           {onClose && (
             <button
               onClick={onClose}
@@ -74,24 +61,44 @@ export default function NotificationList({ onClose }: NotificationListProps) {
             {data.results.map((n) => (
               <div
                 key={n.id}
-                className="flex items-center gap-4 px-5 py-3.5 border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors"
+                onClick={() => openImage(n.photo, n.person_id)}
+                className={`flex items-center gap-4 px-5 py-3.5 border-b border-white/[0.06] transition-colors ${
+                  n.photo ? "cursor-pointer hover:bg-white/[0.02]" : ""
+                }`}
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text">{n.title}</p>
                   <p className="text-sm text-text-muted mt-0.5 truncate">{n.description}</p>
-                  {(n.photo || n.camera_name) && (
+                  {(n.photo || n.camera_name || n.person_id) && (
                     <div className="flex items-center gap-4 mt-1.5">
                       {n.photo && (
                         <button
-                          onClick={() => setImageModal(`${getApiBaseUrl()}/media/${n.photo}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openImage(n.photo, n.person_id);
+                          }}
                           className="text-xs text-primary hover:underline"
                         >
                           Ver Imagem
                         </button>
                       )}
+                      {n.person_id && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            inspectPerson(n.person_id);
+                          }}
+                          className="text-xs text-green-400 hover:underline"
+                        >
+                          Ver Pessoa
+                        </button>
+                      )}
                       {n.camera_name && (
                         <button
-                          onClick={() => panelNavigate?.("camera-monitor")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            panelNavigate?.("camera-monitor");
+                          }}
                           className="text-xs text-primary hover:underline"
                         >
                           {n.camera_name}
@@ -104,7 +111,10 @@ export default function NotificationList({ onClose }: NotificationListProps) {
                   {n.created_at}
                 </span>
                 <button
-                  onClick={() => deleteNotification.mutate(n.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteNotification.mutate(n.id);
+                  }}
                   className="p-2 hover:bg-white/[0.06] text-text-muted hover:text-red-500 transition-colors shrink-0"
                 >
                   <Lucide.Trash size={16} />
@@ -145,9 +155,18 @@ export default function NotificationList({ onClose }: NotificationListProps) {
           <div className="relative">
             <img
               className="max-w-[90vw] max-h-[80vh]"
-              src={imageModal}
+              src={imageModal.url}
               alt="Imagem da Notificação"
             />
+            {imageModal.personId && onInspectPerson && (
+              <button
+                onClick={() => inspectPerson(imageModal.personId)}
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-green-500/90 hover:bg-green-500 text-black text-sm font-semibold transition-colors"
+              >
+                <Lucide.User size={14} />
+                Ver Pessoa
+              </button>
+            )}
             <button
               onClick={() => setImageModal(null)}
               className="absolute top-2 right-2 p-2 bg-black/50 text-white hover:bg-black/70"

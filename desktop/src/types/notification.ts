@@ -8,10 +8,6 @@ export interface Notification {
   photo?: string;
   camera: number;
   camera_name: string;
-  read: boolean;
+  person_id?: number | null;
   created_at: string;
-}
-
-export interface NotificationFilter {
-  search_query: "A" | "NR" | "R";
 }

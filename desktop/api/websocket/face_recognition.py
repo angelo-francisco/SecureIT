@@ -16,6 +16,7 @@ from websocket.helpers import (
     authenticate,
     check_license_feature,
     create_camera_service,
+    create_notification,
     get_user_camera,
     load_user_config,
     set_camera_status,
@@ -151,17 +152,29 @@ class FaceRecognitionManager:
                             or now - self._notified[pid] > self._match_cooldown
                         ):
                             self._notified[pid] = now
+                            name = f.get("name")
                             await self.ws.send_text(
                                 json.dumps(
                                     {
                                         "type": "face_match",
                                         "person_id": pid,
-                                        "name": f.get("name"),
+                                        "name": name,
                                         "camera_id": self.camera_id,
                                         "camera_name": self.camera.name
                                         if self.camera
                                         else None,
                                     }
+                                )
+                            )
+                            create_task(
+                                create_notification(
+                                    profile_id=self.profile_id,
+                                    camera_id=self.camera_id,
+                                    title="Pessoa reconhecida",
+                                    description=f"Pessoa identificada: {name}",
+                                    level="I",
+                                    frame=frame,
+                                    person_id=pid,
                                 )
                             )
                             await save_face_detection(

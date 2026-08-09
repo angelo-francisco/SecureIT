@@ -1,5 +1,5 @@
 from apps.cameras.models import Camera
-from apps.notifications.service import get_unread_count
+from apps.notifications.models import Notification
 from apps.panel.models import Configuration
 from apps.audit.service import log_action
 
@@ -49,7 +49,9 @@ async def update_configuration(profile_id: str, data: dict) -> Configuration:
 
 async def get_dashboard_data(profile_id: str) -> dict:
     cameras = await Camera.filter(profile_id=profile_id)
-    notif_count = await get_unread_count(profile_id)
+    notif_count = await Notification.filter(
+        profile_id=profile_id, deleted=False
+    ).count()
 
     return {
         "cameras": [

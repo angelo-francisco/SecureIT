@@ -1,23 +1,19 @@
-from tortoise.expressions import Q
+import logging
 
 from apps.notifications.models import Notification
 from apps.audit.service import log_action
+from core.config import settings
 from core.exceptions import NotFound
+
+logger = logging.getLogger(__name__)
 
 
 async def list_notifications(
     profile_id: str,
-    filter_type: str = "A",
     page: int = 1,
     per_page: int = 5,
 ) -> tuple[list[Notification], int]:
     query = Notification.filter(profile_id=profile_id, deleted=False)
-
-    match filter_type:
-        case "NR":
-            query = query.filter(readed=False)
-        case "R":
-            query = query.filter(readed=True)
 
     total = await query.count()
     offset = (page - 1) * per_page
@@ -41,7 +37,35 @@ async def delete_notification(notification_id: int, profile_id: str):
     await log_action("delete", "notification", notification_id, profile_id)
 
 
-async def get_unread_count(profile_id: str) -> int:
-    return await Notification.filter(
-        profile_id=profile_id, readed=False, deleted=False
-    ).count()
+async def cleanup_orphan_photos() -> None:
+    """Remove stored notification images that are not valid JPEGs.
+
+    Older versions wrote raw numpy buffers to disk (broken files that show as
+    a missing image in the UI). Anything that is not a real JPEG is deleted and
+    the notification ``photo`` reference is nulled so the UI hides the link.
+    """
+    from pathlib import Path
+
+    frames_dir = Path(settings.MEDIA_ROOT) / "notifications_frames"
+    if not frames_dir.is_dir():
+        return
+
+    removed: list[str] = []
+    for f in frames_dir.iterdir():
+        if not f.is_file() or f.suffix.lower() != ".jpg":
+            continue
+        try:
+            header = f.open("rb").read(2)
+        except OSError:
+            continue
+        if header != b"\xff\xd8":
+            removed.append(f.name)
+            try:
+                f.unlink()
+            except OSError:
+                logger.warning("could not delete broken image %s", f.name)
+
+    if removed:
+        refs = [f"notifications_frames/{name}" for name in removed]
+        await Notification.filter(photo__in=refs).update(photo=None)
+        logger.info("cleaned %d broken notification images", len(removed))

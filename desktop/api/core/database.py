@@ -152,3 +152,10 @@ async def after_db_startup():
         pass
     finally:
         ensure_global_fallback()
+
+    try:
+        from apps.notifications.service import cleanup_orphan_photos
+
+        await cleanup_orphan_photos()
+    except Exception:
+        logger.exception("notification photo cleanup failed")

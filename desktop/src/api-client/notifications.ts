@@ -1,11 +1,11 @@
-import type { Notification, NotificationFilter } from "../types";
+import type { Notification } from "../types";
 import { apiClient } from "./client";
 
 export const notificationsApi = {
-  list: (filter?: NotificationFilter, page?: number) =>
+  list: (page?: number) =>
     apiClient.get<{ results: Notification[]; has_next: boolean; has_previous: boolean; number: number; num_pages: number }>(
       "/api/notifications",
-      { ...(filter?.search_query ? { search_query: filter.search_query } : {}), ...(page ? { page: String(page) } : {}) }
+      page ? { page: String(page) } : {}
     ),
 
   delete: (id: number) =>

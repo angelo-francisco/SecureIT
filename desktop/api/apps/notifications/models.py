@@ -11,7 +11,9 @@ class Notification(models.Model):
     camera = fields.ForeignKeyField(
         "models.Camera", related_name="notifications", null=True
     )
-    readed = fields.BooleanField(default=False)
+    person = fields.ForeignKeyField(
+        "models.Person", related_name="notifications", null=True
+    )
     photo = fields.CharField(max_length=255, null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
 

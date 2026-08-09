@@ -10,13 +10,8 @@ class NotificationResponse(BaseModel):
     level: str
     deleted: bool
     camera_id: int | None
-    readed: bool
+    person_id: int | None
     photo: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
-
-
-class NotificationListParams(BaseModel):
-    filter: str = "A"  # A = All, NR = Unread, R = Read
-    page: int = 1

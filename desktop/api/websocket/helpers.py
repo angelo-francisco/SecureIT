@@ -77,15 +77,27 @@ async def create_notification(
     title: str,
     description: str,
     level: str,
-    frame: bytes,
+    frame,
+    person_id: int | None = None,
 ):
     import uuid
     from pathlib import Path
 
+    import cv2
+    import numpy as np
+
+    if isinstance(frame, np.ndarray):
+        ok, buf = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+        if not ok:
+            raise RuntimeError("failed to encode notification frame as jpeg")
+        payload = buf.tobytes()
+    else:
+        payload = bytes(frame)
+
     filename = f"{uuid.uuid4()}.jpg"
     path = Path(settings.MEDIA_ROOT) / "notifications_frames"
     path.mkdir(parents=True, exist_ok=True)
-    (path / filename).write_bytes(frame)
+    (path / filename).write_bytes(payload)
 
     await Notification.create(
         profile_id=profile_id,
@@ -94,6 +106,7 @@ async def create_notification(
         level=level,
         photo=f"notifications_frames/{filename}",
         camera_id=camera_id,
+        person_id=person_id,
     )
 
 
@@ -110,9 +123,7 @@ async def websocket_watchdog(
     try:
         while not stop.is_set():
             try:
-                msg = await asyncio.wait_for(
-                    websocket.receive(), timeout=interval
-                )
+                msg = await asyncio.wait_for(websocket.receive(), timeout=interval)
             except asyncio.TimeoutError:
                 try:
                     await websocket.send_text('{"type": "ping"}')
