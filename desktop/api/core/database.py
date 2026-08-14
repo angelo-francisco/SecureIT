@@ -7,7 +7,7 @@ from tortoise import Tortoise
 from tortoise.context import TortoiseContext, set_global_context
 from tortoise.exceptions import ConfigurationError
 
-from core.config import is_bundled, settings
+from core.config import settings
 
 logger = logging.getLogger("database")
 
@@ -88,27 +88,33 @@ def migrations_dir() -> Path:
 
 async def run_migrations() -> None:
     config = get_tortoise_config()
-    cmd = Command(
-        tortoise_config=config,
-        app="models",
-        location=str(migrations_dir()),
-    )
+    location = str(migrations_dir())
     # aerich calls Tortoise.init() internally, which would re-initialise (and
     # close) the app's TortoiseContext and wipe the global fallback that lets
     # requests/websockets/background tasks reach the DB. Run it inside its own
     # isolated context so the app's global context stays intact.
     async with TortoiseContext():
+        if not Path(location, "models").exists():
+            logger.warning(
+                "No aerich migrations found at %s; generating schema from models",
+                location,
+            )
+            await Tortoise.init(config=config)
+            await Tortoise.generate_schemas(safe=True)
+            return
+
+        cmd = Command(tortoise_config=config, app="models", location=location)
         await cmd.init()
         try:
             migrated = await cmd.upgrade()
-            if migrated:
-                logger.info("Applied aerich migrations: %s", migrated)
         except Exception as exc:  # NOQA
-            logger.info("Aerich table missing (%s); bootstrapping fresh schema", exc)
-            await Tortoise.generate_schemas()
+            logger.warning(
+                "Aerich upgrade failed (%s); bootstrapping schema from models", exc
+            )
+            await Tortoise.generate_schemas(safe=True)
             migrated = await cmd.upgrade()
-            if migrated:
-                logger.info("Registered aerich migrations on fresh DB: %s", migrated)
+        if migrated:
+            logger.info("Applied aerich migrations: %s", migrated)
 
 
 def ensure_global_fallback() -> None:
@@ -134,13 +140,8 @@ async def after_db_startup():
     conn = Tortoise.get_connection("default")
 
     await conn.execute_query("CREATE EXTENSION IF NOT EXISTS vector")
-    logger.critical("extension created")
 
-    if settings.EMBEDDED_DB or is_bundled():
-        await run_migrations()
-
-    elif settings.DEBUG:
-        await Tortoise.generate_schemas()
+    await run_migrations()
 
     try:
         await conn.execute_query("""
@@ -148,8 +149,8 @@ async def after_db_startup():
             ON person_embeddings
             USING hnsw (embedding vector_cosine_ops)
         """)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("HNSW index creation skipped: %s", exc)
     finally:
         ensure_global_fallback()
 
