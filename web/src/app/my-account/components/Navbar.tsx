@@ -1,18 +1,17 @@
 "use client";
 
-import { Bell, Loader, LogOut, Menu, FileText, X, Key } from "lucide-react";
+import { Bell, FileText, Key, Loader, LogOut, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Modal } from "@/packages/ui";
+import { NewLicenseModal } from "./NewLicenseModal";
 import {
 	type NotificationsResponse,
 	NotificationsSection,
 } from "./NotificationsSection";
-
-import { NewLicenseModal } from "./NewLicenseModal";
 
 export function Navbar() {
 	const router = useRouter();
@@ -55,7 +54,7 @@ export function Navbar() {
 		},
 	];
 
-	const LogoutButton = ({ complet = false }: { complet?: Boolean }) => {
+	const LogoutButton = ({ complet = false }: { complet?: boolean }) => {
 		if (complet)
 			return (
 				<button

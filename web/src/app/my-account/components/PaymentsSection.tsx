@@ -1,6 +1,6 @@
 "use client";
 
-import { Receipt, Info } from "lucide-react";
+import { Receipt } from "lucide-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
 export interface Payment {
@@ -127,6 +127,7 @@ export const PaymentsSection = forwardRef<
 									)}
 
 									<button
+										type="button"
 										rel="noopener noreferrer"
 										className="text-primary hover:underline"
 									>
