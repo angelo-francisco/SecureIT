@@ -1,0 +1,77 @@
+---
+title: Cameras
+description: Register, connect and configure SecureIT monitoring cameras.
+---
+
+# Cameras
+
+The **Cameras** section manages all monitoring devices. SecureIT supports physically
+connected cameras (USB), network cameras (IP/RTSP) and video files for demonstration.
+
+## Camera list
+
+The **Cameras** menu shows a table with all registered cameras:
+
+| Column | Description |
+| --- | --- |
+| ID | Identifier and quick access to details |
+| Name | Assigned camera name |
+| Location | Physical location of the camera |
+| Status | Online or Offline |
+| Date Added | When the camera was registered |
+| Last Updated | Last data change |
+
+- Use the **search bar** to filter by name or location.
+- The **Identify** button automatically looks for cameras connected to the computer.
+- **New Camera** opens the registration form.
+
+{/*  IMAGE SLOT: screenshot of the camera list screen  */}
+
+## New camera
+
+### Connection type
+
+| Type | Description |
+| --- | --- |
+| **Local / USB** | Camera physically connected to the server. Choose from detected devices or use the video file mode (demo). |
+| **Wi-Fi** | Network camera reachable by HTTP, HTTPS or RTSP URL (e.g. `rtsp://192.168.1.100:554/stream`). |
+
+In **Local/USB** mode you can choose between:
+
+- **Real Camera** — a device detected by the system (list loaded automatically).
+- **Video File (Demo)** — an absolute path to a local file (`.mp4`, `.avi`, `.mov`) to test
+  the features.
+
+### Camera task
+
+Each camera performs a task, which determines how the video is analyzed:
+
+| Task | Code | What it does |
+| --- | --- | --- |
+| Area Detection | `D` | Detects and counts people in the monitoring area. |
+| Face Recognition | `FR` | Detects and recognizes faces automatically. |
+| Behavior Analysis | `BA` | Analyzes suspicious behavior and generates critical alerts. |
+
+<Callout variant="warning" title="License features">
+Face Recognition and Behavior Analysis tasks can only be used if your
+[license](/docs/en/licenses) includes those features.
+</Callout>
+
+## Camera details
+
+Clicking a camera (by its ID in the list or by the dashboard tile) opens the
+**Camera Details**:
+
+- **Edit name and location** — click the pencil to change.
+- **Connection type** and **connection information** — read-only current parameters.
+- **Status** — real-time Online/Offline.
+- **Change task** — switch between `D`, `FR` and `BA`. The camera connection restarts
+  automatically; other cameras are not affected.
+- **Remove** — deletes the camera from the system.
+
+{/*  IMAGE SLOT: screenshot of the camera details screen  */}
+
+<Callout variant="success" title="Real-time changes">
+After saving changes, the camera connection is closed and reopened automatically, applying
+the new configuration without restarting the app.
+</Callout>

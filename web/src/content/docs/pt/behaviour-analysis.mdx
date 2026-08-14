@@ -1,0 +1,49 @@
+---
+title: Análise de Comportamento
+description: Deteção de movimentos suspeitos, armas, furtos e situações de assalto.
+---
+
+# Análise de Comportamento
+
+A tarefa de **Análise de Comportamento** vai além da detecção: analisa o movimento das
+pessoas e gera **alertas críticos** para situações suspeitas ou perigosas.
+
+## Como funciona
+
+1. Cada pessoa detectada é seguida ao longo do tempo usando **ByteTrack**.
+2. O movimento é analisado com **fluxo óptico** (optical flow) para identificar padrões.
+3. Quando um padrão suspeito é identificado, o sistema gera um alerta com imagem e
+   prioridade.
+
+{/*  ESPAÇO PARA IMAGEM: captura da análise de comportamento com rastreamento  */}
+
+## Tipos de alertas
+
+| Alerta | Descrição | Prioridade |
+| --- | --- | --- |
+| **Movimento Suspeito** | Movimentação anormal ou agitada de uma pessoa. | Média |
+| **Arma Branca** | Deteção de objeto que aparenta ser arma branca (faca). | Alta |
+| **Possível Furto** | Movimento que sugere subtração de objetos. | Alta |
+| **Assalto** | Situação de assalto ou agressão. | Crítica |
+| **Fuga** | Pessoa em fuga da área monitorizada. | Crítica |
+
+## Centro de controlo de comportamento
+
+A janela de **Análise de Comportamento** apresenta o centro de controlo:
+
+- **Vídeo ao vivo** com as pessoas rastreadas.
+- **Linha temporal** com os alertas críticos gerados pela câmera.
+- **Histórico de alertas** da câmera selecionada.
+- Painel para **detalhes do alerta** selecionado.
+
+{/*  ESPAÇO PARA IMAGEM: captura do centro de controlo de comportamento  */}
+
+<Callout variant="warning" title="Alertas com prioridade crítica">
+Os alertas de **assalto** e **fuga** têm prioridade crítica. Verifique sempre estas
+notificações com urgência.
+</Callout>
+
+<Callout variant="info" title="Rastreamento multi-pessoa">
+O **ByteTrack** permite seguir várias pessoas ao mesmo tempo, mantendo a identidade de cada
+pessoa entre fotogramas, mesmo quando se cruzam ou são momentaneamente ocultadas.
+</Callout>

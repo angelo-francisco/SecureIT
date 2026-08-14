@@ -1,0 +1,48 @@
+---
+title: Area Detection
+description: People detection and counting in the monitoring area.
+---
+
+# Area Detection
+
+The **Area Detection** task uses the YOLO model (YOLOv11) to detect and count people in
+real time in the area monitored by the camera.
+
+## How it works
+
+1. The video is analyzed at a rate controlled by the [settings](/docs/en/settings)
+   (frames per second and detection frequency).
+2. Each detected person is counted and the information is sent to the server.
+3. The **detection panel** on the dashboard shows the total and per-camera count.
+
+{/*  IMAGE SLOT: screenshot of people detection with boxes  */}
+
+## People count
+
+The detection panel shows:
+
+- **Total count** of all selected cameras.
+- **Per-camera count** when a camera is selected.
+- Indicator of active detection **masks**.
+
+### Count alerts
+
+SecureIT generates a count alert when the number of detected people in the area
+**exceeds the configured value** during the monitoring period. The alert includes an
+image of the detection moment.
+
+## Monitoring schedule
+
+Area detection only works during the **monitoring schedule** defined in the
+[settings](/docs/en/settings) (start and end time). Outside this schedule, monitoring is
+paused.
+
+## Interaction with other tasks
+
+Area detection shares the same camera with face recognition: detected faces are processed
+by recognition, but the people count is independent.
+
+<Callout variant="info" title="AI model">
+People detection uses the **YOLOv11** model. The model runs locally on the server where
+SecureIT is installed — the video is not sent to external services.
+</Callout>

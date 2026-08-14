@@ -1,0 +1,48 @@
+---
+title: Detecção de Área
+description: Deteção e contagem de pessoas na área de monitoramento.
+---
+
+# Detecção de Área
+
+A tarefa de **Detecção de Área** usa o modelo YOLO (YOLOv11) para detectar e contar
+pessoas em tempo real na área monitorizada pela câmera.
+
+## Como funciona
+
+1. O vídeo é analisado a uma taxa controlada pelas [configurações](/docs/pt/settings)
+   (fotogramas por segundo e frequência de detecção).
+2. Cada pessoa detectada é contada e a informação é enviada para o servidor.
+3. O **painel de detecção** no dashboard mostra a contagem total e por câmera.
+
+{/*  ESPAÇO PARA IMAGEM: captura da detecção de pessoas com caixas  */}
+
+## Contagem de pessoas
+
+O painel de detecção mostra:
+
+- **Contagem total** de todas as câmeras selecionadas.
+- **Contagem por câmera** quando uma câmera está selecionada.
+- Indicador de **máscaras de detecção** ativas.
+
+### Alertas de contagem
+
+O SecureIT gera um alerta de contagem quando o número de pessoas detectadas na área
+**excede o valor configurado** durante o período de monitoramento. O alerta inclui uma
+imagem do momento da detecção.
+
+## Horário de monitoramento
+
+A detecção de área só funciona durante o **horário de monitoramento** definido nas
+[configurações](/docs/pt/settings) (hora de início e fim). Fora deste horário, a
+monitorização está pausada.
+
+## Interação com outras tarefas
+
+A detecção de área partilha a mesma câmera com o reconhecimento facial: os rostos
+detectados são processados pelo reconhecimento, mas a contagem de pessoas é independente.
+
+<Callout variant="info" title="Modelo de IA">
+A detecção de pessoas usa o modelo **YOLOv11**. O modelo corre localmente no servidor onde
+o SecureIT está instalado — o vídeo não é enviado para serviços externos.
+</Callout>

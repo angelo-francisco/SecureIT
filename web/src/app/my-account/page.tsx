@@ -100,7 +100,7 @@ export default function MyAccountPage() {
 				<h1 className="text-3xl md:text-4xl font-display font-bold text-text">
 					Olá, {`${user?.firstName} ${user?.lastName}`}!
 				</h1>
-				<p className="text-text-muted mt-1 text-base md:text-lg">
+				<p className="text-text-muted mt-1 text-lg md:text-xl">
 					Gerencie os seus dados pessoais, perfis e assinaturas ativas.
 				</p>
 			</div>

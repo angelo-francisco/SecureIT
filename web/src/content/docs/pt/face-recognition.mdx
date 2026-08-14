@@ -1,0 +1,57 @@
+---
+title: Reconhecimento Facial
+description: Identificação automática de rostos conhecidos e desconhecidos.
+---
+
+# Reconhecimento Facial
+
+O **Reconhecimento Facial** identifica automaticamente quem aparece nas câmeras, usando
+as fotos registadas na secção [Pessoas](/docs/pt/people). Funciona com o modelo **FaceNet**
+e a base de dados vetorial **pgvector**.
+
+## Como funciona
+
+1. A câmera com a tarefa `FR` (Reconhecimento Facial) detecta rostos no vídeo.
+2. Cada rosto é convertido num vetor de características (embedding).
+3. O vetor é comparado com os vetores das pessoas registadas usando **pgvector**.
+4. Se houver correspondência acima do limite de confiança, a pessoa é identificada.
+
+{/*  ESPAÇO PARA IMAGEM: captura do reconhecimento de um rosto conhecido  */}
+
+## Rostos conhecidos e desconhecidos
+
+Cada detecção é classificada como:
+
+| Tipo | Descrição |
+| --- | --- |
+| **Conhecido** | O rosto corresponde a uma pessoa registada. O nome da pessoa é apresentado. |
+| **Desconhecido** | O rosto não corresponde a nenhuma pessoa registada. Aparece como "Desconhecido". |
+
+O histórico de detecções fica no separador **Detectados** da janela de reconhecimento:
+
+- **Foto** do momento da detecção.
+- **Nome** da pessoa ou "Desconhecido".
+- **Câmera**, **data** e **hora** da detecção.
+
+{/*  ESPAÇO PARA IMAGEM: captura da lista de rostos detectados  */}
+
+## Cooldown de alertas
+
+Para evitar alertas repetidos da mesma pessoa, o SecureIT usa um **cooldown** de
+notificações. Quando uma pessoa é detectada, novas detecções da mesma pessoa só geram
+alertas após o intervalo configurado nas [configurações](/docs/pt/settings).
+
+## Pesquisa por rosto
+
+A função **Pesquisar por Rosto** usa a imagem atual da câmera para procurar na base de
+dados de pessoas. É útil para identificar quem apareceu sem alerta.
+
+<Callout variant="warning" title="Qualidade da foto">
+A precisão do reconhecimento depende da qualidade das fotos registadas. Use fotos de
+frente, com boa iluminação e sem obstruções.
+</Callout>
+
+<Callout variant="info" title="Privacidade">
+Todos os vetores faciais são armazenados localmente na sua base de dados
+(**pgvector**). Nenhuma informação é enviada para serviços externos.
+</Callout>

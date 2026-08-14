@@ -1,0 +1,56 @@
+---
+title: Settings
+description: Adjust monitoring, alerts and the license in SecureIT.
+---
+
+# Settings
+
+The **Settings** let you adjust the monitoring and detection behavior. Access them through
+the bottom menu or the gear icon.
+
+## Monitoring
+
+| Setting | Description |
+| --- | --- |
+| **Monitoring FPS** | Frames per second captured for analysis. Higher values give smoother detection but use more server resources. |
+| **Monitoring Start** | Time of day when monitoring starts. |
+| **Monitoring End** | Time of day when monitoring ends. |
+| **Detect every N frames** | Every how many frames the video is analyzed. Low values = more detections; high values = less load. |
+| **Allow Drawing** | Allows drawing masks/areas over the camera video. |
+| **Alert Cooldown** | Minimum interval between alerts of the same person/event (in seconds). |
+| **Detected Faces** | Limit of faces kept in the detection history. |
+
+<Callout variant="warning" title="Performance balance">
+Adjusting FPS and detection frequency affects the server CPU/GPU usage. Start with the
+default values and increase only if necessary.
+</Callout>
+
+{/*  IMAGE SLOT: screenshot of the monitoring settings screen  */}
+
+## Saving changes
+
+After adjusting the values, click **Save**:
+
+- The new settings are sent to the server.
+- Detection restarts automatically with the new parameters.
+
+<Callout variant="info" title="Immediate application">
+Changes to the monitoring settings are applied to the cameras automatically without
+restarting the app.
+</Callout>
+
+## License tab
+
+The **License** tab in settings allows you to:
+
+- **Activate** a new license.
+- **Verify** the license status with the server.
+- See the included **features** and the profile **limits**.
+- **Revoke** the current license.
+
+See the [Licenses](/docs/en/licenses) page for details.
+
+## Monitoring tab
+
+This tab brings together the monitoring settings above, with the profile's current values
+already filled in.

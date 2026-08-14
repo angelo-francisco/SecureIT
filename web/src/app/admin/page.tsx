@@ -1478,8 +1478,8 @@ function PaymentsTab() {
 														? ` · ${p.durationDays} dias`
 														: ""}
 												</p>
-												{(p.selectedFeatureNames?.length > 0 ||
-													p.selectedServiceNames?.length > 0) && (
+												{((p.selectedFeatureNames?.length ?? 0) > 0 ||
+													(p.selectedServiceNames?.length ?? 0) > 0) && (
 													<div className="flex flex-wrap gap-1.5 mt-1.5">
 														{[
 															...(p.selectedFeatureNames ?? []),

@@ -1,0 +1,56 @@
+---
+title: Configurações
+description: Ajuste o monitoramento, os alertas e a licença no SecureIT.
+---
+
+# Configurações
+
+As **Configurações** permitem ajustar o comportamento do monitoramento e da detecção.
+Aceda pelo menu inferior ou pelo ícone de engrenagem.
+
+## Monitoramento
+
+| Definição | Descrição |
+| --- | --- |
+| **FPS de Monitoramento** | Fotogramas por segundo capturados para análise. Valores mais altos dão detecção mais suave, mas usam mais recursos do servidor. |
+| **Início da Monitorização** | Hora do dia em que o monitoramento começa. |
+| **Fim da Monitorização** | Hora do dia em que o monitoramento termina. |
+| **Detectar a cada N fotogramas** | A cada quantos fotogramas o vídeo é analisado. Valores baixos = mais detecções; valores altos = menos carga. |
+| **Permitir Desenho** | Permite desenhar máscaras/áreas sobre o vídeo da câmera. |
+| **Cooldown de Alertas** | Intervalo mínimo entre alertas da mesma pessoa/evento (em segundos). |
+| **Rostos Detectados** | Limite de rostos mantidos no histórico de detecções. |
+
+<Callout variant="warning" title="Equilíbrio de desempenho">
+Ajustar FPS e frequência de detecção afeta o uso de CPU/GPU do servidor. Comece com os
+valores padrão e aumente apenas se necessário.
+</Callout>
+
+{/*  ESPAÇO PARA IMAGEM: captura do ecrã de configurações de monitoramento  */}
+
+## Guardar alterações
+
+Depois de ajustar os valores, clique em **Guardar**:
+
+- As novas definições são enviadas ao servidor.
+- A detecção é reiniciada automaticamente com os novos parâmetros.
+
+<Callout variant="info" title="Aplicação imediata">
+As alterações às definições de monitoramento são aplicadas automaticamente às câmeras sem
+necessidade de reiniciar o aplicativo.
+</Callout>
+
+## Separador Licença
+
+O separador **Licença** nas configurações permite:
+
+- **Ativar** uma nova licença.
+- **Verificar** o estado da licença junto do servidor.
+- Ver as **funcionalidades** incluídas e os **limites** do perfil.
+- **Revogar** a licença atual.
+
+Consulte a página de [Licenças](/docs/pt/licenses) para detalhes.
+
+## Separador Monitoramento
+
+Este separador reúne as definições de monitoramento acima, com os valores atuais do
+perfil já preenchidos.

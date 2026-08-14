@@ -1,0 +1,61 @@
+---
+title: Dashboard e Monitoramento
+description: Acompanhe as câmeras em tempo real no dashboard do SecureIT.
+---
+
+# Dashboard e Monitoramento
+
+O **dashboard** é o centro de monitoramento em tempo real. Mostra todas as câmeras numa
+grelha com pré-visualização ao vivo, acesso rápido aos detalhes e o painel de detecção de
+pessoas.
+
+## Grelha de câmeras
+
+O dashboard mostra as câmeras em **tiles** organizados em grelha:
+
+- Cada tile exibe o **nome** da câmera.
+- O vídeo é uma pré-visualização em tempo real.
+- Clique num tile para abrir os **Detalhes da Câmera** em janela própria.
+
+### Movimentar e redimensionar
+
+- **Arraste** um tile para reorganizar a posição da câmera na grelha.
+- Use o ícone de **redimensionar** (canto inferior direito) para alterar o tamanho do tile.
+
+<Callout variant="info" title="Posições guardadas">
+As posições e tamanhos dos tiles são guardados automaticamente e restaurados na próxima
+sessão.
+</Callout>
+
+{/*  ESPAÇO PARA IMAGEM: captura da grelha do dashboard  */}
+
+## Painel de detecção
+
+No canto inferior direito do dashboard está o painel de **Detecção** (ícone de pessoa):
+
+- Mostra o número de pessoas **detectadas** nas câmeras.
+- Com uma câmera selecionada, apresenta a **contagem de pessoas** e as **máscaras** de
+  detecção.
+- **Selecionar Tudo** — mostra o total de todas as câmeras.
+- **Banir Pessoa** — inicia o fluxo de banimento de uma pessoa.
+- **Terminar Sessão** — encerra a sessão no perfil atual.
+
+{/*  ESPAÇO PARA IMAGEM: captura do painel de detecção  */}
+
+## Detalhes da câmera (janela)
+
+Ao abrir uma câmera, uma janela apresenta:
+
+| Secção | Função |
+| --- | --- |
+| **Detecção de Área** | Vista ao vivo com contagem de pessoas na área. |
+| **Reconhecimento Facial** | Detecção de rostos conhecidos/desconhecidos, pesquisa facial. |
+| **Análise de Comportamento** | Alertas de comportamento suspeito. |
+| **Informações** | Detalhes da câmera (nome, localização, tipo de conexão, tarefa). |
+| **Editar** | Alterar nome e localização. |
+| **Remover** | Eliminar a câmera. |
+
+<Callout variant="success" title="Verificação em tempo real">
+As detecções são apresentadas assim que são processadas pelo servidor, com imagens do
+momento da detecção.
+</Callout>

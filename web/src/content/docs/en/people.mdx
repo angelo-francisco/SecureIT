@@ -1,0 +1,82 @@
+---
+title: People
+description: Register people, define roles and search faces in SecureIT.
+---
+
+# People
+
+The **People** section stores the records of people SecureIT should know. With these
+photos, **face recognition** automatically identifies who appears on the cameras.
+
+## People list
+
+The **People** menu shows a table with all records:
+
+| Column | Description |
+| --- | --- |
+| Photo | Person's photograph |
+| Name | Full name |
+| Role | Assigned function |
+| Date Created | When the record was created |
+| Actions | Edit or remove |
+
+- Use the **search bar** to find by name.
+- **New Person** opens the registration form.
+
+{/*  IMAGE SLOT: screenshot of the people list screen  */}
+
+## New person
+
+1. In the **People** menu, click **New Person**.
+2. Add the **photo**:
+   - **Take Photo** — uses the computer camera (camera permission is requested).
+   - **Upload Photo** — select an image from the computer.
+3. Enter the **name**.
+4. Select the **role** and fill in the **custom fields** (see below).
+5. Click **Save**.
+
+<Callout variant="warning" title="No photo?">
+A person without a photo cannot be recognized. Upload a clear, front-facing photo with
+good lighting.
+</Callout>
+
+## Roles and custom fields
+
+**Roles** organize people and let you define custom fields for each function. For example,
+an "Employee" role can have the fields "Employee Number" and "Department".
+
+1. In the people list, tap the **wrench** icon (next to "New Person").
+2. The screen shows the list of created roles.
+3. Tap **New Role**, give it a name and add the desired **custom fields**.
+4. When creating a person, select the role and fill in the fields shown.
+
+{/*  IMAGE SLOT: screenshot of the roles management screen  */}
+
+## Face search
+
+SecureIT lets you find out who is the person visible on a camera:
+
+1. Open a camera (via the dashboard tile).
+2. In the viewing window, click the **Face Recognition** area.
+3. Use **Search by Face** — the current camera image is used to search the registered
+   people database.
+
+{/*  IMAGE SLOT: screenshot of the face search window  */}
+
+## Banning a person
+
+You can **ban** a person so the system flags them as unauthorized:
+
+1. Open the dashboard and the detection panel (person-with-line icon).
+2. Click **Ban Person**.
+3. Confirm the ban.
+
+<Callout variant="warning" title="Permanent ban">
+A banned person appears identified as **banned** in future detections. Use this feature
+with discretion.
+</Callout>
+
+<Callout variant="success" title="Next step">
+After registering people, see [Face Recognition](/docs/en/face-recognition) to learn how
+detections appear in the system.
+</Callout>

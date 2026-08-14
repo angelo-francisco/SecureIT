@@ -1,0 +1,83 @@
+---
+title: Pessoas
+description: Registar pessoas, definir cargos e pesquisar rostos no SecureIT.
+---
+
+# Pessoas
+
+A secção **Pessoas** guarda o registo das pessoas que o SecureIT deve conhecer. Com estas
+fotos, o **reconhecimento facial** identifica automaticamente quem aparece nas câmeras.
+
+## Lista de pessoas
+
+O menu **Pessoas** mostra uma tabela com todos os registos:
+
+| Coluna | Descrição |
+| --- | --- |
+| Foto | Fotografia da pessoa |
+| Nome | Nome completo |
+| Cargo | Função atribuída |
+| Data de Criação | Quando o registo foi criado |
+| Ações | Editar ou remover |
+
+- Use a **barra de pesquisa** para encontrar por nome.
+- **Nova Pessoa** abre o formulário de registo.
+
+{/*  ESPAÇO PARA IMAGEM: captura do ecrã da lista de pessoas  */}
+
+## Nova pessoa
+
+1. No menu **Pessoas**, clique em **Nova Pessoa**.
+2. Adicione a **foto**:
+   - **Tirar Foto** — usa a câmera do computador (é pedida autorização da câmara).
+   - **Carregar Foto** — selecione uma imagem do computador.
+3. Introduza o **nome**.
+4. Selecione o **cargo** e preencha os **campos personalizados** (ver abaixo).
+5. Clique em **Guardar**.
+
+<Callout variant="warning" title="Sem foto?">
+Uma pessoa sem foto não pode ser reconhecida. Carregue uma foto nítida, de frente, com boa
+iluminação.
+</Callout>
+
+## Cargos e campos personalizados
+
+Os **cargos** organizam as pessoas e permitem definir campos próprios para cada função.
+Por exemplo, um cargo "Funcionário" pode ter os campos "Número de Funcionário" e
+"Departamento".
+
+1. Na lista de pessoas, toque no ícone de **ferramenta** (ao lado de "Nova Pessoa").
+2. O ecrã mostra a lista de cargos criados.
+3. Toque em **Novo Cargo**, dê um nome e adicione os **campos personalizados** desejados.
+4. Ao criar uma pessoa, selecione o cargo e preencha os campos mostrados.
+
+{/*  ESPAÇO PARA IMAGEM: captura do ecrã de gestão de cargos  */}
+
+## Pesquisa facial
+
+O SecureIT permite procurar quem é a pessoa visível numa câmera:
+
+1. Abra uma câmera (pelo tile no dashboard).
+2. Na janela de visualização, clique na área de **Reconhecimento Facial**.
+3. Use **Pesquisar por Rosto** — a imagem atual da câmera é usada para procurar na base de
+   dados de pessoas registadas.
+
+{/*  ESPAÇO PARA IMAGEM: captura da janela de pesquisa facial  */}
+
+## Banir uma pessoa
+
+Pode **banir** uma pessoa para que o sistema a sinalize como não autorizada:
+
+1. Abra o dashboard e o painel de detecção (ícone de pessoa com linha).
+2. Clique em **Banir Pessoa**.
+3. Confirme o banimento.
+
+<Callout variant="warning" title="Banimento permanente">
+Uma pessoa banida aparece identificada como **banida** em futuras detecções. Use esta
+funcionalidade com critério.
+</Callout>
+
+<Callout variant="success" title="Próximo passo">
+Depois de registar pessoas, consulte [Reconhecimento Facial](/docs/pt/face-recognition)
+para saber como as detecções aparecem no sistema.
+</Callout>

@@ -1,0 +1,57 @@
+---
+title: Face Recognition
+description: Automatic identification of known and unknown faces.
+---
+
+# Face Recognition
+
+**Face Recognition** automatically identifies who appears on the cameras, using the photos
+registered in the [People](/docs/en/people) section. It works with the **FaceNet** model
+and the **pgvector** vector database.
+
+## How it works
+
+1. The camera with the `FR` (Face Recognition) task detects faces in the video.
+2. Each face is converted into a feature vector (embedding).
+3. The vector is compared with the registered people vectors using **pgvector**.
+4. If there is a match above the confidence threshold, the person is identified.
+
+{/*  IMAGE SLOT: screenshot of recognizing a known face  */}
+
+## Known and unknown faces
+
+Each detection is classified as:
+
+| Type | Description |
+| --- | --- |
+| **Known** | The face matches a registered person. The person's name is shown. |
+| **Unknown** | The face does not match any registered person. Shown as "Unknown". |
+
+The detection history is in the **Detected** tab of the recognition window:
+
+- **Photo** of the detection moment.
+- **Name** of the person or "Unknown".
+- **Camera**, **date** and **time** of the detection.
+
+{/*  IMAGE SLOT: screenshot of the detected faces list  */}
+
+## Alert cooldown
+
+To avoid repeated alerts for the same person, SecureIT uses a notification **cooldown**.
+When a person is detected, new detections of the same person only generate alerts after
+the interval configured in the [settings](/docs/en/settings).
+
+## Face search
+
+The **Search by Face** feature uses the current camera image to search the people
+database. It is useful for identifying who appeared without an alert.
+
+<Callout variant="warning" title="Photo quality">
+Recognition accuracy depends on the quality of the registered photos. Use front-facing
+photos with good lighting and no obstructions.
+</Callout>
+
+<Callout variant="info" title="Privacy">
+All face vectors are stored locally in your database (**pgvector**). No information is sent
+to external services.
+</Callout>

@@ -23,6 +23,9 @@ export function Footer() {
 						reservados.
 					</p>
 					<div className="flex items-center gap-6 text-base text-text-muted">
+						<Link href="/docs" className="hover:text-text transition-colors">
+							Documentação
+						</Link>
 						<Link href="#" className="hover:text-text transition-colors">
 							Termos
 						</Link>

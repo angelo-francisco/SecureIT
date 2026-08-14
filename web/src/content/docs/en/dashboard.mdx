@@ -1,0 +1,58 @@
+---
+title: Dashboard and Monitoring
+description: Follow your cameras in real time on the SecureIT dashboard.
+---
+
+# Dashboard and Monitoring
+
+The **dashboard** is the real-time monitoring center. It shows all cameras in a grid with
+live previews, quick access to details and the people detection panel.
+
+## Camera grid
+
+The dashboard shows cameras as **tiles** arranged in a grid:
+
+- Each tile displays the camera **name**.
+- The video is a real-time preview.
+- Click a tile to open the **Camera Details** in its own window.
+
+### Moving and resizing
+
+- **Drag** a tile to rearrange the camera position in the grid.
+- Use the **resize** icon (bottom-right corner) to change the tile size.
+
+<Callout variant="info" title="Saved positions">
+Tile positions and sizes are saved automatically and restored on the next session.
+</Callout>
+
+{/*  IMAGE SLOT: screenshot of the dashboard grid  */}
+
+## Detection panel
+
+In the bottom-right corner of the dashboard is the **Detection** panel (person icon):
+
+- Shows the number of **detected** people on the cameras.
+- With a camera selected, shows the **people count** and the detection **masks**.
+- **Select All** — shows the total of all cameras.
+- **Ban Person** — starts the person ban flow.
+- **Sign Out** — ends the session on the current profile.
+
+{/*  IMAGE SLOT: screenshot of the detection panel  */}
+
+## Camera details (window)
+
+When you open a camera, a window presents:
+
+| Section | Function |
+| --- | --- |
+| **Area Detection** | Live view with people count in the area. |
+| **Face Recognition** | Known/unknown face detection, face search. |
+| **Behavior Analysis** | Suspicious behavior alerts. |
+| **Information** | Camera details (name, location, connection type, task). |
+| **Edit** | Change name and location. |
+| **Remove** | Delete the camera. |
+
+<Callout variant="success" title="Real-time verification">
+Detections are presented as soon as they are processed by the server, with images of the
+detection moment.
+</Callout>

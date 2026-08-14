@@ -1,0 +1,61 @@
+---
+title: Frequently Asked Questions
+description: Answers to the most common questions about SecureIT.
+---
+
+# Frequently Asked Questions
+
+## Does SecureIT work with any camera?
+
+SecureIT supports **physically connected** cameras (USB/Webcam) and **network cameras**
+reachable by HTTP, HTTPS or RTSP. It also allows using a **video file** for demonstration.
+
+## Where is the video processed?
+
+All processing is done **locally** on the server where SecureIT is installed. The video
+and data are not sent to external AI services.
+
+## Do I need a license to use SecureIT?
+
+Yes. Each profile needs an **active license** to work. The license determines the
+available features (face recognition, behavior analysis) and the profile limits
+(e.g. number of cameras).
+
+## How do I activate my license?
+
+Go to **Settings → License**, enter the key in the `SEC-XXXX-XXXX-XXXX-XXXX` format and
+click **Activate License**. You can buy a license on the [Licenses](/pricing) page.
+
+## How do I stop a license from working?
+
+The license can be **revoked** from the settings. After revocation, limited features stay
+blocked until a new activation.
+
+## How do I identify who appears on the cameras?
+
+1. Register the person in the [People](/docs/en/people) section with a clear photo.
+2. Configure the camera with the **Face Recognition** (`FR`) task.
+3. When the person appears, SecureIT identifies them automatically.
+
+## I am not receiving notifications. What should I check?
+
+- Confirm the **monitoring schedule** is active (detections only occur within the schedule
+  defined in the [settings](/docs/en/settings)).
+- Check the **alert cooldown** — repeated notifications of the same person may be
+  suppressed.
+- Confirm the **license** includes the feature in question.
+
+## Does face recognition work at night?
+
+Recognition depends on image quality. In low-light conditions, accuracy may decrease. Use
+cameras with good night capture when monitoring at night.
+
+## Can I use the same profile on more than one computer?
+
+The account and profiles can be used on more than one device. The license is synced
+periodically (every 6 hours) with the server.
+
+## How do I separate "Home" from "Office"?
+
+Use **profiles**. Each profile has its own cameras, people and settings. See the
+[Profiles and PIN](/docs/en/profiles) page.

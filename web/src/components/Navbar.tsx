@@ -11,14 +11,13 @@ const navLinks = [
 	{ label: "Sobre Nós", href: "/#about" },
 	{ label: "Funcionalidades", href: "/#features" },
 	{ label: "Licenças", href: "/pricing" },
+	{ label: "Documentação", href: "/docs" },
 	{ label: "Contacto", href: "/#contact" },
 ];
 
 export function Navbar({
-	inMyAccount = false,
 	minimal = false,
 }: {
-	inMyAccount?: boolean;
 	minimal?: boolean;
 }) {
 	const [scrolled, setScrolled] = useState(false);
@@ -51,43 +50,12 @@ export function Navbar({
 		);
 	}
 
-	if (inMyAccount) {
-		return (
-			<nav className="relative top-0 z-50 py-6">
-				<div className="px-4 flex items-center justify-between">
-					<div className="flex gap-2 justify-center items-center">
-						<Link
-							href="/"
-							className="flex items-center gap-2.5 transition-colors"
-						>
-							<Image
-								src="/logo.png"
-								alt="SecureIT"
-								width={40}
-								height={40}
-								className="h-6 md:h-8 w-auto"
-							/>
-							<h1 className="text-2xl md:text-3xl font-bold leading-10 text-text tracking-tight">
-								SecureIT
-							</h1>
-						</Link>
-						<div className="min-h-8 w-[1px] bg-border" />
-						<h1 className="font-bold text-2xl md:text-3xl text-text">
-							Minha Conta
-						</h1>
-					</div>
-				</div>
-			</nav>
-		);
-	}
-
 	return (
 		<nav
-			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-				scrolled
+			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
 					? "bg-bg/80 backdrop-blur-xl border-b border-border"
 					: "bg-transparent"
-			}`}
+				}`}
 		>
 			<div className="w-full mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
 				<Link href="/" className="flex items-center gap-2.5 shrink-0">

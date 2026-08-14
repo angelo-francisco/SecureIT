@@ -1,0 +1,62 @@
+---
+title: Perguntas Frequentes
+description: Respostas às dúvidas mais comuns sobre o SecureIT.
+---
+
+# Perguntas Frequentes
+
+## O SecureIT funciona com qualquer câmera?
+
+O SecureIT suporta câmeras **ligadas fisicamente** (USB/Webcam) e **câmeras de rede**
+acessíveis por HTTP, HTTPS ou RTSP. Também permite usar um **ficheiro de vídeo** para
+demonstração.
+
+## Onde é processado o vídeo?
+
+Todo o processamento é feito **localmente** no servidor onde o SecureIT está instalado.
+O vídeo e os dados não são enviados para serviços externos de IA.
+
+## Preciso de uma licença para usar o SecureIT?
+
+Sim. Cada perfil precisa de uma **licença ativa** para funcionar. A licença determina as
+funcionalidades disponíveis (reconhecimento facial, análise de comportamento) e os
+limites do perfil (ex.: número de câmeras).
+
+## Como ativo a minha licença?
+
+Aceda a **Configurações → Licença**, introduza a chave no formato `SEC-XXXX-XXXX-XXXX-XXXX`
+e clique em **Activar Licença**. Pode comprar uma licença na página de [Licenças](/pricing).
+
+## Como faço para a licença deixar de funcionar?
+
+A licença pode ser **revogada** a partir das configurações. Depois de revogada, as
+funcionalidades limitadas ficam bloqueadas até nova ativação.
+
+## Como identifico quem aparece nas câmeras?
+
+1. Registe a pessoa na secção [Pessoas](/docs/pt/people) com uma foto nítida.
+2. Configure a câmera com a tarefa **Reconhecimento Facial** (`FR`).
+3. Quando a pessoa aparecer, o SecureIT identifica-a automaticamente.
+
+## Não recebo notificações. O que devo verificar?
+
+- Confirme que o **horário de monitoramento** está ativo (as detecções só ocorrem dentro
+  do horário definido nas [configurações](/docs/pt/settings)).
+- Verifique o **cooldown de alertas** — notificações repetidas da mesma pessoa podem estar
+  a ser suprimidas.
+- Confirme que a **licença** inclui a funcionalidade em questão.
+
+## O reconhecimento facial funciona de noite?
+
+O reconhecimento depende da qualidade da imagem. Em condições de baixa luz, a precisão
+pode diminuir. Use câmeras com boa captação noturna quando o monitoramento for à noite.
+
+## Posso usar o mesmo perfil em mais do que um computador?
+
+A conta e os perfis podem ser usados em mais do que um dispositivo. A licença é
+sincronizada periodicamente (a cada 6 horas) com o servidor.
+
+## Como separo "Casa" do "Escritório"?
+
+Use **perfis**. Cada perfil tem as suas próprias câmeras, pessoas e configurações.
+Veja a página de [Perfis e PIN](/docs/pt/profiles).

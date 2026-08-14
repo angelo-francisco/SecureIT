@@ -629,3 +629,149 @@ body {
 .animate-slide-up {
 	animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ══════════════════════════════════════════════
+   DOCUMENTATION — markdown content styles
+   ══════════════════════════════════════════════ */
+
+.mdx-content {
+	color: var(--text);
+	line-height: 1.75;
+	font-size: 1.125rem;
+}
+
+.mdx-content > *:first-child {
+	margin-top: 0;
+}
+
+.mdx-content h2 {
+	margin-top: 3rem;
+	margin-bottom: 1rem;
+	font-size: 2rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	color: var(--text);
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid var(--border);
+}
+
+.mdx-content h3 {
+	margin-top: 2.25rem;
+	margin-bottom: 0.75rem;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--text);
+}
+
+.mdx-content h4 {
+	margin-top: 1.75rem;
+	margin-bottom: 0.5rem;
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--text);
+}
+
+.mdx-content p {
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	color: var(--text);
+}
+
+.mdx-content a {
+	color: var(--primary);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	transition: color 0.15s;
+}
+
+.mdx-content a:hover {
+	color: var(--primary-hover);
+}
+
+.mdx-content strong {
+	color: var(--text);
+	font-weight: 700;
+}
+
+.mdx-content ul,
+.mdx-content ol {
+	margin: 1rem 0;
+	padding-left: 1.5rem;
+}
+
+.mdx-content ul {
+	list-style: disc;
+}
+
+.mdx-content ol {
+	list-style: decimal;
+}
+
+.mdx-content li {
+	margin: 0.375rem 0;
+}
+
+.mdx-content li::marker {
+	color: var(--primary);
+}
+
+.mdx-content blockquote {
+	margin: 1.5rem 0;
+	border-left: 3px solid var(--primary);
+	background: var(--surface);
+	padding: 1rem 1.25rem;
+	color: var(--text-muted);
+}
+
+.mdx-content code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.875em;
+	background: var(--surface-hover);
+	border: 1px solid var(--border);
+	padding: 0.125rem 0.375rem;
+	color: var(--primary);
+}
+
+.mdx-content pre {
+	margin: 1.5rem 0;
+	padding: 1rem 1.25rem;
+	overflow-x: auto;
+	background: #0f1318;
+	border: 1px solid var(--border);
+	font-size: 0.9rem;
+	line-height: 1.6;
+}
+
+.mdx-content pre code {
+	background: transparent;
+	border: none;
+	padding: 0;
+	color: #e2e8f0;
+	font-size: inherit;
+}
+
+.mdx-content th,
+.mdx-content td {
+	border: 1px solid var(--border);
+	padding: 0.625rem 0.875rem;
+}
+
+.mdx-content th {
+	background: var(--surface);
+	font-weight: 700;
+	color: var(--text);
+}
+
+.mdx-content td {
+	color: var(--text);
+}
+
+.mdx-content tr:nth-child(even) td {
+	background: color-mix(in srgb, var(--surface) 35%, transparent);
+}
+
+.mdx-content hr {
+	margin: 2.5rem 0;
+	border: none;
+	border-top: 1px solid var(--border);
+}

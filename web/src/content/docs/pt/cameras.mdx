@@ -1,0 +1,77 @@
+---
+title: Câmaras
+description: Registar, ligar e configurar as câmeras de monitoramento do SecureIT.
+---
+
+# Câmaras
+
+A secção **Câmaras** gere todos os dispositivos de monitoramento. O SecureIT suporta
+câmeras ligadas fisicamente (USB), câmeras de rede (IP/RTSP) e ficheiros de vídeo para
+demonstração.
+
+## Lista de câmeras
+
+O menu **Câmeras** mostra uma tabela com todas as câmeras registadas:
+
+| Coluna | Descrição |
+| --- | --- |
+| ID | Identificador e acesso rápido aos detalhes |
+| Nome | Nome atribuído à câmera |
+| Localização | Local físico da câmera |
+| Estado | Online ou Offline |
+| Data de Adição | Quando a câmera foi registada |
+| Última actualização | Última alteração de dados |
+
+- Use a **barra de pesquisa** para filtrar por nome ou localização.
+- O botão **Identificar** procura automaticamente as câmeras ligadas ao computador.
+- **Nova Câmera** abre o formulário de registo.
+
+{/*  ESPAÇO PARA IMAGEM: captura do ecrã da lista de câmeras  */}
+
+## Nova câmera
+
+### Tipo de conexão
+
+| Tipo | Descrição |
+| --- | --- |
+| **Local / USB** | Câmera ligada fisicamente ao servidor. Escolha entre os dispositivos detectados ou use o modo de ficheiro de vídeo (demo). |
+| **Wi-Fi** | Câmera de rede acessível por URL HTTP, HTTPS ou RTSP (ex.: `rtsp://192.168.1.100:554/stream`). |
+
+No modo **Local/USB** pode escolher entre:
+
+- **Câmara Real** — um dispositivo detectado pelo sistema (lista carregada automaticamente).
+- **Ficheiro de Vídeo (Demo)** — um caminho absoluto para um ficheiro local
+  (`.mp4`, `.avi`, `.mov`) para testar as funcionalidades.
+
+### Tarefa da câmera
+
+Cada câmera desempenha uma tarefa, que determina como o vídeo é analisado:
+
+| Tarefa | Código | O que faz |
+| --- | --- | --- |
+| Detecção de Área | `D` | Deteta e conta pessoas na área de monitoramento. |
+| Reconhecimento Facial | `FR` | Deteta e reconhece rostos automaticamente. |
+| Análise de Comportamento | `BA` | Analisa comportamento suspeito e gera alertas críticos. |
+
+<Callout variant="warning" title="Funcionalidades da licença">
+As tarefas de Reconhecimento Facial e Análise de Comportamento só podem ser usadas se a
+sua [licença](/docs/pt/licenses) incluir essas funcionalidades.
+</Callout>
+
+## Detalhes da câmera
+
+Ao clicar numa câmera (pelo ID na lista ou pelo tile no dashboard) abre os **Detalhes da Câmera**:
+
+- **Editar nome e localização** — clique no lápis para alterar.
+- **Tipo de conexão** e **informações de conexão** — leitura dos parâmetros atuais.
+- **Estado** — Online/Offline em tempo real.
+- **Alterar tarefa** — alterar entre `D`, `FR` e `BA`. A conexão da câmera é reiniciada
+  automaticamente; as restantes câmeras não são afetadas.
+- **Remover** — elimina a câmera do sistema.
+
+{/*  ESPAÇO PARA IMAGEM: captura do ecrã de detalhes da câmera  */}
+
+<Callout variant="success" title="Alterações em tempo real">
+Depois de guardar alterações, a conexão da câmera é fechada e reaberta automaticamente,
+aplicando a nova configuração sem reiniciar o aplicativo.
+</Callout>

@@ -1,0 +1,48 @@
+---
+title: Notificações
+description: Histórico e gestão dos alertas gerados pelo SecureIT.
+---
+
+# Notificações
+
+As **Notificações** são o registo de todos os alertas gerados pelo sistema. Reúnem os
+eventos das várias tarefas: detecção de área, reconhecimento facial e análise de
+comportamento.
+
+## Níveis de prioridade
+
+Cada notificação tem um nível que indica a sua importância:
+
+| Nível | Significado |
+| --- | --- |
+| **I — Informação** | Eventos normais, como detecções de pessoas ou contagens. |
+| **S — Suspeito** | Situações potencialmente suspeitas que merecem atenção. |
+| **C — Crítico** | Situações de risco que exigem ação imediata (assalto, fuga, arma). |
+
+<Callout variant="warning" title="Nível crítico">
+Notificações de nível **Crítico** (C) devem ser sempre verificadas com urgência.
+</Callout>
+
+## Como uma notificação é apresentada
+
+Cada notificação inclui:
+
+- **Data e hora** do evento.
+- **Nível** de prioridade (I, S ou C).
+- **Imagem** do momento da detecção.
+- **Câmera** onde ocorreu o evento.
+- **Pessoa** identificada (quando aplicável).
+- **Ação** — atalho para a pessoa ou câmera relacionada.
+
+{/*  ESPAÇO PARA IMAGEM: captura do ecrã de notificações  */}
+
+## Onde encontrar
+
+- **Barra lateral** — consulte as notificações por área (Detecção, Rostos, Comportamento).
+- **Dashboard** — ícone de notificações para ver as mais recentes.
+
+## Cooldown de notificações
+
+Para evitar spam de alertas, cada tarefa aplica um **cooldown** configurável. Enquanto o
+cooldown de uma pessoa ou evento estiver ativo, novas ocorrências não geram notificações.
+O intervalo é definido nas [configurações](/docs/pt/settings).
