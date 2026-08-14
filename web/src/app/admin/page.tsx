@@ -1474,9 +1474,7 @@ function PaymentsTab() {
 													{p.totalPrice
 														? p.totalPrice.toFixed(2)
 														: p.plan.basePrice.toFixed(2)}
-													{p.durationDays
-														? ` · ${p.durationDays} dias`
-														: ""}
+													{p.durationDays ? ` · ${p.durationDays} dias` : ""}
 												</p>
 												{((p.selectedFeatureNames?.length ?? 0) > 0 ||
 													(p.selectedServiceNames?.length ?? 0) > 0) && (

@@ -81,8 +81,7 @@ export const PaymentsSection = forwardRef<
 						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
 							Estado
 						</th>
-						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted">
-						</th>
+						<th className="py-3 px-4 text-base font-bold uppercase text-center text-text-muted"></th>
 					</tr>
 				</thead>
 
@@ -92,7 +91,9 @@ export const PaymentsSection = forwardRef<
 							key={p.id}
 							className="hover:bg-surface-hover/60 transition-colors text-base"
 						>
-							<td className="py-3.5 px-4 font-bold text-text text-center">{p.plan.name}</td>
+							<td className="py-3.5 px-4 font-bold text-text text-center">
+								{p.plan.name}
+							</td>
 
 							<td className="py-3.5 px-4 font-semibold text-text  text-center">
 								${(p.totalPrice || p.plan.basePrice).toFixed(2)}

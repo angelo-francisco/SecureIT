@@ -21,8 +21,8 @@ export async function GET() {
 					eq(license.userId, session.sub),
 					eq(license.status, "ACTIVE"),
 					eq(licenseKey.status, "ACTIVE"),
-					gt(license.expiresAt, now)
-				)
+					gt(license.expiresAt, now),
+				),
 			)
 			.orderBy(desc(license.createdAt))
 			.limit(1)

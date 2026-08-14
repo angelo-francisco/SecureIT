@@ -20,7 +20,10 @@ function buildFeatureSlug(name: string): string {
 		.replace(/[^a-z0-9_]/g, "");
 }
 
-async function _getPlanFeatures(type: string, paymentRequestId?: string | null): Promise<string[]> {
+async function _getPlanFeatures(
+	type: string,
+	paymentRequestId?: string | null,
+): Promise<string[]> {
 	const features: string[] = ["face_recognition"];
 	try {
 		const planRow = await db

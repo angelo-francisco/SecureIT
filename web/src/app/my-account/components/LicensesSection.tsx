@@ -75,7 +75,7 @@ export const LicensesSection = forwardRef<
 			setCopied(true);
 			toast("Chave copiada para o clipboard");
 			setTimeout(() => setCopied(false), 2000);
-		} catch { }
+		} catch {}
 	};
 
 	useImperativeHandle(ref, () => ({
@@ -93,8 +93,8 @@ export const LicensesSection = forwardRef<
 	const license = response;
 	const isActive = license
 		? license.status === "ACTIVE" &&
-		license.key.status === "ACTIVE" &&
-		new Date(license.expiresAt) > new Date()
+			license.key.status === "ACTIVE" &&
+			new Date(license.expiresAt) > new Date()
 		: false;
 
 	const statusInfo = license
@@ -124,17 +124,18 @@ export const LicensesSection = forwardRef<
 				setResponse((prev) =>
 					prev
 						? {
-							...prev,
-							status: "REVOKED",
-							key: { ...prev.key, status: "REVOKED" },
-						}
+								...prev,
+								status: "REVOKED",
+								key: { ...prev.key, status: "REVOKED" },
+							}
 						: null,
 				);
 			}
 			setConfirmRevoke(false);
 			toast("Licença revogada com sucesso", "success");
 		} catch (err) {
-			const message = err instanceof Error ? err.message : "Erro ao revogar licença";
+			const message =
+				err instanceof Error ? err.message : "Erro ao revogar licença";
 			toast(message, "error");
 			console.error(err);
 		} finally {
@@ -232,7 +233,7 @@ export const LicensesSection = forwardRef<
 									0,
 									Math.ceil(
 										(new Date(license.expiresAt).getTime() - Date.now()) /
-										(1000 * 60 * 60 * 24),
+											(1000 * 60 * 60 * 24),
 									),
 								),
 							)}{" "}
@@ -298,7 +299,6 @@ export const LicensesSection = forwardRef<
 });
 
 LicensesSection.displayName = "LicensesSection";
-
 
 function DetailRow({
 	label,

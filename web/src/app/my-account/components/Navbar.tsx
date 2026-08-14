@@ -30,14 +30,14 @@ export function Navbar() {
 			.then((d) => {
 				if (d) setNotifications(d);
 			})
-			.catch(() => { });
+			.catch(() => {});
 	}, []);
 
 	const handleLogout = useCallback(async () => {
 		setLoggingOut(true);
 		try {
 			await fetch("/api/auth/logout", { method: "POST" });
-		} catch { }
+		} catch {}
 		router.push("/login");
 	}, [router]);
 
@@ -47,45 +47,53 @@ export function Navbar() {
 
 	const navLinks = [
 		{ label: "Documentação", href: "/docs", icon: FileText },
-		{ label: "Obter licença", href: "/#about", icon: Key, onClick: scrollToPlans },
+		{
+			label: "Obter licença",
+			href: "/#about",
+			icon: Key,
+			onClick: scrollToPlans,
+		},
 	];
 
 	const LogoutButton = ({ complet = false }: { complet?: Boolean }) => {
-		if (complet) return (
+		if (complet)
+			return (
+				<button
+					type="button"
+					onClick={handleLogout}
+					disabled={loggingOut}
+					className="p-2.5 bg-error text-white text-lg font-bold w-full flex gap-1 justify-center items-center disabled:opacity-50"
+					aria-label="Sair"
+				>
+					{loggingOut ? (
+						<>
+							<Loader size={20} className="animate-spin" />
+							Saindo...
+						</>
+					) : (
+						<>
+							<LogOut size={20} />
+							Terminar Sessão
+						</>
+					)}
+				</button>
+			);
+		return (
 			<button
 				type="button"
 				onClick={handleLogout}
 				disabled={loggingOut}
-				className="p-2.5 bg-error text-white text-lg font-bold w-full flex gap-1 justify-center items-center disabled:opacity-50"
+				className="p-2.5 text-error flex gap-1 items-center disabled:opacity-50"
 				aria-label="Sair"
 			>
 				{loggingOut ? (
-					<>
-						<Loader size={20} className="animate-spin" />
-						Saindo...
-					</>
+					<Loader size={25} className="animate-spin" />
 				) : (
-					<>
-						<LogOut size={20} />
-						Terminar Sessão
-					</>
+					<LogOut size={25} />
 				)}
 			</button>
-		)
-		return (<button
-			type="button"
-			onClick={handleLogout}
-			disabled={loggingOut}
-			className="p-2.5 text-error flex gap-1 items-center disabled:opacity-50"
-			aria-label="Sair"
-		>
-			{loggingOut ? (
-				<Loader size={25} className="animate-spin" />
-			) : (
-				<LogOut size={25} />
-			)}
-		</button>)
-	}
+		);
+	};
 
 	const NotificationsButton = () => (
 		<button
@@ -96,12 +104,10 @@ export function Navbar() {
 		>
 			<Bell size={25} />
 		</button>
-	)
+	);
 
 	return (
-		<nav
-			className="z-50 transition-all duration-300 bg-bg/80 backdrop-blur-xl border-b border-border"
-		>
+		<nav className="z-50 transition-all duration-300 bg-bg/80 backdrop-blur-xl border-b border-border">
 			<div className="w-full mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
 				<Link href="/" className="flex items-center gap-2.5 shrink-0">
 					<Image
