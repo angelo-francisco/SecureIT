@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound, Loader, Receipt, Shield, User } from "lucide-react";
+import { Loader, Receipt, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccordionSection } from "./components/AccordionSection";
@@ -106,17 +106,6 @@ export default function MyAccountPage() {
 			</div>
 			<div className="flex justify-start">
 				<ProfilesSection />
-			</div>
-
-			<div className="mt-6 border border-border bg-surface">
-				<button
-					type="button"
-					onClick={scrollToPlans}
-					className="flex w-full items-center justify-center gap-2 px-4 py-3.5 text-base font-semibold text-text-muted transition-colors hover:bg-surface-hover hover:text-primary"
-				>
-					<KeyRound size={18} />
-					Obter Licença
-				</button>
 			</div>
 
 			<div className="mt-6">

@@ -1,6 +1,15 @@
 "use client";
 
-import { Bell, FileText, Key, Loader, LogOut, Menu, X } from "lucide-react";
+import {
+	Bell,
+	FileText,
+	Home,
+	Key,
+	Loader,
+	LogOut,
+	Menu,
+	X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,6 +54,7 @@ export function Navbar() {
 	}, []);
 
 	const navLinks = [
+		{ label: "Início", href: "/my-account", icon: Home },
 		{ label: "Documentação", href: "/docs", icon: FileText },
 		{
 			label: "Obter licença",
@@ -122,16 +132,29 @@ export function Navbar() {
 				</Link>
 
 				<div className="hidden md:flex items-center gap-3">
-					{navLinks.map((link) => (
-						<Link
-							key={link.href}
-							href={link.href}
-							className="flex items-center justify-center gap-2 px-4 py-2 text-lg font-bold text-text-muted hover:text-text border border-transparent hover:border-border transition-colors"
-						>
-							<link.icon size={20} />
-							{link.label}
-						</Link>
-					))}
+					{navLinks.map((link) => {
+						if (link.onClick)
+							return (
+								<button
+									type="button"
+									onClick={link.onClick}
+									className="flex items-center justify-center gap-2 px-4 py-2 text-lg font-bold text-text-muted hover:text-text border border-transparent hover:border-border transition-colors"
+								>
+									<link.icon size={20} />
+									{link.label}
+								</button>
+							);
+						return (
+							<Link
+								key={link.href}
+								href={link.href}
+								className="flex items-center justify-center gap-2 px-4 py-2 text-lg font-bold text-text-muted hover:text-text border border-transparent hover:border-border transition-colors"
+							>
+								<link.icon size={20} />
+								{link.label}
+							</Link>
+						);
+					})}
 				</div>
 
 				<div className="hidden md:flex items-center gap-3">

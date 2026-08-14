@@ -68,18 +68,16 @@ function AddonRow({
 		<button
 			type="button"
 			onClick={onToggle}
-			className={`w-full flex items-start gap-3 p-3 border text-left transition-all ${
-				selected
+			className={`w-full flex items-start gap-3 p-3 border text-left transition-all ${selected
 					? "border-primary/50 bg-primary/10"
 					: "border-border bg-surface hover:border-primary/30 hover:bg-surface-hover"
-			}`}
+				}`}
 		>
 			<span
-				className={`mt-0.5 shrink-0 w-5 h-5 border flex items-center justify-center ${
-					selected
+				className={`mt-0.5 shrink-0 w-5 h-5 border flex items-center justify-center ${selected
 						? "bg-primary border-primary text-white"
 						: "border-border text-transparent"
-				}`}
+					}`}
 			>
 				<Check size={14} strokeWidth={3} />
 			</span>
@@ -136,12 +134,6 @@ export function NewLicenseModal({
 		});
 	};
 
-	const hasActiveLicense =
-		activeLicense !== null &&
-		activeLicense.status === "ACTIVE" &&
-		activeLicense.key?.status !== "REVOKED" &&
-		new Date(activeLicense.expiresAt) > new Date();
-
 	useEffect(() => {
 		if (open) {
 			setStep(1);
@@ -160,17 +152,15 @@ export function NewLicenseModal({
 				),
 				fetch("/api/my-account/license").then(
 					(r) =>
-						(r.ok ? r.json() : null) as Promise<{
-							license: LicenseData;
-						} | null>,
+						(r.ok ? r.json() : null) as Promise<LicenseData| null>,
 				),
 			])
 				.then(([p, info, lic]) => {
 					setPlans(Array.isArray(p) ? p : []);
 					setPaymentInfo(info);
-					if (lic?.license) setActiveLicense(lic.license);
+					if (lic) setActiveLicense(lic);
 				})
-				.catch(() => {})
+				.catch(() => { })
 				.finally(() => setLoading(false));
 		}
 	}, [open]);
@@ -224,6 +214,12 @@ export function NewLicenseModal({
 			setSubmitting(false);
 		}
 	};
+
+	const hasActiveLicense =
+		activeLicense !== null &&
+		activeLicense.status === "ACTIVE" &&
+		activeLicense.key?.status === "ACTIVE" &&
+		new Date(activeLicense.expiresAt) > new Date();
 
 	return (
 		<Modal open={open} onClose={onClose}>

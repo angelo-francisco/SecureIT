@@ -24,14 +24,14 @@ export function DocsSidebar({ locale }: DocsSidebarProps) {
 			className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pb-8 pr-4"
 		>
 			<div className="mb-6 flex items-center gap-2">
-				<BookOpen className="h-5 w-5 text-primary" />
+				<BookOpen className="h-5 w-5" />
 				<span className="text-xl font-bold text-text">Documentação</span>
 			</div>
 
 			<div className="space-y-8">
 				{DOCS_NAV.map((section) => (
 					<div key={section.id}>
-						<p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
+						<p className="mb-2 text-sm font-semibold uppercase tracking-widest text-text-muted">
 							{section.title[locale]}
 						</p>
 						<ul className="space-y-1">
