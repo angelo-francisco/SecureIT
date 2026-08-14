@@ -68,16 +68,18 @@ function AddonRow({
 		<button
 			type="button"
 			onClick={onToggle}
-			className={`w-full flex items-start gap-3 p-3 border text-left transition-all ${selected
+			className={`w-full flex items-start gap-3 p-3 border text-left transition-all ${
+				selected
 					? "border-primary/50 bg-primary/10"
 					: "border-border bg-surface hover:border-primary/30 hover:bg-surface-hover"
-				}`}
+			}`}
 		>
 			<span
-				className={`mt-0.5 shrink-0 w-5 h-5 border flex items-center justify-center ${selected
+				className={`mt-0.5 shrink-0 w-5 h-5 border flex items-center justify-center ${
+					selected
 						? "bg-primary border-primary text-white"
 						: "border-border text-transparent"
-					}`}
+				}`}
 			>
 				<Check size={14} strokeWidth={3} />
 			</span>
@@ -151,8 +153,7 @@ export function NewLicenseModal({
 					(r) => (r.ok ? r.json() : null) as Promise<PaymentInfo | null>,
 				),
 				fetch("/api/my-account/license").then(
-					(r) =>
-						(r.ok ? r.json() : null) as Promise<LicenseData| null>,
+					(r) => (r.ok ? r.json() : null) as Promise<LicenseData | null>,
 				),
 			])
 				.then(([p, info, lic]) => {
@@ -160,7 +161,7 @@ export function NewLicenseModal({
 					setPaymentInfo(info);
 					if (lic) setActiveLicense(lic);
 				})
-				.catch(() => { })
+				.catch(() => {})
 				.finally(() => setLoading(false));
 		}
 	}, [open]);
