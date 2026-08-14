@@ -15,6 +15,6 @@ export function isDocsLocale(value: string): value is DocsLocale {
  * Pode ser um URL do YouTube, Vimeo ou um ficheiro MP4 directo.
  */
 export const PRESENTATION_VIDEO_URL =
-	"https://www.youtube.com/embed/VIDEO_ID_PLACEHOLDER";
+	"https://drive.google.com/file/d/1VI4aMeGjhz1Af0FkxXsblGNApbnMg31_/preview";
 
 export const PRESENTATION_VIDEO_TITLE = "SecureIT — Vídeo de Apresentação";
