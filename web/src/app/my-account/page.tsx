@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader, Receipt, Shield, User } from "lucide-react";
+import { Loader, Receipt, Key, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccordionSection } from "./components/AccordionSection";
@@ -117,7 +117,7 @@ export default function MyAccountPage() {
 					{user && <ProfileSection user={user} onSaved={fetchUser} />}
 				</AccordionSection>
 
-				<AccordionSection title="Licença" icon={Shield} onOpen={openLicenses}>
+				<AccordionSection title="Licença" icon={Key} onOpen={openLicenses}>
 					<LicensesSection
 						ref={licensesRef}
 						data={null}
