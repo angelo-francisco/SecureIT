@@ -16,19 +16,23 @@ permissions:
 
 jobs:
   create-release:
+    name: Create Release
     uses: ./.github/workflows/create-release.yml
 
   build-windows:
+    name: Build Desktop App for Windows
     needs: create-release
     uses: ./.github/workflows/build-windows.yml
     secrets: inherit
 
   build-linux:
+    name: Build Desktop App for Linux
     needs: create-release
     uses: ./.github/workflows/build-linux.yml
     secrets: inherit
 
   publish:
+    name: Publish Built Apps
     needs:
       - create-release
       - build-windows
