@@ -11,6 +11,9 @@ export const metadata: Metadata = {
 		default: "SecureIT — Sistema de Vigilância Inteligente",
 		template: "%s | SecureIT",
 	},
+	verification: {
+    google: '1XQBTpCC7JWc8LdpZ84mDxzAvavBOrC8SIYLNpO_JOs',
+  },
 	description:
 		"Sistema de monitorização inteligente multi-plataforma. Reconhecimento facial, deteção de pessoas com YOLOv11, alertas em tempo real. Desktop, web e mobile.",
 	keywords: [
