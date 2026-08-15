@@ -38,7 +38,12 @@ export function SecuritySection({
 								: "O autenticador deve ser configurado antes de aceder à conta."}
 						</div>
 					</div>
-					{totpEnabled && <Check size={18} className="absolute right-4 text-primary shrink-0" />}
+					{totpEnabled && (
+						<Check
+							size={18}
+							className="absolute right-4 text-primary shrink-0"
+						/>
+					)}
 				</div>
 			</div>
 
@@ -64,7 +69,10 @@ export function SecuritySection({
 						</div>
 					</div>
 					{email2faEnabled && (
-						<Check size={18} className="absolute right-4 text-primary shrink-0" />
+						<Check
+							size={18}
+							className="absolute right-4 text-primary shrink-0"
+						/>
 					)}
 				</div>
 			</div>

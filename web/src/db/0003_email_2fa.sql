@@ -1,1 +1,1 @@
-ALTER TABLE `user` ADD COLUMN `email2faEnabled` integer DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE `user` ADD COLUMN `email2faEnabled` integer DEFAULT false NOT NULL;

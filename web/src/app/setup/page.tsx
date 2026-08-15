@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check, Loader, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import QRCode from "qrcode";
