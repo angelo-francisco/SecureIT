@@ -60,6 +60,7 @@ export async function GET() {
 				phone: foundUser.phone,
 				hasPin: !!foundUser.pinHash,
 				totpEnabled: foundUser.totpEnabled,
+				email2faEnabled: foundUser.email2faEnabled,
 				isActive: foundUser.isActive,
 				createdAt: foundUser.createdAt,
 			},

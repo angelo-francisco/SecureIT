@@ -15,6 +15,27 @@
 			"when": 1785338961645,
 			"tag": "0001_absurd_fat_cobra",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1786751401709,
+			"tag": "0002_passwordless_auth",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1787000000000,
+			"tag": "0003_email_2fa",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1787004000000,
+			"tag": "0004_email_verified",
+			"breakpoints": true
 		}
 	]
 }

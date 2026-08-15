@@ -61,7 +61,13 @@ export default function SignupPage() {
 				throw new Error(
 					(data as { error?: string }).error || "Erro ao criar conta",
 				);
-			router.push("/my-account");
+			if (data.requires_setup && data.setup_token) {
+				router.push(
+					`/setup?setup_token=${encodeURIComponent(data.setup_token)}`,
+				);
+			} else {
+				router.push("/my-account");
+			}
 		} catch (err) {
 			toast(err instanceof Error ? err.message : "Erro ao criar conta");
 		} finally {

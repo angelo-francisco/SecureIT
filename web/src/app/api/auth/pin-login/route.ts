@@ -75,6 +75,7 @@ export async function POST(request: Request) {
 				lastName: foundUser.lastName,
 				phone: foundUser.phone,
 				totpEnabled: foundUser.totpEnabled,
+				email2faEnabled: foundUser.email2faEnabled,
 				createdAt: foundUser.createdAt,
 			},
 		};

@@ -43,6 +43,32 @@ function getDb(): DrizzleDB {
 						"ALTER TABLE PaymentRequest ADD COLUMN durationDays INTEGER DEFAULT 30 NOT NULL;",
 					);
 				}
+
+				const userColumns = sqlite.query("PRAGMA table_info(User)").all() as {
+					name: string;
+				}[];
+				const hasGoogleId = userColumns.some((col) => col.name === "googleId");
+				if (!hasGoogleId) {
+					sqlite.exec("ALTER TABLE User ADD COLUMN googleId TEXT;");
+				}
+
+				const hasEmail2fa = userColumns.some(
+					(col) => col.name === "email2faEnabled",
+				);
+				if (!hasEmail2fa) {
+					sqlite.exec(
+						"ALTER TABLE User ADD COLUMN email2faEnabled INTEGER DEFAULT false NOT NULL;",
+					);
+				}
+
+				const hasEmailVerified = userColumns.some(
+					(col) => col.name === "emailVerified",
+				);
+				if (!hasEmailVerified) {
+					sqlite.exec(
+						"ALTER TABLE User ADD COLUMN emailVerified INTEGER DEFAULT false NOT NULL;",
+					);
+				}
 			} catch {}
 		}
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { Loader, Receipt, Key, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Key, Loader, Receipt, ShieldCheck, User } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccordionSection } from "./components/AccordionSection";
 import {
@@ -17,6 +17,7 @@ import {
 } from "./components/PaymentsSection";
 import { ProfileSection } from "./components/ProfileSection";
 import { ProfilesSection } from "./components/ProfilesSection";
+import { SecuritySection } from "./components/SecuritySection";
 
 interface UserProfile {
 	firstName: string;
@@ -24,6 +25,8 @@ interface UserProfile {
 	email: string;
 	phone: string;
 	hasPin: boolean;
+	totpEnabled: boolean;
+	email2faEnabled: boolean;
 }
 
 interface MeResponse {
@@ -32,15 +35,21 @@ interface MeResponse {
 
 export default function MyAccountPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const [user, setUser] = useState<UserProfile | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [payments, setPayments] = useState<Payment[]>([]);
+	const [securityOpen, setSecurityOpen] = useState(false);
 
 	const licensesRef = useRef<LicensesSectionHandle>(null);
 	const paymentsRef = useRef<PaymentsSectionHandle>(null);
 
 	const [plansModalOpen, setPlansModalOpen] = useState(false);
 	const [maintenanceModalOpen, setMaintenanceModalOpen] = useState(false);
+
+	useEffect(() => {
+		if (searchParams.get("setup2fa") === "1") setSecurityOpen(true);
+	}, [searchParams]);
 
 	const fetchUser = useCallback(() => {
 		fetch("/api/auth/me")
@@ -60,6 +69,8 @@ export default function MyAccountPage() {
 						email: data.user.email || "",
 						phone: data.user.phone || "",
 						hasPin: !!data.user.hasPin,
+						totpEnabled: !!data.user.totpEnabled,
+						email2faEnabled: !!data.user.email2faEnabled,
 					});
 				}
 			})
@@ -115,6 +126,21 @@ export default function MyAccountPage() {
 					onOpen={openProfile}
 				>
 					{user && <ProfileSection user={user} onSaved={fetchUser} />}
+				</AccordionSection>
+
+				<AccordionSection
+					title="Segurança"
+					icon={ShieldCheck}
+					onOpen={openProfile}
+					open={securityOpen}
+					onOpenChange={setSecurityOpen}
+				>
+					{user && (
+						<SecuritySection
+							totpEnabled={user.totpEnabled}
+							email2faEnabled={user.email2faEnabled}
+						/>
+					)}
 				</AccordionSection>
 
 				<AccordionSection title="Licença" icon={Key} onOpen={openLicenses}>

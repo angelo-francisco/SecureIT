@@ -20,6 +20,7 @@ export const user = sqliteTable(
 			.$defaultFn(() => generateId()),
 		email: text("email").notNull(),
 		passwordHash: text("passwordHash").notNull(),
+		googleId: text("googleId"),
 		firstName: text("firstName").notNull(),
 		lastName: text("lastName").notNull(),
 		phone: text("phone"),
@@ -28,12 +29,21 @@ export const user = sqliteTable(
 		totpEnabled: integer("totpEnabled", { mode: "boolean" })
 			.notNull()
 			.default(false),
+		email2faEnabled: integer("email2faEnabled", { mode: "boolean" })
+			.notNull()
+			.default(false),
+		emailVerified: integer("emailVerified", { mode: "boolean" })
+			.notNull()
+			.default(false),
 		isActive: integer("isActive", { mode: "boolean" }).notNull().default(true),
 		createdAt: text("createdAt")
 			.notNull()
 			.$defaultFn(() => new Date().toISOString()),
 	},
-	(t) => [uniqueIndex("User_email_key").on(t.email)],
+	(t) => [
+		uniqueIndex("User_email_key").on(t.email),
+		uniqueIndex("User_googleId_key").on(t.googleId),
+	],
 );
 
 export const licenseKey = sqliteTable(

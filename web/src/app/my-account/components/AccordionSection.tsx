@@ -11,6 +11,8 @@ interface AccordionSectionProps {
 	onRefresh?: () => void;
 	loading?: boolean;
 	headerActions?: ReactNode;
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 	children: ReactNode;
 }
 
@@ -21,13 +23,22 @@ export function AccordionSection({
 	onRefresh,
 	loading = false,
 	headerActions,
+	open,
+	onOpenChange,
 	children,
 }: AccordionSectionProps) {
-	const [open, setOpen] = useState(false);
+	const [internalOpen, setInternalOpen] = useState(false);
 	const [opening, setOpening] = useState(false);
 
+	const isOpen = open ?? internalOpen;
+
+	const setOpen = (value: boolean) => {
+		setInternalOpen(value);
+		onOpenChange?.(value);
+	};
+
 	const handleToggle = async () => {
-		if (open) {
+		if (isOpen) {
 			setOpen(false);
 			return;
 		}
@@ -96,7 +107,7 @@ export function AccordionSection({
 							<ChevronDown
 								size={18}
 								className={`transition-transform duration-300 ease-out ${
-									open ? "rotate-180" : ""
+									isOpen ? "rotate-180" : ""
 								}`}
 							/>
 						</button>
@@ -104,7 +115,7 @@ export function AccordionSection({
 				</div>
 			</div>
 
-			<div className="accordion-grid" data-open={open}>
+			<div className="accordion-grid" data-open={isOpen}>
 				<div>
 					<div className="border-t border-border p-4 sm:p-6 bg-surface">
 						{children}

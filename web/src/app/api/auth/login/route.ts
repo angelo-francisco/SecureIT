@@ -2,8 +2,12 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { createToken, setTokenCookies } from "@/lib/auth";
 import { verifyPassword } from "@/lib/password";
+import {
+	issueChallengeResponse,
+	issueSetupResponse,
+	requiresTwoFactorSetup,
+} from "@/lib/session";
 
 export async function POST(request: Request) {
 	try {
@@ -43,32 +47,11 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const accessToken = await createToken(
-			{ sub: foundUser.id, email: foundUser.email },
-			"access",
-		);
-		const refreshToken = await createToken(
-			{ sub: foundUser.id, email: foundUser.email },
-			"refresh",
-		);
+		if (requiresTwoFactorSetup(foundUser)) {
+			return await issueSetupResponse(foundUser);
+		}
 
-		const body = {
-			access_token: accessToken,
-			user: {
-				id: foundUser.id,
-				email: foundUser.email,
-				firstName: foundUser.firstName,
-				lastName: foundUser.lastName,
-				phone: foundUser.phone,
-				totpEnabled: foundUser.totpEnabled,
-				createdAt: foundUser.createdAt,
-			},
-		};
-
-		const baseResponse = NextResponse.json(body);
-		const response = setTokenCookies(baseResponse, accessToken, refreshToken);
-
-		return response;
+		return await issueChallengeResponse(foundUser, "email-code");
 	} catch (error) {
 		console.error("[Login]", error);
 		return NextResponse.json(

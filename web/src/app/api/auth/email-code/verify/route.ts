@@ -2,8 +2,12 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { createToken, setTokenCookies } from "@/lib/auth";
 import { verifyEmailCode } from "@/lib/email";
+import {
+	issueChallengeResponse,
+	issueSetupResponse,
+	requiresTwoFactorSetup,
+} from "@/lib/session";
 
 export async function POST(request: Request) {
 	try {
@@ -40,35 +44,14 @@ export async function POST(request: Request) {
 		}
 
 		if (!foundUser.isActive) {
-			return NextResponse.json({ error: "Conta desativada" }, { status: 403 });
+			return NextResponse.json({ error: "Conta desactivada" }, { status: 403 });
 		}
 
-		const accessToken = await createToken(
-			{ sub: foundUser.id, email: foundUser.email },
-			"access",
-		);
-		const refreshToken = await createToken(
-			{ sub: foundUser.id, email: foundUser.email },
-			"refresh",
-		);
+		if (requiresTwoFactorSetup(foundUser)) {
+			return await issueSetupResponse(foundUser);
+		}
 
-		const body = {
-			access_token: accessToken,
-			user: {
-				id: foundUser.id,
-				email: foundUser.email,
-				firstName: foundUser.firstName,
-				lastName: foundUser.lastName,
-				phone: foundUser.phone,
-				totpEnabled: foundUser.totpEnabled,
-				createdAt: foundUser.createdAt,
-			},
-		};
-
-		const baseResponse = NextResponse.json(body);
-		const response = setTokenCookies(baseResponse, accessToken, refreshToken);
-
-		return response;
+		return await issueChallengeResponse(foundUser, "email-code");
 	} catch (error) {
 		console.error("[Email Code Verify]", error);
 		return NextResponse.json(

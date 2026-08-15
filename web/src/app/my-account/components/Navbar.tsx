@@ -58,7 +58,7 @@ export function Navbar() {
 		{ label: "Documentação", href: "/docs", icon: FileText },
 		{
 			label: "Obter licença",
-			href: "/#about",
+			href: "obtain-license",
 			icon: Key,
 			onClick: scrollToPlans,
 		},
@@ -136,6 +136,7 @@ export function Navbar() {
 						if (link.onClick)
 							return (
 								<button
+									key={link.href}
 									type="button"
 									onClick={link.onClick}
 									className="flex items-center justify-center gap-2 px-4 py-2 text-lg font-bold text-text-muted hover:text-text border border-transparent hover:border-border transition-colors"

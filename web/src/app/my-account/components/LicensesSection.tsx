@@ -2,6 +2,7 @@
 
 import {
 	Check,
+	Clock3,
 	Copy,
 	Eye,
 	EyeOff,
@@ -9,7 +10,6 @@ import {
 	Monitor,
 	ShieldCheck,
 	ShieldX,
-	Clock3,
 	X,
 } from "lucide-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
@@ -108,7 +108,7 @@ export const LicensesSection = forwardRef<
 			setTimeout(() => {
 				setCopied(false);
 			}, 2000);
-		} catch { }
+		} catch {}
 	};
 
 	useImperativeHandle(ref, () => ({
@@ -127,8 +127,8 @@ export const LicensesSection = forwardRef<
 
 	const isActive = license
 		? license.status === "ACTIVE" &&
-		license.key.status === "ACTIVE" &&
-		new Date(license.expiresAt) > new Date()
+			license.key.status === "ACTIVE" &&
+			new Date(license.expiresAt) > new Date()
 		: false;
 
 	const statusInfo = license
@@ -145,12 +145,12 @@ export const LicensesSection = forwardRef<
 
 	const remainingDays = license
 		? Math.max(
-			0,
-			Math.ceil(
-				(new Date(license.expiresAt).getTime() - Date.now()) /
-				(1000 * 60 * 60 * 24),
-			),
-		)
+				0,
+				Math.ceil(
+					(new Date(license.expiresAt).getTime() - Date.now()) /
+						(1000 * 60 * 60 * 24),
+				),
+			)
 		: 0;
 
 	const handleRevoke = async () => {
@@ -175,13 +175,13 @@ export const LicensesSection = forwardRef<
 				setResponse((prev) =>
 					prev
 						? {
-							...prev,
-							status: "REVOKED",
-							key: {
-								...prev.key,
+								...prev,
 								status: "REVOKED",
-							},
-						}
+								key: {
+									...prev.key,
+									status: "REVOKED",
+								},
+							}
 						: null,
 				);
 			}
@@ -201,13 +201,11 @@ export const LicensesSection = forwardRef<
 
 	if (!license) {
 		return (
-			<div className="relative overflow-hidden border border-border bg-surface">
+			<div className="relative overflow-hidden bg-surface">
 				<div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
 
 				<div className="relative flex flex-col items-center justify-center px-6 py-14 text-center">
-					<div className="mb-4 flex h-16 w-16 items-center justify-center border border-primary/15 bg-primary/10">
-						<Key className="text-primary" size={30} />
-					</div>
+					<Key className="text-primary mb-2" size={30} />
 
 					<h3 className="text-lg font-semibold text-text">
 						Nenhuma licença activa
@@ -233,7 +231,6 @@ export const LicensesSection = forwardRef<
 								<h2 className="font-display text-xl font-bold tracking-tight text-text">
 									{license.key.type}
 								</h2>
-
 							</div>
 
 							<p className="mt-1 text-sm text-text-muted">
@@ -259,7 +256,6 @@ export const LicensesSection = forwardRef<
 								</button>
 							)}
 						</div>
-
 					</div>
 
 					<div className="mt-6">
@@ -301,9 +297,7 @@ export const LicensesSection = forwardRef<
 					<div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
 						<StatCard
 							label="Activada em"
-							value={new Date(
-								license.activatedAt,
-							).toLocaleDateString("pt-PT")}
+							value={new Date(license.activatedAt).toLocaleDateString("pt-PT")}
 						/>
 
 						<StatCard
@@ -420,9 +414,11 @@ LicensesSection.displayName = "LicensesSection";
 function StatCard({
 	label,
 	value,
+	highlight,
 }: {
 	label: string;
 	value: string;
+	highlight?: boolean;
 }) {
 	return (
 		<div className="border border-border bg-background/40 p-4">
@@ -431,7 +427,11 @@ function StatCard({
 			</p>
 
 			<p
-				className="mt-2 text-sm font-semibold text-text"
+				className={
+					highlight
+						? "mt-2 text-sm font-semibold text-primary"
+						: "mt-2 text-sm font-semibold text-text"
+				}
 			>
 				{value}
 			</p>

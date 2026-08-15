@@ -20,6 +20,11 @@ export async function createTestUser(
 		email?: string;
 		isActive?: boolean;
 		withPin?: boolean;
+		withSetup?: boolean;
+		totpSecret?: string;
+		totpEnabled?: boolean;
+		email2faEnabled?: boolean;
+		emailVerified?: boolean;
 	},
 ) {
 	const id = overrides?.id ?? generateId();
@@ -39,6 +44,13 @@ export async function createTestUser(
 			firstName: "Test",
 			lastName: "User",
 			isActive: overrides?.isActive ?? true,
+			totpSecret: overrides?.totpSecret ?? null,
+			totpEnabled:
+				(overrides?.totpEnabled ?? overrides?.withSetup ?? false) || false,
+			email2faEnabled:
+				(overrides?.email2faEnabled ?? overrides?.withSetup ?? false) || false,
+			emailVerified:
+				(overrides?.emailVerified ?? overrides?.withSetup ?? false) || false,
 		})
 		.run();
 

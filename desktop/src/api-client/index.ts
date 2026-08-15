@@ -1,12 +1,11 @@
-export { apiClient } from "./client";
-export * from "./cameras";
-export * from "./people";
+export { getWebBaseUrl, openExternally } from "./api-base";
+export * from "./audit";
 export * from "./auth";
-export * from "./notifications";
-export * from "./settings";
+export * from "./cameras";
+export { apiClient } from "./client";
 export * from "./face-detections";
 export * from "./license";
+export * from "./notifications";
+export * from "./people";
 export * from "./profiles";
-export * from "./audit";
-
-export { openExternally } from "./api-base"
+export * from "./settings";

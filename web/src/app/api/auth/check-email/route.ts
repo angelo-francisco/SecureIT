@@ -28,7 +28,11 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "Conta desactivada" }, { status: 403 });
 		}
 
-		return NextResponse.json({ valid: true });
+		return NextResponse.json({
+			valid: true,
+			totpEnabled: foundUser.totpEnabled,
+			email2faEnabled: foundUser.email2faEnabled,
+		});
 	} catch (error) {
 		console.error("[CheckEmail]", error);
 		return NextResponse.json(

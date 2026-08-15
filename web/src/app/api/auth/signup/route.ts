@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { generateId, user } from "@/db/schema";
-import { createToken, setTokenCookies } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
+import { issueSetupResponse } from "@/lib/session";
 
 export async function POST(request: Request) {
 	try {
@@ -96,32 +96,7 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const accessToken = await createToken(
-			{ sub: createdUser.id, email: createdUser.email },
-			"access",
-		);
-		const refreshToken = await createToken(
-			{ sub: createdUser.id, email: createdUser.email },
-			"refresh",
-		);
-
-		const body = {
-			access_token: accessToken,
-			user: {
-				id: createdUser.id,
-				email: createdUser.email,
-				firstName: createdUser.firstName,
-				lastName: createdUser.lastName,
-				phone: createdUser.phone,
-				totpEnabled: createdUser.totpEnabled,
-				createdAt: createdUser.createdAt,
-			},
-		};
-
-		const baseResponse = NextResponse.json(body);
-		const response = setTokenCookies(baseResponse, accessToken, refreshToken);
-
-		return response;
+		return await issueSetupResponse(createdUser);
 	} catch (error) {
 		console.error("[Signup]", error);
 		return NextResponse.json(

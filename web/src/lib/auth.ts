@@ -22,6 +22,8 @@ export interface TokenPayload {
 
 export const ACCESS_MAX_AGE = 30 * 24 * 60 * 60; // 30 dias
 export const REFRESH_MAX_AGE = 90 * 24 * 60 * 60; // 90 dias
+export const CHALLENGE_MAX_AGE = 10 * 60; // 10 minutos
+export const SETUP_MAX_AGE = 2 * 60 * 60; // 2 horas
 
 export async function createToken(
 	payload: Omit<TokenPayload, "type">,
@@ -56,6 +58,64 @@ export async function verifyRefreshToken(
 		const { payload } = await jwtVerify(token, getRefreshSecret());
 		if (payload.type !== "refresh") return null;
 		return payload as unknown as TokenPayload;
+	} catch {
+		return null;
+	}
+}
+
+export interface ChallengePayload {
+	sub: string;
+	email: string;
+	type: "challenge";
+}
+
+export async function createChallengeToken(
+	sub: string,
+	email: string,
+): Promise<string> {
+	return new SignJWT({ sub, email, type: "challenge" })
+		.setProtectedHeader({ alg: "HS256" })
+		.setIssuedAt()
+		.setExpirationTime("10m")
+		.sign(getAccessSecret());
+}
+
+export async function verifyChallengeToken(
+	token: string,
+): Promise<ChallengePayload | null> {
+	try {
+		const { payload } = await jwtVerify(token, getAccessSecret());
+		if (payload.type !== "challenge") return null;
+		return payload as unknown as ChallengePayload;
+	} catch {
+		return null;
+	}
+}
+
+export interface SetupPayload {
+	sub: string;
+	email: string;
+	type: "setup";
+}
+
+export async function createSetupToken(
+	sub: string,
+	email: string,
+): Promise<string> {
+	return new SignJWT({ sub, email, type: "setup" })
+		.setProtectedHeader({ alg: "HS256" })
+		.setIssuedAt()
+		.setExpirationTime("2h")
+		.sign(getAccessSecret());
+}
+
+export async function verifySetupToken(
+	token: string,
+): Promise<SetupPayload | null> {
+	try {
+		const { payload } = await jwtVerify(token, getAccessSecret());
+		if (payload.type !== "setup") return null;
+		return payload as unknown as SetupPayload;
 	} catch {
 		return null;
 	}
