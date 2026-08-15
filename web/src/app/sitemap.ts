@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl = "https://www.secureit.co";
+	const baseUrl = "https://secure-it-sigma.vercel.app";
 	const now = new Date();
 
 	return [
@@ -12,7 +12,49 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 1.0,
 		},
 		{
-			url: `${baseUrl}/about`,
+			url: `${baseUrl}/#about`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/#features`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/docs`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/login`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/signup`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/#contact`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/terms`,
+			lastModified: now,
+			changeFrequency: "monthly",
+			priority: 0.8,
+		},
+		{
+			url: `${baseUrl}/privacy`,
 			lastModified: now,
 			changeFrequency: "monthly",
 			priority: 0.8,
