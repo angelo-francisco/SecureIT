@@ -26,14 +26,11 @@ export function Footer() {
 						<Link href="/docs" className="hover:text-text transition-colors">
 							Documentação
 						</Link>
-						<Link href="#" className="hover:text-text transition-colors">
+						<Link href="/terms" className="hover:text-text transition-colors">
 							Termos
 						</Link>
-						<Link href="#" className="hover:text-text transition-colors">
+						<Link href="/privacy" className="hover:text-text transition-colors">
 							Privacidade
-						</Link>
-						<Link href="#" className="hover:text-text transition-colors">
-							Cookies
 						</Link>
 					</div>
 				</div>
