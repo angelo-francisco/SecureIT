@@ -13,22 +13,10 @@ export default async function DocsLayout({
 	children: React.ReactNode;
 }) {
 	const session = await getSession();
-	if (!session) {
-		redirect("/login");
-	}
 
-	const foundUser = await db
-		.select()
-		.from(user)
-		.where(eq(user.id, session.sub))
-		.get();
-
-	if (!foundUser) {
-		redirect("/login");
-	}
 	return (
 		<div className="min-h-screen">
-			{foundUser ? <MyAccountNavbar /> : <Navbar />}
+			{session ? <MyAccountNavbar /> : <Navbar />}
 			<main className="">{children}</main>
 			<Footer />
 		</div>
