@@ -2,8 +2,8 @@ import { spawn } from "node:child_process";
 import { generateKeyPairSync } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
-import { isAbsolute, tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { isAbsolute, join, resolve } from "node:path";
 
 const WEB_ROOT = resolve(__dirname, "../..");
 const TRACKED_FILES = ["tsconfig.json", "next-env.d.ts"];

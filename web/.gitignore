@@ -5,6 +5,7 @@ src/generated
 *.db
 *.db-wal
 *.db-shm
+*.tsbuildinfo
 .env.local
 
 # Logs
