@@ -1,4 +1,6 @@
 .next
+.next-test
+tmp/
 src/generated
 *.db
 *.db-wal

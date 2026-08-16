@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -160,3 +161,62 @@ def make_store_payload(make_signed_payload, sample_keys):
         return payload
 
     return _make
+
+
+@dataclass
+class ProfileRef:
+    profile_id: str
+    user_id: str
+
+
+@pytest_asyncio.fixture
+async def test_profile(test_client):
+    """Create an isolated Profile through the /control/add-profile endpoint."""
+    ref = ProfileRef(
+        profile_id=f"test-profile-{uuid.uuid4()}",
+        user_id=f"test-user-{uuid.uuid4()}",
+    )
+    resp = await test_client.post(
+        "/api/control/add-profile",
+        json={"profile_id": ref.profile_id, "user_id": ref.user_id},
+    )
+    assert resp.status_code == 201, resp.text
+    return ref
+
+
+@pytest.fixture
+def auth_headers(test_profile):
+    """PID/UID headers that authenticate a request as the test profile."""
+    return {"PID": test_profile.profile_id, "UID": test_profile.user_id}
+
+
+@pytest_asyncio.fixture
+async def clear_data(setup_db):
+    """Wipe all domain tables after each test for a deterministic DB.
+
+    Request this fixture from API/router tests that create rows. Teardown
+    deletes children before parents (FK-safe order).
+    """
+    yield
+    from apps.audit.models import AuditLog
+    from apps.cameras.models import Camera
+    from apps.control.models import Profile
+    from apps.face_detection.models import FaceDetection
+    from apps.license.models import License
+    from apps.notifications.models import Notification
+    from apps.panel.models import Configuration
+    from apps.people.models import Person, PersonEmbedding, PersonRole, Role, RoleField
+
+    # Children first, parents last (FK-safe deletion order).
+    await PersonRole.all().delete()
+    await PersonEmbedding.all().delete()
+    await Person.all().delete()
+    await RoleField.all().delete()
+    await Role.all().delete()
+    await Notification.all().delete()
+    await FaceDetection.all().delete()
+    await Camera.all().delete()
+    await AuditLog.all().delete()
+    await Configuration.all().delete()
+    await Profile.all().delete()
+    await License.all().delete()

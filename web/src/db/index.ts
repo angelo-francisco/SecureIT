@@ -14,7 +14,8 @@ function getDb(): DrizzleDB {
 	if (nodeEnv === "development") {
 		const { Database } = require("bun:sqlite");
 		const { drizzle } = require("drizzle-orm/bun-sqlite");
-		const sqlite = new Database("./secureit.db");
+		const dbFile = process.env.SECUREIT_DB_FILE || "./secureit.db";
+		const sqlite = new Database(dbFile);
 		sqlite.run("PRAGMA journal_mode=WAL");
 
 		const tableExists = sqlite

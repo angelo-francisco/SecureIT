@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 		template: "%s | SecureIT",
 	},
 	verification: {
-    google: 'D5QH2j1LpUTf6C1mdtXDb4q8N3KWmZc0oyMCQ5XZBZ4',
-  },
+		google: "D5QH2j1LpUTf6C1mdtXDb4q8N3KWmZc0oyMCQ5XZBZ4",
+	},
 	description:
 		"Sistema de monitorização inteligente multi-plataforma. Reconhecimento facial, deteção de pessoas com YOLOv11, alertas em tempo real. Desktop, web e mobile.",
 	keywords: [
