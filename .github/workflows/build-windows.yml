@@ -14,6 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install LLD
+        shell: bash
+        run: |
+          choco install llvm -y --no-progress
+          echo "C:\Program Files\LLVM\bin" >> $GITHUB_PATH
+
       - uses: oven-sh/setup-bun@v2
 
       - name: Cache Bun Dependencies

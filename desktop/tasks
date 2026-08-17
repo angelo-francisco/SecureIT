@@ -1,8 +1,0 @@
-adicionar um novo botao para recarregar as cameras, fechar e abrir todas as conexoes websocket de forma graciosa, esse botao deve ficar perto do painel lateral ao lado botao de ocultar a navbar fluatuante e ele deve apresentar um modal de aviso dizendo q todas as cameras pararao temporariamente
-ao editar uma camera ao inves de actualizar automaticamente adiciona um botao de salvar quando algo mudar e informa q isso vai fechar graciosamente e rapidamente abrir mais uma vez a conexao com a aquele camera especifica sem afectar os outros websockets abertos
-eu consigo fazer scroll ou puxar mesmo com o touchpad ao ponto da parte branca da pagina (aplicacao tauri) aparecer tem como resolver isso sem impedir o scroll interno, mas apenas evitar ver os limites da aplicao?
-adiciona um loader no botao do modal de remocao de pessoa, camera; e impede de fechar o modal clicando fora;
-sempre que uma camera for eliminada, é necessario remover aquela camera dos websocket e fecha-lo graciosamente;
-a utilizacao de video para demo deve funcionar no windows tambem
-ao inves da aplicacao demorar muito para abrir no windows/linux vc coloca uma pequeno loader do tauri carregando os dados uma tela simples com tudo sendo preparado e depois a aplicacao abre correctamente sem o utilizador esperar muito
-ao adicionar cameras só devem ser listadas as cameras locais q o sistema consegue acessar ao inves daqueles q foram encontradas, para poupar cpu grava esse valor em algum lugar para servir de cache e adiciona um botao para identificar as cameras disponiveis localmente, coloca na parte de camera perto do botao de adicionar camera (faz a parte necessaria na api também, a api é q vai gerir os dados das cameras)

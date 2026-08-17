@@ -20,7 +20,7 @@ def _resolve_version() -> str:
     try:
         return pkg_version("secureit-api")
     except Exception:
-        return "0.6.0"
+        return "0.7.0"
 
 
 APP_VERSION = _resolve_version()
