@@ -16,7 +16,7 @@ from importlib.metadata import version as pkg_version
 
 configure_logging()
 
-APP_VERSION = pkg_version("secureit-api") if __name__ == "__main__" else "0.5.0"
+APP_VERSION = pkg_version("secureit-api") if __name__ == "__main__" else "0.6.0"
 
 
 def create_app() -> FastAPI:

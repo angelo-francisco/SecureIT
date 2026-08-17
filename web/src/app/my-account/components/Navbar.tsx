@@ -194,6 +194,7 @@ export function Navbar() {
 						{mobileOpen ? <X size={24} /> : <Menu size={24} />}
 					</button>
 				</div>
+			</div>
 
 			{mobileOpen && (
 				<div className="md:hidden bg-surface border-b border-border animate-slide-in-up">
