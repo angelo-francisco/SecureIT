@@ -2,6 +2,7 @@
 
 import {
 	Bell,
+	Download,
 	FileText,
 	Home,
 	Key,
@@ -17,6 +18,7 @@ import { useCallback, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Modal } from "@/packages/ui";
 import { NewLicenseModal } from "./NewLicenseModal";
+import { DownloadModal } from "./DownloadModal";
 import {
 	type NotificationsResponse,
 	NotificationsSection,
@@ -27,6 +29,7 @@ export function Navbar() {
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [plansModalOpen, setPlansModalOpen] = useState(false);
 	const [notificationsOpen, setNotificationsOpen] = useState(false);
+	const [downloadOpen, setDownloadOpen] = useState(false);
 	const [notifications, setNotifications] =
 		useState<NotificationsResponse | null>(null);
 	const [loggingOut, setLoggingOut] = useState(false);
@@ -160,12 +163,28 @@ export function Navbar() {
 
 				<div className="hidden md:flex items-center gap-3">
 					<ThemeToggle />
+					<button
+						type="button"
+						onClick={() => setDownloadOpen(true)}
+						className="p-2.5 text-text-muted hover:text-primary transition-colors"
+						aria-label="Descarregar"
+					>
+						<Download size={25} />
+					</button>
 					<NotificationsButton />
 					<LogoutButton />
 				</div>
 
 				<div className="flex md:hidden items-center gap-2">
 					<ThemeToggle />
+					<button
+						type="button"
+						onClick={() => setDownloadOpen(true)}
+						className="p-2.5 text-text-muted hover:text-primary transition-colors"
+						aria-label="Descarregar"
+					>
+						<Download size={25} />
+					</button>
 					<NotificationsButton />
 					<button
 						type="button"
@@ -175,7 +194,6 @@ export function Navbar() {
 						{mobileOpen ? <X size={24} /> : <Menu size={24} />}
 					</button>
 				</div>
-			</div>
 
 			{mobileOpen && (
 				<div className="md:hidden bg-surface border-b border-border animate-slide-in-up">
@@ -217,6 +235,11 @@ export function Navbar() {
 			<NewLicenseModal
 				open={plansModalOpen}
 				onClose={() => setPlansModalOpen(false)}
+			/>
+
+			<DownloadModal
+				open={downloadOpen}
+				onClose={() => setDownloadOpen(false)}
 			/>
 		</nav>
 	);
