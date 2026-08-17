@@ -2,12 +2,14 @@ interface FullLoaderProps {
 	imageSrc?: string;
 	text?: string;
 	show?: boolean;
+	status?: string;
 }
 
 export function FullLoader({
 	imageSrc = "/logo.png",
 	text = "SecureIT",
 	show = true,
+	status,
 }: FullLoaderProps) {
 	return (
 		<div
@@ -20,6 +22,11 @@ export function FullLoader({
 				<h1 className="text-text text-3xl font-bold">{text}</h1>
 			</div>
 			<div className="fl-loader" />
+			{status && (
+				<p className="mt-4 text-xs text-text-secondary animate-pulse transition-opacity duration-300">
+					{status}
+				</p>
+			)}
 			<style>{`
         .fl-loader {
           width: 300px;
