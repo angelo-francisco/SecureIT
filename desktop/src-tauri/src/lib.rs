@@ -1,13 +1,39 @@
 use std::fs::{self, OpenOptions};
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
 
-use tauri::{AppHandle, Manager, RunEvent, State};
+use tauri::{AppHandle, Emitter, Manager, RunEvent, State};
 use tauri_plugin_opener::OpenerExt;
+use tauri_plugin_updater::UpdaterExt;
+
+/// Payload emitted to the frontend during the startup sequence so it can
+/// display a meaningful status message in the loader screen.
+#[derive(Clone, serde::Serialize)]
+struct StartupPayload {
+    phase: &'static str,
+    message: String,
+}
+
+/// Response for app update checks.
+#[derive(Clone, serde::Serialize)]
+struct AppUpdateInfo {
+    available: bool,
+    current_version: String,
+    remote_version: String,
+    notes: String,
+}
+
+/// Response for API update checks.
+#[derive(Clone, serde::Serialize)]
+struct ApiUpdateInfo {
+    available: bool,
+    current_version: String,
+    remote_version: String,
+}
 
 /// The child API's stdout/stderr are captured into a log file so it can be
 /// debugged without opening a terminal. A new timestamped file is written on
@@ -17,6 +43,12 @@ const APP_LOG_PREFIX: &str = "app-";
 /// Maximum number of per-run API log files kept on disk; older ones are
 /// removed the next time the API is spawned.
 const MAX_KEPT_LOGS: usize = 10;
+
+/// GitHub repo for update checks.
+const GITHUB_REPO: &str = "kiluzx/SecureIT";
+
+/// Subdirectory under ~/.secureit/ where API updates are stored.
+const API_UPDATE_SUBDIR: &str = "api";
 
 #[derive(Default)]
 struct ApiState {
@@ -41,18 +73,48 @@ fn find_free_port() -> u16 {
         .unwrap_or(PORTS[0])
 }
 
-fn api_bin(resource_dir: &Path) -> Option<PathBuf> {
-    let exe = if cfg!(target_os = "windows") {
+/// Resolve the API binary path. Prefers an updated copy in ~/.secureit/api/
+/// over the bundled resource, so the API can be updated independently of the
+/// Tauri shell.
+fn api_bin_prefer_updated(app: &AppHandle) -> Option<PathBuf> {
+    let exe_name = if cfg!(target_os = "windows") {
         "desktop-api.exe"
     } else {
         "desktop-api"
     };
+
+    // 1. Check for an updated API in user data dir.
+    let user_api_dir = user_api_dir(app);
+    let updated_bin = user_api_dir.join("desktop-api").join(exe_name);
+    if updated_bin.exists() {
+        return Some(updated_bin);
+    }
+
+    // 2. Fall back to bundled resource.
+    let resource_dir = app.path().resource_dir().ok()?;
     [
-        resource_dir.join("resources/api/desktop-api").join(exe),
-        resource_dir.join("api/desktop-api").join(exe),
+        resource_dir.join("resources/api/desktop-api").join(exe_name),
+        resource_dir.join("api/desktop-api").join(exe_name),
     ]
     .into_iter()
     .find(|p| p.exists())
+}
+
+/// Directory where API updates are stored (~/.secureit/api/).
+fn user_api_dir(_app: &AppHandle) -> PathBuf {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_else(|_| std::env::temp_dir().to_string_lossy().into_owned());
+    PathBuf::from(home).join(".secureit").join(API_UPDATE_SUBDIR)
+}
+
+/// Read the locally installed API version from ~/.secureit/api/UPDATE_VERSION,
+/// or return "unknown" if no update has been applied.
+fn local_api_version(app: &AppHandle) -> String {
+    let version_file = user_api_dir(app).join("UPDATE_VERSION");
+    fs::read_to_string(&version_file)
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|_| "bundled".into())
 }
 
 /// Directory where the API log files are stored (per-user, platform-appropriate).
@@ -121,8 +183,7 @@ fn log_line(app: &AppHandle, state: &ApiState, line: &str) {
 }
 
 fn spawn_api(app: &AppHandle, state: &ApiState) -> Option<u16> {
-    let resource_dir = app.path().resource_dir().ok()?;
-    let bin = api_bin(&resource_dir)?;
+    let bin = api_bin_prefer_updated(app)?;
     let port = find_free_port();
 
     let mut cmd = Command::new(bin);
@@ -253,6 +314,10 @@ fn kill_process_tree(child: &mut Child, port: Option<u16>) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Tauri commands
+// ---------------------------------------------------------------------------
+
 #[tauri::command]
 async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<String, String> {
     let port = match *state.port.lock().unwrap() {
@@ -266,6 +331,14 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
         },
     };
 
+    let _ = app.emit(
+        "startup-progress",
+        StartupPayload {
+            phase: "waiting_api",
+            message: "Aguardando API...".into(),
+        },
+    );
+
     let healthy = tauri::async_runtime::spawn_blocking(move || {
         wait_for_api(port, Duration::from_secs(120))
     })
@@ -278,6 +351,13 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
             &state,
             &format!("API health check on port {}: ok", port),
         );
+        let _ = app.emit(
+            "startup-progress",
+            StartupPayload {
+                phase: "api_ready",
+                message: "API pronta".into(),
+            },
+        );
         return Ok(format!("http://127.0.0.1:{}", port));
     }
 
@@ -287,6 +367,13 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
         &app,
         &state,
         &format!("API on port {} not healthy, restarting", port),
+    );
+    let _ = app.emit(
+        "startup-progress",
+        StartupPayload {
+            phase: "restarting",
+            message: "Reiniciando API...".into(),
+        },
     );
     if let Some(mut child) = state.child.lock().unwrap().take() {
         let port = *state.port.lock().unwrap();
@@ -300,6 +387,15 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
             return Err("desktop-api bundle not found".to_string());
         }
     };
+
+    let _ = app.emit(
+        "startup-progress",
+        StartupPayload {
+            phase: "waiting_api",
+            message: "Aguardando API...".into(),
+        },
+    );
+
     let healthy = tauri::async_runtime::spawn_blocking(move || {
         wait_for_api(port, Duration::from_secs(120))
     })
@@ -312,10 +408,277 @@ async fn get_api_url(app: AppHandle, state: State<'_, ApiState>) -> Result<Strin
         &format!("API health check on port {} after restart: {}", port, healthy),
     );
     if healthy {
+        let _ = app.emit(
+            "startup-progress",
+            StartupPayload {
+                phase: "api_ready",
+                message: "API pronta".into(),
+            },
+        );
         Ok(format!("http://127.0.0.1:{}", port))
     } else {
+        let _ = app.emit(
+            "startup-progress",
+            StartupPayload {
+                phase: "failed",
+                message: "Erro ao iniciar API".into(),
+            },
+        );
         Err(format!("API failed to become healthy on port {}", port))
     }
+}
+
+/// Check if a new version of the Tauri app (frontend + Rust) is available
+/// on GitHub Releases via the configured updater endpoint.
+#[tauri::command]
+async fn check_for_app_update(app: AppHandle) -> Result<AppUpdateInfo, String> {
+    let current_version = env!("CARGO_PKG_VERSION").to_string();
+
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    match updater.check().await.map_err(|e| e.to_string())? {
+        Some(update) => Ok(AppUpdateInfo {
+            available: true,
+            current_version: current_version.clone(),
+            remote_version: update.version.clone(),
+            notes: update.body.clone().unwrap_or_default(),
+        }),
+        None => {
+            let rv = current_version.clone();
+            Ok(AppUpdateInfo {
+                available: false,
+                current_version,
+                remote_version: rv,
+                notes: String::new(),
+            })
+        }
+    }
+}
+
+/// Download and install the available app update, then restart the process.
+#[tauri::command]
+async fn install_app_update(app: AppHandle) -> Result<(), String> {
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    match updater.check().await.map_err(|e| e.to_string())? {
+        Some(update) => {
+            let handle = app.clone();
+            update
+                .download_and_install(
+                    |downloaded, total| {
+                        let _ = handle.emit(
+                            "app-update-progress",
+                            serde_json::json!({
+                                "downloaded": downloaded,
+                                "total": total,
+                            }),
+                        );
+                    },
+                    || {},
+                )
+                .await
+                .map_err(|e| e.to_string())?;
+            app.restart();
+        }
+        None => return Err("No update available".into()),
+    }
+}
+
+/// Check if a newer version of the Python API is available on GitHub Releases.
+/// Compares the remote latest release tag against the locally installed API
+/// version (stored in ~/.secureit/api/UPDATE_VERSION, or "bundled" for the
+/// version shipped inside the installer).
+#[tauri::command]
+async fn check_api_update(app: AppHandle) -> Result<ApiUpdateInfo, String> {
+    let current = local_api_version(&app);
+
+    // Fetch the latest release from GitHub.
+    let url = format!(
+        "https://api.github.com/repos/{}/releases/latest",
+        GITHUB_REPO
+    );
+    let client = reqwest::Client::builder()
+        .user_agent("SecureIT-Updater")
+        .timeout(Duration::from_secs(15))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
+    if !resp.status().is_success() {
+        return Err(format!("GitHub API returned {}", resp.status()));
+    }
+
+    let release: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+    let remote_version = release["tag_name"]
+        .as_str()
+        .unwrap_or("0.0.0")
+        .trim_start_matches('v')
+        .to_string();
+
+    let available = version_is_newer(&current, &remote_version);
+
+    Ok(ApiUpdateInfo {
+        available,
+        current_version: current,
+        remote_version,
+    })
+}
+
+/// Download the API bundle from the latest GitHub release and extract it to
+/// ~/.secureit/api/. The next time the app starts, Rust will use the updated
+/// API binary instead of the bundled one.
+#[tauri::command]
+async fn install_api_update(app: AppHandle) -> Result<(), String> {
+    let handle = app.clone();
+    let api_dir = user_api_dir(&app);
+    let _ = fs::create_dir_all(&api_dir);
+
+    let _ = handle.emit(
+        "api-update-progress",
+        serde_json::json!({ "phase": "fetching_release" }),
+    );
+
+    // 1. Fetch latest release metadata.
+    let url = format!(
+        "https://api.github.com/repos/{}/releases/latest",
+        GITHUB_REPO
+    );
+    let client = reqwest::Client::builder()
+        .user_agent("SecureIT-Updater")
+        .timeout(Duration::from_secs(30))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
+    if !resp.status().is_success() {
+        return Err(format!("GitHub API returned {}", resp.status()));
+    }
+
+    let release: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+    let remote_version = release["tag_name"]
+        .as_str()
+        .unwrap_or("0.0.0")
+        .trim_start_matches('v')
+        .to_string();
+
+    // 2. Find the platform-appropriate asset.
+    let assets = release["assets"]
+        .as_array()
+        .ok_or("No assets in release")?;
+
+    let asset_name = if cfg!(target_os = "linux") {
+        "api-linux.tar.gz"
+    } else if cfg!(target_os = "windows") {
+        "api-windows.zip"
+    } else {
+        "api-macos.tar.gz"
+    };
+
+    let asset = assets
+        .iter()
+        .find(|a| a["name"].as_str() == Some(asset_name))
+        .ok_or_else(|| format!("Asset {} not found in release", asset_name))?;
+
+    let download_url = asset["browser_download_url"]
+        .as_str()
+        .ok_or("Missing download URL")?;
+
+    let _ = handle.emit(
+        "api-update-progress",
+        serde_json::json!({ "phase": "downloading", "url": download_url }),
+    );
+
+    // 3. Download the asset.
+    let resp = client.get(download_url).send().await.map_err(|e| e.to_string())?;
+    if !resp.status().is_success() {
+        return Err(format!("Download failed: {}", resp.status()));
+    }
+
+    let bytes = resp.bytes().await.map_err(|e| e.to_string())?;
+
+    let _ = handle.emit(
+        "api-update-progress",
+        serde_json::json!({ "phase": "extracting" }),
+    );
+
+    // 4. Extract to a temp directory, then move into place.
+    let temp_dir = api_dir.join("update_temp");
+    let _ = fs::remove_dir_all(&temp_dir);
+    fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
+
+    if cfg!(target_os = "windows") {
+        // ZIP extraction on Windows.
+        let zip_path = temp_dir.join("update.zip");
+        fs::write(&zip_path, &bytes).map_err(|e| e.to_string())?;
+        // Use PowerShell to extract.
+        let _ = Command::new("powershell")
+            .args([
+                "-NoProfile",
+                "-Command",
+                &format!(
+                    "Expand-Archive -Path '{}' -DestinationPath '{}' -Force",
+                    zip_path.display(),
+                    temp_dir.display()
+                ),
+            ])
+            .status();
+    } else {
+        // TAR.GZ extraction on Linux/macOS.
+        let tar_path = temp_dir.join("update.tar.gz");
+        fs::write(&tar_path, &bytes).map_err(|e| e.to_string())?;
+        let _ = Command::new("tar")
+            .args([
+                "xzf",
+                &tar_path.to_string_lossy(),
+                "-C",
+                &temp_dir.to_string_lossy(),
+            ])
+            .status();
+    }
+
+    // 5. Move the extracted desktop-api/ into place.
+    let extracted_api = temp_dir.join("desktop-api");
+    let target_api = api_dir.join("desktop-api");
+
+    // Remove old version, ignore errors.
+    let _ = fs::remove_dir_all(&target_api);
+    fs::rename(&extracted_api, &target_api).map_err(|e| {
+        let _ = fs::remove_dir_all(&temp_dir);
+        format!("Failed to move API into place: {}", e)
+    })?;
+
+    // 6. Write the version marker.
+    fs::write(api_dir.join("UPDATE_VERSION"), &remote_version)
+        .map_err(|e| e.to_string())?;
+
+    let _ = fs::remove_dir_all(&temp_dir);
+
+    let _ = handle.emit(
+        "api-update-progress",
+        serde_json::json!({ "phase": "complete", "version": remote_version }),
+    );
+
+    log_line(
+        &app,
+        &app.state::<ApiState>(),
+        &format!("API updated to {} via updater", remote_version),
+    );
+
+    Ok(())
+}
+
+/// Simple semver comparison (major.minor.patch only, ignores pre-release).
+fn version_is_newer(current: &str, remote: &str) -> bool {
+    let parse = |v: &str| -> (u32, u32, u32) {
+        let parts: Vec<u32> = v
+            .split('.')
+            .filter_map(|p| p.split('-').next()?.parse().ok())
+            .collect();
+        (
+            parts.first().copied().unwrap_or(0),
+            parts.get(1).copied().unwrap_or(0),
+            parts.get(2).copied().unwrap_or(0),
+        )
+    };
+    parse(remote) > parse(current)
 }
 
 /// Forward a log line produced by the frontend (webview) into the per-run log
@@ -365,11 +728,6 @@ fn log_frontend_config(
     Ok(())
 }
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 /// Open the folder that contains the per-run API log files in the OS file manager.
 #[tauri::command]
 fn open_logs_folder(app: AppHandle) -> Result<(), String> {
@@ -384,6 +742,8 @@ fn open_logs_folder(app: AppHandle) -> Result<(), String> {
 pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_focus();
@@ -391,11 +751,14 @@ pub fn run() {
         }))
         .manage(ApiState::default())
         .invoke_handler(tauri::generate_handler![
-            greet,
             get_api_url,
             open_logs_folder,
             log_frontend,
-            log_frontend_config
+            log_frontend_config,
+            check_for_app_update,
+            install_app_update,
+            check_api_update,
+            install_api_update,
         ])
         .setup(|_app| {
             // Always create the per-run log file and record run metadata, even
@@ -421,9 +784,25 @@ pub fn run() {
                 ),
             );
 
+            // Report which API binary will be used (updated or bundled).
+            if let Some(bin) = api_bin_prefer_updated(_app.handle()) {
+                log_line(
+                    _app.handle(),
+                    &state,
+                    &format!("API binary: {}", bin.display()),
+                );
+            }
+
             // Start warming up the bundled API as soon as the app boots.
             #[cfg(not(debug_assertions))]
             {
+                let _ = _app.handle().emit(
+                    "startup-progress",
+                    StartupPayload {
+                        phase: "spawning",
+                        message: "Iniciando API...".into(),
+                    },
+                );
                 match spawn_api(_app.handle(), &state) {
                     Some(port) => {
                         log_line(_app.handle(), &state, &format!("API spawned on port {}", port));

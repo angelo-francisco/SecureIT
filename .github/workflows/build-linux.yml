@@ -113,12 +113,20 @@ jobs:
                 || test -f ../src-tauri/resources/api/desktop-api/_internal/pgserver/pginstall/share/postgresql/timezonesets/Default) \
             && echo "OK - API + models + timezonesets embutidos"
 
+      - name: Build API update archive
+        working-directory: desktop/api
+        run: |
+          tar czf api-linux.tar.gz -C dist desktop-api
+          echo "API archive: $(ls -lh api-linux.tar.gz | awk '{print $5}')"
+
       - name: Build Tauri app
-        run: bun run tauri build --bundles deb
+        run: bun run tauri build --bundles deb updater
         env:
           RUSTC_WRAPPER: sccache
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_WEB_URL: ${{ secrets.VITE_WEB_URL }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Rename package
         run: |
@@ -131,3 +139,6 @@ jobs:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
             desktop/src-tauri/target/release/bundle/deb/SecureIT.deb
+            desktop/src-tauri/target/release/bundle/updater/*.tar.gz
+            desktop/src-tauri/target/release/bundle/updater/*.sig
+            desktop/api/api-linux.tar.gz

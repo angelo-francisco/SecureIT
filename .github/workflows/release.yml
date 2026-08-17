@@ -45,3 +45,91 @@ jobs:
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
           draft: false
+
+      - name: Generate updater manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.create-release.outputs.tag }}
+        run: |
+          VERSION="${TAG#v}"
+          echo "Generating latest.json for version $VERSION"
+
+          # Download updater artifacts from the release to get signatures.
+          # The artifacts are uploaded by the build jobs via softprops/action-gh-release.
+          # We download them to compute the manifest.
+
+          gh release download "$TAG" \
+            --pattern "*.tar.gz.sig" \
+            --pattern "*.zip.sig" \
+            --pattern "*.tar.gz" \
+            --pattern "*.zip" \
+            --dir ./updater-artifacts \
+            --repo "$GITHUB_REPOSITORY" \
+            2>/dev/null || true
+
+          # Helper to read a .sig file content.
+          read_sig() {
+            if [ -f "$1" ]; then
+              cat "$1"
+            else
+              echo ""
+            fi
+          }
+
+          # Find the actual asset URLs from the release.
+          LINUX_UPDATER_URL=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.name | test("\\.tar\\.gz$")) | select(.name | test("SecureIT") | not) | .url' 2>/dev/null | head -1)
+          LINUX_SIG=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.name | test("\\.tar\\.gz\\.sig$")) | select(.name | test("SecureIT") | not) | .url' 2>/dev/null | head -1)
+          WINDOWS_UPDATER_URL=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.name | test("\\.zip$")) | select(.name | test("api-windows") | not) | .url' 2>/dev/null | head -1)
+          WINDOWS_SIG=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.name | test("\\.zip\\.sig$")) | select(.name | test("api-windows") | not) | .url' 2>/dev/null | head -1)
+
+          echo "Linux updater URL: $LINUX_UPDATER_URL"
+          echo "Linux sig URL: $LINUX_SIG"
+          echo "Windows updater URL: $WINDOWS_UPDATER_URL"
+          echo "Windows sig URL: $WINDOWS_SIG"
+
+          # Download signatures to read their content.
+          mkdir -p sigs
+          if [ -n "$LINUX_SIG" ]; then
+            gh api "$(echo $LINUX_SIG | sed 's|https://api.github.com/repos|/repos|;s|/releases/assets/|/releases/assets/|')" \
+              -H "Accept: application/octet-stream" > sigs/linux.sig 2>/dev/null || \
+            curl -sL "$LINUX_SIG" -H "Authorization: token $GH_TOKEN" > sigs/linux.sig
+          fi
+          if [ -n "$WINDOWS_SIG" ]; then
+            gh api "$(echo $WINDOWS_SIG | sed 's|https://api.github.com/repos|/repos|;s|/releases/assets/|/releases/assets/|')" \
+              -H "Accept: application/octet-stream" > sigs/windows.sig 2>/dev/null || \
+            curl -sL "$WINDOWS_SIG" -H "Authorization: token $GH_TOKEN" > sigs/windows.sig
+          fi
+
+          LINUX_SIG_CONTENT=$(cat sigs/linux.sig 2>/dev/null || echo "")
+          WINDOWS_SIG_CONTENT=$(cat sigs/windows.sig 2>/dev/null || echo "")
+
+          # Build the manifest JSON.
+          PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          cat > latest.json <<EOF
+          {
+            "version": "$VERSION",
+            "notes": "SecureIT $TAG",
+            "pub_date": "$PUB_DATE",
+            "platforms": {
+              "linux-x86_64": {
+                "signature": $(echo "$LINUX_SIG_CONTENT" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))'),
+                "url": $(echo "$LINUX_UPDATER_URL" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))')
+              },
+              "windows-x86_64": {
+                "signature": $(echo "$WINDOWS_SIG_CONTENT" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))'),
+                "url": $(echo "$WINDOWS_UPDATER_URL" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))')
+              }
+            }
+          }
+          EOF
+
+          echo "Generated latest.json:"
+          cat latest.json
+
+      - name: Upload manifest to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag }}
+          files: latest.json
+          draft: false

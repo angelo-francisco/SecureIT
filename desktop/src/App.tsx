@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { listen } from "@tauri-apps/api/event";
 import AppRoutes from "./routes";
 import { FullLoader, ToastProvider } from "@/packages/ui";
 import { authApi } from "./api-client";
+import { isRunningInTauri } from "./api-client/api-base";
+import { UpdateBanner } from "./components/UpdateBanner";
 import { useAuthStore, loadRememberedCredentials } from "./hooks";
 
 
@@ -11,6 +14,7 @@ function App() {
   const [destination, setDestination] = useState<string | null>(null);
   const [gifDone, setGifDone] = useState(false);
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
+  const [startupStatus, setStartupStatus] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const setAccounts = useAuthStore((s) => s.setAccounts);
@@ -67,6 +71,17 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!isRunningInTauri()) return;
+    const unlisten = listen<{ phase: string; message: string }>(
+      "startup-progress",
+      (event) => {
+        setStartupStatus(event.payload.message);
+      },
+    );
+    return () => { unlisten.then((fn) => fn()); };
+  }, []);
+
+  useEffect(() => {
     if (!gifDone || phase !== "splash") return;
     if (destination) {
       readyRef.current = true;
@@ -106,7 +121,7 @@ function App() {
   return (
     <>
       {phase !== "app" && (
-        <FullLoader show={phase !== "fading"} />
+        <FullLoader show={phase !== "fading"} status={startupStatus ?? undefined} />
       )}
 
       <ToastProvider>
@@ -115,6 +130,7 @@ function App() {
       >
         <AppRoutes />
       </div>
+      {phase === "app" && <UpdateBanner />}
       </ToastProvider>
     </>
   );
