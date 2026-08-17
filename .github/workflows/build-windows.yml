@@ -95,12 +95,21 @@ jobs:
         run: |
           python -c "import shutil, pathlib; src=pathlib.Path('dist')/'desktop-api'; dst=pathlib.Path('../src-tauri')/'resources'/'api'; shutil.rmtree(dst, ignore_errors=True); dst.mkdir(parents=True); shutil.copytree(src, dst/'desktop-api'); exe=dst/'desktop-api'/'desktop-api.exe'; assert exe.exists(), 'API nao embutida: '+str(exe); names={p.name for p in dst.rglob('*')}; assert 'vggface2.pt' in names and 'yolo26n.pt' in names, 'models ausentes no bundle'; tz=list(dst.rglob('timezonesets/Default')); assert tz, 'timezonesets ausente no bundle (postgres nao arranca)'; print('OK - API + models + timezonesets embutidos em', dst)"
 
+      - name: Build API update archive
+        shell: bash
+        working-directory: desktop/api
+        run: |
+          python -c "import shutil; shutil.make_archive('api-windows', 'zip', 'dist', 'desktop-api')"
+          echo "API archive built"
+
       - name: Build Tauri app
-        run: bun run tauri build --bundles nsis
+        run: bun run tauri build --bundles nsis updater
         env:
           RUSTC_WRAPPER: sccache
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_WEB_URL: ${{ secrets.VITE_WEB_URL }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Rename installers
         shell: pwsh
@@ -114,3 +123,6 @@ jobs:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
             desktop/src-tauri/target/release/bundle/nsis/SecureIT.exe
+            desktop/src-tauri/target/release/bundle/updater/*.zip
+            desktop/src-tauri/target/release/bundle/updater/*.sig
+            desktop/api/api-windows.zip

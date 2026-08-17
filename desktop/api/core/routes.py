@@ -14,6 +14,16 @@ from websocket import (
 system_router = APIRouter()
 
 
+@system_router.get("/api/version")
+async def api_version():
+    from importlib.metadata import version as pkg_version
+    try:
+        v = pkg_version("secureit-api")
+    except Exception:
+        v = "0.0.0"
+    return {"version": v}
+
+
 @system_router.get("/api/health")
 async def health():
     return {"status": "ok"}

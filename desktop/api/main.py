@@ -12,14 +12,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from importlib.metadata import version as pkg_version
+
 configure_logging()
+
+APP_VERSION = pkg_version("secureit-api") if __name__ == "__main__" else "0.4.0"
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title="SecureIT API",
         description="API do sistema de segurança SecureIT",
-        version="0.0.1",
+        version=APP_VERSION,
         lifespan=lifespan,
     )
 
