@@ -45,7 +45,7 @@ const APP_LOG_PREFIX: &str = "app-";
 const MAX_KEPT_LOGS: usize = 10;
 
 /// GitHub repo for update checks.
-const GITHUB_REPO: &str = "kiluzx/SecureIT";
+const GITHUB_REPO: &str = "angelo-francisco/SecureIT";
 
 /// Subdirectory under ~/.secureit/ where API updates are stored.
 const API_UPDATE_SUBDIR: &str = "api";
