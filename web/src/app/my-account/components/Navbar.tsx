@@ -108,14 +108,51 @@ export function Navbar() {
 	};
 
 	const NotificationsButton = () => (
-		<button
-			type="button"
-			onClick={openNotifications}
-			className="p-2.5 text-text-muted hover:text-primary transition-colors"
-			aria-label="Notificações"
-		>
-			<Bell size={25} />
-		</button>
+		<div className="relative">
+			<button
+				type="button"
+				onClick={openNotifications}
+				className="relative p-2.5 text-text-muted hover:text-text transition-colors"
+				aria-label="Notificações"
+				aria-expanded={notificationsOpen}
+			>
+				<Bell size={25} />
+				{notifications?.unreadCount ? (
+					<span className="absolute top-1 right-1 min-w-4 h-4 px-1 flex items-center justify-center rounded-full bg-error text-white text-[10px] font-bold">
+						{notifications.unreadCount > 99 ? "99+" : notifications.unreadCount}
+					</span>
+				) : null}
+			</button>
+
+			{notificationsOpen && (
+				<>
+					<button
+						type="button"
+						aria-label="Fechar notificações"
+						className="fixed inset-0 z-40 cursor-default"
+						onClick={() => setNotificationsOpen(false)}
+					/>
+
+					<div
+						className="
+						absolute right-0 top-full mt-3
+						z-50
+						w-[380px]
+						max-w-[calc(100vw-2rem)]
+						overflow-hidden
+						border border-border
+						bg-bg
+						shadow-2xl
+						animate-slide-in-up
+					"
+					>
+						<NotificationsSection
+							data={notifications}
+						/>
+					</div>
+				</>
+			)}
+		</div>
 	);
 
 	return (
@@ -216,22 +253,6 @@ export function Navbar() {
 					</div>
 				</div>
 			)}
-
-			<Modal
-				open={notificationsOpen}
-				onClose={() => setNotificationsOpen(false)}
-			>
-				<div className="flex max-h-[70vh] w-[min(420px,calc(100vw-2rem))] flex-col border border-border bg-surface">
-					<div className="flex items-center justify-between border-b border-border px-5 py-4">
-						<span className="text-base font-bold uppercase tracking-wider text-text">
-							Notificações
-						</span>
-					</div>
-					<div className="overflow-y-auto p-4">
-						<NotificationsSection data={notifications} />
-					</div>
-				</div>
-			</Modal>
 
 			<NewLicenseModal
 				open={plansModalOpen}

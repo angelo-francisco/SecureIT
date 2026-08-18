@@ -2,6 +2,7 @@
 
 import { Bell, CheckCheck, Info, ShieldCheck, ShieldX } from "lucide-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
+import { humanizePortugueseDate } from "@/lib/utils";
 
 interface Notification {
 	id: string;
@@ -90,69 +91,59 @@ export const NotificationsSection = forwardRef<
 	const unreadCount = response?.unreadCount ?? 0;
 
 	return (
-		<div className="space-y-3">
-			{unreadCount > 0 && (
-				<div className="flex justify-end">
-					<button
-						type="button"
-						onClick={handleMarkAllRead}
-						className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-					>
-						<CheckCheck size={14} />
-						Marcar todas como lidas
-					</button>
-				</div>
-			)}
-
-			{notifications.length === 0 ? (
-				<div className="text-center py-8 text-text-muted">
-					<Bell size={40} className="text-primary mx-auto mb-3" />
-					<p className="text-base md:text-lg">Nenhuma notificação</p>
-				</div>
-			) : (
-				<div className="space-y-1">
-					{notifications.map((n) => {
-						const Icon = TYPE_ICONS[n.type] ?? Bell;
-						const iconColor = TYPE_COLORS[n.type] ?? "text-text-muted";
-						return (
+		<div className="flex max-h-[50vh] max-w-md flex-col border border-border bg-surface">
+			<div className="flex items-center justify-between border-b border-border px-5 py-4">
+				<span className="text-lg font-bold text-text">Notificações</span>
+				{unreadCount > 0 && (
+					<div className="flex justify-end">
+						<button
+							type="button"
+							onClick={handleMarkAllRead}
+							className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+						>
+							<CheckCheck size={14} />
+							Marcar todas como lidas
+						</button>
+					</div>
+				)}
+			</div>
+			<div className="overflow-y-auto">
+				{notifications.length === 0 ? (
+					<div className="text-center py-8 text-text-muted">
+						<p className="text-base md:text-lg">Nenhuma notificação</p>
+					</div>
+				) : (
+					<div className="space-y-1 divide-y divide-gray-700">
+						{notifications.map((n) => (
 							<button
 								type="button"
 								key={n.id}
 								onClick={() => !n.read && handleMarkAsRead(n.id)}
-								className={`w-full text-left flex items-start gap-3 p-3 rounded-lg transition-colors ${
-									n.read
-										? "hover:bg-surface-hover/50"
-										: "bg-primary/5 hover:bg-primary/10"
+								className={`px-5 py-3 w-full text-left flex items-start gap-3 transition-colors ${
+									!n.read
+										? "cursor-pointer"
+										: "cursor-default"
 								}`}
 							>
-								<div className={`mt-0.5 shrink-0 ${iconColor}`}>
-									<Icon size={18} />
-								</div>
 								<div className="flex-1 min-w-0">
-									<div className="flex items-center gap-2">
-										<p
-											className={`text-base font-medium ${n.read ? "text-text-muted" : "text-text"}`}
-										>
+									<div className="flex items-center justify-between gap-2">
+										<p className={`text-base font-medium`}>
 											{n.title}
+											{!n.read && (
+												<span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+											)}
 										</p>
-										{!n.read && (
-											<span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-										)}
+										<p className="text-sm text-text-muted mt-1">
+											{humanizePortugueseDate(new Date(n.createdAt))}
+										</p>
 									</div>
-									<p
-										className={`text-base mt-0.5 ${n.read ? "text-text-muted" : "text-text/70"}`}
-									>
-										{n.message}
-									</p>
-									<p className="text-sm text-text-muted mt-1">
-										{new Date(n.createdAt).toLocaleString("pt-PT")}
-									</p>
+									<p className={`text-base mt-0.5`}>{n.message}</p>
 								</div>
 							</button>
-						);
-					})}
-				</div>
-			)}
+						))}
+					</div>
+				)}
+			</div>
 		</div>
 	);
 });

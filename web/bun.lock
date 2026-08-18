@@ -13,6 +13,7 @@
         "class-variance-authority": "^0.7.1",
         "cloudinary": "^2.10.0",
         "clsx": "^2.1.1",
+        "datehumanizer": "^1.0.1",
         "drizzle-orm": "^0.45.2",
         "gray-matter": "^4.0.3",
         "jose": "^6.0.0",
@@ -469,6 +470,8 @@
     "csstype": ["csstype@3.2.3", "", {}, "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ=="],
 
     "data-uri-to-buffer": ["data-uri-to-buffer@4.0.1", "", {}, "sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A=="],
+
+    "datehumanizer": ["datehumanizer@1.0.1", "", {}, "sha512-VteDtyLlBf0rQczLq50Cpwz/knkUo9FQxSLlJ2Hbxzq/xOngTbJhrlMvPPBaFFhYMIYCv/mn9fD128ahZ4VNyQ=="],
 
     "debug": ["debug@4.4.3", "", { "dependencies": { "ms": "^2.1.3" }, "peerDependencies": { "supports-color": "*" }, "optionalPeers": ["supports-color"] }, "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA=="],
 
