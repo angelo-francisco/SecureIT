@@ -38,7 +38,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "vile6JsC50Kx7OdM9DFdxMrd60eSKlSi7rVnb3bkK24=",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY4REU4QUNFQjAxN0E5RUIKUldUcnFSZXd6b3JlYVBybjlYdGhXT0tBMFVjNGhHY2JrVzNSSHlhNlMxNDZVWVRTMVRUR09mYlgK",
       "endpoints": [
         "https://github.com/angelo-francisco/SecureIT/releases/latest/download/latest.json"
       ]
