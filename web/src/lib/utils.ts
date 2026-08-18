@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
+// @ts-ignore
 import { addLocale, humanizeDate } from "datehumanizer";
 import { twMerge } from "tailwind-merge";
 
