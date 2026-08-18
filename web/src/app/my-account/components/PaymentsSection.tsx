@@ -116,20 +116,19 @@ export const PaymentsSection = forwardRef<
 							<td className="text-center">
 								<div className="flex flex-row gap-2">
 									{p.proofUrl && (
-										<a
-											href={p.proofUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="text-primary hover:underline"
-										>
-											Recibo
-										</a>
+									    <a
+									        href={p.proofUrl.replace('/upload/', '/upload/fl_attachment/')}
+									        className="text-primary hover:underline"
+									        download="recibo.jpg"
+									    >
+									        Recibo
+									    </a>
 									)}
 
 									<button
 										type="button"
 										rel="noopener noreferrer"
-										className="text-primary hover:underline"
+										className="line-through text-text-muted cursor-default"
 									>
 										Detalhes
 									</button>
