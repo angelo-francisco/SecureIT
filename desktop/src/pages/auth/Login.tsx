@@ -43,6 +43,7 @@ export default function Login() {
 						<PasswordlessLogin
 							baseUrl={getWebBaseUrl()}
 							onAuthenticated={onAuthenticated}
+							googleEnabled={false}
 							onSetupRequired={onSetupRequired}
 							onError={onError}
 							footer={
@@ -52,7 +53,7 @@ export default function Login() {
 										<button
 											type="button"
 											onClick={async () => await openExternally("signup")}
-											className="text-primary font-bold hover:underline ml-1 cursor-pointer"
+											className="text-primary font-bold hover:underline cursor-pointer"
 										>
 											Criar Conta
 										</button>

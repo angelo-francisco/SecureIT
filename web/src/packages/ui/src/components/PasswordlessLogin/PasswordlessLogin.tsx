@@ -135,6 +135,18 @@ export function PasswordlessLogin({
 				});
 				if (res.challenge && res.challenge_token) {
 					beginChallenge(res);
+
+					if (res.challenge === "email-code") {
+				        await api<{ success: boolean }>("/api/auth/email-code/challenge", {
+				            method: "POST",
+				            body: JSON.stringify({
+				                challenge_token: res.challenge_token,
+				            }),
+				        });
+
+				        startCountdown();
+				    }
+				    
 					return;
 				}
 				complete(res);
@@ -311,15 +323,8 @@ export function PasswordlessLogin({
 
 			{step === "method" && (
 				<div className="space-y-4">
-					<div className="flex items-center justify-between">
-						<button
-							type="button"
-							onClick={goBack}
-							className="cursor-pointer text-primary hover:underline text-base flex items-center gap-1"
-						>
-							<ArrowLeft size={16} /> Voltar
-						</button>
-						<span className="text-base text-text-muted truncate">{email}</span>
+					<div className="flex items-center justify-between text-text text-base">
+						Endereço de e-mail<span className="text-base text-text-muted truncate">{email}</span>
 					</div>
 
 					<button
@@ -351,18 +356,19 @@ export function PasswordlessLogin({
 							</div>
 						</button>
 					)}
+
+					<button
+							type="button"
+							onClick={goBack}
+							className="w-full border border-border text-center cursor-pointer text-text-muted hover:text-text hover:bg-gray-700 font-bold text-base py-2.5 transition-colors"
+						>
+							Voltar
+						</button>
 				</div>
 			)}
 
 			{step === "password" && (
 				<form onSubmit={handlePasswordSubmit} className="space-y-4">
-					<button
-						type="button"
-						onClick={goBack}
-						className="cursor-pointer text-primary hover:underline text-base flex items-center gap-1"
-					>
-						<ArrowLeft size={16} /> Voltar
-					</button>
 					<OutlinedInput
 						id="login-password"
 						label="Palavra-passe"
@@ -373,10 +379,19 @@ export function PasswordlessLogin({
 						labelSize="xl"
 						autoComplete="current-password"
 					/>
+					<div className="flex items-center justify-between gap-3">
+						<button
+							type="button"
+							onClick={goBack}
+							disabled={loading}
+							className="px-3 border border-border py-3 hover:bg-gray-700 transition-colors cursor-pointer text-text flex items-center justify-center"
+						>
+							<ArrowLeft size={20} />
+						</button>
 					<button
 						type="submit"
 						disabled={!password || loading}
-						className="cursor-pointer w-full bg-primary text-white text-lg font-medium py-3 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+						className="cursor-pointer w-full bg-primary text-white text-lg font-medium py-2.5 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
 					>
 						{loading ? (
 							<Loader size={18} className="animate-spin" />
@@ -384,6 +399,7 @@ export function PasswordlessLogin({
 							<>Entrar</>
 						)}
 					</button>
+				</div>
 				</form>
 			)}
 
@@ -397,7 +413,7 @@ export function PasswordlessLogin({
 								Confirme com o código por e-mail
 							</p>
 							<p className="text-sm text-text-muted mt-1">
-								Enviamos um código para{" "}
+								Enviamos um código para&nbsp;
 								<span className="font-bold">{email}</span>
 							</p>
 						</div>
@@ -423,31 +439,12 @@ export function PasswordlessLogin({
 
 					<CodeInput value={code} onChange={setCode} disabled={loading} />
 
-					{step === "email-code-challenge" && (
-						<div className="text-center">
-							{canResend ? (
-								<button
-									type="button"
-									disabled={loading}
-									onClick={resendChallengeCode}
-									className="cursor-pointer text-primary hover:underline disabled:opacity-50"
-								>
-									Reenviar código
-								</button>
-							) : (
-								<span className="text-base text-text-muted">
-									Reenviar em {remaining}s
-								</span>
-							)}
-						</div>
-					)}
-
 					<div className="flex items-center justify-between gap-3">
 						<button
 							type="button"
 							onClick={goBack}
 							disabled={loading}
-							className="px-3 border py-3 hover:bg-gray-700 transition-colors cursor-pointer text-text flex items-center justify-center"
+							className="px-3 border border-border py-3 hover:bg-gray-700 transition-colors cursor-pointer text-text flex items-center justify-center"
 						>
 							<ArrowLeft size={20} />
 						</button>
@@ -455,15 +452,33 @@ export function PasswordlessLogin({
 							type="button"
 							disabled={code.length !== 6 || loading}
 							onClick={verify}
-							className="w-full border py-3 bg-primary disabled:cursor-not-allowed cursor-pointer text-text text-lg font-bold flex items-center justify-center gap-2"
+							className="w-full py-2.5 bg-primary disabled:cursor-not-allowed cursor-pointer text-text text-lg font-bold flex items-center justify-center gap-2"
 						>
 							{loading ? (
-								<Loader size={20} className="animate-spin" />
+								<Loader size={18} className="animate-spin" />
 							) : (
 								<>Verificar</>
 							)}
 						</button>
 					</div>
+					{step === "email-code-challenge" && (
+						<div className="text-center">
+							{canResend ? (
+								<span className="text-text-muted text-lg">Não recebeu o código?&nbsp;<button
+									type="button"
+									disabled={loading}
+									onClick={resendChallengeCode}
+									className="text-primary font-bold hover:underline cursor-pointer disabled:opacity-50"
+								>
+									Reenviar código
+								</button></span>
+							) : (
+								<span className="text-base text-text-muted">
+									Reenviar em {remaining}s
+								</span>
+							)}
+						</div>
+					)}
 				</div>
 			)}
 
