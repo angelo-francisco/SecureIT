@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, CheckCheck, Info, ShieldCheck, ShieldX } from "lucide-react";
+import { CheckCheck } from "lucide-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { humanizePortugueseDate } from "@/lib/utils";
 
@@ -26,22 +26,6 @@ interface NotificationsSectionProps {
 export interface NotificationsSectionHandle {
 	fetchData: () => Promise<NotificationsResponse | null>;
 }
-
-const TYPE_ICONS: Record<string, typeof Bell> = {
-	LICENSE_APPROVED: ShieldCheck,
-	LICENSE_REJECTED: ShieldX,
-	PAYMENT_APPROVED: ShieldCheck,
-	PAYMENT_REJECTED: ShieldX,
-	GENERAL: Info,
-};
-
-const TYPE_COLORS: Record<string, string> = {
-	LICENSE_APPROVED: "text-success",
-	LICENSE_REJECTED: "text-error",
-	PAYMENT_APPROVED: "text-success",
-	PAYMENT_REJECTED: "text-error",
-	GENERAL: "text-primary",
-};
 
 export const NotificationsSection = forwardRef<
 	NotificationsSectionHandle,
@@ -120,9 +104,7 @@ export const NotificationsSection = forwardRef<
 								key={n.id}
 								onClick={() => !n.read && handleMarkAsRead(n.id)}
 								className={`px-5 py-3 w-full text-left flex items-start gap-3 transition-colors ${
-									!n.read
-										? "cursor-pointer"
-										: "cursor-default"
+									!n.read ? "cursor-pointer" : "cursor-default"
 								}`}
 							>
 								<div className="flex-1 min-w-0">

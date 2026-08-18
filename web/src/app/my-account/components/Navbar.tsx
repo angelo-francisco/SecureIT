@@ -16,9 +16,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Modal } from "@/packages/ui";
-import { NewLicenseModal } from "./NewLicenseModal";
 import { DownloadModal } from "./DownloadModal";
+import { NewLicenseModal } from "./NewLicenseModal";
 import {
 	type NotificationsResponse,
 	NotificationsSection,
@@ -146,9 +145,7 @@ export function Navbar() {
 						animate-slide-in-up
 					"
 					>
-						<NotificationsSection
-							data={notifications}
-						/>
+						<NotificationsSection data={notifications} />
 					</div>
 				</>
 			)}
