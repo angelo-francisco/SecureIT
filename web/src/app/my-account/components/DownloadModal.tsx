@@ -1,7 +1,12 @@
 "use client";
 
 import { Modal } from "@/packages/ui";
-import { DownloadSection } from "../../components/DownloadSection.tsx";
+import { DownloadSection } from "../../components/DownloadSection";
+
+interface DownloadModalProps {
+	open: boolean;
+	onClose?: () => void;
+}
 
 export function DownloadModal({ open, onClose }: DownloadModalProps) {
 	return (
