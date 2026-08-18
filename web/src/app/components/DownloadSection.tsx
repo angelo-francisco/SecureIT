@@ -1,5 +1,3 @@
-import Image from "next/image";
-import { useState } from "react";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 
 const getDownloadLink = (executableName: string) =>
@@ -465,12 +463,12 @@ export function DownloadSection() {
 										{platform.arch.map((arch) => {
 											if (platform.unavailable) {
 												return (
-													<a
+													<span
 														key={arch.link}
 														className="text-lg line-through text-primary cursor-not-allowed"
 													>
 														{arch.name}
-													</a>
+													</span>
 												);
 											}
 											return (
