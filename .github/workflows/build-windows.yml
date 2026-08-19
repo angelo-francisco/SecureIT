@@ -112,6 +112,7 @@ jobs:
         run: bun run tauri build --bundles nsis updater
         env:
           RUSTC_WRAPPER: sccache
+          RUSTFLAGS: "-C link-arg=-fuse-ld=lld"
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_WEB_URL: ${{ secrets.VITE_WEB_URL }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
