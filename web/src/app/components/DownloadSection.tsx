@@ -434,7 +434,7 @@ const platforms = [
 
 export function DownloadSection() {
 	return (
-		<section className="py-32 px-8 bg-surface/20">
+		<section id="download" className="py-32 px-8 bg-surface/20">
 			<div className="max-w-5xl mx-auto text-center">
 				<RevealOnScroll>
 					<h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mb-2">
