@@ -50,8 +50,8 @@ const platforms = [
 						y1="115.276%"
 						y2="41.364%"
 					>
-						<stop offset="0%" stop-color="#ffeed7" />
-						<stop offset="100%" stop-color="#bdbfc2" />
+						<stop offset="0%" stopColor="#ffeed7" />
+						<stop offset="100%" stopColor="#bdbfc2" />
 					</linearGradient>
 					<linearGradient
 						id="SVGZrQemdEu"
@@ -60,8 +60,8 @@ const platforms = [
 						y1="2.404%"
 						y2="90.542%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".8" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".8" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGViD9UWNq"
@@ -70,8 +70,8 @@ const platforms = [
 						y1="88.248%"
 						y2="9.748%"
 					>
-						<stop offset="0%" stop-color="#ffeed7" />
-						<stop offset="100%" stop-color="#bdbfc2" />
+						<stop offset="0%" stopColor="#ffeed7" />
+						<stop offset="100%" stopColor="#bdbfc2" />
 					</linearGradient>
 					<linearGradient
 						id="SVGpwAGebry"
@@ -80,8 +80,8 @@ const platforms = [
 						y1="85.49%"
 						y2="13.811%"
 					>
-						<stop offset="0%" stop-color="#ffeed7" />
-						<stop offset="100%" stop-color="#bdbfc2" />
+						<stop offset="0%" stopColor="#ffeed7" />
+						<stop offset="100%" stopColor="#bdbfc2" />
 					</linearGradient>
 					<linearGradient
 						id="SVGeLJpbd6T"
@@ -90,8 +90,8 @@ const platforms = [
 						y1="3.102%"
 						y2="93.895%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGoqBSHerK"
@@ -100,8 +100,8 @@ const platforms = [
 						y1="5.475%"
 						y2="93.524%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVG4QSySb4K"
@@ -110,8 +110,8 @@ const platforms = [
 						y1="89.845%"
 						y2="40.632%"
 					>
-						<stop offset="0%" stop-color="#ffeed7" />
-						<stop offset="100%" stop-color="#bdbfc2" />
+						<stop offset="0%" stopColor="#ffeed7" />
+						<stop offset="100%" stopColor="#bdbfc2" />
 					</linearGradient>
 					<linearGradient
 						id="SVGmqOHmezj"
@@ -120,8 +120,8 @@ const platforms = [
 						y1="99.975%"
 						y2="23.545%"
 					>
-						<stop offset="0%" stop-color="#ffeed7" />
-						<stop offset="100%" stop-color="#bdbfc2" />
+						<stop offset="0%" stopColor="#ffeed7" />
+						<stop offset="100%" stopColor="#bdbfc2" />
 					</linearGradient>
 					<linearGradient
 						id="SVG6COJqcYh"
@@ -130,8 +130,8 @@ const platforms = [
 						y1="13.229%"
 						y2="94.673%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".8" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".8" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGMM2cICtb"
@@ -140,8 +140,8 @@ const platforms = [
 						y1="37.327%"
 						y2="92.782%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGGYYiOcHn"
@@ -150,8 +150,8 @@ const platforms = [
 						y1="2.299%"
 						y2="81.204%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGWdyw0crI"
@@ -160,8 +160,8 @@ const platforms = [
 						y1="2.272%"
 						y2="71.799%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVG83oHF3vg"
@@ -170,8 +170,8 @@ const platforms = [
 						y1="48.921%"
 						y2="98.1%"
 					>
-						<stop offset="0%" stop-color="#ffa63f" />
-						<stop offset="100%" stop-color="#ff0" />
+						<stop offset="0%" stopColor="#ffa63f" />
+						<stop offset="100%" stopColor="#ff0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGLpQcUdBQ"
@@ -180,8 +180,8 @@ const platforms = [
 						y1="143.009%"
 						y2="-64.622%"
 					>
-						<stop offset="0%" stop-color="#ffeed7" />
-						<stop offset="100%" stop-color="#bdbfc2" />
+						<stop offset="0%" stopColor="#ffeed7" />
+						<stop offset="100%" stopColor="#bdbfc2" />
 					</linearGradient>
 					<linearGradient
 						id="SVGehok0c3p"
@@ -190,8 +190,8 @@ const platforms = [
 						y1="34.024%"
 						y2="89.175%"
 					>
-						<stop offset="0%" stop-color="#ffa63f" />
-						<stop offset="100%" stop-color="#ff0" />
+						<stop offset="0%" stopColor="#ffa63f" />
+						<stop offset="100%" stopColor="#ff0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGSLPsocSe"
@@ -200,8 +200,8 @@ const platforms = [
 						y1="-17.216%"
 						y2="66.118%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGr4fuKdTl"
@@ -210,8 +210,8 @@ const platforms = [
 						y1="1.565%"
 						y2="104.313%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGOxCzIbUA"
@@ -220,8 +220,8 @@ const platforms = [
 						y1="4.533%"
 						y2="92.827%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGp3HnSbuR"
@@ -230,8 +230,8 @@ const platforms = [
 						y1="17.609%"
 						y2="99.385%"
 					>
-						<stop offset="0%" stop-color="#ffa63f" />
-						<stop offset="100%" stop-color="#ff0" />
+						<stop offset="0%" stopColor="#ffa63f" />
+						<stop offset="100%" stopColor="#ff0" />
 					</linearGradient>
 					<linearGradient
 						id="SVGSUrnubkU"
@@ -240,8 +240,8 @@ const platforms = [
 						y1="2.89%"
 						y2="94.17%"
 					>
-						<stop offset="0%" stop-color="#fff" stop-opacity=".65" />
-						<stop offset="100%" stop-color="#fff" stop-opacity="0" />
+						<stop offset="0%" stopColor="#fff" stopOpacity=".65" />
+						<stop offset="100%" stopColor="#fff" stopOpacity="0" />
 					</linearGradient>
 					<filter
 						id="SVGSbSGrdoj"
@@ -262,7 +262,7 @@ const platforms = [
 				<g fill="none">
 					<path
 						fill="#000"
-						fill-opacity=".2"
+						fillOpacity=".2"
 						d="M235.125 249.359c0 17.355-52.617 31.497-117.54 31.497S.044 266.806.044 249.359c0-17.356 52.618-31.498 117.54-31.498c64.924 0 117.45 14.142 117.541 31.498"
 						filter="url(#SVGSbSGrdoj)"
 						transform="translate(10)"
@@ -279,7 +279,7 @@ const platforms = [
 					<path
 						fill="#000"
 						stroke="#000"
-						stroke-width=".977"
+						strokeWidth=".977"
 						d="M176.805 117.86c13.59 11.02 38.292 49.587 2.204 74.748c-11.846 7.806 10.468 32.508 23.049 19.927c43.618-43.894-1.102-94.308-16.53-111.664c-13.774-15.151-25.987 3.49-8.723 16.989z"
 					/>
 					<path
@@ -324,7 +324,7 @@ const platforms = [
 					<path
 						fill="#000"
 						stroke="#000"
-						stroke-width="1.25"
+						strokeWidth="1.25"
 						d="M79.925 122.727c-8.907 14.509-30.211 48.669-1.652 66.484c38.384 23.6 27.548 47.108-7.53 25.895c-49.404-29.568-5.97-89.257 13.774-112.03c22.59-25.529 4.316 4.683-4.592 19.65z"
 					/>
 					<path
@@ -350,7 +350,7 @@ const platforms = [
 					<path
 						fill="url(#SVG83oHF3vg)"
 						stroke="#e68c3f"
-						stroke-width="6.25"
+						strokeWidth="6.25"
 						d="M51.835 258.542c-20.57-10.928-50.414 2.112-39.578-27.457c2.204-6.704-3.214-16.805.275-23.325c4.133-7.989 13.04-6.244 18.366-11.57c5.234-5.51 8.54-15.06 18.366-13.59c9.734 1.468 16.254 13.406 23.049 28.099c5.05 10.468 22.865 25.253 21.672 37.007c-1.47 17.998-21.948 21.396-42.15 10.836z"
 						transform="translate(10)"
 					/>
@@ -362,7 +362,7 @@ const platforms = [
 					<path
 						fill="url(#SVGehok0c3p)"
 						stroke="#e68c3f"
-						stroke-width="6.251"
+						strokeWidth="6.251"
 						d="M194.445 253.49c15.06-18.273 48.578-14.508 25.988-39.577c-4.775-5.418-3.306-16.989-9.183-21.947c-6.887-6.061-14.509-1.102-21.488-4.224c-6.979-3.398-14.325-9.918-22.865-5.327c-8.54 4.684-9.459 16.805-10.285 32.783c-.735 11.479-11.203 30.671-5.602 41.231c8.081 16.346 29.11 14.142 43.435-2.938z"
 						transform="translate(10)"
 					/>
@@ -388,13 +388,13 @@ const platforms = [
 					<path
 						fill="url(#SVGp3HnSbuR)"
 						stroke="#e68c3f"
-						stroke-width="3.75"
+						strokeWidth="3.75"
 						d="M97.107 66.344c3.673-3.398 12.58-13.774 29.477-2.939c3.122 2.02 5.693 2.204 11.662 4.775c12.03 4.96 6.336 16.897-6.52 20.937c-5.51 1.745-10.468 8.449-20.386 7.806c-8.54-.46-10.744-6.06-15.978-9.091c-9.275-5.234-10.652-12.305-5.602-16.07c5.051-3.765 6.98-5.143 7.347-5.418z"
 						transform="translate(10)"
 					/>
 					<path
 						stroke="#e68c3f"
-						stroke-width="2.5"
+						strokeWidth="2.5"
 						d="M148.43 75.986c-5.05.275-15.979 11.203-27.457 11.203s-18.366-10.652-20.11-10.652"
 					/>
 					<path
