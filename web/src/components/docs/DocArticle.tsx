@@ -1,20 +1,37 @@
-import { MDXRemote } from "next-mdx-remote-client/rsc";
+import { Suspense } from 'react'
 import remarkGfm from "remark-gfm";
-import { MDX_COMPONENTS } from "@/components/docs/MDXComponents";
-import { PrevNextNav } from "@/components/docs/PrevNextNav";
 import type { DocMeta } from "@/lib/docs";
+import { MDXRemote } from "next-mdx-remote-client/rsc";
+import { PrevNextNav } from "@/components/docs/PrevNextNav";
+import { MDX_COMPONENTS } from "@/components/docs/MDXComponents";
 
 interface DocArticleProps {
 	meta: DocMeta;
 	source: string;
 }
 
-export async function DocArticle({ meta, source }: DocArticleProps) {
+async function MDXRender({ source }: { source: string }) {
 	const content = await MDXRemote({
 		source,
 		components: MDX_COMPONENTS,
 		options: { mdxOptions: { remarkPlugins: [remarkGfm] } },
 	});
+
+	return <>{content}</>;
+}
+
+function MDXSkeleton() {
+	return (
+		<div className="animate-pulse space-y-4 my-8">
+			<div className="h-4 bg-gray-200 rounded w-3/4"></div>
+			<div className="h-4 bg-gray-200 rounded"></div>
+			<div className="h-4 bg-gray-200 rounded w-5/6"></div>
+			<div className="h-4 bg-gray-200 rounded w-1/2"></div>
+		</div>
+	);
+}
+
+export async function DocArticle({ meta, source }: DocArticleProps) {
 
 	return (
 		<article className="mdx-content">
@@ -29,7 +46,10 @@ export async function DocArticle({ meta, source }: DocArticleProps) {
 				)}
 			</header>
 
-			{content}
+			<Suspense fallback={<MDXSkeleton />}>
+				<MDXRender source={source} />
+			</Suspense>
+
 
 			<PrevNextNav locale={meta.locale} slug={meta.slug} />
 		</article>

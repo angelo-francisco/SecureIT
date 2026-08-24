@@ -13,7 +13,7 @@ export default async function DocsLayout({
 	return (
 		<div className="min-h-screen">
 			{session ? <MyAccountNavbar /> : <Navbar />}
-			<main className="">{children}</main>
+			<main>{children}</main>
 			<Footer />
 		</div>
 	);

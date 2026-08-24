@@ -26,12 +26,12 @@ export default async function DocsLocaleLayout({
 	if (lang !== locale) notFound();
 
 	return (
-		<div className="mx-auto flex w-full max-w-7xl gap-10 px-6 py-10 md:px-8">
+		<div className="mx-auto flex w-full max-w-7xl gap-10 px-6 py-10 md:px-8 pt-32">
 			<aside className="hidden w-64 shrink-0 lg:block">
 				<DocsSidebar locale={lang} />
 			</aside>
 			<div className="min-w-0 flex-1">
-				<div className="mb-6 flex justify-end">
+				<div className="flex justify-end">
 					<DocsLanguageSwitch locale={lang} />
 				</div>
 				{children}

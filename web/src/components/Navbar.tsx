@@ -5,13 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { DEFAULT_DOCS_LOCALE } from "@/lib/docs-config";
 
 const navLinks = [
 	{ label: "Início", href: "/#home" },
 	{ label: "Sobre Nós", href: "/#about" },
 	{ label: "Funcionalidades", href: "/#features" },
 	{ label: "Licenças", href: "/pricing" },
-	{ label: "Documentação", href: "/docs" },
+	{ label: "Documentação", href: `/docs/${DEFAULT_DOCS_LOCALE}` },
 	{ label: "Contacto", href: "/#contact" },
 ];
 
@@ -48,11 +49,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
 
 	return (
 		<nav
-			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-				scrolled
+			className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
 					? "bg-bg/80 backdrop-blur-xl border-b border-border"
 					: "bg-transparent"
-			}`}
+				}`}
 		>
 			<div className="w-full mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
 				<Link href="/" className="flex items-center gap-2.5 shrink-0">
